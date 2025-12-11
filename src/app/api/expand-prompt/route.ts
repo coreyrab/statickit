@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { auth } from '@clerk/nextjs/server';
+import { generalRateLimiter, checkRateLimit } from '@/lib/rate-limit';
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify user is authenticated
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check rate limit (200 requests/day for lighter operations)
+    const rateLimitResult = await checkRateLimit(generalRateLimiter, userId, 'API requests');
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const { shortPrompt, analysis } = await request.json();
 
     if (!shortPrompt) {

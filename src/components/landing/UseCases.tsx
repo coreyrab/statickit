@@ -1,14 +1,14 @@
 'use client';
 
 const useCases = [
-  { title: 'Ad variations', description: 'Test more creative across every platform without more shoots.' },
+  { title: 'Ad variations', description: 'Test more creative across every platform.' },
   { title: 'Thumbnail testing', description: 'A/B test YouTube thumbnails to find what gets clicks.' },
   { title: 'Carousel creation', description: 'Turn one hero image into a full carousel in seconds.' },
   { title: 'Image localization', description: 'Adapt your visuals for different markets and audiences.' },
-  { title: 'Seasonal refresh', description: 'Update imagery for holidays, weather, and seasonal campaigns.' },
+  { title: 'Seasonal refresh', description: 'Update for holidays, weather, and seasonal campaigns.' },
   { title: 'Lighting & color fixes', description: 'Adjust mood and tone without re-editing source files.' },
   { title: 'Background swaps', description: 'New environments for the same product. No reshoots.' },
-  { title: 'Quick edits', description: 'Remove objects, add elements, fix details in plain English.' },
+  { title: 'Quick edits', description: 'Remove objects, add elements, and fix details.' },
 ];
 
 export function UseCases() {

@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { auth } from '@clerk/nextjs/server';
+import { generalRateLimiter, checkRateLimit } from '@/lib/rate-limit';
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify user is authenticated
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check rate limit (200 requests/day for lighter operations)
+    const rateLimitResult = await checkRateLimit(generalRateLimiter, userId, 'API requests');
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const { analysis, aspectRatio, additionalContext } = await request.json();
 
     if (!analysis) {
@@ -16,7 +30,14 @@ export async function POST(request: NextRequest) {
 
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-    const prompt = `You are an expert advertising creative director specializing in ad variation testing for A/B tests. Your job is to suggest variations that test different creative angles while keeping the product IDENTICAL.
+    const prompt = `You are an expert advertising creative director. Your job is to suggest ITERATIONS of a winning ad.
+
+THE ITERATION FRAMEWORK:
+Iterations = change ONE variable only. That's it.
+- New location
+- New person
+
+Same message. Same product. New backdrop OR new model.
 
 ORIGINAL AD ANALYSIS:
 - Product/Service: ${analysis.product}
@@ -26,49 +47,45 @@ ORIGINAL AD ANALYSIS:
 - Target Audience: ${analysis.target_audience}
 - Colors: ${analysis.colors?.join(', ') || 'N/A'}
 - Current Mood: ${analysis.mood}
-${additionalContext ? `\nADDITIONAL CONTEXT FROM ADVERTISER:\n${additionalContext}\n\nIMPORTANT: Use this context to tailor variations to the specific campaign goals, target audience, and brand voice mentioned above.` : ''}
+${additionalContext ? `\nADDITIONAL CONTEXT FROM ADVERTISER:\n${additionalContext}\n\nIMPORTANT: Use this context to tailor iterations to the specific campaign goals and target audience.` : ''}
 
-GENERATE 4 VARIATIONS - one from each tier:
+GENERATE 4 ITERATIONS:
 
-**TIER 1 - SCENE CHANGE** (1 variation)
-Change the environment/location entirely. Examples:
-- Home office → Coffee shop
-- Desk setup → Outdoor patio table
-- Studio setting → Living room couch
-- Minimal background → Busy lifestyle scene
+**LOCATION ITERATIONS** (3 iterations)
+Same ad, new backdrop. The location must be VISUALLY DISTINCT.
 
-**TIER 2 - HUMAN ELEMENT** (1 variation)
-Add a person or human presence. Examples:
-- Hands reaching toward/using the product
-- Person visible in background, blurred
-- Over-the-shoulder POV perspective
-- Someone's workspace with personal items
+Based on the product and current setting, suggest 3 alternative locations that:
+1. Make sense for where someone would actually use this product
+2. Are VISUALLY DIFFERENT from each other (not just slight variations)
+3. Appeal to different lifestyle contexts within the target audience
 
-**TIER 3 - MOOD/ATMOSPHERE** (1 variation)
-Change lighting, time of day, or styling. Examples:
-- Warm golden hour sunset lighting
-- Cool, professional morning light
-- Cozy evening with lamp lighting
-- Bright, energetic daylight
+BAD: Two locations with similar backgrounds (white wall → another white wall)
+GOOD: Clearly different environments that tell different stories
 
-**TIER 4 - CONTEXT SHIFT** (1 variation)
-Same product, different use-case or moment. Examples:
-- "Getting started" moment vs "deep in work"
-- Solo use vs collaborative/social setting
-- Casual/relaxed vs professional/focused
-- Morning routine vs late night session
+Think about WHERE the target audience uses this product and suggest realistic, contextual locations.
+
+**PERSON ITERATION** (1 iteration)
+If there's a person in the ad, suggest a different model to reach new audience segments.
+
+Test:
+- Different ethnicities
+- Different ages
+- Different demographics
+- Different styles (casual vs professional, etc.)
+
+Make it VISUALLY DISTINCT. Don't go micro with minor differences.
 
 CRITICAL RULES:
-1. The product MUST remain EXACTLY the same - we only change what's AROUND it
-2. **SCREEN RULE**: If there is a screen (phone, laptop, computer, monitor, TV, tablet) in the image, the content displayed on that screen must NOT be changed in ANY way. The screen content is sacred.
-3. Each variation tests ONE hypothesis
-4. Variations should be different enough to generate meaningful A/B test data
+1. The product MUST remain EXACTLY the same - only change what's AROUND it
+2. **SCREEN RULE**: If there's a screen in the image, the content on that screen must NOT change
+3. Each iteration changes ONE variable only
+4. Iterations must be VISUALLY DIFFERENT enough that the audience can tell them apart
 
-Return a JSON array with exactly 4 variations:
+Return a JSON array with exactly 4 iterations:
 [
   {
     "title": "Short descriptive title (2-4 words)",
-    "description": "Clear description of the change. Be specific about the new setting, lighting, or context. 2-3 sentences max."
+    "description": "Clear description of the change. Be specific about the new location or person. 1-2 sentences."
   }
 ]
 

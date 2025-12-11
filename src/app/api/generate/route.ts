@@ -1,10 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { auth } from '@clerk/nextjs/server';
+import { generateRateLimiter, checkRateLimit } from '@/lib/rate-limit';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '../../../../convex/_generated/api';
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify user is authenticated
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check rate limit (10 generations/day for free tier)
+    const rateLimitResult = await checkRateLimit(generateRateLimiter, userId, 'image generations');
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
+    // Check credits
+    const user = await convex.query(api.users.getByClerkId, { clerkId: userId });
+    if (!user) {
+      // Create user if doesn't exist (first time)
+      // This will be handled by the mutation
+    } else if (user.credits < 1) {
+      return NextResponse.json(
+        {
+          error: 'Insufficient credits',
+          message: 'You have run out of credits. Please upgrade your plan to continue generating images.',
+          credits: user.credits,
+        },
+        { status: 402 } // Payment Required
+      );
+    }
+
     const { image, mimeType, analysis, variationDescription, aspectRatio, isEdit } =
       await request.json();
 
@@ -113,6 +146,15 @@ Generate the variation that implements the requested change while keeping the pr
           // Return the base64 image as a data URL
           const imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
           console.log('Generated image successfully');
+
+          // Deduct 1 credit for successful generation
+          try {
+            await convex.mutation(api.users.useCredits, { amount: 1 });
+          } catch (creditError) {
+            console.error('Failed to deduct credit:', creditError);
+            // Continue anyway - don't block the user
+          }
+
           return NextResponse.json({ imageUrl });
         }
         if ('text' in part && part.text) {

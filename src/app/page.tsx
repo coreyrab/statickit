@@ -27,15 +27,20 @@ import {
   X,
   FolderDown,
   Settings,
+  Archive,
+  ArchiveRestore,
+  ChevronDown,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { detectAspectRatio, AspectRatioKey } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import { useUser, SignInButton, UserButton } from '@clerk/nextjs';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { LandingPage } from '@/components/landing/LandingPage';
+import { uploadFileToConvex, dataUrlToBlob } from '@/lib/convex-storage';
+import { PlanSelectionModal } from '@/components/PlanSelectionModal';
 
 type Step = 'upload' | 'context' | 'analyzing' | 'editor';
 
@@ -95,6 +100,8 @@ interface Variation {
   // Edit regeneration
   isRegenerating: boolean; // True when an edit is in progress
   hasNewVersion: boolean; // True when a new version is ready after edit
+  // Archive
+  isArchived: boolean; // True when variation is archived
 }
 
 function HomeContent() {
@@ -117,6 +124,15 @@ function HomeContent() {
     onConfirm: () => void;
   } | null>(null);
   const [additionalContext, setAdditionalContext] = useState('');
+  const [showSignUpPrompt, setShowSignUpPrompt] = useState(false);
+  const [showPlanSelection, setShowPlanSelection] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const [isSuggestingIteration, setIsSuggestingIteration] = useState(false);
+
+  // Get current user's subscription status
+  const dbUser = useQuery(api.users.getCurrent);
+  const hasSubscription = dbUser?.plan && dbUser.plan !== 'none' && dbUser.credits > 0;
+  const [showArchived, setShowArchived] = useState(false);
 
   // Original image editing state
   const [originalEditPrompt, setOriginalEditPrompt] = useState('');
@@ -128,6 +144,7 @@ function HomeContent() {
 
   const { user, isLoaded: isUserLoaded } = useUser();
   const createGeneration = useMutation(api.generations.create);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 
   // Load default weirdness level from localStorage
   useEffect(() => {
@@ -179,6 +196,7 @@ function HomeContent() {
             currentVersionIndex: 0,
             isRegenerating: false,
             hasNewVersion: false,
+            isArchived: false,
           }));
 
           setVariations(restoredVariations);
@@ -334,6 +352,7 @@ function HomeContent() {
         currentVersionIndex: 0,
         isRegenerating: false,
         hasNewVersion: false,
+        isArchived: false,
       };
 
       if (varResponse.ok) {
@@ -408,8 +427,7 @@ function HomeContent() {
         } : v))
       );
 
-      // Auto-select to show the generated image
-      setSelectedVariationId(variationId);
+      // Don't auto-select - let user stay where they are to avoid UI jump
     } catch (err) {
       console.error('Generation error:', err);
       setVariations(prev =>
@@ -444,6 +462,21 @@ function HomeContent() {
     }
   };
 
+  const handleArchiveVariation = (id: string) => {
+    setVariations(prev =>
+      prev.map(v => (v.id === id ? { ...v, isArchived: true } : v))
+    );
+    if (selectedVariationId === id) {
+      setSelectedVariationId(null);
+    }
+  };
+
+  const handleRestoreVariation = (id: string) => {
+    setVariations(prev =>
+      prev.map(v => (v.id === id ? { ...v, isArchived: false } : v))
+    );
+  };
+
   const handleAddCustomVariation = () => {
     if (!customPrompt.trim()) return;
     const newVariation: Variation = {
@@ -460,6 +493,7 @@ function HomeContent() {
       currentVersionIndex: 0,
       isRegenerating: false,
       hasNewVersion: false,
+      isArchived: false,
     };
     setVariations(prev => [...prev, newVariation]);
     setCustomPrompt('');
@@ -578,24 +612,44 @@ function HomeContent() {
     }
   };
 
-  // Edit original image
+  // Edit original image (or currently selected resized version)
   const handleEditOriginal = async () => {
     if (!uploadedImage || !analysis || !originalEditPrompt.trim()) return;
 
     setIsEditingOriginal(true);
 
     try {
-      const base64 = await fileToBase64(uploadedImage.file);
+      // Determine which image to edit based on currently selected size
+      let currentImageUrl: string;
+      let aspectRatioToUse: string;
 
-      // Get the current version to edit (either original or latest edited version)
-      const currentImageUrl = originalVersions.length > 0
-        ? originalVersions[originalVersionIndex].imageUrl
-        : uploadedImage.url;
+      if (viewingOriginalResizedSize) {
+        // Editing a resized version
+        const resizedVersion = originalResizedVersions.find(r => r.size === viewingOriginalResizedSize);
+        if (!resizedVersion?.imageUrl) {
+          console.error('Resized version not found');
+          setIsEditingOriginal(false);
+          return;
+        }
+        currentImageUrl = resizedVersion.imageUrl;
+        aspectRatioToUse = viewingOriginalResizedSize; // e.g., "1:1", "9:16"
+      } else {
+        // Editing the original
+        currentImageUrl = originalVersions.length > 0
+          ? originalVersions[originalVersionIndex].imageUrl
+          : uploadedImage.url;
+        aspectRatioToUse = uploadedImage.aspectRatio;
+      }
 
-      // Convert current image URL to base64 if it's a data URL
-      const imageToEdit = currentImageUrl.startsWith('data:')
-        ? currentImageUrl.split(',')[1]
-        : base64;
+      // Convert image URL to base64 if it's a data URL, otherwise fetch and convert
+      let imageToEdit: string;
+      if (currentImageUrl.startsWith('data:')) {
+        imageToEdit = currentImageUrl.split(',')[1];
+      } else {
+        // For blob URLs or other formats, we need the original file
+        const base64 = await fileToBase64(uploadedImage.file);
+        imageToEdit = base64;
+      }
 
       // Store the prompt before clearing it
       const editPromptUsed = originalEditPrompt.trim();
@@ -608,7 +662,7 @@ function HomeContent() {
           mimeType: uploadedImage.file.type,
           analysis,
           variationDescription: `EDIT REQUEST: ${editPromptUsed}`,
-          aspectRatio: uploadedImage.aspectRatio,
+          aspectRatio: aspectRatioToUse,
           isEdit: true,
         }),
       });
@@ -617,14 +671,24 @@ function HomeContent() {
         const data = await response.json();
         const newImageUrl = data.imageUrl;
 
-        // Initialize versions array if empty, then add new version
-        const currentVersions: ImageVersion[] = originalVersions.length === 0
-          ? [{ imageUrl: uploadedImage.url, prompt: null }]
-          : originalVersions;
+        if (viewingOriginalResizedSize) {
+          // Update the resized version with the edited image
+          setOriginalResizedVersions(prev =>
+            prev.map(r => r.size === viewingOriginalResizedSize
+              ? { ...r, imageUrl: newImageUrl }
+              : r
+            )
+          );
+        } else {
+          // Initialize versions array if empty, then add new version
+          const currentVersions: ImageVersion[] = originalVersions.length === 0
+            ? [{ imageUrl: uploadedImage.url, prompt: null }]
+            : originalVersions;
 
-        const newVersions: ImageVersion[] = [...currentVersions, { imageUrl: newImageUrl, prompt: editPromptUsed }];
-        setOriginalVersions(newVersions);
-        setOriginalVersionIndex(newVersions.length - 1);
+          const newVersions: ImageVersion[] = [...currentVersions, { imageUrl: newImageUrl, prompt: editPromptUsed }];
+          setOriginalVersions(newVersions);
+          setOriginalVersionIndex(newVersions.length - 1);
+        }
       }
 
       setOriginalEditPrompt('');
@@ -703,6 +767,7 @@ function HomeContent() {
       currentVersionIndex: 0,
       isRegenerating: false,
       hasNewVersion: false,
+      isArchived: false,
     };
 
     setVariations(prev => [...prev, duplicatedVariation]);
@@ -973,18 +1038,29 @@ function HomeContent() {
     if (completedVariations.length === 0) return;
 
     try {
-      const base64 = await fileToBase64(uploadedImage.file);
-      const originalDataUrl = `data:${uploadedImage.file.type};base64,${base64}`;
+      // Upload original image to Convex storage
+      const originalImageId = await uploadFileToConvex(generateUploadUrl, uploadedImage.file);
 
-      const variationsToSave = completedVariations.map(v => ({
-        id: v.id,
-        title: v.title,
-        description: v.description,
-        image_url: v.imageUrl || '',
-      }));
+      // Upload variation images to Convex storage
+      const variationsToSave = await Promise.all(
+        completedVariations.map(async (v) => {
+          let imageId;
+          if (v.imageUrl) {
+            // Convert data URL to blob and upload
+            const blob = dataUrlToBlob(v.imageUrl);
+            imageId = await uploadFileToConvex(generateUploadUrl, blob);
+          }
+          return {
+            id: v.id,
+            title: v.title,
+            description: v.description,
+            imageId: imageId,
+          };
+        })
+      );
 
       await createGeneration({
-        originalImageUrl: originalDataUrl,
+        originalImageId: originalImageId,
         originalFilename: uploadedImage.filename,
         aspectRatio: uploadedImage.aspectRatio,
         analysis: analysis,
@@ -998,9 +1074,74 @@ function HomeContent() {
   const completedCount = variations.filter(v => v.status === 'completed').length;
   const generatingCount = variations.filter(v => v.status === 'generating').length;
 
-  // Show landing page for non-authenticated users
-  if (isUserLoaded && !user) {
-    return <LandingPage />;
+  // Helper to check if action requires auth and subscription
+  const requireAuth = (action: () => void) => {
+    if (!user) {
+      setPendingAction(() => action);
+      setShowSignUpPrompt(true);
+      return;
+    }
+    // User is signed in, check subscription
+    if (!hasSubscription) {
+      setPendingAction(() => action);
+      setShowPlanSelection(true);
+      return;
+    }
+    action();
+  };
+
+  // Handle successful sign-in - check if plan selection is needed
+  useEffect(() => {
+    if (user && showSignUpPrompt) {
+      setShowSignUpPrompt(false);
+      // After sign-in, check if user needs to select a plan
+      if (!hasSubscription) {
+        setShowPlanSelection(true);
+      } else if (pendingAction) {
+        // User has subscription, execute pending action
+        pendingAction();
+        setPendingAction(null);
+      }
+    }
+  }, [user, hasSubscription, showSignUpPrompt, pendingAction]);
+
+  // Show landing page for non-authenticated users who haven't uploaded yet
+  if (isUserLoaded && step === 'upload') {
+    return (
+      <LandingPage
+        onUpload={(file: File) => {
+          // Handle upload from landing page
+          if (file.size > 10 * 1024 * 1024) {
+            setError('File size must be less than 10MB');
+            return;
+          }
+
+          const img = new Image();
+          const objectUrl = URL.createObjectURL(file);
+
+          img.onload = () => {
+            const { key, label } = detectAspectRatio(img.width, img.height);
+            setUploadedImage({
+              file,
+              url: objectUrl,
+              filename: file.name,
+              width: img.width,
+              height: img.height,
+              aspectRatio: label,
+              aspectRatioKey: key,
+            });
+            setStep('context');
+          };
+
+          img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            setError('Failed to read image');
+          };
+
+          img.src = objectUrl;
+        }}
+      />
+    );
   }
 
   // Show loading while checking auth
@@ -1023,18 +1164,29 @@ function HomeContent() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href="/history">
-              <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
-                <FolderOpen className="w-4 h-4 mr-1.5" />
-                My Ads
-              </Button>
-            </Link>
-            <Link href="/settings">
-              <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
-                <Settings className="w-4 h-4" />
-              </Button>
-            </Link>
-            <UserButton afterSignOutUrl="/" />
+            {user ? (
+              <>
+                <Link href="/history">
+                  <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
+                    <FolderOpen className="w-4 h-4 mr-1.5" />
+                    My Ads
+                  </Button>
+                </Link>
+                <Link href="/settings">
+                  <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </Link>
+                <UserButton afterSignOutUrl="/" />
+              </>
+            ) : (
+              <SignInButton mode="modal">
+                <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
+                  <LogIn className="w-4 h-4 mr-1.5" />
+                  Sign in
+                </Button>
+              </SignInButton>
+            )}
           </div>
         </div>
       </header>
@@ -1044,10 +1196,10 @@ function HomeContent() {
         <main className="max-w-3xl mx-auto px-6 py-16">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-              Generate Ad Variations
+              Iterate on Your Ads
             </h1>
             <p className="text-white/50 text-lg">
-              Upload your ad and get AI-powered variations in seconds
+              Upload your winning ad and create iterations in seconds
             </p>
           </div>
 
@@ -1104,7 +1256,7 @@ function HomeContent() {
               <div className="flex-1">
                 <h2 className="text-xl font-semibold mb-2">Any additional context?</h2>
                 <p className="text-white/50 text-sm mb-4">
-                  Optional details help us create better variations
+                  Optional details help us create better iterations
                 </p>
 
                 <Textarea
@@ -1120,7 +1272,7 @@ function HomeContent() {
                   <Button
                     variant="ghost"
                     onClick={handleProceedFromContext}
-                    className="flex-1 text-white/60 hover:text-white hover:bg-white/10"
+                    className="flex-1 text-white/60 hover:text-white border border-white/20 bg-white/5 hover:bg-white/10"
                   >
                     Skip
                   </Button>
@@ -1268,13 +1420,13 @@ function HomeContent() {
                       disabled={selectedVariation.isRegenerating}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && selectedVariation.editPrompt.trim() && !selectedVariation.isRegenerating) {
-                          handleRegenerateWithEdit(selectedVariation.id);
+                          requireAuth(() => handleRegenerateWithEdit(selectedVariation.id));
                         }
                       }}
                     />
                     <Button
                       size="sm"
-                      onClick={() => handleRegenerateWithEdit(selectedVariation.id)}
+                      onClick={() => requireAuth(() => handleRegenerateWithEdit(selectedVariation.id))}
                       disabled={!selectedVariation.editPrompt.trim() || selectedVariation.isRegenerating}
                       className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50"
                     >
@@ -1340,7 +1492,7 @@ function HomeContent() {
                             if (isCompleted) {
                               setViewingResizedSize(size.name);
                             } else if (!isResizing) {
-                              handleResizeImage(selectedVariation.id, size);
+                              requireAuth(() => handleResizeImage(selectedVariation.id, size));
                             }
                           }}
                           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
@@ -1429,13 +1581,13 @@ function HomeContent() {
                       disabled={isEditingOriginal}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && originalEditPrompt.trim() && !isEditingOriginal) {
-                          handleEditOriginal();
+                          requireAuth(handleEditOriginal);
                         }
                       }}
                     />
                     <Button
                       size="sm"
-                      onClick={handleEditOriginal}
+                      onClick={() => requireAuth(handleEditOriginal)}
                       disabled={!originalEditPrompt.trim() || isEditingOriginal}
                       className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50"
                     >
@@ -1501,7 +1653,7 @@ function HomeContent() {
                             if (isCompleted) {
                               setViewingOriginalResizedSize(size.name);
                             } else if (!isResizing) {
-                              handleResizeOriginal(size);
+                              requireAuth(() => handleResizeOriginal(size));
                             }
                           }}
                           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
@@ -1580,7 +1732,7 @@ function HomeContent() {
             {/* Header */}
             <div className="p-4 border-b border-white/10">
               <div className="flex items-center justify-between mb-1">
-                <h2 className="font-semibold">Variations</h2>
+                <h2 className="font-semibold">Iterations</h2>
                 <div className="flex items-center gap-3">
                   {completedCount > 0 && (
                     <button
@@ -1607,11 +1759,11 @@ function HomeContent() {
               {generatingCount === 0 && variations.some(v => v.status === 'idle') && (
                 <Button
                   size="sm"
-                  onClick={handleGenerateAll}
+                  onClick={() => requireAuth(handleGenerateAll)}
                   className="w-full mt-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500"
                 >
                   <Sparkles className="w-4 h-4 mr-1.5" />
-                  Generate All
+                  Create all
                 </Button>
               )}
             </div>
@@ -1662,11 +1814,11 @@ function HomeContent() {
               {/* Divider */}
               <div className="flex items-center gap-2 py-1">
                 <div className="flex-1 border-t border-white/10"></div>
-                <span className="text-xs text-white/30 uppercase tracking-wide">Variations</span>
+                <span className="text-xs text-white/30 uppercase tracking-wide">Suggested</span>
                 <div className="flex-1 border-t border-white/10"></div>
               </div>
 
-              {variations.map((variation) => (
+              {variations.filter(v => !v.isArchived).map((variation) => (
                 <div
                   key={variation.id}
                   onClick={() => variation.imageUrl && setSelectedVariationId(variation.id)}
@@ -1756,7 +1908,7 @@ function HomeContent() {
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleGenerateSingle(variation.id);
+                                        requireAuth(() => handleGenerateSingle(variation.id));
                                       }}
                                       className="p-1.5 rounded-lg hover:bg-violet-500/20 text-violet-400 hover:text-violet-300 transition-colors"
                                     >
@@ -1782,9 +1934,25 @@ function HomeContent() {
                               </>
                             )}
                             {variation.status === 'completed' && !variation.isRegenerating && (
-                              <span className="text-green-400">
-                                <Check className="w-4 h-4" />
-                              </span>
+                              <>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleArchiveVariation(variation.id);
+                                      }}
+                                      className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white/60 transition-colors"
+                                    >
+                                      <Archive className="w-3.5 h-3.5" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Archive</TooltipContent>
+                                </Tooltip>
+                                <span className="text-green-400">
+                                  <Check className="w-4 h-4" />
+                                </span>
+                              </>
                             )}
                             {variation.isRegenerating && (
                               <Loader2 className="w-4 h-4 text-violet-400 animate-spin" />
@@ -1872,10 +2040,64 @@ function HomeContent() {
                 </div>
               ))}
 
+              {/* Suggest Another Iteration */}
+              <button
+                onClick={async () => {
+                  if (!analysis || isSuggestingIteration) return;
+                  setIsSuggestingIteration(true);
+                  try {
+                    const response = await fetch('/api/suggest-variations', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        analysis,
+                        aspectRatio: uploadedImage?.aspectRatio,
+                        additionalContext: `Already suggested: ${variations.map(v => v.title).join(', ')}. Suggest something different.`,
+                      }),
+                    });
+                    if (response.ok) {
+                      const data = await response.json();
+                      if (data.variations && data.variations.length > 0) {
+                        const newVariation: Variation = {
+                          id: uuidv4(),
+                          title: data.variations[0].title,
+                          description: data.variations[0].description,
+                          imageUrl: null,
+                          status: 'idle',
+                          isEditing: false,
+                          editPrompt: '',
+                          isEditingGenerated: false,
+                          resizedVersions: [],
+                          versions: [],
+                          currentVersionIndex: 0,
+                          isRegenerating: false,
+                          hasNewVersion: false,
+                          isArchived: false,
+                        };
+                        setVariations(prev => [...prev, newVariation]);
+                      }
+                    }
+                  } catch (err) {
+                    console.error('Failed to suggest iteration:', err);
+                  } finally {
+                    setIsSuggestingIteration(false);
+                  }
+                }}
+                disabled={isSuggestingIteration}
+                className="w-full py-3 rounded-xl border border-dashed border-white/20 hover:border-violet-500/50 hover:bg-violet-500/5 text-white/50 hover:text-violet-400 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSuggestingIteration ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Plus className="w-4 h-4" />
+                )}
+                {isSuggestingIteration ? 'Suggesting...' : 'Suggest another iteration'}
+              </button>
+
               {/* Add Custom Variation */}
               <div className="rounded-xl border border-dashed border-white/10 p-4">
                 <div className="flex items-center gap-3 mb-2">
-                  <p className="text-sm font-medium text-white/60">Add custom variation</p>
+                  <p className="text-sm font-medium text-white/60">Add custom iteration</p>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={handleGeneratePrompt}
@@ -1918,9 +2140,67 @@ function HomeContent() {
                   className="w-full bg-white/10 text-white hover:bg-white/20 disabled:opacity-50 disabled:text-white/40"
                 >
                   <Plus className="w-4 h-4 mr-1.5" />
-                  Add Variation
+                  Add Iteration
                 </Button>
               </div>
+
+              {/* Archived Section */}
+              {variations.filter(v => v.isArchived).length > 0 && (
+                <div className="mt-4">
+                  <button
+                    onClick={() => setShowArchived(!showArchived)}
+                    className="w-full flex items-center justify-between py-2 px-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 text-sm text-white/50">
+                      <Archive className="w-4 h-4" />
+                      <span>Archived ({variations.filter(v => v.isArchived).length})</span>
+                    </div>
+                    <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${showArchived ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {showArchived && (
+                    <div className="mt-2 space-y-2">
+                      {variations.filter(v => v.isArchived).map((variation) => (
+                        <div
+                          key={variation.id}
+                          className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
+                        >
+                          <div className="flex gap-3">
+                            {/* Thumbnail */}
+                            <div className="w-12 h-14 rounded-lg bg-white/10 overflow-hidden flex-shrink-0">
+                              {variation.imageUrl && (
+                                <img
+                                  src={variation.imageUrl}
+                                  alt={variation.title}
+                                  className="w-full h-full object-cover opacity-60"
+                                />
+                              )}
+                            </div>
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-sm font-medium text-white/50 truncate">{variation.title}</h4>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      onClick={() => handleRestoreVariation(variation.id)}
+                                      className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white/70 transition-colors"
+                                    >
+                                      <ArchiveRestore className="w-3.5 h-3.5" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Restore</TooltipContent>
+                                </Tooltip>
+                              </div>
+                              <p className="text-xs text-white/30 line-clamp-2 mt-0.5">{variation.description}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Footer */}
@@ -1956,6 +2236,52 @@ function HomeContent() {
           </div>
         </main>
       )}
+
+      {/* Sign Up Prompt Modal */}
+      {showSignUpPrompt && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-lg">Sign up to continue</h3>
+              <button
+                onClick={() => setShowSignUpPrompt(false)}
+                className="p-1 rounded-lg hover:bg-white/10 text-white/60 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-white/60 mb-6">
+              Create an account to create iterations, edit images, and save your work.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => setShowSignUpPrompt(false)}
+                className="flex-1 text-white/60 hover:text-white border border-white/20 bg-white/5 hover:bg-white/10"
+              >
+                Cancel
+              </Button>
+              <SignInButton mode="modal">
+                <Button
+                  className="flex-1 bg-violet-600 hover:bg-violet-500"
+                >
+                  <LogIn className="w-4 h-4 mr-1.5" />
+                  Sign up
+                </Button>
+              </SignInButton>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Plan Selection Modal */}
+      <PlanSelectionModal
+        isOpen={showPlanSelection}
+        onClose={() => {
+          setShowPlanSelection(false);
+          setPendingAction(null);
+        }}
+      />
 
       {/* Download Confirmation Modal */}
       {downloadModal && (

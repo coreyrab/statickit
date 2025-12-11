@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "StaticKit - AI Ad Variation Generator",
-  description: "Turn one winning ad into five. Generate AI-powered ad variations for A/B testing in minutes.",
-  keywords: ["ad generator", "AI advertising", "ad variations", "A/B testing", "meta ads", "google ads"],
+  title: "StaticKit - AI Ad Iteration Tool",
+  description: "Iterate on your winning ads. Change one variable at a time. New locations, new people, same message.",
+  keywords: ["ad iteration", "AI advertising", "ad testing", "A/B testing", "meta ads", "google ads", "ad creative"],
 };
 
 export default function RootLayout({

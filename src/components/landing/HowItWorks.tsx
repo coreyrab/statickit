@@ -14,8 +14,8 @@ const steps = [
   {
     number: '02',
     title: 'Generate',
-    description: 'AI creates strategic variations',
-    details: 'Get 4+ variations testing different scenes, moods, and contexts. Same product, new environments.',
+    description: 'AI creates strategic iterations',
+    details: 'Get iterations testing different scenes, moods, and contexts. Same product, new environments.',
     icon: Sparkles,
     isGenerate: true,
   },

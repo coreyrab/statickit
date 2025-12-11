@@ -1,21 +1,50 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Sparkles, ArrowLeft, Settings, Loader2, Trash2, User, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Settings, Loader2, Trash2, User, BarChart3, CreditCard, Sparkles, ExternalLink, Check } from 'lucide-react';
 import { useUser, SignInButton, UserButton } from '@clerk/nextjs';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 
+// Wrapper component to handle Suspense for useSearchParams
 export default function SettingsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+      </div>
+    }>
+      <SettingsContent />
+    </Suspense>
+  );
+}
+
+function SettingsContent() {
   const { user, isLoaded: isUserLoaded } = useUser();
+  const searchParams = useSearchParams();
   const generations = useQuery(api.generations.getByUser);
+  const dbUser = useQuery(api.users.getCurrent);
   const deleteGeneration = useMutation(api.generations.remove);
 
   const [defaultWeirdness, setDefaultWeirdness] = useState(50);
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
+  const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  // Check for success param from Stripe redirect
+  useEffect(() => {
+    if (searchParams.get('success') === 'true') {
+      setShowSuccessMessage(true);
+      // Remove the query param from URL
+      window.history.replaceState({}, '', '/settings');
+      // Auto-hide after 5 seconds
+      setTimeout(() => setShowSuccessMessage(false), 5000);
+    }
+  }, [searchParams]);
 
   // Load saved weirdness preference from localStorage
   useEffect(() => {
@@ -42,6 +71,61 @@ export default function SettingsPage() {
   // Calculate usage stats
   const totalSessions = generations?.length || 0;
   const totalVariations = generations?.reduce((acc, gen) => acc + (gen.variations?.length || 0), 0) || 0;
+
+  // Plan display info
+  const planInfo: Record<string, { name: string; credits: number; color: string }> = {
+    none: { name: 'No Plan', credits: 0, color: 'text-gray-400' },
+    starter: { name: 'Starter', credits: 30, color: 'text-blue-400' },
+    pro: { name: 'Pro', credits: 300, color: 'text-violet-400' },
+    ultra: { name: 'Ultra', credits: 800, color: 'text-amber-400' },
+  };
+
+  const currentPlan = dbUser?.plan || 'none';
+  const currentPlanInfo = planInfo[currentPlan] || planInfo.none;
+  const hasSubscription = currentPlan !== 'none' && dbUser?.stripeCustomerId;
+
+  const handleManageSubscription = async () => {
+    setIsLoadingPortal(true);
+    try {
+      const response = await fetch('/api/stripe/portal', {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error('Portal error:', data.error);
+        alert(data.error || 'Failed to open subscription management');
+      }
+    } catch (error) {
+      console.error('Portal error:', error);
+      alert('Failed to open subscription management');
+    } finally {
+      setIsLoadingPortal(false);
+    }
+  };
+
+  const handleUpgrade = async (plan: string) => {
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error('Checkout error:', data.error);
+        alert(data.error || 'Failed to start checkout');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('Failed to start checkout');
+    }
+  };
 
   const handleDeleteAll = async () => {
     if (!generations || generations.length === 0) return;
@@ -101,6 +185,19 @@ export default function SettingsPage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8">
+        {/* Success Message */}
+        {showSuccessMessage && (
+          <div className="mb-6 bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
+              <Check className="w-4 h-4 text-green-400" />
+            </div>
+            <div>
+              <p className="font-medium text-green-400">Subscription activated!</p>
+              <p className="text-sm text-white/60">Your plan has been updated. You now have access to your new credits.</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center gap-4 mb-8">
           <Link href="/">
             <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
@@ -139,6 +236,80 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          {/* Subscription & Billing Section */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                <CreditCard className="w-5 h-5 text-amber-400" />
+              </div>
+              <div>
+                <h2 className="font-semibold">Subscription & Credits</h2>
+                <p className="text-sm text-white/50">Manage your plan and credits</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Current Plan */}
+              <div className="flex items-center justify-between py-3 px-4 bg-white/5 rounded-xl">
+                <div>
+                  <p className="text-white/60 text-sm">Current Plan</p>
+                  <p className={`font-semibold text-lg ${currentPlanInfo.color}`}>
+                    {currentPlanInfo.name}
+                  </p>
+                </div>
+                {hasSubscription ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleManageSubscription}
+                    disabled={isLoadingPortal}
+                    className="border-white/20 text-white hover:bg-white/10"
+                  >
+                    {isLoadingPortal ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        Manage
+                        <ExternalLink className="w-3 h-3 ml-1" />
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Link href="/#pricing">
+                    <Button
+                      size="sm"
+                      className="bg-violet-500 hover:bg-violet-400 text-white"
+                    >
+                      Subscribe
+                    </Button>
+                  </Link>
+                )}
+              </div>
+
+              {/* Credits */}
+              <div className="py-3 px-4 bg-white/5 rounded-xl">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-white/60 text-sm">Credits Remaining</p>
+                  <p className="font-semibold text-lg">
+                    {dbUser?.credits ?? currentPlanInfo.credits} / {currentPlanInfo.credits}
+                  </p>
+                </div>
+                <div className="w-full bg-white/10 rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-violet-500 to-indigo-500 h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${Math.min(100, ((dbUser?.credits ?? currentPlanInfo.credits) / currentPlanInfo.credits) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-white/40 mt-2">
+                  Credits reset monthly on your billing date
+                </p>
+              </div>
+
+            </div>
+          </div>
+
           {/* Usage Stats Section */}
           <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -158,7 +329,7 @@ export default function SettingsPage() {
               </div>
               <div className="bg-white/5 rounded-xl p-4 text-center">
                 <p className="text-3xl font-bold text-indigo-400">{totalVariations}</p>
-                <p className="text-sm text-white/50">Total Variations</p>
+                <p className="text-sm text-white/50">Total Iterations</p>
               </div>
             </div>
           </div>
@@ -192,7 +363,7 @@ export default function SettingsPage() {
                   className="w-full weirdness-slider"
                 />
                 <p className="text-xs text-white/40 mt-1">
-                  This will be the default setting for generating new variation prompts
+                  This will be the default setting for generating new iterations
                 </p>
               </div>
             </div>
@@ -215,7 +386,7 @@ export default function SettingsPage() {
                 <div>
                   <p className="text-white/80">Delete All Saved Ads</p>
                   <p className="text-sm text-white/40">
-                    Permanently delete all {totalSessions} saved sessions and {totalVariations} variations
+                    Permanently delete all {totalSessions} saved sessions and {totalVariations} iterations
                   </p>
                 </div>
                 {confirmDeleteAll ? (

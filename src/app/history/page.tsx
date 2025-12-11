@@ -126,7 +126,7 @@ export default function HistoryPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold">My Ads</h1>
-            <p className="text-white/50 text-sm">Your saved ad variations</p>
+            <p className="text-white/50 text-sm">Your saved ad iterations</p>
           </div>
         </div>
 
@@ -137,12 +137,12 @@ export default function HistoryPage() {
             </div>
             <h2 className="text-lg font-semibold mb-2">No saved ads yet</h2>
             <p className="text-white/50 mb-6">
-              Your ad variations will appear here after you save them.
+              Your ad iterations will appear here after you save them.
             </p>
             <Link href="/">
               <Button className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500">
                 <Sparkles className="w-4 h-4 mr-2" />
-                Generate Your First Ad
+                Create Your First Iteration
               </Button>
             </Link>
           </div>
@@ -172,7 +172,7 @@ export default function HistoryPage() {
                       <div>
                         <p className="font-medium truncate">{gen.originalFilename || 'Uploaded ad'}</p>
                         <p className="text-sm text-white/50">
-                          {gen.aspectRatio} • {gen.variations?.length || 0} variations
+                          {gen.aspectRatio} • {gen.variations?.length || 0} iterations
                         </p>
                         <p className="text-xs text-white/40 mt-1">
                           {formatDate(gen._creationTime)}
@@ -250,14 +250,16 @@ export default function HistoryPage() {
                                 <ImageIcon className="w-4 h-4 text-white/30" />
                               </div>
                             )}
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <button
-                                onClick={() => handleDownload(variation.image_url, `${variation.title}.png`)}
-                                className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-                              >
-                                <Download className="w-4 h-4" />
-                              </button>
-                            </div>
+                            {variation.image_url && (
+                              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button
+                                  onClick={() => handleDownload(variation.image_url!, `${variation.title}.png`)}
+                                  className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </button>
+                              </div>
+                            )}
                           </div>
                           <p className="text-[11px] text-white/50 truncate mt-1">{variation.title}</p>
                         </div>

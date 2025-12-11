@@ -8,7 +8,7 @@ export function LandingCTA() {
     <section className="py-20 px-6 border-t border-white/5">
       <div className="max-w-4xl mx-auto text-center">
         <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-          Start generating variations
+          Start iterating on your winners
         </h2>
         <p className="text-white/40 mb-8">
           Free to try. No credit card required.

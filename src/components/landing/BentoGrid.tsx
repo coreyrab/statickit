@@ -1,48 +1,48 @@
 'use client';
 
 import {
-  Image,
+  MapPin,
   Maximize2,
   MessageSquare,
-  Sliders,
+  User,
   History,
   CameraOff,
 } from 'lucide-react';
 
 const features = [
   {
-    title: 'Instant variations',
-    description: 'New locations, poses, outfits, lighting. Generated instantly.',
-    icon: Image,
+    title: 'Change locations',
+    description: 'Same ad, new backdrop with perfect lighting and shadows everytime.',
+    icon: MapPin,
     color: 'text-violet-400',
   },
   {
-    title: 'No reshoot needed',
-    description: 'Skip the studio. Skip the photographer. Get new creative from existing assets.',
-    icon: CameraOff,
+    title: 'New models',
+    description: 'Test different people, ages, demographics. Reach new segments.',
+    icon: User,
     color: 'text-blue-400',
   },
   {
-    title: 'Natural language edits',
-    description: '"Make the lighting warmer" or "remove the flowers". Edit with plain English.',
-    icon: MessageSquare,
+    title: 'No reshoot needed',
+    description: 'Skip the studio. Skip the photographer. Iterate from existing assets.',
+    icon: CameraOff,
     color: 'text-emerald-400',
   },
   {
-    title: 'Creativity control',
-    description: 'Dial from conservative to experimental. You decide how far the AI pushes.',
-    icon: Sliders,
+    title: 'Natural language edits',
+    description: '"Make the lighting warmer" or "Make his shirt red". Edit in plain English.',
+    icon: MessageSquare,
     color: 'text-pink-400',
   },
   {
     title: 'Version history',
-    description: 'Every iteration saved. Navigate back and forth. Never lose a good version.',
+    description: 'Every iteration saved. Navigate back and forth. Never lose a winner.',
     icon: History,
     color: 'text-orange-400',
   },
   {
     title: 'Resize with AI',
-    description: '1:1, 9:16, 16:9, 4:5. Generate every format from a single image. One click.',
+    description: '1:1, 9:16, 16:9, 4:5. Every format from a single image. One click.',
     icon: Maximize2,
     color: 'text-cyan-400',
   },
