@@ -8,6 +8,9 @@ import { api } from '../../../../convex/_generated/api';
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
+// Admin emails that bypass credit checks
+const ADMIN_EMAILS = ['coreyrab@gmail.com'];
+
 export async function POST(request: NextRequest) {
   try {
     // Verify user is authenticated
@@ -22,12 +25,14 @@ export async function POST(request: NextRequest) {
       return rateLimitResult.response;
     }
 
-    // Check credits
+    // Check credits (skip for admin users)
     const user = await convex.query(api.users.getByClerkId, { clerkId: userId });
+    const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
+
     if (!user) {
       // Create user if doesn't exist (first time)
       // This will be handled by the mutation
-    } else if (user.credits < 1) {
+    } else if (!isAdmin && user.credits < 1) {
       return NextResponse.json(
         {
           error: 'Insufficient credits',

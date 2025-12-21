@@ -131,7 +131,12 @@ function HomeContent() {
 
   // Get current user's subscription status
   const dbUser = useQuery(api.users.getCurrent);
-  const hasSubscription = dbUser?.plan && dbUser.plan !== 'none' && dbUser.credits > 0;
+  const ADMIN_EMAILS = ['coreyrab@gmail.com'];
+  const isAdmin = dbUser?.email && ADMIN_EMAILS.includes(dbUser.email.toLowerCase());
+  const hasSubscription = isAdmin || (dbUser?.plan && dbUser.plan !== 'none' && dbUser.credits > 0);
+
+  // Debug: log user info
+  console.log('dbUser:', dbUser, 'isAdmin:', isAdmin, 'hasSubscription:', hasSubscription);
   const [showArchived, setShowArchived] = useState(false);
 
   // Original image editing state
@@ -145,6 +150,14 @@ function HomeContent() {
   const { user, isLoaded: isUserLoaded } = useUser();
   const createGeneration = useMutation(api.generations.create);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const getOrCreateUser = useMutation(api.users.getOrCreate);
+
+  // Create user in Convex when authenticated
+  useEffect(() => {
+    if (user && dbUser === null) {
+      getOrCreateUser().catch(console.error);
+    }
+  }, [user, dbUser, getOrCreateUser]);
 
   // Load default weirdness level from localStorage
   useEffect(() => {
@@ -1081,8 +1094,8 @@ function HomeContent() {
       setShowSignUpPrompt(true);
       return;
     }
-    // User is signed in, check subscription
-    if (!hasSubscription) {
+    // User is signed in, check subscription (skip if still loading or admin)
+    if (dbUser !== undefined && !hasSubscription) {
       setPendingAction(() => action);
       setShowPlanSelection(true);
       return;
@@ -1094,16 +1107,16 @@ function HomeContent() {
   useEffect(() => {
     if (user && showSignUpPrompt) {
       setShowSignUpPrompt(false);
-      // After sign-in, check if user needs to select a plan
-      if (!hasSubscription) {
+      // After sign-in, check if user needs to select a plan (wait for dbUser to load)
+      if (dbUser !== undefined && !hasSubscription) {
         setShowPlanSelection(true);
-      } else if (pendingAction) {
+      } else if (pendingAction && hasSubscription) {
         // User has subscription, execute pending action
         pendingAction();
         setPendingAction(null);
       }
     }
-  }, [user, hasSubscription, showSignUpPrompt, pendingAction]);
+  }, [user, dbUser, hasSubscription, showSignUpPrompt, pendingAction]);
 
   // Show landing page for non-authenticated users who haven't uploaded yet
   if (isUserLoaded && step === 'upload') {
