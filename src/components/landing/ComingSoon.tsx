@@ -158,10 +158,16 @@ export function ComingSoon() {
             </div>
 
             {/* Terminal-style footer note */}
-            <div className="mt-32 pt-8 border-t border-neutral-900">
+            <div className="mt-32 pt-8 border-t border-neutral-900 flex items-center justify-between">
               <p className="text-neutral-600 text-xs font-mono">
-                launching q1 2025 · built in san francisco
+                launching q1 2026
               </p>
+              <a
+                href="/?app=true"
+                className="text-neutral-600 text-xs font-mono hover:text-neutral-400 transition-colors"
+              >
+                open app →
+              </a>
             </div>
           </div>
         </main>

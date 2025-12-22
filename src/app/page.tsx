@@ -671,7 +671,7 @@ function HomeContent() {
 
   // Edit original image (or currently selected resized version)
   const handleEditOriginal = async () => {
-    if (!uploadedImage || !analysis || !originalEditPrompt.trim()) return;
+    if (!uploadedImage || !originalEditPrompt.trim()) return;
 
     setIsEditingOriginal(true);
 
@@ -711,13 +711,24 @@ function HomeContent() {
       // Store the prompt before clearing it
       const editPromptUsed = originalEditPrompt.trim();
 
+      // Use analysis if available, otherwise provide minimal context
+      const analysisToUse = analysis || {
+        product: 'Image',
+        brand_style: 'Not specified',
+        visual_elements: [],
+        key_selling_points: [],
+        target_audience: 'General',
+        colors: [],
+        mood: 'Not specified',
+      };
+
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           image: imageToEdit,
           mimeType: uploadedImage.file.type,
-          analysis,
+          analysis: analysisToUse,
           variationDescription: `EDIT REQUEST: ${editPromptUsed}`,
           aspectRatio: aspectRatioToUse,
           isEdit: true,
