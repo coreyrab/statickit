@@ -183,13 +183,11 @@ Generate the variation that implements the requested change while keeping the pr
     // If no image was generated, log the full response for debugging
     console.log('No image in response. Full response:', JSON.stringify(response, null, 2).substring(0, 500));
 
-    // Return a placeholder for demo purposes
-    return NextResponse.json({
-      imageUrl: `https://placehold.co/400x500/6366f1/white?text=${encodeURIComponent(
-        'Generated'
-      )}`,
-      note: 'Image generation model did not return an image',
-    });
+    // Return an error so frontend can mark the version as failed
+    return NextResponse.json(
+      { error: 'Image generation failed', details: 'The model could not generate an image. Try a different prompt or image.' },
+      { status: 422 }
+    );
   } catch (error: any) {
     console.error('Generation error:', error?.message || error);
     console.error('Full error:', JSON.stringify(error, null, 2));

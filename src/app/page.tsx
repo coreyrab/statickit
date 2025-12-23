@@ -32,6 +32,7 @@ import {
   ChevronDown,
   Maximize2,
   Info,
+  Layers,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -92,9 +93,10 @@ interface ResizedVersion {
 }
 
 interface ImageVersion {
-  imageUrl: string;
+  imageUrl: string | null; // null when processing
   prompt: string | null; // The edit prompt used to create this version (null for original/first generation)
   parentIndex: number; // Index of the version this was edited from (-1 for original)
+  status: 'processing' | 'completed' | 'error'; // Track processing state for concurrent edits
 }
 
 interface Variation {
@@ -164,7 +166,7 @@ function HomeContent() {
 
   // Original image editing state
   const [originalEditPrompt, setOriginalEditPrompt] = useState('');
-  const [isEditingOriginal, setIsEditingOriginal] = useState(false);
+  // isEditingOriginal removed - now tracking per-version with status field
   const [originalVersions, setOriginalVersions] = useState<ImageVersion[]>([]);
   const [originalVersionIndex, setOriginalVersionIndex] = useState(0);
   const [originalResizedVersions, setOriginalResizedVersions] = useState<ResizedVersion[]>([]);
@@ -181,7 +183,7 @@ function HomeContent() {
     hardware: string | null;
   }>({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, background: null, hardware: null });
   const [expandedPresetCategory, setExpandedPresetCategory] = useState<string | null>(null);
-  const [isApplyingPreset, setIsApplyingPreset] = useState(false);
+  // isApplyingPreset removed - now tracking per-version with status field
 
   // Presets data - prompts optimized for AI image editing
   const PRESETS = {
@@ -392,7 +394,16 @@ function HomeContent() {
       }
       // Check if we have edited versions
       if (originalVersions.length > 0) {
-        return originalVersions[originalVersionIndex].imageUrl;
+        const currentVersion = originalVersions[originalVersionIndex];
+        // If current version is processing, show parent version or original
+        if (currentVersion.imageUrl) {
+          return currentVersion.imageUrl;
+        }
+        // Fall back to parent version or original for processing/error states
+        if (currentVersion.parentIndex >= 0 && originalVersions[currentVersion.parentIndex]?.imageUrl) {
+          return originalVersions[currentVersion.parentIndex].imageUrl;
+        }
+        return uploadedImage?.url;
       }
       return uploadedImage?.url;
     }
@@ -808,11 +819,13 @@ function HomeContent() {
   const handleEditOriginal = async () => {
     if (!uploadedImage || !originalEditPrompt.trim()) return;
 
-    setIsEditingOriginal(true);
+    // Store the prompt before clearing it
+    const editPromptUsed = originalEditPrompt.trim();
+    setOriginalEditPrompt('');
 
     try {
       // Determine which image to edit based on currently selected size
-      let currentImageUrl: string;
+      let currentImageUrl: string | null;
       let aspectRatioToUse: string;
 
       if (viewingOriginalResizedSize) {
@@ -820,17 +833,24 @@ function HomeContent() {
         const resizedVersion = originalResizedVersions.find(r => r.size === viewingOriginalResizedSize);
         if (!resizedVersion?.imageUrl) {
           console.error('Resized version not found');
-          setIsEditingOriginal(false);
           return;
         }
         currentImageUrl = resizedVersion.imageUrl;
-        aspectRatioToUse = viewingOriginalResizedSize; // e.g., "1:1", "9:16"
+        aspectRatioToUse = viewingOriginalResizedSize;
       } else {
-        // Editing the original
-        currentImageUrl = originalVersions.length > 0
-          ? originalVersions[originalVersionIndex].imageUrl
-          : uploadedImage.url;
+        // Editing the original - only allow editing completed versions
+        const currentVersion = originalVersions.length > 0 ? originalVersions[originalVersionIndex] : null;
+        if (currentVersion && currentVersion.status !== 'completed') {
+          console.error('Cannot edit a processing version');
+          return;
+        }
+        currentImageUrl = currentVersion?.imageUrl || uploadedImage.url;
         aspectRatioToUse = uploadedImage.aspectRatio;
+      }
+
+      if (!currentImageUrl) {
+        console.error('No image URL available');
+        return;
       }
 
       // Convert image URL to base64 if it's a data URL, otherwise fetch and convert
@@ -838,13 +858,28 @@ function HomeContent() {
       if (currentImageUrl.startsWith('data:')) {
         imageToEdit = currentImageUrl.split(',')[1];
       } else {
-        // For blob URLs or other formats, we need the original file
         const base64 = await fileToBase64(uploadedImage.file);
         imageToEdit = base64;
       }
 
-      // Store the prompt before clearing it
-      const editPromptUsed = originalEditPrompt.trim();
+      // For non-resized edits, immediately add a processing version
+      let newVersionIndex: number | null = null;
+      if (!viewingOriginalResizedSize) {
+        const currentVersions: ImageVersion[] = originalVersions.length === 0
+          ? [{ imageUrl: uploadedImage.url, prompt: null, parentIndex: -1, status: 'completed' as const }]
+          : originalVersions;
+
+        const processingVersion: ImageVersion = {
+          imageUrl: null,
+          prompt: editPromptUsed,
+          parentIndex: originalVersionIndex,
+          status: 'processing'
+        };
+        const newVersions = [...currentVersions, processingVersion];
+        newVersionIndex = newVersions.length - 1;
+        setOriginalVersions(newVersions);
+        // Don't auto-switch to the processing version - user can continue working
+      }
 
       // Use analysis if available, otherwise provide minimal context
       const analysisToUse = analysis || {
@@ -882,23 +917,26 @@ function HomeContent() {
               : r
             )
           );
-        } else {
-          // Initialize versions array if empty, then add new version
-          const currentVersions: ImageVersion[] = originalVersions.length === 0
-            ? [{ imageUrl: uploadedImage.url, prompt: null, parentIndex: -1 }]
-            : originalVersions;
-
-          const newVersions: ImageVersion[] = [...currentVersions, { imageUrl: newImageUrl, prompt: editPromptUsed, parentIndex: originalVersionIndex }];
-          setOriginalVersions(newVersions);
-          setOriginalVersionIndex(newVersions.length - 1);
+        } else if (newVersionIndex !== null) {
+          // Update the processing version with the completed image
+          setOriginalVersions(prev => prev.map((v, idx) =>
+            idx === newVersionIndex
+              ? { ...v, imageUrl: newImageUrl, status: 'completed' as const }
+              : v
+          ));
+        }
+      } else {
+        // Mark version as error
+        if (newVersionIndex !== null) {
+          setOriginalVersions(prev => prev.map((v, idx) =>
+            idx === newVersionIndex
+              ? { ...v, status: 'error' as const }
+              : v
+          ));
         }
       }
-
-      setOriginalEditPrompt('');
     } catch (err) {
       console.error('Original edit error:', err);
-    } finally {
-      setIsEditingOriginal(false);
     }
   };
 
@@ -932,13 +970,25 @@ function HomeContent() {
 
     if (prompts.length === 0) return;
 
-    setIsApplyingPreset(true);
+    // Build preset label for the version history
+    const presetLabel = presetNames.filter(Boolean).join(' + ') + ' [preset]';
+
+    // Clear selections immediately
+    setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, background: null, hardware: null });
 
     try {
-      // Get current image to edit
-      const currentImageUrl = originalVersions.length > 0
-        ? originalVersions[originalVersionIndex].imageUrl
-        : uploadedImage.url;
+      // Get current image to edit - only from completed versions
+      const currentVersion = originalVersions.length > 0 ? originalVersions[originalVersionIndex] : null;
+      if (currentVersion && currentVersion.status !== 'completed') {
+        console.error('Cannot apply preset to a processing version');
+        return;
+      }
+      const currentImageUrl = currentVersion?.imageUrl || uploadedImage.url;
+
+      if (!currentImageUrl) {
+        console.error('No image URL available');
+        return;
+      }
 
       // Convert to base64
       let imageToEdit: string;
@@ -949,8 +999,20 @@ function HomeContent() {
         imageToEdit = base64;
       }
 
-      // Build preset label for the version history
-      const presetLabel = presetNames.filter(Boolean).join(' + ') + ' [preset]';
+      // Immediately add a processing version
+      const currentVersions: ImageVersion[] = originalVersions.length === 0
+        ? [{ imageUrl: uploadedImage.url, prompt: null, parentIndex: -1, status: 'completed' as const }]
+        : originalVersions;
+
+      const processingVersion: ImageVersion = {
+        imageUrl: null,
+        prompt: presetLabel,
+        parentIndex: originalVersionIndex,
+        status: 'processing'
+      };
+      const newVersions = [...currentVersions, processingVersion];
+      const newVersionIndex = newVersions.length - 1;
+      setOriginalVersions(newVersions);
 
       const combinedPrompt = prompts.join('. ');
 
@@ -981,26 +1043,22 @@ function HomeContent() {
         const data = await response.json();
         const newImageUrl = data.imageUrl;
 
-        // Initialize versions array if empty, then add new version
-        const currentVersions: ImageVersion[] = originalVersions.length === 0
-          ? [{ imageUrl: uploadedImage.url, prompt: null, parentIndex: -1 }]
-          : originalVersions;
-
-        const newVersions: ImageVersion[] = [...currentVersions, {
-          imageUrl: newImageUrl,
-          prompt: presetLabel,
-          parentIndex: originalVersionIndex
-        }];
-        setOriginalVersions(newVersions);
-        setOriginalVersionIndex(newVersions.length - 1);
-
-        // Clear selections after successful apply
-        setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, background: null, hardware: null });
+        // Update the processing version with the completed image
+        setOriginalVersions(prev => prev.map((v, idx) =>
+          idx === newVersionIndex
+            ? { ...v, imageUrl: newImageUrl, status: 'completed' as const }
+            : v
+        ));
+      } else {
+        // Mark version as error
+        setOriginalVersions(prev => prev.map((v, idx) =>
+          idx === newVersionIndex
+            ? { ...v, status: 'error' as const }
+            : v
+        ));
       }
     } catch (err) {
       console.error('Preset apply error:', err);
-    } finally {
-      setIsApplyingPreset(false);
     }
   };
 
@@ -1258,6 +1316,28 @@ function HomeContent() {
     } catch (err) {
       console.error('Download error:', err);
     }
+  };
+
+  // Create a new version from the current image (makes it a new base to edit on top of)
+  const handleCreateVersion = (imageUrl: string, sourceLabel: string) => {
+    const currentVersions: ImageVersion[] = originalVersions.length === 0
+      ? [{ imageUrl: uploadedImage!.url, prompt: null, parentIndex: -1, status: 'completed' as const }]
+      : originalVersions;
+
+    const newVersion: ImageVersion = {
+      imageUrl,
+      prompt: sourceLabel,
+      parentIndex: currentVersions.length - 1,
+      status: 'completed'
+    };
+
+    const newVersions = [...currentVersions, newVersion];
+    setOriginalVersions(newVersions);
+    setOriginalVersionIndex(newVersions.length - 1);
+
+    // Switch to viewing original (non-generated) to show the new version
+    setIsShowingGenerated(false);
+    setSelectedVariationId(null);
   };
 
   // Count files for a single variation (all versions + all resizes)
@@ -1573,6 +1653,23 @@ function HomeContent() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
+                      onClick={() => setSelectedTool('iterations')}
+                      className={`px-3 py-2 rounded-lg flex items-center gap-2 transition-all text-sm font-medium ${
+                        selectedTool === 'iterations'
+                          ? 'bg-amber-600 text-white'
+                          : 'text-white/50 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <Layers className="w-4 h-4" />
+                      Versions
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Generate variations</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
                       onClick={() => setSelectedTool('edit')}
                       className={`px-3 py-2 rounded-lg flex items-center gap-2 transition-all text-sm font-medium ${
                         selectedTool === 'edit'
@@ -1585,23 +1682,6 @@ function HomeContent() {
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>AI-powered editing & resize</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => setSelectedTool('iterations')}
-                      className={`px-3 py-2 rounded-lg flex items-center gap-2 transition-all text-sm font-medium ${
-                        selectedTool === 'iterations'
-                          ? 'bg-amber-600 text-white'
-                          : 'text-white/50 hover:text-white hover:bg-white/10'
-                      }`}
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      Iterate
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Generate variations</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -1637,23 +1717,35 @@ function HomeContent() {
                       />
                     )}
                     {originalVersions.map((version, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setOriginalVersionIndex(idx)}
-                        className={`w-2.5 h-2.5 rounded-full transition-all ${
-                          idx === originalVersionIndex
-                            ? 'bg-emerald-500 scale-110'
-                            : 'bg-white/30 hover:bg-white/50'
-                        }`}
-                      />
+                      version.status === 'processing' ? (
+                        <Loader2
+                          key={idx}
+                          className={`w-2.5 h-2.5 animate-spin ${
+                            idx === originalVersionIndex ? 'text-emerald-500' : 'text-white/50'
+                          }`}
+                        />
+                      ) : (
+                        <button
+                          key={idx}
+                          onClick={() => version.status === 'completed' && setOriginalVersionIndex(idx)}
+                          className={`w-2.5 h-2.5 rounded-full transition-all ${
+                            version.status === 'error'
+                              ? 'bg-red-500/50'
+                              : idx === originalVersionIndex
+                                ? 'bg-emerald-500 scale-110'
+                                : 'bg-white/30 hover:bg-white/50'
+                          }`}
+                        />
+                      )
                     ))}
-                    {(isEditingOriginal || isApplyingPreset) && (
-                      <Loader2 className="w-2.5 h-2.5 text-white/50 animate-spin" />
-                    )}
                   </div>
                   {/* Label row - changes but dots stay fixed */}
                   <span className="text-xs text-white/50 text-center">
-                    {originalVersions.length > 0 && originalVersions[originalVersionIndex]?.prompt ? (
+                    {originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing' ? (
+                      <span className="italic text-white/40">Processing...</span>
+                    ) : originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'error' ? (
+                      <span className="italic text-red-400">Error - try again</span>
+                    ) : originalVersions.length > 0 && originalVersions[originalVersionIndex]?.prompt ? (
                       originalVersions[originalVersionIndex].prompt.includes('[preset]') ? (
                         <span>
                           <span className="text-amber-400">[preset]</span>
@@ -1957,30 +2049,33 @@ function HomeContent() {
                   {/* Edit prompt */}
                   <p className="text-sm font-medium mb-2 text-white/70">Edit this image</p>
                   <div className="flex gap-2">
-                    <Input
-                      placeholder="e.g., 'make the background brighter'"
-                      value={originalEditPrompt}
-                      onChange={(e) => setOriginalEditPrompt(e.target.value)}
-                      className="flex-1 bg-white/5 border-white/10 text-white/80 text-sm placeholder:text-white/30"
-                      disabled={isEditingOriginal}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && originalEditPrompt.trim() && !isEditingOriginal) {
-                          requireAuth(handleEditOriginal);
-                        }
-                      }}
-                    />
-                    <Button
-                      size="sm"
-                      onClick={() => requireAuth(handleEditOriginal)}
-                      disabled={!originalEditPrompt.trim() || isEditingOriginal}
-                      className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50"
-                    >
-                      {isEditingOriginal ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4" />
-                      )}
-                    </Button>
+                    {(() => {
+                      const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
+                      return (
+                        <>
+                          <Input
+                            placeholder="e.g., 'make the background brighter'"
+                            value={originalEditPrompt}
+                            onChange={(e) => setOriginalEditPrompt(e.target.value)}
+                            className="flex-1 bg-white/5 border-white/10 text-white/80 text-sm placeholder:text-white/30"
+                            disabled={currentVersionProcessing}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && originalEditPrompt.trim() && !currentVersionProcessing) {
+                                requireAuth(handleEditOriginal);
+                              }
+                            }}
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => requireAuth(handleEditOriginal)}
+                            disabled={!originalEditPrompt.trim() || currentVersionProcessing}
+                            className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                          </Button>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
@@ -2096,12 +2191,36 @@ function HomeContent() {
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                   </div>
-                  {/* Loading overlay when editing */}
-                  {isEditingOriginal && !isShowingGenerated && (
+                  {/* Loading overlay when viewing a processing version */}
+                  {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing' && (
                     <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
                       <div className="flex flex-col items-center gap-3">
                         <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
-                        <span className="text-sm text-white/70">Applying edit...</span>
+                        <span className="text-sm text-white/70">Processing...</span>
+                      </div>
+                    </div>
+                  )}
+                  {/* Error overlay when viewing a failed version */}
+                  {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'error' && (
+                    <div className="absolute inset-0 bg-black/70 rounded-2xl flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-3 max-w-xs text-center px-4">
+                        <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                          <X className="w-6 h-6 text-red-400" />
+                        </div>
+                        <span className="text-sm font-medium text-white">Generation Failed</span>
+                        <span className="text-xs text-white/50">The AI couldn't process this edit. This can happen with certain prompts or images. Try a different edit or preset.</span>
+                        <button
+                          onClick={() => {
+                            // Remove the failed version and go back to previous
+                            const failedIndex = originalVersionIndex;
+                            const parentIndex = originalVersions[failedIndex]?.parentIndex ?? 0;
+                            setOriginalVersions(prev => prev.filter((_, idx) => idx !== failedIndex));
+                            setOriginalVersionIndex(Math.max(0, parentIndex));
+                          }}
+                          className="mt-2 px-4 py-2 text-xs bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                        >
+                          Dismiss
+                        </button>
                       </div>
                     </div>
                   )}
@@ -2114,30 +2233,33 @@ function HomeContent() {
               {selectedTool === 'edit' && !isShowingGenerated && uploadedImage && (
                 <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
                   <div className="bg-black/70 backdrop-blur-md rounded-full border border-white/20 shadow-2xl flex items-center gap-2 pl-4 pr-1.5 py-1.5">
-                    <input
-                      type="text"
-                      placeholder="Describe an edit..."
-                      value={originalEditPrompt}
-                      onChange={(e) => setOriginalEditPrompt(e.target.value)}
-                      className="flex-1 bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
-                      disabled={isEditingOriginal}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && originalEditPrompt.trim() && !isEditingOriginal) {
-                          requireAuth(handleEditOriginal);
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={() => requireAuth(handleEditOriginal)}
-                      disabled={!originalEditPrompt.trim() || isEditingOriginal}
-                      className="p-2 rounded-full bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                      {isEditingOriginal ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-white" />
-                      ) : (
-                        <Send className="w-4 h-4 text-white" />
-                      )}
-                    </button>
+                    {(() => {
+                      const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
+                      return (
+                        <>
+                          <input
+                            type="text"
+                            placeholder="Describe an edit..."
+                            value={originalEditPrompt}
+                            onChange={(e) => setOriginalEditPrompt(e.target.value)}
+                            className="flex-1 bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
+                            disabled={currentVersionProcessing}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && originalEditPrompt.trim() && !currentVersionProcessing) {
+                                requireAuth(handleEditOriginal);
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => requireAuth(handleEditOriginal)}
+                            disabled={!originalEditPrompt.trim() || currentVersionProcessing}
+                            className="p-2 rounded-full bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <Send className="w-4 h-4 text-white" />
+                          </button>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
@@ -2145,6 +2267,25 @@ function HomeContent() {
               {/* Action buttons overlay */}
               {previewImage && (
                 <div className="absolute top-3 right-3 flex gap-2">
+                  {/* Create Version button - shows when viewing generated variation or edited original */}
+                  {(isShowingGenerated && selectedVariation?.imageUrl) || (originalVersions.length > 0 && originalVersionIndex > 0) ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => {
+                            const sourceLabel = isShowingGenerated && selectedVariation
+                              ? `From: ${selectedVariation.title}`
+                              : originalVersions[originalVersionIndex]?.prompt || 'Edited version';
+                            handleCreateVersion(previewImage, sourceLabel);
+                          }}
+                          className="p-2 rounded-lg bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white/70 hover:text-white transition-colors"
+                        >
+                          <Layers className="w-4 h-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>Create new version</TooltipContent>
+                    </Tooltip>
+                  ) : null}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
@@ -2178,15 +2319,15 @@ function HomeContent() {
             </div>
           </div>
 
-          {/* Right Panel - Tool Panel */}
-          <div className="w-[360px] flex-shrink-0 border border-white/10 rounded-2xl bg-white/[0.02] flex flex-col overflow-hidden">
-            {/* Iterate Tool */}
+          {/* Left Panel - Tool Panel */}
+          <div className="w-[360px] flex-shrink-0 border border-white/10 rounded-2xl bg-white/[0.02] flex flex-col overflow-hidden order-first">
+            {/* Versions Tool */}
             {selectedTool === 'iterations' && (
               <>
                 {/* Header */}
                 <div className="p-4 border-b border-white/10">
                   <div className="flex items-center justify-between mb-1">
-                    <h2 className="font-semibold">Iterate</h2>
+                    <h2 className="font-semibold">Versions</h2>
                     {variations.length > 0 && (
                       <div className="flex items-center gap-3">
                         {completedCount > 0 && (
@@ -2666,20 +2807,11 @@ function HomeContent() {
                     <div className="mt-3 pt-3 border-t border-white/10">
                       <Button
                         onClick={() => requireAuth(handleApplyPresets)}
-                        disabled={isApplyingPreset}
+                        disabled={originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing'}
                         className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500"
                       >
-                        {isApplyingPreset ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Applying...
-                          </>
-                        ) : (
-                          <>
-                            <Wand2 className="w-4 h-4 mr-2" />
-                            Apply Preset
-                          </>
-                        )}
+                        <Wand2 className="w-4 h-4 mr-2" />
+                        Apply Preset
                       </Button>
                       <button
                         onClick={() => setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, background: null, hardware: null })}
