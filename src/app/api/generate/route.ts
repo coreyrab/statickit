@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { image, mimeType, analysis, variationDescription, aspectRatio, isEdit } =
+    const { image, mimeType, analysis, variationDescription, aspectRatio, isEdit, isBackgroundOnly } =
       await request.json();
 
     if (!image || !mimeType || !analysis || !variationDescription) {
@@ -75,7 +75,49 @@ export async function POST(request: NextRequest) {
     // Different prompts for new generation vs. edit/refinement
     let prompt: string;
 
-    if (isEdit) {
+    if (isBackgroundOnly) {
+      // Background-only mode - changes ONLY the background, protects everything else
+      prompt = `BACKGROUND CHANGE ONLY - Replace the background while making the subject look naturally placed in the new environment.
+
+BACKGROUND REQUEST:
+${variationDescription}
+
+=== WHAT TO PROTECT (KEEP IDENTICAL) ===
+
+**PRODUCT/SUBJECT**: Must remain EXACTLY as shown:
+- Same position, size, angle, and physical appearance
+- Same colors, textures, and details
+- Any text, logos, or branding unchanged
+- Do NOT move, resize, or alter the product structure
+
+**PEOPLE/MODELS**: Any people must remain EXACTLY as shown:
+- Same pose, expression, and position
+- Same clothing, hair, and facial features
+- Do NOT alter any physical aspect of the person
+
+=== WHAT TO ADAPT (FOR NATURAL INTEGRATION) ===
+
+**LIGHTING ON SUBJECT**: Adjust the lighting ON the product/person to match the new environment:
+- If the new background has warm sunlight, add warm light tones to the subject
+- If the new background is cool/blue, adjust the subject's lighting accordingly
+- Match the direction of light (if background has light from the left, subject should too)
+- Add appropriate reflections, highlights, and ambient color from the new environment
+- The goal is to make the subject look NATURALLY LIT by the new scene, not composited
+
+**SHADOWS**: Update shadows to match the new environment:
+- Shadow direction should match the new lighting
+- Shadow softness should match the new ambient light
+- Ground shadows should interact naturally with the new surface
+
+=== BACKGROUND CHANGE ===
+Replace the background/environment with: ${variationDescription}
+
+OUTPUT REQUIREMENTS:
+- The subject must look like they BELONG in the new environment
+- Professional advertising quality
+- Aspect ratio: ${aspectRatio}
+- No visible compositing artifacts - seamless integration`;
+    } else if (isEdit) {
       // Edit/refinement prompt - focuses on making specific changes to the existing generated image
       prompt = `Edit this advertising image according to the following instructions.
 

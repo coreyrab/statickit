@@ -33,6 +33,12 @@ import {
   Maximize2,
   Info,
   Layers,
+  Sun,
+  Palette,
+  Camera,
+  Droplets,
+  Clock,
+  Aperture,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -55,7 +61,7 @@ import { uploadFileToConvex, dataUrlToBlob } from '@/lib/convex-storage';
 // import { PlanSelectionModal } from '@/components/PlanSelectionModal';
 
 type Step = 'upload' | 'editor';
-type Tool = 'edit' | 'iterations' | 'export' | null;
+type Tool = 'edit' | 'iterations' | 'export' | 'backgrounds' | null;
 
 interface UploadedImage {
   file: File;
@@ -171,6 +177,11 @@ function HomeContent() {
   const [originalVersionIndex, setOriginalVersionIndex] = useState(0);
   const [originalResizedVersions, setOriginalResizedVersions] = useState<ResizedVersion[]>([]);
 
+  // Backgrounds tool state
+  const [backgroundSuggestions, setBackgroundSuggestions] = useState<{id: string, name: string, prompt: string}[]>([]);
+  const [isLoadingBackgroundSuggestions, setIsLoadingBackgroundSuggestions] = useState(false);
+  const [backgroundCustomPrompt, setBackgroundCustomPrompt] = useState('');
+
   // Presets state
   const [selectedPresets, setSelectedPresets] = useState<{
     lighting: string | null;
@@ -179,9 +190,8 @@ function HomeContent() {
     mood: string | null;
     color: string | null;
     era: string | null;
-    background: string | null;
     hardware: string | null;
-  }>({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, background: null, hardware: null });
+  }>({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null });
   const [expandedPresetCategory, setExpandedPresetCategory] = useState<string | null>(null);
   // isApplyingPreset removed - now tracking per-version with status field
 
@@ -235,14 +245,6 @@ function HomeContent() {
       { id: 'vintage-sepia', name: 'Vintage Sepia', prompt: 'Apply vintage sepia toning: classic brown/amber monochromatic tint, antique photograph feeling, timeless nostalgic warmth, aged photo aesthetic, historical photography look, elegant vintage finish, maintain all subjects exactly as they are' },
       { id: 'modern-clean', name: 'Modern Clean', prompt: 'Apply modern clean aesthetic: true-to-color accuracy, crisp and contemporary, neutral color balance, timeless professional look, minimal color grading, honest representation with subtle polish, maintain all subjects exactly as they are' },
     ],
-    background: [
-      { id: 'blur-bg', name: 'Blur Background', prompt: 'Increase background blur: apply stronger gaussian blur to background areas only, enhance depth separation, creamy out-of-focus background, keep main subject perfectly sharp and in focus, professional portrait-style background separation, maintain the subject exactly as it is' },
-      { id: 'brighten-bg', name: 'Brighten Background', prompt: 'Brighten the background: increase exposure and brightness of background areas, create clean airy feeling, high-key background effect, make subject pop against lighter backdrop, maintain the subject exactly as it is with original exposure' },
-      { id: 'darken-bg', name: 'Darken Background', prompt: 'Darken the background: decrease exposure of background areas, add subtle vignette effect, create dramatic subject emphasis, low-key backdrop for focus, rich dark surroundings, maintain the subject exactly as it is with original exposure' },
-      { id: 'clean-white', name: 'Clean White', prompt: 'Transform to clean white background: pure white seamless backdrop, professional ecommerce/product photography style, high-key studio look, remove all background distractions, Amazon/catalog style clean presentation, maintain the subject exactly as it is' },
-      { id: 'simplify-scene', name: 'Simplify Scene', prompt: 'Simplify the background scene: reduce visual clutter and distracting elements, declutter surroundings, create cleaner composition, remove unnecessary background objects, focus attention on main subject, maintain the subject exactly as it is' },
-      { id: 'gradient-fade', name: 'Gradient Fade', prompt: 'Apply gradient background fade: smooth gradient transition in background, editorial magazine style backdrop, modern gradient effect from dark to light or complementary colors, sophisticated contemporary look, maintain the subject exactly as it is' },
-    ],
     hardware: [
       { id: 'hasselblad', name: 'Hasselblad X2D', prompt: 'Apply Hasselblad medium format camera look: exceptional detail and resolution, medium format sensor rendering, smooth tonal transitions, Hasselblad Natural Color Solution color science, ultra-fine detail in highlights and shadows, studio-quality commercial photography aesthetic, maintain all subjects exactly as they are' },
       { id: 'canon-r5', name: 'Canon EOS R5', prompt: 'Apply Canon EOS R5 camera look: Canon color science with warm pleasing skin tones, excellent dynamic range, vibrant but natural colors, professional full-frame rendering, flagship Canon image quality, maintain all subjects exactly as they are' },
@@ -253,6 +255,21 @@ function HomeContent() {
       { id: 'security-cam', name: 'Security Camera', prompt: 'Apply security camera / Ring doorbell look: lower resolution appearance, slight wide-angle distortion, surveillance camera aesthetic, timestamp overlay style, infrared night-vision green tint option, grainy compressed video still quality, utilitarian lo-fi look, maintain all subjects exactly as they are' },
     ],
   };
+
+  // Background suggestions for the Backgrounds tool
+  const BACKGROUND_SUGGESTIONS = [
+    { id: 'blur-bg', name: 'Blur Background', prompt: 'Blur the background to create depth of field effect, keep main subject perfectly sharp' },
+    { id: 'white-studio', name: 'White Studio', prompt: 'Clean white studio background with soft shadows, professional ecommerce style' },
+    { id: 'outdoor-nature', name: 'Outdoor Nature', prompt: 'Natural outdoor setting with greenery, trees, and soft natural light' },
+    { id: 'urban-street', name: 'Urban Street', prompt: 'Modern urban street scene with city architecture and contemporary elements' },
+    { id: 'minimalist-gradient', name: 'Minimalist Gradient', prompt: 'Simple gradient background fading from light to dark, modern editorial style' },
+    { id: 'office-workspace', name: 'Office/Workspace', prompt: 'Modern office or workspace setting with desk and professional environment' },
+    { id: 'beach-coastal', name: 'Beach/Coastal', prompt: 'Beach or coastal setting with ocean, sand, and warm sunlight' },
+    { id: 'coffee-shop', name: 'Coffee Shop', prompt: 'Cozy coffee shop or cafe interior with warm ambient lighting' },
+    { id: 'darken-bg', name: 'Darken Background', prompt: 'Darken the background for dramatic subject emphasis' },
+    { id: 'simplify-scene', name: 'Simplify Scene', prompt: 'Reduce visual clutter, remove distracting elements from background' },
+  ];
+
   const [viewingOriginalResizedSize, setViewingOriginalResizedSize] = useState<string | null>(null);
 
   const { user, isLoaded: isUserLoaded } = useUser();
@@ -965,7 +982,6 @@ function HomeContent() {
     addPreset('mood', selectedPresets.mood);
     addPreset('color', selectedPresets.color);
     addPreset('era', selectedPresets.era);
-    addPreset('background', selectedPresets.background);
     addPreset('hardware', selectedPresets.hardware);
 
     if (prompts.length === 0) return;
@@ -974,7 +990,7 @@ function HomeContent() {
     const presetLabel = presetNames.filter(Boolean).join(' + ') + ' [preset]';
 
     // Clear selections immediately
-    setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, background: null, hardware: null });
+    setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null });
 
     try {
       // Get current image to edit - only from completed versions
@@ -1059,6 +1075,166 @@ function HomeContent() {
       }
     } catch (err) {
       console.error('Preset apply error:', err);
+    }
+  };
+
+  // Apply a background change with background-scoped prompt
+  const handleApplyBackgroundChange = async (prompt: string, label: string) => {
+    if (!uploadedImage) return;
+
+    // Build background label for version history
+    const backgroundLabel = `[background] ${label}`;
+
+    // Use functional update to handle concurrent calls correctly
+    // Each call will see the latest state and add to it
+    let newVersionIndex: number = -1;
+    let parentIndex: number = -1;
+    let imageToUse: string | null = null;
+
+    setOriginalVersions(prev => {
+      const currentVersions: ImageVersion[] = prev.length === 0
+        ? [{ imageUrl: uploadedImage.url, prompt: null, parentIndex: -1, status: 'completed' as const }]
+        : prev;
+
+      // Find the current version to use as parent
+      const safeIndex = Math.min(originalVersionIndex, currentVersions.length - 1);
+      const currentVersion = currentVersions[safeIndex] || currentVersions[0];
+
+      // Only allow editing completed versions
+      if (!currentVersion || currentVersion.status !== 'completed') {
+        return prev; // Don't modify state
+      }
+
+      parentIndex = safeIndex;
+      imageToUse = currentVersion.imageUrl || uploadedImage.url;
+
+      const processingVersion: ImageVersion = {
+        imageUrl: null,
+        prompt: backgroundLabel,
+        parentIndex: safeIndex,
+        status: 'processing'
+      };
+
+      newVersionIndex = currentVersions.length;
+      return [...currentVersions, processingVersion];
+    });
+
+    // If we couldn't create a version, bail out
+    if (newVersionIndex === -1 || !imageToUse) {
+      return;
+    }
+
+    try {
+      // imageToUse was captured from the state updater above
+      const imageResponse = await fetch(imageToUse);
+      const blob = await imageResponse.blob();
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          resolve(result.split(',')[1]);
+        };
+        reader.readAsDataURL(blob);
+      });
+
+      // Use analysis if available, otherwise provide minimal context
+      const analysisToUse = analysis || {
+        product: 'Image',
+        brand_style: 'Not specified',
+        visual_elements: [],
+        key_selling_points: [],
+        target_audience: 'General',
+        colors: [],
+        mood: 'Not specified',
+      };
+
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: base64,
+          mimeType: blob.type,
+          analysis: analysisToUse,
+          variationDescription: prompt,
+          aspectRatio: uploadedImage.aspectRatio,
+          isEdit: true,
+          isBackgroundOnly: true,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setOriginalVersions(prev => prev.map((v, idx) =>
+          idx === newVersionIndex
+            ? { ...v, imageUrl: data.imageUrl, status: 'completed' as const }
+            : v
+        ));
+      } else {
+        setOriginalVersions(prev => prev.map((v, idx) =>
+          idx === newVersionIndex
+            ? { ...v, status: 'error' as const }
+            : v
+        ));
+      }
+    } catch (err) {
+      console.error('Background change error:', err);
+      setOriginalVersions(prev => prev.map((v, idx) =>
+        idx === newVersionIndex
+          ? { ...v, status: 'error' as const }
+          : v
+      ));
+    }
+  };
+
+  // Generate AI background suggestions based on current image
+  const handleGenerateBackgroundSuggestions = async () => {
+    if (!uploadedImage) return;
+
+    setIsLoadingBackgroundSuggestions(true);
+    setBackgroundSuggestions([]);
+
+    try {
+      // Get current image URL
+      const currentVersion = originalVersions.length > 0 ? originalVersions[originalVersionIndex] : null;
+      const imageUrl = currentVersion?.imageUrl || uploadedImage.url;
+
+      const imageResponse = await fetch(imageUrl);
+      const blob = await imageResponse.blob();
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          resolve(result.split(',')[1]);
+        };
+        reader.readAsDataURL(blob);
+      });
+
+      // Use analysis if available for better suggestions
+      const analysisToUse = analysis || {
+        product: 'Unknown',
+        brand_style: 'Not specified',
+        target_audience: 'General',
+        mood: 'Not specified',
+      };
+
+      const response = await fetch('/api/suggest-backgrounds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: base64,
+          mimeType: blob.type,
+          analysis: analysisToUse,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBackgroundSuggestions(data.suggestions || []);
+      }
+    } catch (err) {
+      console.error('Background suggestions error:', err);
+    } finally {
+      setIsLoadingBackgroundSuggestions(false);
     }
   };
 
@@ -1682,6 +1858,23 @@ function HomeContent() {
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>AI-powered editing & resize</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => setSelectedTool('backgrounds')}
+                      className={`px-3 py-2 rounded-lg flex items-center gap-2 transition-all text-sm font-medium ${
+                        selectedTool === 'backgrounds'
+                          ? 'bg-amber-600 text-white'
+                          : 'text-white/50 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                      Backgrounds
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Change background only</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -2496,7 +2689,7 @@ function HomeContent() {
                         className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span>💡</span>
+                          <Sun className="w-4 h-4 text-white/60" />
                           <span>Lighting</span>
                           {selectedPresets.lighting && (
                             <span className="text-xs text-amber-400 ml-1">
@@ -2535,7 +2728,7 @@ function HomeContent() {
                         className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span>🎨</span>
+                          <Palette className="w-4 h-4 text-white/60" />
                           <span>Style</span>
                           {selectedPresets.style && (
                             <span className="text-xs text-amber-400 ml-1">
@@ -2574,7 +2767,7 @@ function HomeContent() {
                         className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span>📷</span>
+                          <Camera className="w-4 h-4 text-white/60" />
                           <span>Camera</span>
                           {selectedPresets.camera && (
                             <span className="text-xs text-amber-400 ml-1">
@@ -2613,7 +2806,7 @@ function HomeContent() {
                         className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span>✨</span>
+                          <Sparkles className="w-4 h-4 text-white/60" />
                           <span>Mood</span>
                           {selectedPresets.mood && (
                             <span className="text-xs text-amber-400 ml-1">
@@ -2652,7 +2845,7 @@ function HomeContent() {
                         className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span>🎨</span>
+                          <Droplets className="w-4 h-4 text-white/60" />
                           <span>Color</span>
                           {selectedPresets.color && (
                             <span className="text-xs text-amber-400 ml-1">
@@ -2691,7 +2884,7 @@ function HomeContent() {
                         className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span>📼</span>
+                          <Clock className="w-4 h-4 text-white/60" />
                           <span>Era</span>
                           {selectedPresets.era && (
                             <span className="text-xs text-amber-400 ml-1">
@@ -2723,45 +2916,6 @@ function HomeContent() {
                       )}
                     </div>
 
-                    {/* Background */}
-                    <div className="rounded-lg border border-white/10 overflow-hidden">
-                      <button
-                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'background' ? null : 'background')}
-                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span>🖼️</span>
-                          <span>Background</span>
-                          {selectedPresets.background && (
-                            <span className="text-xs text-amber-400 ml-1">
-                              ({PRESETS.background.find(p => p.id === selectedPresets.background)?.name})
-                            </span>
-                          )}
-                        </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'background' ? 'rotate-180' : ''}`} />
-                      </button>
-                      {expandedPresetCategory === 'background' && (
-                        <div className="p-2 space-y-1 bg-black/20">
-                          {PRESETS.background.map((preset) => (
-                            <button
-                              key={preset.id}
-                              onClick={() => setSelectedPresets(prev => ({
-                                ...prev,
-                                background: prev.background === preset.id ? null : preset.id
-                              }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all ${
-                                selectedPresets.background === preset.id
-                                  ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70'
-                              }`}
-                            >
-                              {preset.name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
                     {/* Hardware */}
                     <div className="rounded-lg border border-white/10 overflow-hidden">
                       <button
@@ -2769,7 +2923,7 @@ function HomeContent() {
                         className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span>📸</span>
+                          <Aperture className="w-4 h-4 text-white/60" />
                           <span>Hardware</span>
                           {selectedPresets.hardware && (
                             <span className="text-xs text-amber-400 ml-1">
@@ -2803,7 +2957,7 @@ function HomeContent() {
                   </div>
 
                   {/* Apply button */}
-                  {(selectedPresets.lighting || selectedPresets.style || selectedPresets.camera || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.background || selectedPresets.hardware) && (
+                  {(selectedPresets.lighting || selectedPresets.style || selectedPresets.camera || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.hardware) && (
                     <div className="mt-3 pt-3 border-t border-white/10">
                       <Button
                         onClick={() => requireAuth(handleApplyPresets)}
@@ -2814,7 +2968,7 @@ function HomeContent() {
                         Apply Preset
                       </Button>
                       <button
-                        onClick={() => setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, background: null, hardware: null })}
+                        onClick={() => setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null })}
                         className="w-full mt-2 text-xs text-white/40 hover:text-white/60 transition-colors"
                       >
                         Clear selections
@@ -2913,6 +3067,119 @@ function HomeContent() {
                       </div>
                     </button>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Backgrounds Tool */}
+            {selectedTool === 'backgrounds' && (
+              <div className="p-4 flex flex-col h-full">
+                <h2 className="font-semibold mb-1">Backgrounds</h2>
+                <p className="text-xs text-white/50 mb-3">
+                  Change the background while preserving the product and any models.
+                </p>
+
+                {/* Generate AI Suggestions Button - Top */}
+                <button
+                  onClick={handleGenerateBackgroundSuggestions}
+                  disabled={isLoadingBackgroundSuggestions || !uploadedImage}
+                  className="w-full px-3 py-2.5 mb-4 rounded-lg text-sm bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                >
+                  {isLoadingBackgroundSuggestions ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Analyzing image...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      Generate for this image
+                    </>
+                  )}
+                </button>
+
+                {/* AI-Generated Suggestions with Skeleton Loading */}
+                {(isLoadingBackgroundSuggestions || backgroundSuggestions.length > 0) && (
+                  <div className="mb-4">
+                    <h3 className="text-xs text-white/40 uppercase tracking-wide mb-2">AI Suggestions</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {isLoadingBackgroundSuggestions ? (
+                        // Skeleton loading placeholders
+                        <>
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <div
+                              key={i}
+                              className="h-8 rounded-full bg-white/5 border border-white/10 animate-pulse"
+                              style={{ width: `${60 + Math.random() * 40}px` }}
+                            />
+                          ))}
+                        </>
+                      ) : (
+                        // Actual suggestions as pills
+                        backgroundSuggestions.map((suggestion) => (
+                          <button
+                            key={suggestion.id}
+                            onClick={() => {
+                              handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
+                            }}
+                            className="px-3 py-1.5 rounded-full text-xs bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 hover:border-amber-500/60 transition-all text-amber-300"
+                          >
+                            {suggestion.name}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Common Backgrounds - Compact Grid */}
+                <div className="flex-1 overflow-y-auto">
+                  <h3 className="text-xs text-white/40 uppercase tracking-wide mb-2">Common Backgrounds</h3>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {BACKGROUND_SUGGESTIONS.map((suggestion) => (
+                      <button
+                        key={suggestion.id}
+                        onClick={() => {
+                          handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
+                        }}
+                        className="px-2.5 py-2 rounded-lg text-left text-xs bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all"
+                      >
+                        <span className="text-white/80">{suggestion.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom Background Input */}
+                <div className="mt-auto pt-4 border-t border-white/10">
+                  <h3 className="text-xs text-white/40 uppercase tracking-wide mb-2">Custom Background</h3>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Describe a background..."
+                      value={backgroundCustomPrompt}
+                      onChange={(e) => setBackgroundCustomPrompt(e.target.value)}
+                      className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm placeholder:text-white/30 focus:border-amber-500/50 focus:outline-none"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && backgroundCustomPrompt.trim()) {
+                          handleApplyBackgroundChange(backgroundCustomPrompt, 'Custom background');
+                          setBackgroundCustomPrompt('');
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        if (backgroundCustomPrompt.trim()) {
+                          handleApplyBackgroundChange(backgroundCustomPrompt, 'Custom background');
+                          setBackgroundCustomPrompt('');
+                        }
+                      }}
+                      disabled={!backgroundCustomPrompt.trim()}
+                      className="px-3 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
