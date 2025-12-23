@@ -259,6 +259,7 @@ function HomeContent() {
 
   // Background suggestions for the Backgrounds tool
   const BACKGROUND_SUGGESTIONS = [
+    // Scene/Location backgrounds
     { id: 'blur-bg', name: 'Blur Background', prompt: 'Blur the background to create depth of field effect, keep main subject perfectly sharp' },
     { id: 'white-studio', name: 'White Studio', prompt: 'Clean white studio background with soft shadows, professional ecommerce style' },
     { id: 'outdoor-nature', name: 'Outdoor Nature', prompt: 'Natural outdoor setting with greenery, trees, and soft natural light' },
@@ -269,6 +270,17 @@ function HomeContent() {
     { id: 'coffee-shop', name: 'Coffee Shop', prompt: 'Cozy coffee shop or cafe interior with warm ambient lighting' },
     { id: 'darken-bg', name: 'Darken Background', prompt: 'Darken the background for dramatic subject emphasis' },
     { id: 'simplify-scene', name: 'Simplify Scene', prompt: 'Reduce visual clutter, remove distracting elements from background' },
+    // Time of day lighting
+    { id: 'golden-hour', name: 'Golden Hour', prompt: 'Warm golden hour lighting with soft orange and amber tones, long shadows, sunset or sunrise atmosphere' },
+    { id: 'sunrise-glow', name: 'Sunrise Glow', prompt: 'Soft early morning sunrise light with pink and orange hues, gentle warm glow, dawn atmosphere' },
+    { id: 'blue-hour', name: 'Blue Hour', prompt: 'Twilight blue hour lighting with cool blue and purple tones, dramatic cinematic atmosphere' },
+    { id: 'moonlit-night', name: 'Moonlit Night', prompt: 'Nighttime scene with soft moonlight illumination, cool blue tones, subtle shadows, nocturnal atmosphere' },
+    { id: 'bright-midday', name: 'Bright Midday', prompt: 'Bright midday summer sun with high contrast, strong overhead lighting, vibrant colors' },
+    { id: 'winter-light', name: 'Winter Light', prompt: 'Cool winter sunlight with low angle, soft cool blue tones, crisp clear atmosphere' },
+    // Weather conditions
+    { id: 'overcast-sky', name: 'Overcast Sky', prompt: 'Soft overcast lighting with diffused clouds, no harsh shadows, even gentle illumination' },
+    { id: 'foggy-misty', name: 'Foggy/Misty', prompt: 'Atmospheric fog or mist in the background, ethereal dreamy quality, soft diffused light' },
+    { id: 'rainy-day', name: 'Rainy Day', prompt: 'Rainy day atmosphere with wet surfaces, reflections, moody overcast sky, atmospheric mood' },
   ];
 
   const [viewingOriginalResizedSize, setViewingOriginalResizedSize] = useState<string | null>(null);
@@ -2321,6 +2333,49 @@ function HomeContent() {
                 </div>
               )}
 
+              {/* Floating Background Input - shows when backgrounds tool selected */}
+              {selectedTool === 'backgrounds' && !isShowingGenerated && uploadedImage && (
+                <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
+                  <div className="bg-black/70 backdrop-blur-md rounded-full border border-white/20 shadow-2xl flex items-center gap-2 pl-4 pr-1.5 py-1.5">
+                    {(() => {
+                      const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
+                      return (
+                        <>
+                          <input
+                            type="text"
+                            placeholder="Describe a background..."
+                            value={backgroundCustomPrompt}
+                            onChange={(e) => setBackgroundCustomPrompt(e.target.value)}
+                            className="flex-1 bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
+                            disabled={currentVersionProcessing}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && backgroundCustomPrompt.trim() && !currentVersionProcessing) {
+                                requireAuth(() => {
+                                  handleApplyBackgroundChange(backgroundCustomPrompt, 'Custom background');
+                                  setBackgroundCustomPrompt('');
+                                });
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => {
+                              requireAuth(() => {
+                                handleApplyBackgroundChange(backgroundCustomPrompt, 'Custom background');
+                                setBackgroundCustomPrompt('');
+                              });
+                            }}
+                            disabled={!backgroundCustomPrompt.trim() || currentVersionProcessing}
+                            className="p-2 rounded-full bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <Send className="w-4 h-4 text-white" />
+                          </button>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+
               {/* Action buttons overlay */}
               {previewImage && (
                 <div className="absolute top-3 right-3 flex gap-2">
@@ -2931,6 +2986,28 @@ function HomeContent() {
                           </button>
                         );
                       })}
+                      {/* Generate All link */}
+                      {(() => {
+                        const ungeneratedSizes = AD_SIZES.filter(size => {
+                          const resized = originalResizedVersions.find(r => r.size === size.name);
+                          return !resized || resized.status === 'idle' || resized.status === 'error';
+                        });
+                        const isAnyResizing = originalResizedVersions.some(r => r.status === 'resizing');
+                        if (ungeneratedSizes.length === 0) return null;
+                        return (
+                          <button
+                            onClick={() => {
+                              requireAuth(() => {
+                                ungeneratedSizes.forEach(size => handleResizeOriginal(size));
+                              });
+                            }}
+                            disabled={isAnyResizing}
+                            className="w-full mt-2 text-xs text-amber-400 hover:text-amber-300 disabled:text-white/30 disabled:cursor-not-allowed transition-colors text-center py-1"
+                          >
+                            {isAnyResizing ? 'Generating...' : `Generate all ${ungeneratedSizes.length} sizes`}
+                          </button>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
@@ -3029,7 +3106,7 @@ function HomeContent() {
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4" />
-                      Generate for this image
+                      Generate suggestions
                     </>
                   )}
                 </button>
@@ -3086,37 +3163,6 @@ function HomeContent() {
                   </div>
                 </div>
 
-                {/* Custom Background Input */}
-                <div className="mt-auto pt-4 border-t border-white/10">
-                  <h3 className="text-xs text-white/40 uppercase tracking-wide mb-2">Custom Background</h3>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Describe a background..."
-                      value={backgroundCustomPrompt}
-                      onChange={(e) => setBackgroundCustomPrompt(e.target.value)}
-                      className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm placeholder:text-white/30 focus:border-amber-500/50 focus:outline-none"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && backgroundCustomPrompt.trim()) {
-                          handleApplyBackgroundChange(backgroundCustomPrompt, 'Custom background');
-                          setBackgroundCustomPrompt('');
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={() => {
-                        if (backgroundCustomPrompt.trim()) {
-                          handleApplyBackgroundChange(backgroundCustomPrompt, 'Custom background');
-                          setBackgroundCustomPrompt('');
-                        }
-                      }}
-                      disabled={!backgroundCustomPrompt.trim()}
-                      className="px-3 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <Send className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
               </div>
             )}
 
