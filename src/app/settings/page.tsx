@@ -4,10 +4,11 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Settings, Loader2, Trash2, User, BarChart3, CreditCard, Sparkles, ExternalLink, Check, Key, X } from 'lucide-react';
+import { ArrowLeft, Settings, Loader2, Trash2, User, BarChart3, CreditCard, Sparkles, ExternalLink, Check, Key, X, Shield } from 'lucide-react';
 import { useUser, SignInButton, UserButton } from '@clerk/nextjs';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
+import { SecurityBadge } from '@/components/onboarding';
 
 // Wrapper component to handle Suspense for useSearchParams
 export default function SettingsPage() {
@@ -41,6 +42,7 @@ function SettingsContent() {
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [isSetupMode, setIsSetupMode] = useState(false);
 
   // Check for success param from Stripe redirect
   useEffect(() => {
@@ -50,6 +52,22 @@ function SettingsContent() {
       window.history.replaceState({}, '', '/settings');
       // Auto-hide after 5 seconds
       setTimeout(() => setShowSuccessMessage(false), 5000);
+    }
+  }, [searchParams]);
+
+  // Check for setup mode from onboarding redirect
+  useEffect(() => {
+    if (searchParams.get('setup') === 'true') {
+      setIsSetupMode(true);
+      // Remove the query param from URL
+      window.history.replaceState({}, '', '/settings');
+      // Scroll to API key section after a short delay
+      setTimeout(() => {
+        const apiKeySection = document.getElementById('api-key-section');
+        if (apiKeySection) {
+          apiKeySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
     }
   }, [searchParams]);
 
@@ -179,6 +197,7 @@ function SettingsContent() {
 
       setApiKeyInput('');
       setApiKeyError(null);
+      setIsSetupMode(false); // Clear setup mode highlight
     } catch (err) {
       console.error('API key validation error:', err);
       setApiKeyError('Failed to validate API key. Please try again.');
@@ -281,15 +300,27 @@ function SettingsContent() {
           </div>
 
           {/* API Key Section */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                <Key className="w-5 h-5 text-emerald-400" />
+          <div
+            id="api-key-section"
+            className={`bg-white/5 border rounded-2xl p-6 transition-all duration-300 ${
+              isSetupMode && !hasApiKeyQuery
+                ? 'border-violet-500/50 ring-2 ring-violet-500/20'
+                : 'border-white/10'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                  <Key className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <h2 className="font-semibold">Google API Key</h2>
+                  <p className="text-sm text-white/50">Use your own API key for unlimited generations</p>
+                </div>
               </div>
-              <div>
-                <h2 className="font-semibold">Google API Key</h2>
-                <p className="text-sm text-white/50">Use your own API key for unlimited generations</p>
-              </div>
+              <SecurityBadge variant="tooltip">
+                Your API key is encrypted with AES-256-GCM before storage. It&apos;s only decrypted server-side when needed for API calls. We never log or share your key.
+              </SecurityBadge>
             </div>
 
             {hasApiKeyQuery ? (
@@ -371,8 +402,15 @@ function SettingsContent() {
                   >
                     Google AI Studio
                   </a>
-                  . Your key is encrypted before storage and never logged.
                 </p>
+                <div className="p-3 bg-emerald-500/5 rounded-lg border border-emerald-500/10">
+                  <div className="flex items-start gap-2">
+                    <Shield className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-white/60">
+                      <span className="font-medium text-emerald-400">Secure Storage:</span> Your key is encrypted with AES-256-GCM before storage and only decrypted server-side when needed. We never log or share your key.
+                    </p>
+                  </div>
+                </div>
                 <div className="p-3 bg-white/5 rounded-lg border border-white/10">
                   <p className="text-sm text-white/60">
                     <span className="font-medium text-white">Free:</span> Use your own API key for unlimited generations.

@@ -58,6 +58,7 @@ import { useMutation, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { LandingPage } from '@/components/landing/LandingPage';
 import { uploadFileToConvex, dataUrlToBlob } from '@/lib/convex-storage';
+import { WelcomeModal, ApiKeySetupModal, SecurityBadge } from '@/components/onboarding';
 // PlanSelectionModal hidden for BYOK-only mode
 // import { PlanSelectionModal } from '@/components/PlanSelectionModal';
 
@@ -150,6 +151,8 @@ function HomeContent() {
   const [showSignUpPrompt, setShowSignUpPrompt] = useState(false);
   // const [showPlanSelection, setShowPlanSelection] = useState(false); // Hidden for BYOK-only mode
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showApiKeySetup, setShowApiKeySetup] = useState(false);
   const [isSuggestingIteration, setIsSuggestingIteration] = useState(false);
   const [isAnalyzingForIterations, setIsAnalyzingForIterations] = useState(false);
   const [numGenerations, setNumGenerations] = useState(5);
@@ -387,6 +390,20 @@ function HomeContent() {
       setWeirdnessLevel(parseInt(savedWeirdness));
     }
   }, []);
+
+  // Check if user has seen welcome modal
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem('statickit_has_seen_welcome');
+    if (!hasSeenWelcome) {
+      setShowWelcomeModal(true);
+    }
+  }, []);
+
+  // Handle welcome modal dismiss
+  const handleDismissWelcome = () => {
+    localStorage.setItem('statickit_has_seen_welcome', 'true');
+    setShowWelcomeModal(false);
+  };
 
   // Keyboard navigation for version control (left/right arrow keys)
   useEffect(() => {
@@ -2045,8 +2062,9 @@ function HomeContent() {
     }
     // User is signed in, check if they have BYOK key configured
     if (dbUser !== undefined && !canAccessEditor) {
-      // Redirect to settings to add API key
-      router.push('/settings');
+      // Show API key setup modal instead of redirecting
+      setPendingAction(() => action);
+      setShowApiKeySetup(true);
       return;
     }
     action();
@@ -2058,55 +2076,17 @@ function HomeContent() {
       setShowSignUpPrompt(false);
       // After sign-in, check if user needs to add API key (wait for dbUser to load)
       if (dbUser !== undefined && !canAccessEditor) {
-        // Redirect to settings to add API key
-        router.push('/settings');
+        // Show API key setup modal instead of redirecting
+        setShowApiKeySetup(true);
       } else if (pendingAction && canAccessEditor) {
         // User has API key, execute pending action
         pendingAction();
         setPendingAction(null);
       }
     }
-  }, [user, dbUser, canAccessEditor, showSignUpPrompt, pendingAction, router]);
+  }, [user, dbUser, canAccessEditor, showSignUpPrompt, pendingAction]);
 
-  // Show landing page for non-authenticated users who haven't uploaded yet
-  if (isUserLoaded && step === 'upload') {
-    return (
-      <LandingPage
-        onUpload={(file: File) => {
-          // Handle upload from landing page
-          if (file.size > 10 * 1024 * 1024) {
-            setError('File size must be less than 10MB');
-            return;
-          }
-
-          const img = new Image();
-          const objectUrl = URL.createObjectURL(file);
-
-          img.onload = () => {
-            const { key, label } = detectAspectRatio(img.width, img.height);
-            setUploadedImage({
-              file,
-              url: objectUrl,
-              filename: file.name,
-              width: img.width,
-              height: img.height,
-              aspectRatio: label,
-              aspectRatioKey: key,
-            });
-            setStep('editor');
-            setSelectedTool('edit'); // Default to edit tool
-          };
-
-          img.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            setError('Failed to read image');
-          };
-
-          img.src = objectUrl;
-        }}
-      />
-    );
-  }
+  // Landing page removed - app now shows upload UI directly as homepage
 
   // Show loading while checking auth
   if (!isUserLoaded) {
@@ -2147,6 +2127,15 @@ function HomeContent() {
                     My Ads
                   </Button>
                 </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowWelcomeModal(true)}
+                  className="text-white/60 hover:text-white hover:bg-white/10"
+                >
+                  <Info className="w-4 h-4 mr-1.5" />
+                  How it Works
+                </Button>
                 <Link href="/settings">
                   <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
                     <Settings className="w-4 h-4" />
@@ -2155,12 +2144,23 @@ function HomeContent() {
                 <UserButton afterSignOutUrl="/" />
               </>
             ) : (
-              <SignInButton mode="modal">
-                <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
-                  <LogIn className="w-4 h-4 mr-1.5" />
-                  Sign in
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowWelcomeModal(true)}
+                  className="text-white/60 hover:text-white hover:bg-white/10"
+                >
+                  <Info className="w-4 h-4 mr-1.5" />
+                  How it Works
                 </Button>
-              </SignInButton>
+                <SignInButton mode="modal">
+                  <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
+                    <LogIn className="w-4 h-4 mr-1.5" />
+                    Sign in
+                  </Button>
+                </SignInButton>
+              </>
             )}
           </div>
         </div>
@@ -4296,25 +4296,46 @@ function HomeContent() {
 
       {/* Sign Up Prompt Modal */}
       <Dialog open={showSignUpPrompt} onOpenChange={setShowSignUpPrompt}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-md !bg-[#1a1a1a] border-white/10 text-white">
           <DialogHeader>
             <DialogTitle>Sign up to continue</DialogTitle>
             <DialogDescription>
-              Create an account to create iterations, edit images, and save your work.
+              Create a free account to unlock AI-powered editing
             </DialogDescription>
           </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-white/60">
+              You&apos;ll be able to:
+            </p>
+            <ul className="space-y-2 text-sm text-white/80">
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-400" />
+                Generate unlimited variations
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-400" />
+                Edit images with natural language
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-400" />
+                Resize to any format
+              </li>
+            </ul>
+            <SecurityBadge variant="inline">
+              You&apos;ll need to add your own API key after signing up. All keys are encrypted and stored securely.
+            </SecurityBadge>
+          </div>
           <DialogFooter className="flex-row gap-3">
             <Button
-              variant="outline"
               onClick={() => setShowSignUpPrompt(false)}
-              className="flex-1"
+              className="flex-1 bg-transparent border border-white/20 text-white hover:bg-white/10"
             >
               Cancel
             </Button>
             <SignInButton mode="modal">
-              <Button className="flex-1">
+              <Button className="flex-1 bg-violet-600 hover:bg-violet-500 text-white">
                 <LogIn className="w-4 h-4" />
-                Sign up
+                Sign up free
               </Button>
             </SignInButton>
           </DialogFooter>
@@ -4353,6 +4374,19 @@ function HomeContent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Welcome Modal */}
+      <WelcomeModal
+        open={showWelcomeModal}
+        onOpenChange={setShowWelcomeModal}
+        onDismiss={handleDismissWelcome}
+      />
+
+      {/* API Key Setup Modal */}
+      <ApiKeySetupModal
+        open={showApiKeySetup}
+        onOpenChange={setShowApiKeySetup}
+      />
 
     </div>
   );
