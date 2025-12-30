@@ -13,6 +13,7 @@ import {
   Download,
   Plus,
   LogIn,
+  UserPlus,
   FolderOpen,
   Edit3,
   Check,
@@ -53,7 +54,7 @@ import {
 } from '@/components/ui/dialog';
 import { detectAspectRatio, AspectRatioKey } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
-import { useUser, SignInButton, UserButton } from '@clerk/nextjs';
+import { useUser, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { LandingPage } from '@/components/landing/LandingPage';
@@ -132,7 +133,7 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [step, setStep] = useState<Step>('editor');
-  const [selectedTool, setSelectedTool] = useState<Tool>(null);
+  const [selectedTool, setSelectedTool] = useState<Tool>('edit');
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [variations, setVariations] = useState<Variation[]>([]);
@@ -154,6 +155,7 @@ function HomeContent() {
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showApiKeySetup, setShowApiKeySetup] = useState(false);
+  const [showNewConfirmModal, setShowNewConfirmModal] = useState(false);
   const [isSuggestingIteration, setIsSuggestingIteration] = useState(false);
   const [isAnalyzingForIterations, setIsAnalyzingForIterations] = useState(false);
   const [numGenerations, setNumGenerations] = useState(5);
@@ -608,7 +610,7 @@ function HomeContent() {
     img.src = objectUrl;
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open: openFileDialog } = useDropzone({
     onDrop,
     accept: {
       'image/png': ['.png'],
@@ -617,6 +619,7 @@ function HomeContent() {
     },
     maxFiles: 1,
     disabled: uploadedImage !== null, // Only disabled when we have an image
+    noClick: uploadedImage !== null, // Disable click when image exists
   });
 
   // Generate iterations on-demand (called from the Iterations tool)
@@ -1854,6 +1857,14 @@ function HomeContent() {
     }
   };
 
+  const handleNewClick = () => {
+    // If there's an existing image, show confirmation modal
+    if (uploadedImage) {
+      setShowNewConfirmModal(true);
+    }
+    // Otherwise, just proceed with reset
+  };
+
   const handleReset = () => {
     if (uploadedImage?.url) URL.revokeObjectURL(uploadedImage.url);
     // Stay in editor mode, just clear the image
@@ -1871,7 +1882,8 @@ function HomeContent() {
     setOriginalVersionIndex(0);
     setOriginalResizedVersions([]);
     setViewingOriginalResizedSize(null);
-    setSelectedTool(null);
+    setSelectedTool('edit');
+    setShowNewConfirmModal(false);
   };
 
   const handleDownload = async (imageUrl: string, filename: string) => {
@@ -2104,7 +2116,7 @@ function HomeContent() {
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           {/* Left: Logo + How it Works */}
           <div className="flex items-center gap-4">
-            <button onClick={handleReset} className="flex items-center gap-2 font-semibold hover:opacity-80 transition-opacity">
+            <button onClick={uploadedImage ? () => setShowNewConfirmModal(true) : handleReset} className="flex items-center gap-2 font-semibold hover:opacity-80 transition-opacity">
               <img src="/logo.svg" alt="StaticKit" className="w-7 h-7" />
               <span className="text-lg">StaticKit</span>
             </button>
@@ -2141,92 +2153,53 @@ function HomeContent() {
                 <UserButton afterSignOutUrl="/" />
               </>
             ) : (
-              <SignInButton mode="modal">
-                <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
-                  <LogIn className="w-4 h-4 mr-1.5" />
-                  Sign in
-                </Button>
-              </SignInButton>
+              <>
+                <SignInButton mode="modal">
+                  <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
+                    <LogIn className="w-4 h-4 mr-1.5" />
+                    Log in
+                  </Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
+                    <UserPlus className="w-4 h-4 mr-1.5" />
+                    Sign up
+                  </Button>
+                </SignUpButton>
+              </>
             )}
           </div>
         </div>
       </header>
 
-      {/* Upload State */}
-      {step === 'upload' && (
-        <main className="flex-1 max-w-3xl mx-auto px-6 py-16">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-              Iterate on Your Ads
-            </h1>
-            <p className="text-white/50 text-lg">
-              Upload your winning ad and create iterations in seconds
-            </p>
-          </div>
-
-          <div
-            {...getRootProps()}
-            className={`border border-dashed rounded-2xl p-16 text-center cursor-pointer transition-all ${
-              isDragActive
-                ? 'border-amber-500 bg-amber-500/10'
-                : 'border-white/20 hover:border-white/40 bg-white/5'
-            }`}
-          >
-            <input {...getInputProps()} />
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center">
-                <Upload className="w-8 h-8 text-white/60" />
-              </div>
-              {isDragActive ? (
-                <p className="text-amber-400 font-medium text-lg">Drop your ad here...</p>
-              ) : (
-                <>
-                  <div>
-                    <p className="font-medium text-xl mb-1">Drop your ad image here</p>
-                    <p className="text-white/50">or click to browse</p>
-                  </div>
-                  <p className="text-sm text-white/30">PNG, JPG, WebP • Max 10MB</p>
-                </>
-              )}
-            </div>
-          </div>
-
-          {error && (
-            <div className="mt-6 bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl text-sm text-center">
-              {error}
-            </div>
-          )}
-        </main>
-      )}
-
-      {/* Editor State - Main Interface */}
-      {step === 'editor' && (
-        <main className="h-[calc(100vh-57px)] flex p-6 gap-6">
+      {/* Main Interface */}
+      <main className="h-[calc(100vh-57px)] flex p-6 gap-6">
           {/* Center Panel - Image Preview */}
           <div className="flex-1 flex flex-col min-w-0">
             {/* Horizontal Toolbar - Above Image */}
             <div className="flex items-center justify-center mb-4">
               <div className="flex items-center gap-1 p-1 bg-white/[0.02] border border-white/10 rounded-xl">
-                {/* New Ad Button */}
-                <button
-                  onClick={handleReset}
-                  className="px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all duration-200 text-sm font-medium text-white/50 hover:text-white hover:bg-white/10"
-                >
-                  <Plus className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-xs">New</span>
-                </button>
+                {/* New Ad Button - only show when image exists */}
+                {uploadedImage && (
+                  <>
+                    <button
+                      onClick={handleNewClick}
+                      className="px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all duration-200 text-sm font-medium text-white/50 hover:text-white hover:bg-white/10"
+                    >
+                      <Plus className="w-4 h-4 flex-shrink-0" />
+                      <span className="text-xs">New</span>
+                    </button>
 
-                {/* Divider */}
-                <div className="w-px h-6 bg-white/20 mx-1" />
+                    {/* Divider */}
+                    <div className="w-px h-6 bg-white/20 mx-1" />
+                  </>
+                )}
 
                 <button
                   onClick={() => setSelectedTool('iterations')}
-                  disabled={!uploadedImage}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'iterations'
                       ? 'bg-amber-600 text-white gap-2'
-                      : !uploadedImage
-                      ? 'text-white/30 cursor-not-allowed gap-0'
                       : 'text-white/50 hover:text-white hover:bg-white/10 gap-0'
                   }`}
                 >
@@ -2240,17 +2213,11 @@ function HomeContent() {
                   </span>
                 </button>
 
-                {/* Divider between navigation and editing tools */}
-                <div className="w-px h-6 bg-white/20 mx-1" />
-
                 <button
                   onClick={() => setSelectedTool('edit')}
-                  disabled={!uploadedImage}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'edit'
                       ? 'bg-amber-600 text-white gap-2'
-                      : !uploadedImage
-                      ? 'text-white/30 cursor-not-allowed gap-0'
                       : 'text-white/50 hover:text-white hover:bg-white/10 gap-0'
                   }`}
                 >
@@ -2266,12 +2233,9 @@ function HomeContent() {
 
                 <button
                   onClick={() => setSelectedTool('backgrounds')}
-                  disabled={!uploadedImage}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'backgrounds'
                       ? 'bg-amber-600 text-white gap-2'
-                      : !uploadedImage
-                      ? 'text-white/30 cursor-not-allowed gap-0'
                       : 'text-white/50 hover:text-white hover:bg-white/10 gap-0'
                   }`}
                 >
@@ -2287,12 +2251,9 @@ function HomeContent() {
 
                 <button
                   onClick={() => setSelectedTool('model')}
-                  disabled={!uploadedImage}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'model'
                       ? 'bg-amber-600 text-white gap-2'
-                      : !uploadedImage
-                      ? 'text-white/30 cursor-not-allowed gap-0'
                       : 'text-white/50 hover:text-white hover:bg-white/10 gap-0'
                   }`}
                 >
@@ -2308,12 +2269,9 @@ function HomeContent() {
 
                 <button
                   onClick={() => setSelectedTool('export')}
-                  disabled={!uploadedImage}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'export'
                       ? 'bg-amber-600 text-white gap-2'
-                      : !uploadedImage
-                      ? 'text-white/30 cursor-not-allowed gap-0'
                       : 'text-white/50 hover:text-white hover:bg-white/10 gap-0'
                   }`}
                 >
@@ -2694,29 +2652,31 @@ function HomeContent() {
                   )}
                 </>
               ) : !uploadedImage ? (
-                <div
-                  {...getRootProps()}
-                  className={`flex flex-col items-center justify-center w-full h-full gap-4 rounded-2xl border-2 border-dashed transition-all ${
-                    isDragActive
-                      ? 'border-amber-500 bg-amber-500/10'
-                      : 'border-white/20 hover:border-white/40 bg-white/5'
-                  }`}
-                >
-                  <input {...getInputProps()} />
-                  <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center">
-                    <Upload className="w-8 h-8 text-white/60" />
+                <div className="flex items-center justify-center w-full h-full">
+                  <div
+                    {...getRootProps()}
+                    className={`flex flex-col items-center justify-center max-w-2xl w-full h-96 gap-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
+                      isDragActive
+                        ? 'border-amber-500 bg-amber-500/10'
+                        : 'border-white/20 hover:border-white/40 bg-white/5'
+                    }`}
+                  >
+                    <input {...getInputProps()} />
+                    <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center">
+                      <Upload className="w-7 h-7 text-white/60" />
+                    </div>
+                    {isDragActive ? (
+                      <p className="text-amber-400 font-medium">Drop your ad here...</p>
+                    ) : (
+                      <>
+                        <div className="text-center">
+                          <p className="font-medium mb-1">Drop your ad image here</p>
+                          <p className="text-white/50 text-sm">or click to browse</p>
+                        </div>
+                        <p className="text-xs text-white/30">PNG, JPG, WebP • Max 10MB</p>
+                      </>
+                    )}
                   </div>
-                  {isDragActive ? (
-                    <p className="text-amber-400 font-medium text-lg">Drop your ad here...</p>
-                  ) : (
-                    <>
-                      <div className="text-center">
-                        <p className="font-medium text-lg mb-1">Drop your ad image here</p>
-                        <p className="text-white/50 text-sm">or click to browse</p>
-                      </div>
-                      <p className="text-xs text-white/30">PNG, JPG, WebP • Max 10MB</p>
-                    </>
-                  )}
                 </div>
               ) : (
                 <div className="text-white/30">No image</div>
@@ -2917,10 +2877,23 @@ function HomeContent() {
           </div>
 
           {/* Left Panel - Tool Panel */}
-          <div className="w-[360px] flex-shrink-0 border border-white/10 rounded-2xl bg-white/[0.02] flex flex-col overflow-hidden order-first">
+          <div className="w-[360px] flex-shrink-0 border border-white/10 rounded-2xl bg-white/[0.02] flex flex-col overflow-hidden order-first relative">
             {/* Versions Tool */}
             {selectedTool === 'iterations' && (
               <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col overflow-hidden">
+                {/* Upload prompt banner when no image */}
+                {!uploadedImage && (
+                  <button
+                    onClick={openFileDialog}
+                    className="m-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-1">
+                      <Upload className="w-4 h-4" />
+                      Upload an image to start editing
+                    </div>
+                    <p className="text-xs text-white/50">Click here or drop an image in the preview area</p>
+                  </button>
+                )}
                 {/* Header */}
                 <div className="p-4 border-b border-white/10">
                   <div className="flex items-center justify-between mb-1">
@@ -2952,7 +2925,7 @@ function HomeContent() {
                   </div>
                   {/* Generate Iterations button - show when no variations yet */}
                   {variations.length === 0 && !isAnalyzingForIterations && (
-                    <div className="mt-2">
+                    <div className={`mt-2 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
                       <p className="text-sm text-white/50 mb-3">
                         Generate AI-powered variations of your ad for different contexts and styles.
                       </p>
@@ -3068,6 +3041,19 @@ function HomeContent() {
             {/* Edit Tool - with resize presets */}
             {selectedTool === 'edit' && (
               <div className="animate-in fade-in slide-in-from-left-2 duration-200 p-4 flex flex-col h-full">
+                {/* Upload prompt banner when no image */}
+                {!uploadedImage && (
+                  <button
+                    onClick={openFileDialog}
+                    className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-1">
+                      <Upload className="w-4 h-4" />
+                      Upload an image to start editing
+                    </div>
+                    <p className="text-xs text-white/50">Click here or drop an image in the preview area</p>
+                  </button>
+                )}
                 {/* Current Size */}
                 {uploadedImage && (
                   <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
@@ -3101,18 +3087,19 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'lighting' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'lighting' && (
-                        <div className="p-2 space-y-1 bg-black/20">
+                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.lighting.map((preset) => (
                             <button
                               key={preset.id}
+                              disabled={!uploadedImage}
                               onClick={() => setSelectedPresets(prev => ({
                                 ...prev,
                                 lighting: prev.lighting === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.lighting === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70'
+                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3140,18 +3127,19 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'style' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'style' && (
-                        <div className="p-2 space-y-1 bg-black/20">
+                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.style.map((preset) => (
                             <button
                               key={preset.id}
+                              disabled={!uploadedImage}
                               onClick={() => setSelectedPresets(prev => ({
                                 ...prev,
                                 style: prev.style === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.style === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70'
+                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3179,18 +3167,19 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'camera' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'camera' && (
-                        <div className="p-2 space-y-1 bg-black/20">
+                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.camera.map((preset) => (
                             <button
                               key={preset.id}
+                              disabled={!uploadedImage}
                               onClick={() => setSelectedPresets(prev => ({
                                 ...prev,
                                 camera: prev.camera === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.camera === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70'
+                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3218,18 +3207,19 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'mood' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'mood' && (
-                        <div className="p-2 space-y-1 bg-black/20">
+                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.mood.map((preset) => (
                             <button
                               key={preset.id}
+                              disabled={!uploadedImage}
                               onClick={() => setSelectedPresets(prev => ({
                                 ...prev,
                                 mood: prev.mood === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.mood === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70'
+                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3257,18 +3247,19 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'color' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'color' && (
-                        <div className="p-2 space-y-1 bg-black/20">
+                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.color.map((preset) => (
                             <button
                               key={preset.id}
+                              disabled={!uploadedImage}
                               onClick={() => setSelectedPresets(prev => ({
                                 ...prev,
                                 color: prev.color === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.color === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70'
+                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3296,18 +3287,19 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'era' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'era' && (
-                        <div className="p-2 space-y-1 bg-black/20">
+                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.era.map((preset) => (
                             <button
                               key={preset.id}
+                              disabled={!uploadedImage}
                               onClick={() => setSelectedPresets(prev => ({
                                 ...prev,
                                 era: prev.era === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.era === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70'
+                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3335,18 +3327,19 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'hardware' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'hardware' && (
-                        <div className="p-2 space-y-1 bg-black/20">
+                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.hardware.map((preset) => (
                             <button
                               key={preset.id}
+                              disabled={!uploadedImage}
                               onClick={() => setSelectedPresets(prev => ({
                                 ...prev,
                                 hardware: prev.hardware === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.hardware === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70'
+                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3388,6 +3381,20 @@ function HomeContent() {
                 <p className="text-xs text-white/50 mb-4">
                   Resize and download your images.
                 </p>
+
+                {/* Upload prompt banner when no image */}
+                {!uploadedImage && (
+                  <button
+                    onClick={openFileDialog}
+                    className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-1">
+                      <Upload className="w-4 h-4" />
+                      Upload an image to start editing
+                    </div>
+                    <p className="text-xs text-white/50">Click here or drop an image in the preview area</p>
+                  </button>
+                )}
 
                 {/* Smart Resize Section */}
                 {uploadedImage && (
@@ -3480,8 +3487,11 @@ function HomeContent() {
                 )}
 
                 {/* Download Section */}
-                <div className="mt-auto space-y-2">
+                <div className={`mt-auto space-y-2 ${!uploadedImage ? 'opacity-50' : ''}`}>
                   <h3 className="text-xs text-white/40 uppercase tracking-wide mb-2">Download</h3>
+                  {!uploadedImage && (
+                    <div className="text-sm text-white/40 italic">No images to download</div>
+                  )}
                   {uploadedImage && (
                     <button
                       onClick={() => {
@@ -3559,6 +3569,20 @@ function HomeContent() {
                   Change the background while preserving the product and any models.
                 </p>
 
+                {/* Upload prompt banner when no image */}
+                {!uploadedImage && (
+                  <button
+                    onClick={openFileDialog}
+                    className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-1">
+                      <Upload className="w-4 h-4" />
+                      Upload an image to start editing
+                    </div>
+                    <p className="text-xs text-white/50">Click here or drop an image in the preview area</p>
+                  </button>
+                )}
+
                 {/* Generate AI Suggestions Button - Top */}
                 <button
                   onClick={handleGenerateBackgroundSuggestions}
@@ -3579,7 +3603,7 @@ function HomeContent() {
                 </button>
 
                 {/* Backgrounds Grid */}
-                <div className="flex-1 overflow-y-auto">
+                <div className={`flex-1 overflow-y-auto ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
                   <div className="grid grid-cols-2 gap-1.5">
                     {/* Separator above AI suggestions */}
                     {(isLoadingBackgroundSuggestions || backgroundSuggestions.length > 0) && (
@@ -3658,29 +3682,45 @@ function HomeContent() {
                   Change the model while preserving background, lighting & product.
                 </p>
 
-                {/* Preserve Outfit Toggle */}
-                <div className="flex items-center justify-between mb-4 p-2 rounded-lg bg-white/5 border border-white/10">
-                  <span className="text-sm text-white/70">Preserve outfit</span>
+                {/* Upload prompt banner when no image */}
+                {!uploadedImage && (
                   <button
-                    onClick={() => setKeepClothing(!keepClothing)}
-                    className={`w-10 h-6 rounded-full transition-colors relative ${
-                      keepClothing ? 'bg-amber-600' : 'bg-white/20'
-                    }`}
+                    onClick={openFileDialog}
+                    className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer text-left"
                   >
-                    <div
-                      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                        keepClothing ? 'translate-x-5' : 'translate-x-1'
-                      }`}
-                    />
+                    <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-1">
+                      <Upload className="w-4 h-4" />
+                      Upload an image to start editing
+                    </div>
+                    <p className="text-xs text-white/50">Click here or drop an image in the preview area</p>
                   </button>
-                </div>
+                )}
 
-                {/* Generate AI Suggestions Button */}
-                <button
-                  onClick={handleGenerateModelSuggestions}
-                  disabled={isLoadingModelSuggestions || !uploadedImage}
-                  className="w-full px-3 py-2 mb-4 rounded-lg text-sm border border-white/20 hover:border-amber-500/50 hover:bg-amber-500/10 text-white/70 hover:text-amber-400 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
+                {/* Model controls wrapper - disabled when no image */}
+                <div className={!uploadedImage ? 'opacity-50 pointer-events-none' : ''}>
+                  {/* Preserve Outfit Toggle */}
+                  <div className="flex items-center justify-between mb-4 p-2 rounded-lg bg-white/5 border border-white/10">
+                    <span className="text-sm text-white/70">Preserve outfit</span>
+                    <button
+                      onClick={() => setKeepClothing(!keepClothing)}
+                      className={`w-10 h-6 rounded-full transition-colors relative ${
+                        keepClothing ? 'bg-amber-600' : 'bg-white/20'
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                          keepClothing ? 'translate-x-5' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Generate AI Suggestions Button */}
+                  <button
+                    onClick={handleGenerateModelSuggestions}
+                    disabled={isLoadingModelSuggestions || !uploadedImage}
+                    className="w-full px-3 py-2 mb-4 rounded-lg text-sm border border-white/20 hover:border-amber-500/50 hover:bg-amber-500/10 text-white/70 hover:text-amber-400 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
                   {isLoadingModelSuggestions ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -3934,11 +3974,12 @@ function HomeContent() {
                     Generate
                   </button>
                 </div>
+                </div>
               </div>
             )}
 
             {/* No tool selected */}
-            {selectedTool === null && (
+            {selectedTool === null && uploadedImage && (
               <div className="animate-in fade-in duration-200 p-4 flex-1 flex flex-col items-center justify-center text-center">
                 <Info className="w-8 h-8 text-white/20 mb-3" />
                 <p className="text-white/40 text-sm">Select a tool from the sidebar to get started</p>
@@ -4330,7 +4371,6 @@ function HomeContent() {
             )}
           </div>
         </main>
-      )}
 
       {/* Sign Up Prompt Modal */}
       <Dialog open={showSignUpPrompt} onOpenChange={setShowSignUpPrompt}>
@@ -4413,6 +4453,41 @@ function HomeContent() {
         </DialogContent>
       </Dialog>
 
+      {/* New Image Confirmation Modal */}
+      <Dialog open={showNewConfirmModal} onOpenChange={setShowNewConfirmModal}>
+        <DialogContent className="sm:max-w-md !bg-[#1a1a1a] border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Start Fresh?</DialogTitle>
+            <DialogDescription className="text-white/70 mt-2">
+              Uploading a new image will delete this session and all your current work.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 mt-6">
+            <Button
+              onClick={() => {
+                setShowNewConfirmModal(false);
+                setSelectedTool('export');
+              }}
+              variant="outline"
+              className="w-full bg-white/10 hover:bg-white/20 border-white/20 text-white"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download First
+            </Button>
+            <Button
+              onClick={() => {
+                handleReset();
+                // Open file picker after clearing state
+                setTimeout(() => openFileDialog(), 0);
+              }}
+              className="w-full bg-amber-600 hover:bg-amber-500 text-white"
+            >
+              Continue
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Welcome Modal */}
       <WelcomeModal
         open={showWelcomeModal}
@@ -4426,7 +4501,7 @@ function HomeContent() {
         onOpenChange={setShowApiKeySetup}
       />
 
-      {step === 'upload' && <Footer />}
+      {!uploadedImage && <Footer />}
     </div>
   );
 }
