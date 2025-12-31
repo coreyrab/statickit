@@ -41,6 +41,9 @@ import {
   Clock,
   Aperture,
   User,
+  Move,
+  Scan,
+  Grid3X3,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -218,7 +221,10 @@ function HomeContent() {
     color: string | null;
     era: string | null;
     hardware: string | null;
-  }>({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null });
+    angles: string | null;
+    shotSize: string | null;
+    perspective: string | null;
+  }>({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null, angles: null, shotSize: null, perspective: null });
   const [expandedPresetCategory, setExpandedPresetCategory] = useState<string | null>(null);
   // isApplyingPreset removed - now tracking per-version with status field
 
@@ -280,6 +286,29 @@ function HomeContent() {
       { id: 'film-35mm', name: '35mm Film Camera', prompt: 'Apply vintage 35mm film camera look: authentic analog film grain, classic SLR camera rendering, Kodak or Fuji film emulation, mechanical camera aesthetic, nostalgic film photography look with natural imperfections, soft organic detail, maintain all subjects exactly as they are' },
       { id: 'polaroid', name: 'Polaroid Instant', prompt: 'Apply Polaroid instant camera look: characteristic Polaroid color cast, slightly faded and washed out tones, soft dreamy focus, instant film texture, vintage instant photography aesthetic, white border framing feel, nostalgic lo-fi charm, maintain all subjects exactly as they are' },
       { id: 'security-cam', name: 'Security Camera', prompt: 'Apply security camera / Ring doorbell look: lower resolution appearance, slight wide-angle distortion, surveillance camera aesthetic, timestamp overlay style, infrared night-vision green tint option, grainy compressed video still quality, utilitarian lo-fi look, maintain all subjects exactly as they are' },
+    ],
+    angles: [
+      { id: 'eye-level', name: 'Eye Level', prompt: 'Adjust the camera angle to eye level perspective: camera positioned at the subject\'s eye height, natural and neutral viewing angle that creates direct connection with the viewer, balanced and relatable framing, standard conversational perspective, maintain all subjects and their features exactly as they are' },
+      { id: 'high-angle', name: 'High Angle', prompt: 'Apply high angle camera perspective: camera positioned above the subject looking down at approximately 30-45 degrees, subject appears smaller and more vulnerable, creates sense of overview or observation, slightly diminished subject presence, maintain all subjects and their features exactly as they are' },
+      { id: 'low-angle', name: 'Low Angle', prompt: 'Apply low angle camera perspective: camera positioned below the subject looking up at approximately 30-45 degrees, subject appears more powerful and dominant, heroic or imposing presence, dramatic sense of authority and strength, maintain all subjects and their features exactly as they are' },
+      { id: 'dutch-angle', name: 'Dutch Angle', prompt: 'Apply Dutch angle (Dutch tilt) perspective: camera tilted on its axis at 15-30 degrees creating diagonal horizon line, sense of unease or dynamic tension, edgy and unconventional framing, cinematic drama and visual interest, maintain all subjects and their features exactly as they are' },
+      { id: 'birds-eye-view', name: "Bird's-Eye View", prompt: 'Apply bird\'s-eye view (overhead) perspective: camera positioned directly above looking straight down at 90 degrees, top-down flat lay composition, unique overhead vantage point, reveals spatial relationships and patterns from above, maintain all subjects and their features exactly as they are' },
+      { id: 'worms-eye-view', name: "Worm's-Eye View", prompt: 'Apply worm\'s-eye view perspective: extreme low angle camera positioned at ground level looking up, dramatic upward perspective, subjects and surroundings tower above, sky or ceiling prominently visible, powerful and awe-inspiring viewpoint, maintain all subjects and their features exactly as they are' },
+    ],
+    shotSize: [
+      { id: 'extreme-closeup', name: 'Extreme Close-Up', prompt: 'Apply extreme close-up framing: tight crop focusing on a specific detail like eyes, lips, hands, or product detail, intimate and intense focus, fills the entire frame with the detail, reveals texture and fine elements, maintain the subject exactly as it is' },
+      { id: 'closeup', name: 'Close-Up', prompt: 'Apply close-up shot framing: subject\'s face or key product feature fills most of the frame, typically from shoulders/top up for people, emphasizes facial expressions or product details, intimate connection with viewer, maintain the subject exactly as it is' },
+      { id: 'medium-closeup', name: 'Medium Close-Up', prompt: 'Apply medium close-up framing: subject framed from chest up, balance between facial detail and some body language context, common for interviews and portraits, professional headshot style, maintain the subject exactly as it is' },
+      { id: 'medium-shot', name: 'Medium Shot', prompt: 'Apply medium shot framing: subject framed from waist up, shows upper body and hand gestures, balance between subject and environment, conversational and natural framing, maintain the subject exactly as it is' },
+      { id: 'medium-wide', name: 'Medium Wide Shot', prompt: 'Apply medium wide shot framing: subject framed from knees up, full body gestures visible with environmental context, also called "American shot" or "cowboy shot", good for showing action and setting, maintain the subject exactly as it is' },
+      { id: 'wide-shot', name: 'Wide Shot', prompt: 'Apply wide shot framing: full body of subject visible with significant environment around them, establishes the subject within their space, shows complete figure and surroundings, lifestyle photography style, maintain the subject exactly as it is' },
+      { id: 'extreme-wide', name: 'Extreme Wide Shot', prompt: 'Apply extreme wide shot (establishing shot) framing: vast view of the environment with subject appearing small within it, emphasizes location and scale, cinematic landscape perspective, environmental storytelling, maintain the subject exactly as it is' },
+    ],
+    perspective: [
+      { id: 'pov', name: 'Point of View (POV)', prompt: 'Apply point of view (POV) perspective: camera shows what the subject would see from their eyes, first-person viewpoint, immersive and subjective experience, viewer becomes the subject, hands or body parts may be visible in frame, maintain all elements exactly as they are' },
+      { id: 'over-shoulder', name: 'Over-the-Shoulder', prompt: 'Apply over-the-shoulder perspective: camera positioned behind one subject looking at another or at a scene, back of shoulder and head partially visible in foreground, creates depth and connection, common in conversation and reaction shots, maintain all subjects exactly as they are' },
+      { id: 'center-framed', name: 'Center Framed', prompt: 'Apply center framed composition: subject positioned directly in the center of the frame, symmetrical and balanced composition, bold and intentional placement, Wes Anderson or Stanley Kubrick style symmetry, strong visual impact, maintain the subject exactly as it is' },
+      { id: 'rule-of-thirds', name: 'Rule of Thirds', prompt: 'Apply rule of thirds composition: position the main subject at one of the four intersection points of the thirds grid, off-center dynamic composition, create visual balance with negative space, professional photography composition technique, maintain the subject exactly as it is' },
     ],
   };
 
@@ -1124,6 +1153,9 @@ function HomeContent() {
     addPreset('color', selectedPresets.color);
     addPreset('era', selectedPresets.era);
     addPreset('hardware', selectedPresets.hardware);
+    addPreset('angles', selectedPresets.angles);
+    addPreset('shotSize', selectedPresets.shotSize);
+    addPreset('perspective', selectedPresets.perspective);
 
     if (prompts.length === 0) return;
 
@@ -1131,7 +1163,7 @@ function HomeContent() {
     const presetLabel = presetNames.filter(Boolean).join(' + ') + ' [preset]';
 
     // Clear selections immediately
-    setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null });
+    setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null, angles: null, shotSize: null, perspective: null });
 
     try {
       // Get current image to edit - only from completed versions
@@ -3348,10 +3380,130 @@ function HomeContent() {
                         </div>
                       )}
                     </div>
+
+                    {/* Angles */}
+                    <div className="rounded-lg border border-white/10 overflow-hidden">
+                      <button
+                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'angles' ? null : 'angles')}
+                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Move className="w-4 h-4 text-white/60" />
+                          <span>Angles</span>
+                          {selectedPresets.angles && (
+                            <span className="text-xs text-amber-400 ml-1">
+                              ({PRESETS.angles.find(p => p.id === selectedPresets.angles)?.name})
+                            </span>
+                          )}
+                        </div>
+                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'angles' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedPresetCategory === 'angles' && (
+                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                          {PRESETS.angles.map((preset) => (
+                            <button
+                              key={preset.id}
+                              disabled={!uploadedImage}
+                              onClick={() => setSelectedPresets(prev => ({
+                                ...prev,
+                                angles: prev.angles === preset.id ? null : preset.id
+                              }))}
+                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                                selectedPresets.angles === preset.id
+                                  ? 'bg-amber-600/30 text-amber-300'
+                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                              }`}
+                            >
+                              {preset.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Shot Size / Framing */}
+                    <div className="rounded-lg border border-white/10 overflow-hidden">
+                      <button
+                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'shotSize' ? null : 'shotSize')}
+                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Scan className="w-4 h-4 text-white/60" />
+                          <span>Shot Size</span>
+                          {selectedPresets.shotSize && (
+                            <span className="text-xs text-amber-400 ml-1">
+                              ({PRESETS.shotSize.find(p => p.id === selectedPresets.shotSize)?.name})
+                            </span>
+                          )}
+                        </div>
+                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'shotSize' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedPresetCategory === 'shotSize' && (
+                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                          {PRESETS.shotSize.map((preset) => (
+                            <button
+                              key={preset.id}
+                              disabled={!uploadedImage}
+                              onClick={() => setSelectedPresets(prev => ({
+                                ...prev,
+                                shotSize: prev.shotSize === preset.id ? null : preset.id
+                              }))}
+                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                                selectedPresets.shotSize === preset.id
+                                  ? 'bg-amber-600/30 text-amber-300'
+                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                              }`}
+                            >
+                              {preset.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Perspective */}
+                    <div className="rounded-lg border border-white/10 overflow-hidden">
+                      <button
+                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'perspective' ? null : 'perspective')}
+                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Grid3X3 className="w-4 h-4 text-white/60" />
+                          <span>Perspective</span>
+                          {selectedPresets.perspective && (
+                            <span className="text-xs text-amber-400 ml-1">
+                              ({PRESETS.perspective.find(p => p.id === selectedPresets.perspective)?.name})
+                            </span>
+                          )}
+                        </div>
+                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'perspective' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedPresetCategory === 'perspective' && (
+                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                          {PRESETS.perspective.map((preset) => (
+                            <button
+                              key={preset.id}
+                              disabled={!uploadedImage}
+                              onClick={() => setSelectedPresets(prev => ({
+                                ...prev,
+                                perspective: prev.perspective === preset.id ? null : preset.id
+                              }))}
+                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                                selectedPresets.perspective === preset.id
+                                  ? 'bg-amber-600/30 text-amber-300'
+                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                              }`}
+                            >
+                              {preset.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Apply button */}
-                  {(selectedPresets.lighting || selectedPresets.style || selectedPresets.camera || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.hardware) && (
+                  {(selectedPresets.lighting || selectedPresets.style || selectedPresets.camera || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.hardware || selectedPresets.angles || selectedPresets.shotSize || selectedPresets.perspective) && (
                     <div className="mt-3 pt-3 border-t border-white/10">
                       <Button
                         onClick={() => requireAuth(handleApplyPresets)}
@@ -3362,7 +3514,7 @@ function HomeContent() {
                         Apply Preset
                       </Button>
                       <button
-                        onClick={() => setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null })}
+                        onClick={() => setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null, angles: null, shotSize: null, perspective: null })}
                         className="w-full mt-2 text-xs text-white/40 hover:text-white/60 transition-colors"
                       >
                         Clear selections
