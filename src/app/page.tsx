@@ -344,6 +344,7 @@ function HomeContent() {
     { id: 'office-workspace', name: 'Office/Workspace', prompt: 'Modern office or workspace setting with desk and professional environment' },
     { id: 'beach-coastal', name: 'Beach/Coastal', prompt: 'Beach or coastal setting with ocean, sand, and warm sunlight' },
     { id: 'coffee-shop', name: 'Coffee Shop', prompt: 'Cozy coffee shop or cafe interior with warm ambient lighting' },
+    { id: 'urban-studio', name: 'Urban Photo Studio', prompt: 'Vibrant photo studio set in a big city like NYC, London, or Tokyo. Professional backdrop in the center with visible lighting equipment, softboxes, reflectors, and photography props around the edges. Large windows showing city skyline or urban energy outside. Creative studio atmosphere with exposed brick or industrial elements, energetic metropolitan vibe.' },
     { id: 'darken-bg', name: 'Darken Background', prompt: 'Keep the exact same background scene and location but darken it for dramatic subject emphasis. Do not change or replace the background - only reduce its brightness and exposure.' },
     { id: 'simplify-scene', name: 'Simplify Scene', prompt: 'Reduce visual clutter, remove distracting elements from background' },
     // Lighting adjustments (preserve scene, change only lighting/mood)
@@ -3508,10 +3509,10 @@ function HomeContent() {
                     </div>
 
                     {/* Rotation */}
-                    <div className="border-b border-white/5">
+                    <div className="rounded-lg border border-white/10 overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'rotation' ? null : 'rotation')}
-                        className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-white/5 transition-colors"
+                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
                       >
                         <div className="flex items-center gap-2">
                           <RotateCw className="w-4 h-4 text-white/60" />
