@@ -45,6 +45,7 @@ import {
   Grid3X3,
   Key,
   AlertTriangle,
+  RotateCw,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -189,6 +190,7 @@ function HomeContent() {
   console.log('dbUser:', dbUser, 'isAdmin:', isAdmin, 'hasSubscription:', hasSubscription, 'hasApiKey:', hasApiKey);
   const [showArchived, setShowArchived] = useState(false);
   const [showCustomVariationInput, setShowCustomVariationInput] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Original image editing state
   const [originalEditPrompt, setOriginalEditPrompt] = useState('');
@@ -233,7 +235,8 @@ function HomeContent() {
     angles: string | null;
     shotSize: string | null;
     perspective: string | null;
-  }>({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null, angles: null, shotSize: null, perspective: null });
+    rotation: string | null;
+  }>({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null, angles: null, shotSize: null, perspective: null, rotation: null });
   const [expandedPresetCategory, setExpandedPresetCategory] = useState<string | null>(null);
   // isApplyingPreset removed - now tracking per-version with status field
 
@@ -318,6 +321,15 @@ function HomeContent() {
       { id: 'over-shoulder', name: 'Over-the-Shoulder', prompt: 'Apply over-the-shoulder perspective: camera positioned behind one subject looking at another or at a scene, back of shoulder and head partially visible in foreground, creates depth and connection, common in conversation and reaction shots, maintain all subjects exactly as they are' },
       { id: 'center-framed', name: 'Center Framed', prompt: 'Apply center framed composition: subject positioned directly in the center of the frame, symmetrical and balanced composition, bold and intentional placement, Wes Anderson or Stanley Kubrick style symmetry, strong visual impact, maintain the subject exactly as it is' },
       { id: 'rule-of-thirds', name: 'Rule of Thirds', prompt: 'Apply rule of thirds composition: position the main subject at one of the four intersection points of the thirds grid, off-center dynamic composition, create visual balance with negative space, professional photography composition technique, maintain the subject exactly as it is' },
+    ],
+    rotation: [
+      { id: 'rotate-90-cw', name: '90° Clockwise', prompt: 'Rotate the camera perspective 90 degrees clockwise around the subject. The subject remains in the same pose with the same facial expression - only the camera viewpoint rotates to the right. Maintain all subject features, expression, and details exactly as they are.' },
+      { id: 'rotate-90-ccw', name: '90° Counter-Clockwise', prompt: 'Rotate the camera perspective 90 degrees counter-clockwise around the subject. The subject remains in the same pose with the same facial expression - only the camera viewpoint rotates to the left. Maintain all subject features, expression, and details exactly as they are.' },
+      { id: 'rotate-180', name: '180°', prompt: 'Rotate the camera perspective 180 degrees around the subject to show the opposite view. The subject remains in the same pose with the same facial expression - the camera moves to the other side. Maintain all subject features, expression, and details exactly as they are.' },
+      { id: 'rotate-45-cw', name: '45° Clockwise', prompt: 'Rotate the camera perspective 45 degrees clockwise around the subject. The subject remains in the same pose with the same facial expression - only the camera viewpoint shifts diagonally to the right. Creates dynamic diagonal energy. Maintain all subject features, expression, and details exactly as they are.' },
+      { id: 'rotate-45-ccw', name: '45° Counter-Clockwise', prompt: 'Rotate the camera perspective 45 degrees counter-clockwise around the subject. The subject remains in the same pose with the same facial expression - only the camera viewpoint shifts diagonally to the left. Creates dynamic diagonal energy. Maintain all subject features, expression, and details exactly as they are.' },
+      { id: 'slight-tilt', name: 'Slight Tilt (15°)', prompt: 'Rotate the camera perspective by a subtle 15 degrees clockwise around the subject. The subject remains in the same pose with the same facial expression - only a slight camera shift for natural, candid feeling. Maintain all subject features, expression, and details exactly as they are.' },
+      { id: 'horizontal-flip', name: 'Horizontal Flip (Mirror)', prompt: 'Mirror/flip the camera perspective horizontally so the subject faces the opposite direction. The subject remains in the same pose with the same facial expression - only the left-right orientation changes as if viewing in a mirror. Maintain all subject features, expression, and details exactly as they are.' },
     ],
   };
 
@@ -1165,6 +1177,7 @@ function HomeContent() {
     addPreset('angles', selectedPresets.angles);
     addPreset('shotSize', selectedPresets.shotSize);
     addPreset('perspective', selectedPresets.perspective);
+    addPreset('rotation', selectedPresets.rotation);
 
     if (prompts.length === 0) return;
 
@@ -1172,7 +1185,7 @@ function HomeContent() {
     const presetLabel = presetNames.filter(Boolean).join(' + ') + ' [preset]';
 
     // Clear selections immediately
-    setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null, angles: null, shotSize: null, perspective: null });
+    setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null, angles: null, shotSize: null, perspective: null, rotation: null });
 
     try {
       // Get current image to edit - only from completed versions
@@ -3493,10 +3506,50 @@ function HomeContent() {
                         </div>
                       )}
                     </div>
+
+                    {/* Rotation */}
+                    <div className="border-b border-white/5">
+                      <button
+                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'rotation' ? null : 'rotation')}
+                        className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-white/5 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <RotateCw className="w-4 h-4 text-white/60" />
+                          <span>Rotation</span>
+                          {selectedPresets.rotation && (
+                            <span className="text-xs text-amber-400 ml-1">
+                              ({PRESETS.rotation.find(p => p.id === selectedPresets.rotation)?.name})
+                            </span>
+                          )}
+                        </div>
+                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'rotation' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedPresetCategory === 'rotation' && (
+                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                          {PRESETS.rotation.map((preset) => (
+                            <button
+                              key={preset.id}
+                              disabled={!uploadedImage}
+                              onClick={() => setSelectedPresets(prev => ({
+                                ...prev,
+                                rotation: prev.rotation === preset.id ? null : preset.id
+                              }))}
+                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                                selectedPresets.rotation === preset.id
+                                  ? 'bg-amber-600/30 text-amber-300'
+                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                              }`}
+                            >
+                              {preset.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Apply button */}
-                  {(selectedPresets.lighting || selectedPresets.style || selectedPresets.camera || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.hardware || selectedPresets.angles || selectedPresets.shotSize || selectedPresets.perspective) && (
+                  {(selectedPresets.lighting || selectedPresets.style || selectedPresets.camera || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.hardware || selectedPresets.angles || selectedPresets.shotSize || selectedPresets.perspective || selectedPresets.rotation) && (
                     <div className="mt-3 pt-3 border-t border-white/10">
                       <Button
                         onClick={() => requireAuth(handleApplyPresets)}
@@ -3507,7 +3560,7 @@ function HomeContent() {
                         Apply Preset
                       </Button>
                       <button
-                        onClick={() => setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null, angles: null, shotSize: null, perspective: null })}
+                        onClick={() => setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null, angles: null, shotSize: null, perspective: null, rotation: null })}
                         className="w-full mt-2 text-xs text-white/40 hover:text-white/60 transition-colors"
                       >
                         Clear selections
@@ -4503,16 +4556,16 @@ function HomeContent() {
               {user ? (
                 <UserButton afterSignOutUrl="/" />
               ) : (
-                <DropdownMenu>
+                <DropdownMenu open={userMenuOpen} onOpenChange={setUserMenuOpen}>
                   <DropdownMenuTrigger asChild>
-                    <button className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
-                      <User className="w-5 h-5 text-white/50" />
+                    <button className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                      <User className="w-6 h-6 text-white/50" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
                     side="top"
-                    className="w-64 bg-[#1a1a1a] border-white/10 text-white mb-2"
+                    className="w-72 bg-[#1a1a1a] border-white/10 text-white mb-2"
                   >
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex items-center gap-3 py-1">
@@ -4524,23 +4577,29 @@ function HomeContent() {
                             <span className="text-sm font-medium">Guest</span>
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-500/20 text-red-400 border border-red-500/30">
                               <AlertTriangle className="w-3 h-3" />
-                              Data Lost Warning
+                              Data loss warning
                             </span>
                           </div>
-                          <div className="text-xs text-white/40">Login to sync your data across devices</div>
+                          <div className="text-xs text-white/40">Sign up to securely save your keys</div>
                         </div>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-white/10" />
                     <div className="p-2 space-y-2">
                       <SignInButton mode="modal">
-                        <button className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center gap-2 hover:bg-white/10 text-white/70 hover:text-white transition-colors">
+                        <button
+                          onClick={() => setUserMenuOpen(false)}
+                          className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center gap-2 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                        >
                           <LogIn className="w-4 h-4" />
                           Log in
                         </button>
                       </SignInButton>
                       <SignUpButton mode="modal">
-                        <button className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white transition-colors">
+                        <button
+                          onClick={() => setUserMenuOpen(false)}
+                          className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center gap-2 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                        >
                           <User className="w-4 h-4" />
                           Sign up free
                         </button>
@@ -4549,7 +4608,10 @@ function HomeContent() {
                     <DropdownMenuSeparator className="bg-white/10" />
                     <div className="p-2">
                       <button
-                        onClick={() => setShowApiKeySetup(true)}
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          setShowApiKeySetup(true);
+                        }}
                         className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center gap-2 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
                       >
                         <Key className="w-4 h-4" />
