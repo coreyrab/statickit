@@ -13,7 +13,6 @@ import {
   Download,
   Plus,
   LogIn,
-  UserPlus,
   FolderOpen,
   Edit3,
   Check,
@@ -44,9 +43,19 @@ import {
   Move,
   Scan,
   Grid3X3,
+  Key,
+  AlertTriangle,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -285,7 +294,7 @@ function HomeContent() {
       { id: 'nikon-z8', name: 'Nikon Z8', prompt: 'Apply Nikon Z8 camera look: Nikon color science with rich natural tones, excellent skin tone rendering, professional-grade image quality, balanced contrast, versatile all-rounder aesthetic, maintain all subjects exactly as they are' },
       { id: 'film-35mm', name: '35mm Film Camera', prompt: 'Apply vintage 35mm film camera look: authentic analog film grain, classic SLR camera rendering, Kodak or Fuji film emulation, mechanical camera aesthetic, nostalgic film photography look with natural imperfections, soft organic detail, maintain all subjects exactly as they are' },
       { id: 'polaroid', name: 'Polaroid Instant', prompt: 'Apply Polaroid instant camera look: characteristic Polaroid color cast, slightly faded and washed out tones, soft dreamy focus, instant film texture, vintage instant photography aesthetic, white border framing feel, nostalgic lo-fi charm, maintain all subjects exactly as they are' },
-      { id: 'security-cam', name: 'Security Camera', prompt: 'Apply security camera / Ring doorbell look: lower resolution appearance, slight wide-angle distortion, surveillance camera aesthetic, timestamp overlay style, infrared night-vision green tint option, grainy compressed video still quality, utilitarian lo-fi look, maintain all subjects exactly as they are' },
+      { id: 'ring-camera', name: 'Ring Camera', prompt: 'Apply Ring doorbell camera look: pronounced fisheye barrel distortion with curved edges, warm amber/orange color cast especially in daylight, HDR-style processing with boosted shadows, slightly soft compressed video quality, high vantage point perspective looking downward, wide field of view capturing full scene, doorbell camera surveillance aesthetic, do not add any text or logos or watermarks, maintain all subjects exactly as they are' },
     ],
     angles: [
       { id: 'eye-level', name: 'Eye Level', prompt: 'Adjust the camera angle to eye level perspective: camera positioned at the subject\'s eye height, natural and neutral viewing angle that creates direct connection with the viewer, balanced and relatable framing, standard conversational perspective, maintain all subjects and their features exactly as they are' },
@@ -2169,7 +2178,7 @@ function HomeContent() {
 
           {/* Right: Actions */}
           <div className="flex items-center gap-3">
-            {user ? (
+            {user && (
               <>
                 <Link href="/history">
                   <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
@@ -2182,22 +2191,6 @@ function HomeContent() {
                     <Settings className="w-4 h-4" />
                   </Button>
                 </Link>
-                <UserButton afterSignOutUrl="/" />
-              </>
-            ) : (
-              <>
-                <SignInButton mode="modal">
-                  <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
-                    <LogIn className="w-4 h-4 mr-1.5" />
-                    Log in
-                  </Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
-                    <UserPlus className="w-4 h-4 mr-1.5" />
-                    Sign up
-                  </Button>
-                </SignUpButton>
               </>
             )}
           </div>
@@ -4505,22 +4498,68 @@ function HomeContent() {
               </div>
             )}
 
-            {selectedTool === 'iterations' && !user && completedCount > 0 && (
-              <div className="p-4 border-t border-white/10">
-                <div className="text-center text-sm text-white/40 mb-2">
-                  Sign in to save your generations
-                </div>
-                <SignInButton mode="modal">
-                  <Button
-                    size="sm"
-                    className="w-full bg-white text-black hover:bg-white/90"
+            {/* User Section - Bottom of left panel */}
+            <div className="absolute bottom-3 left-3">
+              {user ? (
+                <UserButton afterSignOutUrl="/" />
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                      <User className="w-5 h-5 text-white/50" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    side="top"
+                    className="w-64 bg-[#1a1a1a] border-white/10 text-white mb-2"
                   >
-                    <LogIn className="w-4 h-4 mr-1.5" />
-                    Sign in
-                  </Button>
-                </SignInButton>
-              </div>
-            )}
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex items-center gap-3 py-1">
+                        <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                          <User className="w-5 h-5 text-white/50" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">Guest</span>
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-500/20 text-red-400 border border-red-500/30">
+                              <AlertTriangle className="w-3 h-3" />
+                              Data Lost Warning
+                            </span>
+                          </div>
+                          <div className="text-xs text-white/40">Login to sync your data across devices</div>
+                        </div>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <div className="p-2 space-y-2">
+                      <SignInButton mode="modal">
+                        <button className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center gap-2 hover:bg-white/10 text-white/70 hover:text-white transition-colors">
+                          <LogIn className="w-4 h-4" />
+                          Log in
+                        </button>
+                      </SignInButton>
+                      <SignUpButton mode="modal">
+                        <button className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white transition-colors">
+                          <User className="w-4 h-4" />
+                          Sign up free
+                        </button>
+                      </SignUpButton>
+                    </div>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <div className="p-2">
+                      <button
+                        onClick={() => setShowApiKeySetup(true)}
+                        className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center gap-2 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                      >
+                        <Key className="w-4 h-4" />
+                        Add your API keys
+                      </button>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
         </main>
 
