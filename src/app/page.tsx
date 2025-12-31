@@ -2168,26 +2168,13 @@ function HomeContent() {
     <div className="min-h-screen bg-[#0f0f0f] text-white flex flex-col">
       {/* Header */}
       <header className="border-b border-white/10 bg-[#0f0f0f]/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          {/* Left: Logo + How it Works */}
-          <div className="flex items-center gap-4">
+        <div className="px-6 h-14 flex items-center justify-between">
+          {/* Left: Logo - aligned with left panel icons */}
+          <div className="w-[360px] flex items-center pl-7">
             <button onClick={uploadedImage ? () => setShowNewConfirmModal(true) : handleReset} className="flex items-center gap-2 font-semibold hover:opacity-80 transition-opacity">
-              <img src="/logo.svg" alt="StaticKit" className="w-7 h-7" />
+              <img src="/logo.svg" alt="StaticKit" className="w-8 h-8" />
               <span className="text-lg">StaticKit</span>
             </button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowWelcomeModal(true)}
-                  className="text-white/40 hover:text-white hover:bg-white/10 px-2"
-                >
-                  <Info className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>How it Works</TooltipContent>
-            </Tooltip>
           </div>
 
           {/* Right: Actions */}
