@@ -148,6 +148,17 @@ interface Variation {
   isArchived: boolean; // True when variation is archived
 }
 
+// A base version is a starting point for edits - the original or a "New Version" snapshot
+interface BaseVersion {
+  id: string;
+  name: string;
+  baseImageUrl: string; // The base image URL for this version
+  sourceLabel: string; // Description of where this came from (e.g., "From: Soft Lighting edit")
+  versions: ImageVersion[]; // Edit history for this base
+  currentVersionIndex: number; // Which edit is currently shown
+  resizedVersions: ResizedVersion[]; // Resized versions for this base
+}
+
 function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -201,9 +212,43 @@ function HomeContent() {
   // Original image editing state
   const [originalEditPrompt, setOriginalEditPrompt] = useState('');
   // isEditingOriginal removed - now tracking per-version with status field
-  const [originalVersions, setOriginalVersions] = useState<ImageVersion[]>([]);
-  const [originalVersionIndex, setOriginalVersionIndex] = useState(0);
-  const [originalResizedVersions, setOriginalResizedVersions] = useState<ResizedVersion[]>([]);
+
+  // Base versions - each is a starting point for edits (Original + any "New Version" snapshots)
+  const [baseVersions, setBaseVersions] = useState<BaseVersion[]>([]);
+  const [activeBaseId, setActiveBaseId] = useState<string>('original');
+
+  // Computed: get current base version's data
+  const activeBase = baseVersions.find(b => b.id === activeBaseId) || baseVersions[0];
+  const originalVersions = activeBase?.versions || [];
+  const originalVersionIndex = activeBase?.currentVersionIndex || 0;
+  const originalResizedVersions = activeBase?.resizedVersions || [];
+
+  // Helper to update the active base's versions
+  const setOriginalVersions = (updater: ImageVersion[] | ((prev: ImageVersion[]) => ImageVersion[])) => {
+    setBaseVersions(prev => prev.map(base => {
+      if (base.id !== activeBaseId) return base;
+      const newVersions = typeof updater === 'function' ? updater(base.versions) : updater;
+      return { ...base, versions: newVersions };
+    }));
+  };
+
+  // Helper to update the active base's current version index
+  const setOriginalVersionIndex = (updater: number | ((prev: number) => number)) => {
+    setBaseVersions(prev => prev.map(base => {
+      if (base.id !== activeBaseId) return base;
+      const newIndex = typeof updater === 'function' ? updater(base.currentVersionIndex) : updater;
+      return { ...base, currentVersionIndex: newIndex };
+    }));
+  };
+
+  // Helper to update the active base's resized versions
+  const setOriginalResizedVersions = (updater: ResizedVersion[] | ((prev: ResizedVersion[]) => ResizedVersion[])) => {
+    setBaseVersions(prev => prev.map(base => {
+      if (base.id !== activeBaseId) return base;
+      const newResized = typeof updater === 'function' ? updater(base.resizedVersions) : updater;
+      return { ...base, resizedVersions: newResized };
+    }));
+  };
 
   // Backgrounds tool state
   const [backgroundSuggestions, setBackgroundSuggestions] = useState<{id: string, name: string, prompt: string}[]>([]);
@@ -306,11 +351,11 @@ function HomeContent() {
       { id: 'birds-eye-view', name: "Bird's-Eye View", prompt: 'Render this scene from directly above looking down. CRITICAL: The subject does NOT lay down. The subject does NOT change their pose. They stay standing/sitting exactly as they were. Only the camera moves above them. We see the top of their head and shoulders from above because the CAMERA moved up, not because the subject laid down. Same pose, same position, only the viewpoint changes.' },
     ],
     rotation: [
-      { id: 'orbit-right', name: 'Orbit Right', prompt: 'Render this scene from a different camera angle - position the virtual camera to the subject\'s right side. CRITICAL: The subject\'s head does NOT turn. Their body does NOT move. Their gaze direction stays EXACTLY the same as the original. Only the camera viewpoint changes. We are seeing the same frozen moment from a different angle. The result should show their right profile because WE moved, not because THEY turned. IMPORTANT: Same facial features, same expression, same identity. Any text or lettering must not be changed.' },
-      { id: 'orbit-left', name: 'Orbit Left', prompt: 'Render this scene from a different camera angle - position the virtual camera to the subject\'s left side. CRITICAL: The subject\'s head does NOT turn. Their body does NOT move. Their gaze direction stays EXACTLY the same as the original. Only the camera viewpoint changes. We are seeing the same frozen moment from a different angle. The result should show their left profile because WE moved, not because THEY turned. IMPORTANT: Same facial features, same expression, same identity. Any text or lettering must not be changed.' },
-      { id: 'orbit-behind', name: 'Orbit Behind', prompt: 'Render this scene from a different camera angle - position the virtual camera behind the subject. CRITICAL: The subject\'s head does NOT turn. Their body does NOT move. Only the camera viewpoint changes. We are seeing the same frozen moment from behind. The result shows their back because WE moved behind them, not because THEY turned around. IMPORTANT: Any text or lettering must not be changed.' },
-      { id: 'orbit-45-right', name: 'Orbit 45° Right', prompt: 'Render this scene from a different camera angle - position the virtual camera 45 degrees to the subject\'s right. CRITICAL: The subject\'s head does NOT turn. Their body does NOT move. Their gaze direction stays EXACTLY the same as the original. Only the camera viewpoint changes. We are seeing the same frozen moment from a slight angle. IMPORTANT: Same facial features, same expression, same identity. Any text or lettering must not be changed.' },
-      { id: 'orbit-45-left', name: 'Orbit 45° Left', prompt: 'Render this scene from a different camera angle - position the virtual camera 45 degrees to the subject\'s left. CRITICAL: The subject\'s head does NOT turn. Their body does NOT move. Their gaze direction stays EXACTLY the same as the original. Only the camera viewpoint changes. We are seeing the same frozen moment from a slight angle. IMPORTANT: Same facial features, same expression, same identity. Any text or lettering must not be changed.' },
+      { id: 'orbit-right', name: 'Orbit Right', prompt: 'Render the ENTIRE scene from a different camera angle - position the virtual camera to the subject\'s right side. The floor, mats, props, furniture, and background must ALL be viewed from this new angle. POSE PRESERVATION: Every limb stays in the EXACT same position - same arm angles, same hand placement, same finger positions, same leg positions, same foot placement. The subject is like a 3D statue being viewed from a different angle. Head does NOT turn, gaze does NOT change. IMPORTANT: Same facial features, expression, identity. Any text must not be changed.' },
+      { id: 'orbit-left', name: 'Orbit Left', prompt: 'Render the ENTIRE scene from a different camera angle - position the virtual camera to the subject\'s left side. The floor, mats, props, furniture, and background must ALL be viewed from this new angle. POSE PRESERVATION: Every limb stays in the EXACT same position - same arm angles, same hand placement, same finger positions, same leg positions, same foot placement. The subject is like a 3D statue being viewed from a different angle. Head does NOT turn, gaze does NOT change. IMPORTANT: Same facial features, expression, identity. Any text must not be changed.' },
+      { id: 'orbit-behind', name: 'Orbit Behind', prompt: 'Render the ENTIRE scene from a different camera angle - position the virtual camera behind the subject. The floor, mats, props, furniture, and background must ALL be viewed from this new angle. POSE PRESERVATION: Every limb stays in the EXACT same position - same arm angles, same hand placement, same finger positions, same leg positions, same foot placement. The subject is like a 3D statue being viewed from behind. Head does NOT turn. IMPORTANT: Any text must not be changed.' },
+      { id: 'orbit-45-right', name: 'Orbit 45° Right', prompt: 'Render the ENTIRE scene from a different camera angle - position the virtual camera 45 degrees to the subject\'s right. The floor, mats, props, furniture, and background must ALL be viewed from this new angle. POSE PRESERVATION: Every limb stays in the EXACT same position - same arm angles, same hand placement, same finger positions, same leg positions, same foot placement. The subject is like a 3D statue being viewed from a slight angle. Head does NOT turn, gaze does NOT change. IMPORTANT: Same facial features, expression, identity. Any text must not be changed.' },
+      { id: 'orbit-45-left', name: 'Orbit 45° Left', prompt: 'Render the ENTIRE scene from a different camera angle - position the virtual camera 45 degrees to the subject\'s left. The floor, mats, props, furniture, and background must ALL be viewed from this new angle. POSE PRESERVATION: Every limb stays in the EXACT same position - same arm angles, same hand placement, same finger positions, same leg positions, same foot placement. The subject is like a 3D statue being viewed from a slight angle. Head does NOT turn, gaze does NOT change. IMPORTANT: Same facial features, expression, identity. Any text must not be changed.' },
     ],
   };
 
@@ -584,6 +629,18 @@ function HomeContent() {
             aspectRatioKey,
           });
 
+          // Initialize base versions with the restored Original
+          setBaseVersions([{
+            id: 'original',
+            name: 'Original',
+            baseImageUrl: data.originalImageUrl,
+            sourceLabel: 'Restored from session',
+            versions: [{ imageUrl: data.originalImageUrl, prompt: null, parentIndex: -1, status: 'completed' as const }],
+            currentVersionIndex: 0,
+            resizedVersions: [],
+          }]);
+          setActiveBaseId('original');
+
           // Set the analysis
           setAnalysis(data.analysis);
 
@@ -680,6 +737,17 @@ function HomeContent() {
         aspectRatio: label,
         aspectRatioKey: key,
       });
+      // Initialize base versions with the Original
+      setBaseVersions([{
+        id: 'original',
+        name: 'Original',
+        baseImageUrl: objectUrl,
+        sourceLabel: 'Uploaded image',
+        versions: [{ imageUrl: objectUrl, prompt: null, parentIndex: -1, status: 'completed' as const }],
+        currentVersionIndex: 0,
+        resizedVersions: [],
+      }]);
+      setActiveBaseId('original');
       setStep('editor');
       setSelectedTool('edit'); // Default to edit tool
     };
@@ -1960,11 +2028,10 @@ function HomeContent() {
     setError(null);
     setCustomPrompt('');
     setAdditionalContext('');
-    // Reset original editing state
+    // Reset base versions and editing state
     setOriginalEditPrompt('');
-    setOriginalVersions([]);
-    setOriginalVersionIndex(0);
-    setOriginalResizedVersions([]);
+    setBaseVersions([]);
+    setActiveBaseId('original');
     setViewingOriginalResizedSize(null);
     setSelectedTool('edit');
     setShowNewConfirmModal(false);
@@ -1987,25 +2054,29 @@ function HomeContent() {
     }
   };
 
-  // Create a new version from the current image (makes it a new base to edit on top of)
+  // Create a new base version from the current image
+  // This adds a new card to the sidebar with its own fresh edit history
   const handleCreateVersion = (imageUrl: string, sourceLabel: string) => {
-    const currentVersions: ImageVersion[] = originalVersions.length === 0
-      ? [{ imageUrl: uploadedImage!.url, prompt: null, parentIndex: -1, status: 'completed' as const }]
-      : originalVersions;
+    const newBaseId = `base-${Date.now()}`;
+    const versionNumber = baseVersions.length; // 0 is original, so this gives us 1, 2, 3...
 
-    const newVersion: ImageVersion = {
-      imageUrl,
-      prompt: sourceLabel,
-      parentIndex: currentVersions.length - 1,
-      status: 'completed'
+    const newBaseVersion: BaseVersion = {
+      id: newBaseId,
+      name: `Version ${versionNumber}`,
+      baseImageUrl: imageUrl,
+      sourceLabel: sourceLabel,
+      versions: [{ imageUrl, prompt: null, parentIndex: -1, status: 'completed' as const }],
+      currentVersionIndex: 0,
+      resizedVersions: [],
     };
 
-    const newVersions = [...currentVersions, newVersion];
-    setOriginalVersions(newVersions);
-    setOriginalVersionIndex(newVersions.length - 1);
+    // Add new base version to the list
+    setBaseVersions(prev => [...prev, newBaseVersion]);
+
+    // Switch to the new base version
+    setActiveBaseId(newBaseId);
 
     // Switch to viewing original (non-generated) to show the new version
-    // Setting selectedVariationId to null makes isShowingGenerated false (computed value)
     setSelectedVariationId(null);
   };
 
@@ -4237,56 +4308,75 @@ function HomeContent() {
             {/* Variation Cards - Show for iterations tool when image uploaded */}
             {selectedTool === 'iterations' && uploadedImage && (
               <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
-                {/* Original Image Card - Always at top */}
-                <div
-                  onClick={() => {
-                    setSelectedVariationId(null);
-                    setViewingResizedSize(null);
-                  }}
-                  className={`rounded-xl border transition-all cursor-pointer ${
-                    selectedVariationId === null
-                      ? 'border-emerald-500 bg-emerald-500/10'
-                      : 'border-white/10 bg-white/5 hover:border-white/20'
-                  }`}
-                >
-                  <div className="p-4">
-                    <div className="flex gap-3">
-                      {/* Thumbnail */}
-                      <div className="w-16 h-20 rounded-lg bg-white/10 overflow-hidden flex-shrink-0">
-                        <img
-                          src={uploadedImage.url}
-                          alt="Original"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <ImageIcon className="w-4 h-4 text-emerald-400" />
-                          <span className="font-medium text-sm text-emerald-400">Original</span>
-                          {originalVersions.length > 1 && (
-                            <span className="text-xs text-white/40 bg-white/10 px-1.5 py-0.5 rounded">
-                              {originalVersions.length - 1} edit{originalVersions.length > 2 ? 's' : ''}
-                            </span>
-                          )}
-                          {originalResizedVersions.filter(r => r.status === 'completed').length > 0 && (
-                            <span className="text-xs text-amber-400/80 bg-amber-500/10 px-1.5 py-0.5 rounded">
-                              {originalResizedVersions.filter(r => r.status === 'completed').length + 1} sizes
-                            </span>
-                          )}
+                {/* Base Version Cards - Original and any "New Versions" */}
+                {baseVersions.map((base, baseIdx) => {
+                  const isActive = activeBaseId === base.id && selectedVariationId === null;
+                  const isOriginal = base.id === 'original';
+                  const editCount = base.versions.length - 1;
+                  const resizeCount = base.resizedVersions.filter(r => r.status === 'completed').length;
+
+                  return (
+                    <div
+                      key={base.id}
+                      onClick={() => {
+                        setActiveBaseId(base.id);
+                        setSelectedVariationId(null);
+                        setViewingResizedSize(null);
+                      }}
+                      className={`rounded-xl border transition-all cursor-pointer ${
+                        isActive
+                          ? isOriginal ? 'border-emerald-500 bg-emerald-500/10' : 'border-blue-500 bg-blue-500/10'
+                          : 'border-white/10 bg-white/5 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="p-4">
+                        <div className="flex gap-3">
+                          {/* Thumbnail */}
+                          <div className="w-16 h-20 rounded-lg bg-white/10 overflow-hidden flex-shrink-0">
+                            <img
+                              src={base.baseImageUrl}
+                              alt={base.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              {isOriginal ? (
+                                <ImageIcon className="w-4 h-4 text-emerald-400" />
+                              ) : (
+                                <Layers className="w-4 h-4 text-blue-400" />
+                              )}
+                              <span className={`font-medium text-sm ${isOriginal ? 'text-emerald-400' : 'text-blue-400'}`}>
+                                {base.name}
+                              </span>
+                              {editCount > 0 && (
+                                <span className="text-xs text-white/40 bg-white/10 px-1.5 py-0.5 rounded">
+                                  {editCount} edit{editCount > 1 ? 's' : ''}
+                                </span>
+                              )}
+                              {resizeCount > 0 && (
+                                <span className="text-xs text-amber-400/80 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                                  {resizeCount + 1} sizes
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-white/50 truncate">
+                              {isOriginal ? uploadedImage.filename : base.sourceLabel}
+                            </p>
+                            {isOriginal && (
+                              <p className="text-xs text-white/40 mt-1">
+                                {uploadedImage.aspectRatio.includes('(')
+                                  ? uploadedImage.aspectRatio
+                                  : `${uploadedImage.aspectRatio} • ${uploadedImage.width}×${uploadedImage.height}`}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        <p className="text-xs text-white/50">
-                          {uploadedImage.filename}
-                        </p>
-                        <p className="text-xs text-white/40 mt-1">
-                          {uploadedImage.aspectRatio.includes('(')
-                            ? uploadedImage.aspectRatio
-                            : `${uploadedImage.aspectRatio} • ${uploadedImage.width}×${uploadedImage.height}`}
-                        </p>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })}
 
               {/* Divider - only show when there are variations */}
               {variations.length > 0 && (
