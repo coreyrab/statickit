@@ -158,7 +158,7 @@ export function ApiKeySetupModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg !bg-[#1a1a1a] border-white/10 text-white">
+      <DialogContent className="sm:max-w-lg !bg-[#181c24] border-white/10 text-white">
         <DialogHeader>
           <DialogTitle className="text-xl text-center">Add your API Key</DialogTitle>
         </DialogHeader>

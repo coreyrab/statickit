@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-    const prompt = `You are an expert advertising analyst. Analyze this static ad image and provide detailed information about it.
+    const prompt = `You are an expert advertising analyst and photography expert. Analyze this static ad image and provide detailed information about it.
 
 ${websiteUrl ? `The advertiser's website is: ${websiteUrl}` : ''}
 ${additionalContext ? `\nADDITIONAL CONTEXT FROM ADVERTISER:\n${additionalContext}\n\nUse this context to better understand the product, target audience, and campaign goals.` : ''}
@@ -44,7 +44,10 @@ Please analyze the image and return a JSON object with the following structure:
   "key_selling_points": ["List of key selling points or value propositions shown"],
   "target_audience": "Who this ad is targeting",
   "colors": ["List of dominant colors used"],
-  "mood": "The overall mood or feeling of the ad"
+  "mood": "The overall mood or feeling of the ad",
+  "imageDescription": "A concise technical description of the image's composition, lighting style, color grading, and overall photographic technique (1-2 sentences)",
+  "backgroundDescription": "A detailed description of the background/environment/setting - describe the location, props, textures, and atmosphere (1-2 sentences). If it's a plain/studio background, describe the color, gradient, and lighting style.",
+  "subjectDescription": "If there's a person/model in the image, describe their appearance, pose, expression, clothing, and styling (1-2 sentences). If no person is present, return null."
 }
 
 Return ONLY the JSON object, no other text.`;

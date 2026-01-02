@@ -14,7 +14,7 @@ import { SecurityBadge } from '@/components/onboarding';
 export default function SettingsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
+      <div className="min-h-screen bg-[#101318] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
       </div>
     }>
@@ -220,7 +220,7 @@ function SettingsContent() {
   // Show loading while checking auth
   if (!isUserLoaded) {
     return (
-      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
+      <div className="min-h-screen bg-[#101318] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
       </div>
     );
@@ -229,7 +229,7 @@ function SettingsContent() {
   // Redirect to sign in if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#0f0f0f] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#101318] text-white flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-4">Sign in to access settings</h2>
           <SignInButton mode="modal">
@@ -243,9 +243,9 @@ function SettingsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white">
+    <div className="min-h-screen bg-[#101318] text-white">
       {/* Header */}
-      <header className="border-b border-white/10 bg-[#0f0f0f]/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-white/10 bg-[#101318]/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-semibold">
             <img src="/logo.svg" alt="StaticKit" className="w-7 h-7" />

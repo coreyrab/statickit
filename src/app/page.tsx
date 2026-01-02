@@ -46,6 +46,10 @@ import {
   Key,
   AlertTriangle,
   RotateCw,
+  Scaling,
+  Ratio,
+  ScanLine,
+  Expand,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -98,6 +102,9 @@ interface Analysis {
   target_audience: string;
   colors: string[];
   mood: string;
+  imageDescription?: string;
+  backgroundDescription?: string;
+  subjectDescription?: string | null;
 }
 
 // Common ad sizes for resizing
@@ -2158,16 +2165,16 @@ function HomeContent() {
   // Show loading while checking auth
   if (!isUserLoaded) {
     return (
-      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
+      <div className="min-h-screen bg-[#101318] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white flex flex-col">
+    <div className="min-h-screen bg-[#101318] text-white flex flex-col">
       {/* Header */}
-      <header className="border-b border-white/10 bg-[#0f0f0f]/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-white/10 bg-[#101318]/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="px-6 h-14 flex items-center justify-between">
           {/* Left: Logo - aligned with left panel icons */}
           <div className="w-[360px] flex items-center pl-7">
@@ -2205,22 +2212,6 @@ function HomeContent() {
             {/* Horizontal Toolbar - Above Image */}
             <div className="flex items-center justify-center mb-4">
               <div className="flex items-center gap-1 p-1 bg-white/[0.02] border border-white/10 rounded-xl">
-                {/* New Ad Button - only show when image exists */}
-                {uploadedImage && (
-                  <>
-                    <button
-                      onClick={handleNewClick}
-                      className="px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all duration-200 text-sm font-medium text-white/50 hover:text-white hover:bg-white/10"
-                    >
-                      <Plus className="w-4 h-4 flex-shrink-0" />
-                      <span className="text-xs">New</span>
-                    </button>
-
-                    {/* Divider */}
-                    <div className="w-px h-6 bg-white/20 mx-1" />
-                  </>
-                )}
-
                 <button
                   onClick={() => setSelectedTool('iterations')}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
@@ -2301,13 +2292,13 @@ function HomeContent() {
                       : 'text-white/50 hover:text-white hover:bg-white/10 gap-0'
                   }`}
                 >
-                  <Download className="w-4 h-4 flex-shrink-0" />
+                  <Expand className="w-4 h-4 flex-shrink-0" />
                   <span className={`overflow-hidden whitespace-nowrap transition-all duration-200 ease-out ${
                     selectedTool === 'export'
                       ? 'max-w-[80px] opacity-100'
                       : 'max-w-0 opacity-0'
                   }`}>
-                    Export
+                    Resize
                   </span>
                 </button>
               </div>
@@ -2365,7 +2356,7 @@ function HomeContent() {
                         <span className="italic text-white/60">"{originalVersions[originalVersionIndex].prompt}"</span>
                       )
                     ) : (
-                      uploadedImage.filename
+                      'Original'
                     )}
                   </span>
                 </>
@@ -2904,6 +2895,23 @@ function HomeContent() {
 
           {/* Left Panel - Tool Panel */}
           <div className="w-[360px] flex-shrink-0 border border-white/10 rounded-2xl bg-white/[0.02] flex flex-col overflow-hidden order-first relative">
+            {/* New Project Button - Top of panel */}
+            <div className="p-3 border-b border-white/10">
+              <button
+                onClick={uploadedImage ? handleNewClick : openFileDialog}
+                className={`w-full py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${
+                  uploadedImage
+                    ? 'bg-white/5 hover:bg-white/10 text-white/60 hover:text-white'
+                    : 'bg-amber-600 hover:bg-amber-500 text-white'
+                }`}
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  {uploadedImage ? 'New Image' : 'Upload Image'}
+                </span>
+              </button>
+            </div>
+
             {/* Versions Tool */}
             {selectedTool === 'iterations' && (
               <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col overflow-hidden">
@@ -3003,7 +3011,7 @@ function HomeContent() {
                             className="w-full px-3 py-2.5 rounded-lg border border-dashed border-white/20 text-white/50 hover:text-white/70 hover:border-white/30 transition-all flex items-center justify-center gap-2 text-sm"
                           >
                             <Plus className="w-4 h-4" />
-                            Custom iteration
+                            Custom version
                           </button>
                         ) : (
                           <div className="space-y-3">
@@ -3080,14 +3088,19 @@ function HomeContent() {
                     <p className="text-xs text-white/50">Click here or drop an image in the preview area</p>
                   </button>
                 )}
-                {/* Current Size */}
+                {/* Source File */}
                 {uploadedImage && (
                   <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-white/40 uppercase tracking-wide">Current Size</span>
-                      <span className="text-sm font-medium">{uploadedImage.width}×{uploadedImage.height}</span>
+                      <span className="text-sm font-medium text-white/70">Source file</span>
+                      <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
                     </div>
-                    <div className="text-xs text-white/30 mt-1">{uploadedImage.aspectRatio}</div>
+                    <div className="text-[11px] text-white/40 mt-1 truncate">{uploadedImage.filename}</div>
+                    {analysis?.imageDescription && (
+                      <div className="mt-2 pt-2 border-t border-white/10">
+                        <p className="text-[11px] text-white/50 italic leading-relaxed">{analysis.imageDescription}</p>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -3560,10 +3573,10 @@ function HomeContent() {
               </div>
             )}
 
-            {/* Export Tool */}
+            {/* Resize Tool */}
             {selectedTool === 'export' && (
               <div className="animate-in fade-in slide-in-from-left-2 duration-200 p-4 flex flex-col h-full">
-                <h2 className="font-semibold mb-1">Export</h2>
+                <h2 className="font-semibold mb-1">Resize</h2>
                 <p className="text-xs text-white/50 mb-4">
                   Resize and download your images.
                 </p>
@@ -3755,6 +3768,14 @@ function HomeContent() {
                   Change the background while preserving the product and any models.
                 </p>
 
+                {/* Current background description */}
+                {analysis?.backgroundDescription && uploadedImage && (
+                  <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
+                    <span className="text-[11px] text-white/40 uppercase tracking-wide">Current background</span>
+                    <p className="text-[11px] text-white/50 italic leading-relaxed mt-1">{analysis.backgroundDescription}</p>
+                  </div>
+                )}
+
                 {/* Upload prompt banner when no image */}
                 {!uploadedImage && (
                   <button
@@ -3867,6 +3888,14 @@ function HomeContent() {
                 <p className="text-xs text-white/50 mb-3">
                   Change the model while preserving background, lighting & product.
                 </p>
+
+                {/* Current model description */}
+                {analysis?.subjectDescription && uploadedImage && (
+                  <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
+                    <span className="text-[11px] text-white/40 uppercase tracking-wide">Current model</span>
+                    <p className="text-[11px] text-white/50 italic leading-relaxed mt-1">{analysis.subjectDescription}</p>
+                  </div>
+                )}
 
                 {/* Upload prompt banner when no image */}
                 {!uploadedImage && (
@@ -4553,7 +4582,7 @@ function HomeContent() {
                   <DropdownMenuContent
                     align="start"
                     side="top"
-                    className="w-72 bg-[#1a1a1a] border-white/10 text-white mb-2"
+                    className="w-72 bg-[#181c24] border-white/10 text-white mb-2"
                   >
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex items-center gap-3 py-1">
@@ -4615,7 +4644,7 @@ function HomeContent() {
 
       {/* Sign Up Prompt Modal */}
       <Dialog open={showSignUpPrompt} onOpenChange={setShowSignUpPrompt}>
-        <DialogContent className="sm:max-w-md !bg-[#1a1a1a] border-white/10 text-white">
+        <DialogContent className="sm:max-w-md !bg-[#181c24] border-white/10 text-white">
           <DialogHeader>
             <DialogTitle>Sign up to continue</DialogTitle>
             <DialogDescription>
@@ -4696,7 +4725,7 @@ function HomeContent() {
 
       {/* New Image Confirmation Modal */}
       <Dialog open={showNewConfirmModal} onOpenChange={setShowNewConfirmModal}>
-        <DialogContent className="sm:max-w-md !bg-[#1a1a1a] border-white/10 text-white">
+        <DialogContent className="sm:max-w-md !bg-[#181c24] border-white/10 text-white">
           <DialogHeader>
             <DialogTitle className="text-xl">Start Fresh?</DialogTitle>
             <DialogDescription className="text-white/70 mt-2">
@@ -4762,7 +4791,7 @@ function fileToBase64(file: File): Promise<string> {
 export default function Home() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
+      <div className="min-h-screen bg-[#101318] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
       </div>
     }>

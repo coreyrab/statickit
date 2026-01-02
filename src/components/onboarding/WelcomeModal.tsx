@@ -57,7 +57,7 @@ export function WelcomeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md !bg-[#1a1a1a] border-white/10 text-white" showCloseButton={false}>
+      <DialogContent className="sm:max-w-md !bg-[#181c24] border-white/10 text-white" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle className="text-xl">Welcome to StaticKit</DialogTitle>
           <DialogDescription>
