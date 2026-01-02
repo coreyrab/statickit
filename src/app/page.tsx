@@ -2462,7 +2462,7 @@ function HomeContent() {
                         <span className="italic text-white/60">"{originalVersions[originalVersionIndex].prompt}"</span>
                       )
                     ) : (
-                      'Original'
+                      activeBase?.name || 'Original'
                     )}
                   </span>
                 </>
@@ -2653,7 +2653,7 @@ function HomeContent() {
                                 />
                               </TooltipTrigger>
                               <TooltipContent>
-                                {version.prompt ? `v${idx + 1}: "${version.prompt}"` : `v${idx + 1}: Original`}
+                                {version.prompt ? `v${idx + 1}: "${version.prompt}"` : `v${idx + 1}: ${activeBase?.name || 'Original'}`}
                               </TooltipContent>
                             </Tooltip>
                           ))}
@@ -2666,7 +2666,7 @@ function HomeContent() {
                           <ChevronRight className="w-4 h-4" />
                         </button>
                         <span className="text-[10px] text-white/40 ml-1">
-                          {originalVersionIndex === 0 ? 'Original' : `v${originalVersionIndex + 1}`}
+                          {originalVersionIndex === 0 ? (activeBase?.name || 'Original') : `${activeBase?.name || 'Original'} v${originalVersionIndex + 1}`}
                           {originalVersions[originalVersionIndex]?.prompt && (
                             <span className="italic ml-1">
                               · "{originalVersions[originalVersionIndex].prompt}"
