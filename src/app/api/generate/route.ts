@@ -93,7 +93,9 @@ ${variationDescription}
 **PEOPLE/MODELS**: Any people must remain EXACTLY as shown:
 - Same pose, expression, and position
 - Same clothing, hair, and facial features
+- CRITICAL: Preserve the EXACT facial features and identity - same face shape, eyes, nose, mouth, skin texture
 - Do NOT alter any physical aspect of the person
+- Faces must be recognizable as the same person
 
 === WHAT TO ADAPT (FOR NATURAL INTEGRATION) ===
 
@@ -207,6 +209,13 @@ ${variationDescription}
 - Same appearance, position, and details
 - Any text, logos, or UI elements unchanged
 
+**FACE PRESERVATION**: If any people are in the image:
+- CRITICAL: Preserve the EXACT facial features and identity
+- Same face shape, eyes, nose, mouth, jawline, and skin texture
+- Same facial expression and gaze direction
+- The person must be recognizable as the same individual
+- Do NOT distort, morph, or alter facial proportions
+
 === EDIT GUIDELINES ===
 1. ONLY make the specific change requested above
 2. Keep overall composition the same
@@ -237,6 +246,14 @@ ${variationDescription}
 - Same size and position relative to the frame
 - Any logos, text, or branding on the product stays identical
 - Any annotations, arrows, or callouts stay in the same positions
+
+**FACE PRESERVATION RULE**: If any people are in the reference image:
+- CRITICAL: Preserve the EXACT facial features and identity
+- Same face shape, eyes, nose, mouth, jawline, and skin texture
+- Same facial expression and gaze direction
+- The person must be recognizable as the same individual
+- Do NOT distort, morph, or alter facial proportions
+- Faces are as important to preserve as the product
 
 === WHAT YOU CAN CHANGE ===
 Based on the variation request above, you may change:

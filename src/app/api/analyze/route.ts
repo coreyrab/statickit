@@ -31,22 +31,22 @@ export async function POST(request: NextRequest) {
 
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-    const prompt = `You are an expert advertising analyst and photography expert. Analyze this static ad image and provide detailed information about it.
+    const prompt = `You are an expert photography and image analyst. Analyze this image and provide detailed information about its visual qualities.
 
-${websiteUrl ? `The advertiser's website is: ${websiteUrl}` : ''}
-${additionalContext ? `\nADDITIONAL CONTEXT FROM ADVERTISER:\n${additionalContext}\n\nUse this context to better understand the product, target audience, and campaign goals.` : ''}
+${websiteUrl ? `Context - associated website: ${websiteUrl}` : ''}
+${additionalContext ? `\nADDITIONAL CONTEXT:\n${additionalContext}\n` : ''}
 
 Please analyze the image and return a JSON object with the following structure:
 {
-  "product": "What product or service is being advertised",
-  "brand_style": "Description of the brand's visual style and identity",
-  "visual_elements": ["List of key visual elements in the ad"],
-  "key_selling_points": ["List of key selling points or value propositions shown"],
-  "target_audience": "Who this ad is targeting",
+  "product": "The main subject or focus of the image (could be a product, person, scene, object, etc.)",
+  "brand_style": "Description of the overall visual style and aesthetic",
+  "visual_elements": ["List of key visual elements in the image"],
+  "key_selling_points": ["Notable features or qualities of the subject"],
+  "target_audience": "Who might be interested in this type of image or subject",
   "colors": ["List of dominant colors used"],
-  "mood": "The overall mood or feeling of the ad",
-  "imageDescription": "A concise technical description of the image's composition, lighting style, color grading, and overall photographic technique (1-2 sentences)",
-  "backgroundDescription": "A detailed description of the background/environment/setting - describe the location, props, textures, and atmosphere (1-2 sentences). If it's a plain/studio background, describe the color, gradient, and lighting style.",
+  "mood": "The overall mood or feeling of the image",
+  "imageDescription": "A concise technical description of the image: describe the composition, lighting (natural, studio, dramatic, soft, etc.), color grading/tones, depth of field, and photographic style (1-2 sentences). Focus on HOW the image looks, not what it contains.",
+  "backgroundDescription": "A detailed description of the background/environment/setting - describe the location, surfaces, textures, and atmosphere (1-2 sentences). If it's a plain/studio background, describe the color, gradient, and lighting style.",
   "subjectDescription": "If there's a person/model in the image, describe their appearance, pose, expression, clothing, and styling (1-2 sentences). If no person is present, return null."
 }
 

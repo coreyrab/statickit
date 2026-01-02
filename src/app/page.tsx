@@ -42,7 +42,6 @@ import {
   User,
   Move,
   Scan,
-  Grid3X3,
   Key,
   AlertTriangle,
   RotateCw,
@@ -234,17 +233,18 @@ function HomeContent() {
   const [selectedPresets, setSelectedPresets] = useState<{
     lighting: string | null;
     style: string | null;
-    camera: string | null;
     mood: string | null;
     color: string | null;
     era: string | null;
-    hardware: string | null;
+    camera: string | null;
     angles: string | null;
     shotSize: string | null;
-    perspective: string | null;
     rotation: string | null;
-  }>({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null, angles: null, shotSize: null, perspective: null, rotation: null });
+  }>({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, angles: null, shotSize: null, rotation: null });
   const [expandedPresetCategory, setExpandedPresetCategory] = useState<string | null>(null);
+  const [showImageDetails, setShowImageDetails] = useState(false);
+  const [showBackgroundDetails, setShowBackgroundDetails] = useState(false);
+  const [showModelDetails, setShowModelDetails] = useState(false);
   // isApplyingPreset removed - now tracking per-version with status field
 
   // Presets data - prompts optimized for AI image editing
@@ -264,14 +264,6 @@ function HomeContent() {
       { id: 'film-grain', name: 'Film Grain', prompt: 'Apply analog 35mm film aesthetic: visible film grain texture like Kodak Portra 400, slightly lifted blacks, gentle color fade, subtle halation on highlights, nostalgic vintage film photography look, maintain all subjects and composition exactly as they are' },
       { id: 'minimalist', name: 'Minimalist', prompt: 'Apply minimalist aesthetic: simplify and clean the background, increase negative space, reduce visual clutter, focus attention on the main subject, clean lines, Scandinavian design sensibility, maintain the main subject exactly as it is' },
       { id: 'hdr', name: 'HDR', prompt: 'Apply HDR tone mapping effect: enhanced dynamic range, recovered shadow details, controlled highlights, slightly boosted saturation, visible detail in all tonal ranges, punchy vibrant look, maintain all subjects and composition exactly as they are' },
-    ],
-    camera: [
-      { id: 'shallow-dof', name: 'Shallow DOF', prompt: 'Apply shallow depth of field effect: simulate f/1.4 aperture, creamy smooth bokeh in background, circular out-of-focus highlights, subject tack-sharp, professional portrait-style background separation, maintain the subject exactly as it is' },
-      { id: 'wide-angle', name: 'Wide Angle', prompt: 'Apply wide angle lens perspective: simulate 16-24mm focal length, expanded field of view, subtle barrel distortion at edges, exaggerated perspective with closer objects appearing larger, dramatic sense of space, maintain the subject exactly as it is' },
-      { id: 'macro', name: 'Macro', prompt: 'Apply macro lens close-up effect: extreme fine detail visibility, simulate 1:1 magnification ratio, very shallow plane of focus, visible surface textures and micro-details, scientific precision, maintain the subject exactly as it is' },
-      { id: 'portrait-85mm', name: 'Portrait 85mm', prompt: 'Apply 85mm portrait lens look: flattering facial compression, smooth creamy background bokeh at f/1.8, classic portrait photography perspective, beautiful subject-background separation, maintain the subject exactly as it is' },
-      { id: 'tilt-shift', name: 'Tilt Shift', prompt: 'Apply tilt-shift miniature effect: selective focus plane at an angle, blur at top and bottom of frame, scene appears like a tiny diorama or model, toy-like surreal appearance, maintain the subject in the focused area exactly as it is' },
-      { id: 'birds-eye', name: "Bird's Eye", prompt: 'Apply bird\'s eye overhead perspective: viewing angle directly from above at 90 degrees, flat lay composition style, looking straight down at the subject, top-down view, maintain the subject exactly as it is' },
     ],
     mood: [
       { id: 'cinematic-moody', name: 'Cinematic Moody', prompt: 'Apply cinematic moody aesthetic: deep shadows with crushed blacks, desaturated midtones, high contrast ratio, dramatic shadow play, intense emotional atmosphere, film-like color grading with teal shadows and warm highlights, maintain all subjects exactly as they are' },
@@ -297,7 +289,7 @@ function HomeContent() {
       { id: 'vintage-sepia', name: 'Vintage Sepia', prompt: 'Apply vintage sepia toning: classic brown/amber monochromatic tint, antique photograph feeling, timeless nostalgic warmth, aged photo aesthetic, historical photography look, elegant vintage finish, maintain all subjects exactly as they are' },
       { id: 'modern-clean', name: 'Modern Clean', prompt: 'Apply modern clean aesthetic: true-to-color accuracy, crisp and contemporary, neutral color balance, timeless professional look, minimal color grading, honest representation with subtle polish, maintain all subjects exactly as they are' },
     ],
-    hardware: [
+    camera: [
       { id: 'hasselblad', name: 'Hasselblad X2D', prompt: 'Apply Hasselblad medium format camera look: exceptional detail and resolution, medium format sensor rendering, smooth tonal transitions, Hasselblad Natural Color Solution color science, ultra-fine detail in highlights and shadows, studio-quality commercial photography aesthetic, maintain all subjects exactly as they are' },
       { id: 'canon-r5', name: 'Canon EOS R5', prompt: 'Apply Canon EOS R5 camera look: Canon color science with warm pleasing skin tones, excellent dynamic range, vibrant but natural colors, professional full-frame rendering, flagship Canon image quality, maintain all subjects exactly as they are' },
       { id: 'sony-a7rv', name: 'Sony a7R V', prompt: 'Apply Sony a7R V camera look: ultra high resolution detail, Sony color science with accurate true-to-life colors, exceptional sharpness and clarity, professional mirrorless quality, precise highlight and shadow detail, maintain all subjects exactly as they are' },
@@ -323,20 +315,13 @@ function HomeContent() {
       { id: 'wide-shot', name: 'Wide Shot', prompt: 'Apply wide shot framing: full body of subject visible with significant environment around them, establishes the subject within their space, shows complete figure and surroundings, lifestyle photography style, maintain the subject exactly as it is' },
       { id: 'extreme-wide', name: 'Extreme Wide Shot', prompt: 'Apply extreme wide shot (establishing shot) framing: vast view of the environment with subject appearing small within it, emphasizes location and scale, cinematic landscape perspective, environmental storytelling, maintain the subject exactly as it is' },
     ],
-    perspective: [
-      { id: 'pov', name: 'Point of View (POV)', prompt: 'Apply point of view (POV) perspective: camera shows what the subject would see from their eyes, first-person viewpoint, immersive and subjective experience, viewer becomes the subject, hands or body parts may be visible in frame, maintain all elements exactly as they are' },
-      { id: 'over-shoulder', name: 'Over-the-Shoulder', prompt: 'Apply over-the-shoulder perspective: camera positioned behind one subject looking at another or at a scene, back of shoulder and head partially visible in foreground, creates depth and connection, common in conversation and reaction shots, maintain all subjects exactly as they are' },
-      { id: 'center-framed', name: 'Center Framed', prompt: 'Apply center framed composition: subject positioned directly in the center of the frame, symmetrical and balanced composition, bold and intentional placement, Wes Anderson or Stanley Kubrick style symmetry, strong visual impact, maintain the subject exactly as it is' },
-      { id: 'rule-of-thirds', name: 'Rule of Thirds', prompt: 'Apply rule of thirds composition: position the main subject at one of the four intersection points of the thirds grid, off-center dynamic composition, create visual balance with negative space, professional photography composition technique, maintain the subject exactly as it is' },
-    ],
     rotation: [
-      { id: 'rotate-90-cw', name: '90° Clockwise', prompt: 'Rotate the camera perspective 90 degrees clockwise around the subject. The subject remains in the same pose with the same facial expression - only the camera viewpoint rotates to the right. Maintain all subject features, expression, and details exactly as they are.' },
-      { id: 'rotate-90-ccw', name: '90° Counter-Clockwise', prompt: 'Rotate the camera perspective 90 degrees counter-clockwise around the subject. The subject remains in the same pose with the same facial expression - only the camera viewpoint rotates to the left. Maintain all subject features, expression, and details exactly as they are.' },
-      { id: 'rotate-180', name: '180°', prompt: 'Rotate the camera perspective 180 degrees around the subject to show the opposite view. The subject remains in the same pose with the same facial expression - the camera moves to the other side. Maintain all subject features, expression, and details exactly as they are.' },
-      { id: 'rotate-45-cw', name: '45° Clockwise', prompt: 'Rotate the camera perspective 45 degrees clockwise around the subject. The subject remains in the same pose with the same facial expression - only the camera viewpoint shifts diagonally to the right. Creates dynamic diagonal energy. Maintain all subject features, expression, and details exactly as they are.' },
-      { id: 'rotate-45-ccw', name: '45° Counter-Clockwise', prompt: 'Rotate the camera perspective 45 degrees counter-clockwise around the subject. The subject remains in the same pose with the same facial expression - only the camera viewpoint shifts diagonally to the left. Creates dynamic diagonal energy. Maintain all subject features, expression, and details exactly as they are.' },
-      { id: 'slight-tilt', name: 'Slight Tilt (15°)', prompt: 'Rotate the camera perspective by a subtle 15 degrees clockwise around the subject. The subject remains in the same pose with the same facial expression - only a slight camera shift for natural, candid feeling. Maintain all subject features, expression, and details exactly as they are.' },
-      { id: 'horizontal-flip', name: 'Horizontal Flip (Mirror)', prompt: 'Mirror/flip the camera perspective horizontally so the subject faces the opposite direction. The subject remains in the same pose with the same facial expression - only the left-right orientation changes as if viewing in a mirror. Maintain all subject features, expression, and details exactly as they are.' },
+      { id: 'orbit-right', name: 'Orbit Right', prompt: 'Photograph this subject from their RIGHT SIDE. The photographer has walked around to the right side of the subject to take this photo.\n\nCRITICAL - KEEP IDENTICAL:\n- SAME exact pose (every limb, arm, leg in the same position)\n- SAME exact facial expression\n- SAME exact clothing and styling\n- SAME distance from camera to subject (same framing/crop)\n\nONLY CHANGE: The camera is now positioned to the subject\'s right, so we see the right side of their body and face in profile. Show what their pose looks like when viewed from 90 degrees to the right. The subject has NOT moved or turned - the photographer moved.' },
+      { id: 'orbit-left', name: 'Orbit Left', prompt: 'Photograph this subject from their LEFT SIDE. The photographer has walked around to the left side of the subject to take this photo.\n\nCRITICAL - KEEP IDENTICAL:\n- SAME exact pose (every limb, arm, leg in the same position)\n- SAME exact facial expression\n- SAME exact clothing and styling\n- SAME distance from camera to subject (same framing/crop)\n\nONLY CHANGE: The camera is now positioned to the subject\'s left, so we see the left side of their body and face in profile. Show what their pose looks like when viewed from 90 degrees to the left. The subject has NOT moved or turned - the photographer moved.' },
+      { id: 'orbit-behind', name: 'Orbit Behind', prompt: 'Photograph this subject from BEHIND. The photographer has walked around to stand behind the subject to take this photo.\n\nCRITICAL - KEEP IDENTICAL:\n- SAME exact pose (every limb, arm, leg in the same position)\n- SAME exact clothing and styling\n- SAME distance from camera to subject (same framing/crop)\n\nONLY CHANGE: The camera is now positioned behind the subject, so we see the back of their head, back of their body, back of their clothing. Show what their pose looks like when viewed from directly behind. The subject has NOT turned around - the photographer walked behind them.' },
+      { id: 'orbit-45-right', name: 'Orbit 45° Right', prompt: 'Photograph this subject from a THREE-QUARTER ANGLE on their RIGHT. The photographer has stepped slightly to the right to capture a classic 3/4 portrait angle.\n\nCRITICAL - KEEP IDENTICAL:\n- SAME exact pose (every limb, arm, leg in the same position)\n- SAME exact facial expression\n- SAME exact clothing and styling\n- SAME distance from camera to subject (same framing/crop)\n\nONLY CHANGE: The camera has moved about 45 degrees to the subject\'s right, showing slightly more of their right side while still seeing most of the front. The subject has NOT moved or turned - the photographer moved.' },
+      { id: 'orbit-45-left', name: 'Orbit 45° Left', prompt: 'Photograph this subject from a THREE-QUARTER ANGLE on their LEFT. The photographer has stepped slightly to the left to capture a classic 3/4 portrait angle.\n\nCRITICAL - KEEP IDENTICAL:\n- SAME exact pose (every limb, arm, leg in the same position)\n- SAME exact facial expression\n- SAME exact clothing and styling\n- SAME distance from camera to subject (same framing/crop)\n\nONLY CHANGE: The camera has moved about 45 degrees to the subject\'s left, showing slightly more of their left side while still seeing most of the front. The subject has NOT moved or turned - the photographer moved.' },
+      { id: 'orbit-above', name: 'Orbit Above', prompt: 'Photograph this subject from DIRECTLY ABOVE, looking down. The photographer is now above the subject shooting downward.\n\nCRITICAL - KEEP IDENTICAL:\n- SAME exact pose (every limb, arm, leg in the same position)\n- SAME exact clothing and styling\n\nONLY CHANGE: The camera is now directly overhead looking down at the subject. Show the top of their head, their shoulders from above, and their pose as it would appear from a bird\'s eye view. The subject has NOT laid down - the photographer moved above them.' },
     ],
   };
 
@@ -536,6 +521,56 @@ function HomeContent() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedVariationId, variations, originalVersions, originalVersionIndex]);
 
+  // Automatically analyze image when uploaded (for the image description tooltip)
+  useEffect(() => {
+    if (!uploadedImage || analysis) return; // Skip if no image or already analyzed
+
+    const analyzeImageForDescription = async () => {
+      try {
+        const base64 = await fileToBase64(uploadedImage.file);
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image: base64,
+            mimeType: uploadedImage.file.type,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setAnalysis(data.analysis);
+        } else {
+          // Set a fallback analysis with a generic description
+          setAnalysis({
+            product: 'Image subject',
+            brand_style: 'Clean aesthetic',
+            visual_elements: ['Main subject', 'Background'],
+            key_selling_points: ['Visual quality'],
+            target_audience: 'General',
+            colors: ['Various'],
+            mood: 'Neutral',
+            imageDescription: 'Unable to analyze image - please try again',
+          });
+        }
+      } catch (error) {
+        console.error('Auto-analysis error:', error);
+        setAnalysis({
+          product: 'Image subject',
+          brand_style: 'Clean aesthetic',
+          visual_elements: ['Main subject'],
+          key_selling_points: ['Visual quality'],
+          target_audience: 'General',
+          colors: ['Various'],
+          mood: 'Neutral',
+          imageDescription: 'Unable to analyze image',
+        });
+      }
+    };
+
+    analyzeImageForDescription();
+  }, [uploadedImage, analysis]);
+
   // Load session from history page (resume functionality)
   useEffect(() => {
     const resume = searchParams.get('resume');
@@ -706,13 +741,14 @@ function HomeContent() {
         analysisData = data.analysis;
       } else {
         analysisData = {
-          product: 'Product from uploaded ad',
-          brand_style: 'Modern, clean aesthetic',
-          visual_elements: ['Product shot', 'Clean background', 'Text overlay'],
-          key_selling_points: ['Quality', 'Value', 'Design'],
-          target_audience: 'General consumers',
-          colors: ['Primary brand colors'],
-          mood: 'Professional and appealing',
+          product: 'Image subject',
+          brand_style: 'Clean aesthetic',
+          visual_elements: ['Main subject', 'Background', 'Visual elements'],
+          key_selling_points: ['Visual quality', 'Composition'],
+          target_audience: 'General',
+          colors: ['Various'],
+          mood: 'Neutral',
+          imageDescription: 'Unable to analyze image - please try again',
         };
       }
 
@@ -1177,14 +1213,12 @@ function HomeContent() {
 
     addPreset('lighting', selectedPresets.lighting);
     addPreset('style', selectedPresets.style);
-    addPreset('camera', selectedPresets.camera);
     addPreset('mood', selectedPresets.mood);
     addPreset('color', selectedPresets.color);
     addPreset('era', selectedPresets.era);
-    addPreset('hardware', selectedPresets.hardware);
+    addPreset('camera', selectedPresets.camera);
     addPreset('angles', selectedPresets.angles);
     addPreset('shotSize', selectedPresets.shotSize);
-    addPreset('perspective', selectedPresets.perspective);
     addPreset('rotation', selectedPresets.rotation);
 
     if (prompts.length === 0) return;
@@ -1193,7 +1227,7 @@ function HomeContent() {
     const presetLabel = presetNames.filter(Boolean).join(' + ') + ' [preset]';
 
     // Clear selections immediately
-    setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null, angles: null, shotSize: null, perspective: null, rotation: null });
+    setSelectedPresets({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, angles: null, shotSize: null, rotation: null });
 
     try {
       // Get current image to edit - only from completed versions
@@ -2341,9 +2375,15 @@ function HomeContent() {
                     ))}
                   </div>
                   {/* Label row - changes but dots stay fixed */}
-                  <span className="text-xs text-white/50 text-center">
+                  <span className="text-xs text-white/50 text-center max-w-xs">
                     {originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing' ? (
-                      <span className="italic text-white/40">Processing...</span>
+                      <span className="italic text-white/40">
+                        Processing{originalVersions[originalVersionIndex]?.prompt ? (
+                          originalVersions[originalVersionIndex].prompt.includes('[preset]')
+                            ? ` "${originalVersions[originalVersionIndex].prompt.replace(' [preset]', '')}"`
+                            : ` "${originalVersions[originalVersionIndex].prompt}"`
+                        ) : ''}...
+                      </span>
                     ) : originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'error' ? (
                       <span className="italic text-red-400">Error - try again</span>
                     ) : originalVersions.length > 0 && originalVersions[originalVersionIndex]?.prompt ? (
@@ -2637,10 +2677,7 @@ function HomeContent() {
                   {/* Loading overlay when viewing a processing version */}
                   {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing' && (
                     <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
-                      <div className="flex flex-col items-center gap-3">
-                        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
-                        <span className="text-sm text-white/70">Processing...</span>
-                      </div>
+                      <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
                     </div>
                   )}
                   {/* Error overlay when viewing a failed version */}
@@ -2895,43 +2932,48 @@ function HomeContent() {
 
           {/* Left Panel - Tool Panel */}
           <div className="w-[360px] flex-shrink-0 border border-white/10 rounded-2xl bg-white/[0.02] flex flex-col overflow-hidden order-first relative">
-            {/* New Project Button - Top of panel */}
-            <div className="p-3 border-b border-white/10">
-              <button
-                onClick={uploadedImage ? handleNewClick : openFileDialog}
-                className={`w-full py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${
-                  uploadedImage
-                    ? 'bg-white/5 hover:bg-white/10 text-white/60 hover:text-white'
-                    : 'bg-amber-600 hover:bg-amber-500 text-white'
-                }`}
-              >
-                <Plus className="w-4 h-4" />
-                <span className="text-sm font-medium">
-                  {uploadedImage ? 'New Image' : 'Upload Image'}
-                </span>
-              </button>
-            </div>
-
             {/* Versions Tool */}
             {selectedTool === 'iterations' && (
               <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col overflow-hidden">
-                {/* Upload prompt banner when no image */}
-                {!uploadedImage && (
-                  <button
-                    onClick={openFileDialog}
-                    className="m-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer text-left"
-                  >
-                    <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-1">
-                      <Upload className="w-4 h-4" />
-                      Upload an image to start editing
-                    </div>
-                    <p className="text-xs text-white/50">Click here or drop an image in the preview area</p>
-                  </button>
-                )}
-                {/* Header */}
+                {/* Image Section */}
                 <div className="p-4 border-b border-white/10">
-                  <div className="flex items-center justify-between mb-1">
-                    <h2 className="font-semibold">Versions</h2>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-white/70">Image</h3>
+                    <button
+                      onClick={uploadedImage ? handleNewClick : openFileDialog}
+                      className={`text-xs flex items-center gap-0.5 transition-colors ${
+                        uploadedImage
+                          ? 'text-white/40 hover:text-white/70'
+                          : 'text-amber-500 hover:text-amber-400'
+                      }`}
+                    >
+                      <Plus className="w-3 h-3" />
+                      New
+                    </button>
+                  </div>
+                  {uploadedImage ? (
+                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
+                        <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={openFileDialog}
+                      className="w-full p-3 rounded-lg border border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-colors"
+                    >
+                      <span className="text-[11px] text-white/30">No image uploaded</span>
+                    </button>
+                  )}
+                </div>
+                {/* Header */}
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="font-semibold mb-1">Versions</h2>
+                      <p className="text-xs text-white/50">Saved edits you can continue to build on.</p>
+                    </div>
                     {variations.length > 0 && (
                       <div className="flex items-center gap-3">
                         {completedCount > 0 && (
@@ -2959,14 +3001,10 @@ function HomeContent() {
                   </div>
                   {/* Generate Iterations button - show when no variations yet */}
                   {variations.length === 0 && !isAnalyzingForIterations && (
-                    <div className={`mt-2 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
-                      <p className="text-sm text-white/50 mb-3">
-                        Generate AI-powered variations of your ad for different contexts and styles.
-                      </p>
-
+                    <div className={`mt-4 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
                       {/* Number of generations */}
                       <div className="mb-3">
-                        <label className="text-xs text-white/40 mb-1.5 block">Number of suggestions</label>
+                        <label className="text-xs text-white/40 mb-1.5 block">Generate suggestions</label>
                         <div className="flex items-center gap-2">
                           {[3, 5, 8, 10].map((num) => (
                             <button
@@ -2987,7 +3025,7 @@ function HomeContent() {
                       {/* Context input */}
                       <div className="mb-3">
                         <Textarea
-                          placeholder="Optional: Add additional context to guide the suggestions"
+                          placeholder="Optional: add context to guide the AI-powered suggestions"
                           value={additionalContext}
                           onChange={(e) => setAdditionalContext(e.target.value)}
                           className="w-full bg-white/5 border-white/10 text-white placeholder:text-white/30 min-h-[60px] resize-none text-sm"
@@ -3074,39 +3112,75 @@ function HomeContent() {
 
             {/* Edit Tool - with resize presets */}
             {selectedTool === 'edit' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 p-4 flex flex-col h-full">
-                {/* Upload prompt banner when no image */}
-                {!uploadedImage && (
-                  <button
-                    onClick={openFileDialog}
-                    className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer text-left"
-                  >
-                    <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-1">
-                      <Upload className="w-4 h-4" />
-                      Upload an image to start editing
-                    </div>
-                    <p className="text-xs text-white/50">Click here or drop an image in the preview area</p>
-                  </button>
-                )}
-                {/* Source File */}
-                {uploadedImage && (
-                  <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-white/70">Source file</span>
-                      <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
-                    </div>
-                    <div className="text-[11px] text-white/40 mt-1 truncate">{uploadedImage.filename}</div>
-                    {analysis?.imageDescription && (
-                      <div className="mt-2 pt-2 border-t border-white/10">
-                        <p className="text-[11px] text-white/50 italic leading-relaxed">{analysis.imageDescription}</p>
+              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col h-full">
+                {/* Image Section */}
+                <div className="p-4 border-b border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-white/70">Image</h3>
+                    <button
+                      onClick={uploadedImage ? handleNewClick : openFileDialog}
+                      className={`text-xs flex items-center gap-0.5 transition-colors ${
+                        uploadedImage
+                          ? 'text-white/40 hover:text-white/70'
+                          : 'text-amber-500 hover:text-amber-400'
+                      }`}
+                    >
+                      <Plus className="w-3 h-3" />
+                      New
+                    </button>
+                  </div>
+                  {uploadedImage ? (
+                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
+                        <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
                       </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={openFileDialog}
+                      className="w-full p-3 rounded-lg border border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-colors"
+                    >
+                      <span className="text-[11px] text-white/30">No image uploaded</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Tool Content */}
+                <div className="p-4 flex-1 flex flex-col min-h-0">
+                  <h2 className="font-semibold mb-1">Edit</h2>
+                  <div className="text-xs text-white/50 mb-3">
+                    Apply preset effects for lighting, style, camera angles, and more.
+                    {uploadedImage && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => analysis?.imageDescription && setShowImageDetails(!showImageDetails)}
+                            disabled={!analysis?.imageDescription}
+                            className={`inline-flex items-center gap-1 ml-1.5 transition-colors ${
+                              analysis?.imageDescription
+                                ? 'text-white/60 hover:text-white/80 cursor-pointer'
+                                : 'text-white/30 cursor-not-allowed'
+                            }`}
+                          >
+                            <span>Image Details</span>
+                            <ChevronDown className={`w-3 h-3 transition-transform ${showImageDetails ? 'rotate-180' : ''}`} />
+                          </button>
+                        </TooltipTrigger>
+                        {!analysis?.imageDescription && (
+                          <TooltipContent side="bottom">
+                            <p className="text-xs">Still analyzing...</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
                     )}
                   </div>
-                )}
+                  {showImageDetails && analysis?.imageDescription && (
+                    <div className="mb-3 p-2.5 rounded-lg bg-white/5 border border-white/10">
+                      <p className="text-[11px] text-white/50 italic leading-relaxed">{analysis.imageDescription}</p>
+                    </div>
+                  )}
 
-                {/* Presets */}
-                <div className="flex-1 flex flex-col min-h-0">
-                  <h3 className="text-sm font-medium mb-2 text-white/70">Presets</h3>
                   <div className="flex-1 overflow-y-auto space-y-2">
                     {/* Lighting */}
                     <div className="rounded-lg border border-white/10 overflow-hidden">
@@ -3117,11 +3191,7 @@ function HomeContent() {
                         <div className="flex items-center gap-2">
                           <Sun className="w-4 h-4 text-white/60" />
                           <span>Lighting</span>
-                          {selectedPresets.lighting && (
-                            <span className="text-xs text-amber-400 ml-1">
-                              ({PRESETS.lighting.find(p => p.id === selectedPresets.lighting)?.name})
-                            </span>
-                          )}
+                          {selectedPresets.lighting && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'lighting' ? 'rotate-180' : ''}`} />
                       </button>
@@ -3135,10 +3205,10 @@ function HomeContent() {
                                 ...prev,
                                 lighting: prev.lighting === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.lighting === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3157,11 +3227,7 @@ function HomeContent() {
                         <div className="flex items-center gap-2">
                           <Palette className="w-4 h-4 text-white/60" />
                           <span>Style</span>
-                          {selectedPresets.style && (
-                            <span className="text-xs text-amber-400 ml-1">
-                              ({PRESETS.style.find(p => p.id === selectedPresets.style)?.name})
-                            </span>
-                          )}
+                          {selectedPresets.style && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'style' ? 'rotate-180' : ''}`} />
                       </button>
@@ -3175,10 +3241,10 @@ function HomeContent() {
                                 ...prev,
                                 style: prev.style === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.style === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3197,11 +3263,7 @@ function HomeContent() {
                         <div className="flex items-center gap-2">
                           <Camera className="w-4 h-4 text-white/60" />
                           <span>Camera</span>
-                          {selectedPresets.camera && (
-                            <span className="text-xs text-amber-400 ml-1">
-                              ({PRESETS.camera.find(p => p.id === selectedPresets.camera)?.name})
-                            </span>
-                          )}
+                          {selectedPresets.camera && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'camera' ? 'rotate-180' : ''}`} />
                       </button>
@@ -3215,10 +3277,10 @@ function HomeContent() {
                                 ...prev,
                                 camera: prev.camera === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.camera === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3237,11 +3299,7 @@ function HomeContent() {
                         <div className="flex items-center gap-2">
                           <Sparkles className="w-4 h-4 text-white/60" />
                           <span>Mood</span>
-                          {selectedPresets.mood && (
-                            <span className="text-xs text-amber-400 ml-1">
-                              ({PRESETS.mood.find(p => p.id === selectedPresets.mood)?.name})
-                            </span>
-                          )}
+                          {selectedPresets.mood && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'mood' ? 'rotate-180' : ''}`} />
                       </button>
@@ -3255,10 +3313,10 @@ function HomeContent() {
                                 ...prev,
                                 mood: prev.mood === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.mood === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3277,11 +3335,7 @@ function HomeContent() {
                         <div className="flex items-center gap-2">
                           <Droplets className="w-4 h-4 text-white/60" />
                           <span>Color</span>
-                          {selectedPresets.color && (
-                            <span className="text-xs text-amber-400 ml-1">
-                              ({PRESETS.color.find(p => p.id === selectedPresets.color)?.name})
-                            </span>
-                          )}
+                          {selectedPresets.color && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'color' ? 'rotate-180' : ''}`} />
                       </button>
@@ -3295,10 +3349,10 @@ function HomeContent() {
                                 ...prev,
                                 color: prev.color === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.color === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3317,11 +3371,7 @@ function HomeContent() {
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-white/60" />
                           <span>Era</span>
-                          {selectedPresets.era && (
-                            <span className="text-xs text-amber-400 ml-1">
-                              ({PRESETS.era.find(p => p.id === selectedPresets.era)?.name})
-                            </span>
-                          )}
+                          {selectedPresets.era && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'era' ? 'rotate-180' : ''}`} />
                       </button>
@@ -3335,50 +3385,10 @@ function HomeContent() {
                                 ...prev,
                                 era: prev.era === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.era === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
-                              }`}
-                            >
-                              {preset.name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Hardware */}
-                    <div className="rounded-lg border border-white/10 overflow-hidden">
-                      <button
-                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'hardware' ? null : 'hardware')}
-                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Aperture className="w-4 h-4 text-white/60" />
-                          <span>Hardware</span>
-                          {selectedPresets.hardware && (
-                            <span className="text-xs text-amber-400 ml-1">
-                              ({PRESETS.hardware.find(p => p.id === selectedPresets.hardware)?.name})
-                            </span>
-                          )}
-                        </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'hardware' ? 'rotate-180' : ''}`} />
-                      </button>
-                      {expandedPresetCategory === 'hardware' && (
-                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
-                          {PRESETS.hardware.map((preset) => (
-                            <button
-                              key={preset.id}
-                              disabled={!uploadedImage}
-                              onClick={() => setSelectedPresets(prev => ({
-                                ...prev,
-                                hardware: prev.hardware === preset.id ? null : preset.id
-                              }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
-                                selectedPresets.hardware === preset.id
-                                  ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3397,11 +3407,7 @@ function HomeContent() {
                         <div className="flex items-center gap-2">
                           <Move className="w-4 h-4 text-white/60" />
                           <span>Angles</span>
-                          {selectedPresets.angles && (
-                            <span className="text-xs text-amber-400 ml-1">
-                              ({PRESETS.angles.find(p => p.id === selectedPresets.angles)?.name})
-                            </span>
-                          )}
+                          {selectedPresets.angles && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'angles' ? 'rotate-180' : ''}`} />
                       </button>
@@ -3415,10 +3421,10 @@ function HomeContent() {
                                 ...prev,
                                 angles: prev.angles === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.angles === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3437,11 +3443,7 @@ function HomeContent() {
                         <div className="flex items-center gap-2">
                           <Scan className="w-4 h-4 text-white/60" />
                           <span>Shot Size</span>
-                          {selectedPresets.shotSize && (
-                            <span className="text-xs text-amber-400 ml-1">
-                              ({PRESETS.shotSize.find(p => p.id === selectedPresets.shotSize)?.name})
-                            </span>
-                          )}
+                          {selectedPresets.shotSize && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'shotSize' ? 'rotate-180' : ''}`} />
                       </button>
@@ -3455,50 +3457,10 @@ function HomeContent() {
                                 ...prev,
                                 shotSize: prev.shotSize === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.shotSize === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
-                              }`}
-                            >
-                              {preset.name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Perspective */}
-                    <div className="rounded-lg border border-white/10 overflow-hidden">
-                      <button
-                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'perspective' ? null : 'perspective')}
-                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Grid3X3 className="w-4 h-4 text-white/60" />
-                          <span>Perspective</span>
-                          {selectedPresets.perspective && (
-                            <span className="text-xs text-amber-400 ml-1">
-                              ({PRESETS.perspective.find(p => p.id === selectedPresets.perspective)?.name})
-                            </span>
-                          )}
-                        </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'perspective' ? 'rotate-180' : ''}`} />
-                      </button>
-                      {expandedPresetCategory === 'perspective' && (
-                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
-                          {PRESETS.perspective.map((preset) => (
-                            <button
-                              key={preset.id}
-                              disabled={!uploadedImage}
-                              onClick={() => setSelectedPresets(prev => ({
-                                ...prev,
-                                perspective: prev.perspective === preset.id ? null : preset.id
-                              }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
-                                selectedPresets.perspective === preset.id
-                                  ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3517,11 +3479,7 @@ function HomeContent() {
                         <div className="flex items-center gap-2">
                           <RotateCw className="w-4 h-4 text-white/60" />
                           <span>Rotation</span>
-                          {selectedPresets.rotation && (
-                            <span className="text-xs text-amber-400 ml-1">
-                              ({PRESETS.rotation.find(p => p.id === selectedPresets.rotation)?.name})
-                            </span>
-                          )}
+                          {selectedPresets.rotation && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'rotation' ? 'rotate-180' : ''}`} />
                       </button>
@@ -3535,10 +3493,10 @@ function HomeContent() {
                                 ...prev,
                                 rotation: prev.rotation === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-sm transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
                                 selectedPresets.rotation === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 text-white/70 disabled:hover:bg-transparent'
+                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3547,27 +3505,29 @@ function HomeContent() {
                         </div>
                       )}
                     </div>
-                  </div>
 
-                  {/* Apply button */}
-                  {(selectedPresets.lighting || selectedPresets.style || selectedPresets.camera || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.hardware || selectedPresets.angles || selectedPresets.shotSize || selectedPresets.perspective || selectedPresets.rotation) && (
-                    <div className="mt-3 pt-3 border-t border-white/10">
+                    {/* Apply button - always rendered, visibility controlled by opacity */}
+                    <div className={`mt-3 pt-3 border-t border-white/10 transition-opacity duration-150 ${
+                      (selectedPresets.lighting || selectedPresets.style || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.camera || selectedPresets.angles || selectedPresets.shotSize || selectedPresets.rotation)
+                        ? 'opacity-100'
+                        : 'opacity-0 pointer-events-none'
+                    }`}>
                       <Button
                         onClick={() => requireAuth(handleApplyPresets)}
                         disabled={originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing'}
-                        className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500"
+                        className="w-full bg-amber-600 hover:bg-amber-500 text-white"
                       >
                         <Wand2 className="w-4 h-4 mr-2" />
-                        Apply Preset
+                        Apply {Object.values(selectedPresets).filter(Boolean).length > 1 ? 'Presets' : 'Preset'}
                       </Button>
                       <button
-                        onClick={() => setSelectedPresets({ lighting: null, style: null, camera: null, mood: null, color: null, era: null, hardware: null, angles: null, shotSize: null, perspective: null, rotation: null })}
+                        onClick={() => setSelectedPresets({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, angles: null, shotSize: null, rotation: null })}
                         className="w-full mt-2 text-xs text-white/40 hover:text-white/60 transition-colors"
                       >
                         Clear selections
                       </button>
                     </div>
-                  )}
+                  </div>
                 </div>
 
               </div>
@@ -3575,27 +3535,48 @@ function HomeContent() {
 
             {/* Resize Tool */}
             {selectedTool === 'export' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 p-4 flex flex-col h-full">
-                <h2 className="font-semibold mb-1">Resize</h2>
-                <p className="text-xs text-white/50 mb-4">
-                  Resize and download your images.
-                </p>
-
-                {/* Upload prompt banner when no image */}
-                {!uploadedImage && (
-                  <button
-                    onClick={openFileDialog}
-                    className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer text-left"
-                  >
-                    <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-1">
-                      <Upload className="w-4 h-4" />
-                      Upload an image to start editing
+              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col h-full">
+                {/* Image Section */}
+                <div className="p-4 border-b border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-white/70">Image</h3>
+                    <button
+                      onClick={uploadedImage ? handleNewClick : openFileDialog}
+                      className={`text-xs flex items-center gap-0.5 transition-colors ${
+                        uploadedImage
+                          ? 'text-white/40 hover:text-white/70'
+                          : 'text-amber-500 hover:text-amber-400'
+                      }`}
+                    >
+                      <Plus className="w-3 h-3" />
+                      New
+                    </button>
+                  </div>
+                  {uploadedImage ? (
+                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
+                        <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
+                      </div>
                     </div>
-                    <p className="text-xs text-white/50">Click here or drop an image in the preview area</p>
-                  </button>
-                )}
+                  ) : (
+                    <button
+                      onClick={openFileDialog}
+                      className="w-full p-3 rounded-lg border border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-colors"
+                    >
+                      <span className="text-[11px] text-white/30">No image uploaded</span>
+                    </button>
+                  )}
+                </div>
 
-                {/* Smart Resize Section */}
+                {/* Tool Content */}
+                <div className="p-4 flex-1 flex flex-col overflow-hidden">
+                  <h2 className="font-semibold mb-1">Resize</h2>
+                  <p className="text-xs text-white/50 mb-3">
+                    AI-powered resizing to fit any aspect ratio or platform.
+                  </p>
+
+                  {/* Smart Resize Section */}
                 {uploadedImage && (
                   <div className="mb-4">
                     <div className="space-y-1.5">
@@ -3757,38 +3738,80 @@ function HomeContent() {
                     </button>
                   )}
                 </div>
+                </div>
               </div>
             )}
 
             {/* Backgrounds Tool */}
             {selectedTool === 'backgrounds' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 p-4 flex flex-col h-full">
-                <h2 className="font-semibold mb-1">Backgrounds</h2>
-                <p className="text-xs text-white/50 mb-3">
-                  Change the background while preserving the product and any models.
-                </p>
-
-                {/* Current background description */}
-                {analysis?.backgroundDescription && uploadedImage && (
-                  <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-[11px] text-white/40 uppercase tracking-wide">Current background</span>
-                    <p className="text-[11px] text-white/50 italic leading-relaxed mt-1">{analysis.backgroundDescription}</p>
+              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col h-full">
+                {/* Image Section */}
+                <div className="p-4 border-b border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-white/70">Image</h3>
+                    <button
+                      onClick={uploadedImage ? handleNewClick : openFileDialog}
+                      className={`text-xs flex items-center gap-0.5 transition-colors ${
+                        uploadedImage
+                          ? 'text-white/40 hover:text-white/70'
+                          : 'text-amber-500 hover:text-amber-400'
+                      }`}
+                    >
+                      <Plus className="w-3 h-3" />
+                      New
+                    </button>
                   </div>
-                )}
-
-                {/* Upload prompt banner when no image */}
-                {!uploadedImage && (
-                  <button
-                    onClick={openFileDialog}
-                    className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer text-left"
-                  >
-                    <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-1">
-                      <Upload className="w-4 h-4" />
-                      Upload an image to start editing
+                  {uploadedImage ? (
+                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
+                        <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
+                      </div>
                     </div>
-                    <p className="text-xs text-white/50">Click here or drop an image in the preview area</p>
-                  </button>
-                )}
+                  ) : (
+                    <button
+                      onClick={openFileDialog}
+                      className="w-full p-3 rounded-lg border border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-colors"
+                    >
+                      <span className="text-[11px] text-white/30">No image uploaded</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Tool Content */}
+                <div className="p-4 flex flex-col flex-1 overflow-hidden">
+                  <h2 className="font-semibold mb-1">Backgrounds</h2>
+                  <div className="text-xs text-white/50 mb-3">
+                    Change the background while preserving the product and any models.
+                    {uploadedImage && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => analysis?.backgroundDescription && setShowBackgroundDetails(!showBackgroundDetails)}
+                            disabled={!analysis?.backgroundDescription}
+                            className={`inline-flex items-center gap-1 ml-1.5 transition-colors ${
+                              analysis?.backgroundDescription
+                                ? 'text-white/60 hover:text-white/80 cursor-pointer'
+                                : 'text-white/30 cursor-not-allowed'
+                            }`}
+                          >
+                            <span>Current Background</span>
+                            <ChevronDown className={`w-3 h-3 transition-transform ${showBackgroundDetails ? 'rotate-180' : ''}`} />
+                          </button>
+                        </TooltipTrigger>
+                        {!analysis?.backgroundDescription && (
+                          <TooltipContent side="bottom">
+                            <p className="text-xs">Still analyzing...</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    )}
+                  </div>
+                  {showBackgroundDetails && analysis?.backgroundDescription && (
+                    <div className="mb-3 p-2.5 rounded-lg bg-white/5 border border-white/10">
+                      <p className="text-[11px] text-white/50 italic leading-relaxed">{analysis.backgroundDescription}</p>
+                    </div>
+                  )}
 
                 {/* Generate AI Suggestions Button - Top */}
                 <button
@@ -3877,39 +3900,81 @@ function HomeContent() {
                     })}
                   </div>
                 </div>
+                </div>
 
               </div>
             )}
 
             {/* Model Tool */}
             {selectedTool === 'model' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 p-4 flex flex-col h-full overflow-hidden">
-                <h2 className="font-semibold mb-1">Model</h2>
-                <p className="text-xs text-white/50 mb-3">
-                  Change the model while preserving background, lighting & product.
-                </p>
-
-                {/* Current model description */}
-                {analysis?.subjectDescription && uploadedImage && (
-                  <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-[11px] text-white/40 uppercase tracking-wide">Current model</span>
-                    <p className="text-[11px] text-white/50 italic leading-relaxed mt-1">{analysis.subjectDescription}</p>
+              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col h-full overflow-hidden">
+                {/* Image Section */}
+                <div className="p-4 border-b border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-white/70">Image</h3>
+                    <button
+                      onClick={uploadedImage ? handleNewClick : openFileDialog}
+                      className={`text-xs flex items-center gap-0.5 transition-colors ${
+                        uploadedImage
+                          ? 'text-white/40 hover:text-white/70'
+                          : 'text-amber-500 hover:text-amber-400'
+                      }`}
+                    >
+                      <Plus className="w-3 h-3" />
+                      New
+                    </button>
                   </div>
-                )}
-
-                {/* Upload prompt banner when no image */}
-                {!uploadedImage && (
-                  <button
-                    onClick={openFileDialog}
-                    className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer text-left"
-                  >
-                    <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-1">
-                      <Upload className="w-4 h-4" />
-                      Upload an image to start editing
+                  {uploadedImage ? (
+                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
+                        <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
+                      </div>
                     </div>
-                    <p className="text-xs text-white/50">Click here or drop an image in the preview area</p>
-                  </button>
-                )}
+                  ) : (
+                    <button
+                      onClick={openFileDialog}
+                      className="w-full p-3 rounded-lg border border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-colors"
+                    >
+                      <span className="text-[11px] text-white/30">No image uploaded</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Tool Content */}
+                <div className="p-4 flex flex-col flex-1 overflow-hidden">
+                  <h2 className="font-semibold mb-1">Model</h2>
+                  <div className="text-xs text-white/50 mb-3">
+                    Change the model while preserving background, lighting & product.
+                    {uploadedImage && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => analysis?.subjectDescription && setShowModelDetails(!showModelDetails)}
+                            disabled={!analysis?.subjectDescription}
+                            className={`inline-flex items-center gap-1 ml-1.5 transition-colors ${
+                              analysis?.subjectDescription
+                                ? 'text-white/60 hover:text-white/80 cursor-pointer'
+                                : 'text-white/30 cursor-not-allowed'
+                            }`}
+                          >
+                            <span>Current Model</span>
+                            <ChevronDown className={`w-3 h-3 transition-transform ${showModelDetails ? 'rotate-180' : ''}`} />
+                          </button>
+                        </TooltipTrigger>
+                        {!analysis?.subjectDescription && (
+                          <TooltipContent side="bottom">
+                            <p className="text-xs">Still analyzing...</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    )}
+                  </div>
+                  {showModelDetails && analysis?.subjectDescription && (
+                    <div className="mb-3 p-2.5 rounded-lg bg-white/5 border border-white/10">
+                      <p className="text-[11px] text-white/50 italic leading-relaxed">{analysis.subjectDescription}</p>
+                    </div>
+                  )}
 
                 {/* Model controls wrapper - disabled when no image */}
                 <div className={!uploadedImage ? 'opacity-50 pointer-events-none' : ''}>
@@ -4188,6 +4253,7 @@ function HomeContent() {
                   >
                     Generate
                   </button>
+                </div>
                 </div>
                 </div>
               </div>
