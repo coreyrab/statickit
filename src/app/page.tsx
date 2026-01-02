@@ -237,10 +237,9 @@ function HomeContent() {
     color: string | null;
     era: string | null;
     camera: string | null;
-    angles: string | null;
-    shotSize: string | null;
+    framing: string | null;
     rotation: string | null;
-  }>({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, angles: null, shotSize: null, rotation: null });
+  }>({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null });
   const [expandedPresetCategory, setExpandedPresetCategory] = useState<string | null>(null);
   const [showImageDetails, setShowImageDetails] = useState(false);
   const [showBackgroundDetails, setShowBackgroundDetails] = useState(false);
@@ -298,30 +297,20 @@ function HomeContent() {
       { id: 'polaroid', name: 'Polaroid Instant', prompt: 'Apply Polaroid instant camera look: characteristic Polaroid color cast, slightly faded and washed out tones, soft dreamy focus, instant film texture, vintage instant photography aesthetic, white border framing feel, nostalgic lo-fi charm, maintain all subjects exactly as they are' },
       { id: 'ring-camera', name: 'Ring Camera', prompt: 'Apply Ring doorbell camera look: pronounced fisheye barrel distortion with curved edges, warm amber/orange color cast especially in daylight, HDR-style processing with boosted shadows, slightly soft compressed video quality, high vantage point perspective looking downward, wide field of view capturing full scene, doorbell camera surveillance aesthetic, do not add any text or logos or watermarks, maintain all subjects exactly as they are' },
     ],
-    angles: [
-      { id: 'eye-level', name: 'Eye Level', prompt: 'Adjust the camera angle to eye level perspective: camera positioned at the subject\'s eye height, natural and neutral viewing angle that creates direct connection with the viewer, balanced and relatable framing, standard conversational perspective, maintain all subjects and their features exactly as they are' },
-      { id: 'high-angle', name: 'High Angle', prompt: 'Apply high angle camera perspective: camera positioned above the subject looking down at approximately 30-45 degrees, subject appears smaller and more vulnerable, creates sense of overview or observation, slightly diminished subject presence, maintain all subjects and their features exactly as they are' },
-      { id: 'low-angle', name: 'Low Angle', prompt: 'Apply low angle camera perspective: camera positioned below the subject looking up at approximately 30-45 degrees, subject appears more powerful and dominant, heroic or imposing presence, dramatic sense of authority and strength, maintain all subjects and their features exactly as they are' },
-      { id: 'dutch-angle', name: 'Dutch Angle', prompt: 'Apply Dutch angle (Dutch tilt) perspective: camera tilted on its axis at 15-30 degrees creating diagonal horizon line, sense of unease or dynamic tension, edgy and unconventional framing, cinematic drama and visual interest, maintain all subjects and their features exactly as they are' },
-      { id: 'birds-eye-view', name: "Bird's-Eye View", prompt: 'Apply bird\'s-eye view (overhead) perspective: camera positioned directly above looking straight down at 90 degrees, top-down flat lay composition, unique overhead vantage point, reveals spatial relationships and patterns from above, maintain all subjects and their features exactly as they are' },
-      { id: 'worms-eye-view', name: "Worm's-Eye View", prompt: 'Apply worm\'s-eye view perspective: extreme low angle camera positioned at ground level looking up, dramatic upward perspective, subjects and surroundings tower above, sky or ceiling prominently visible, powerful and awe-inspiring viewpoint, maintain all subjects and their features exactly as they are' },
-    ],
-    shotSize: [
-      { id: 'extreme-closeup', name: 'Extreme Close-Up', prompt: 'Apply extreme close-up framing: tight crop focusing on a specific detail like eyes, lips, hands, or product detail, intimate and intense focus, fills the entire frame with the detail, reveals texture and fine elements, maintain the subject exactly as it is' },
+    framing: [
       { id: 'closeup', name: 'Close-Up', prompt: 'Apply close-up shot framing: subject\'s face or key product feature fills most of the frame, typically from shoulders/top up for people, emphasizes facial expressions or product details, intimate connection with viewer, maintain the subject exactly as it is' },
-      { id: 'medium-closeup', name: 'Medium Close-Up', prompt: 'Apply medium close-up framing: subject framed from chest up, balance between facial detail and some body language context, common for interviews and portraits, professional headshot style, maintain the subject exactly as it is' },
       { id: 'medium-shot', name: 'Medium Shot', prompt: 'Apply medium shot framing: subject framed from waist up, shows upper body and hand gestures, balance between subject and environment, conversational and natural framing, maintain the subject exactly as it is' },
-      { id: 'medium-wide', name: 'Medium Wide Shot', prompt: 'Apply medium wide shot framing: subject framed from knees up, full body gestures visible with environmental context, also called "American shot" or "cowboy shot", good for showing action and setting, maintain the subject exactly as it is' },
       { id: 'wide-shot', name: 'Wide Shot', prompt: 'Apply wide shot framing: full body of subject visible with significant environment around them, establishes the subject within their space, shows complete figure and surroundings, lifestyle photography style, maintain the subject exactly as it is' },
-      { id: 'extreme-wide', name: 'Extreme Wide Shot', prompt: 'Apply extreme wide shot (establishing shot) framing: vast view of the environment with subject appearing small within it, emphasizes location and scale, cinematic landscape perspective, environmental storytelling, maintain the subject exactly as it is' },
+      { id: 'high-angle', name: 'High Angle', prompt: 'Render this scene from a higher camera angle looking down at 30-45 degrees. CRITICAL: The subject does NOT crouch, kneel, or change their pose. They stay standing/sitting exactly as they were. Only the camera moves higher. The subject appears smaller because the CAMERA moved up, not because they crouched down. Same pose, same position, only the viewpoint changes.' },
+      { id: 'low-angle', name: 'Low Angle', prompt: 'Render this scene from a lower camera angle looking up at 30-45 degrees. CRITICAL: The subject does NOT stand on something or change their pose. They stay exactly as they were. Only the camera moves lower. The subject appears more powerful/dominant because the CAMERA moved down, not because they stood taller. Same pose, same position, only the viewpoint changes.' },
+      { id: 'birds-eye-view', name: "Bird's-Eye View", prompt: 'Render this scene from directly above looking down. CRITICAL: The subject does NOT lay down. The subject does NOT change their pose. They stay standing/sitting exactly as they were. Only the camera moves above them. We see the top of their head and shoulders from above because the CAMERA moved up, not because the subject laid down. Same pose, same position, only the viewpoint changes.' },
     ],
     rotation: [
-      { id: 'orbit-right', name: 'Orbit Right', prompt: 'Show this same scene from a camera positioned to the subject\'s right side. The subject keeps their exact same pose and expression - do not change anything about how they are positioned. Only the camera viewpoint changes to show their right profile. IMPORTANT: The subject\'s face must remain exactly the same - same facial features, same expression, same identity. Any text or lettering in the image must not be changed or altered in any way.' },
-      { id: 'orbit-left', name: 'Orbit Left', prompt: 'Show this same scene from a camera positioned to the subject\'s left side. The subject keeps their exact same pose and expression - do not change anything about how they are positioned. Only the camera viewpoint changes to show their left profile. IMPORTANT: The subject\'s face must remain exactly the same - same facial features, same expression, same identity. Any text or lettering in the image must not be changed or altered in any way.' },
-      { id: 'orbit-behind', name: 'Orbit Behind', prompt: 'Show this same scene from a camera positioned behind the subject. The subject keeps their exact same pose - do not change anything about how they are positioned. Only the camera viewpoint changes to show their back. IMPORTANT: Any text or lettering in the image must not be changed or altered in any way.' },
-      { id: 'orbit-45-right', name: 'Orbit 45° Right', prompt: 'Show this same scene from a camera positioned 45 degrees to the subject\'s right. The subject keeps their exact same pose and expression - do not change anything about how they are positioned. Only the camera viewpoint changes to a three-quarter view from the right. IMPORTANT: The subject\'s face must remain exactly the same - same facial features, same expression, same identity. Any text or lettering in the image must not be changed or altered in any way.' },
-      { id: 'orbit-45-left', name: 'Orbit 45° Left', prompt: 'Show this same scene from a camera positioned 45 degrees to the subject\'s left. The subject keeps their exact same pose and expression - do not change anything about how they are positioned. Only the camera viewpoint changes to a three-quarter view from the left. IMPORTANT: The subject\'s face must remain exactly the same - same facial features, same expression, same identity. Any text or lettering in the image must not be changed or altered in any way.' },
-      { id: 'orbit-above', name: 'Orbit Above', prompt: 'Show this same scene from a camera positioned directly above looking down. The subject keeps their exact same pose - do not change anything about how they are positioned. Only the camera viewpoint changes to a bird\'s eye view. IMPORTANT: Any text or lettering in the image must not be changed or altered in any way.' },
+      { id: 'orbit-right', name: 'Orbit Right', prompt: 'Render this scene from a different camera angle - position the virtual camera to the subject\'s right side. CRITICAL: The subject\'s head does NOT turn. Their body does NOT move. Their gaze direction stays EXACTLY the same as the original. Only the camera viewpoint changes. We are seeing the same frozen moment from a different angle. The result should show their right profile because WE moved, not because THEY turned. IMPORTANT: Same facial features, same expression, same identity. Any text or lettering must not be changed.' },
+      { id: 'orbit-left', name: 'Orbit Left', prompt: 'Render this scene from a different camera angle - position the virtual camera to the subject\'s left side. CRITICAL: The subject\'s head does NOT turn. Their body does NOT move. Their gaze direction stays EXACTLY the same as the original. Only the camera viewpoint changes. We are seeing the same frozen moment from a different angle. The result should show their left profile because WE moved, not because THEY turned. IMPORTANT: Same facial features, same expression, same identity. Any text or lettering must not be changed.' },
+      { id: 'orbit-behind', name: 'Orbit Behind', prompt: 'Render this scene from a different camera angle - position the virtual camera behind the subject. CRITICAL: The subject\'s head does NOT turn. Their body does NOT move. Only the camera viewpoint changes. We are seeing the same frozen moment from behind. The result shows their back because WE moved behind them, not because THEY turned around. IMPORTANT: Any text or lettering must not be changed.' },
+      { id: 'orbit-45-right', name: 'Orbit 45° Right', prompt: 'Render this scene from a different camera angle - position the virtual camera 45 degrees to the subject\'s right. CRITICAL: The subject\'s head does NOT turn. Their body does NOT move. Their gaze direction stays EXACTLY the same as the original. Only the camera viewpoint changes. We are seeing the same frozen moment from a slight angle. IMPORTANT: Same facial features, same expression, same identity. Any text or lettering must not be changed.' },
+      { id: 'orbit-45-left', name: 'Orbit 45° Left', prompt: 'Render this scene from a different camera angle - position the virtual camera 45 degrees to the subject\'s left. CRITICAL: The subject\'s head does NOT turn. Their body does NOT move. Their gaze direction stays EXACTLY the same as the original. Only the camera viewpoint changes. We are seeing the same frozen moment from a slight angle. IMPORTANT: Same facial features, same expression, same identity. Any text or lettering must not be changed.' },
     ],
   };
 
@@ -1217,8 +1206,7 @@ function HomeContent() {
     addPreset('color', selectedPresets.color);
     addPreset('era', selectedPresets.era);
     addPreset('camera', selectedPresets.camera);
-    addPreset('angles', selectedPresets.angles);
-    addPreset('shotSize', selectedPresets.shotSize);
+    addPreset('framing', selectedPresets.framing);
     addPreset('rotation', selectedPresets.rotation);
 
     if (prompts.length === 0) return;
@@ -1227,7 +1215,7 @@ function HomeContent() {
     const presetLabel = presetNames.filter(Boolean).join(' + ') + ' [preset]';
 
     // Clear selections immediately
-    setSelectedPresets({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, angles: null, shotSize: null, rotation: null });
+    setSelectedPresets({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null });
 
     try {
       // Get current image to edit - only from completed versions
@@ -3413,67 +3401,31 @@ function HomeContent() {
                       )}
                     </div>
 
-                    {/* Angles */}
+                    {/* Framing */}
                     <div className="rounded-lg border border-white/10 overflow-hidden">
                       <button
-                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'angles' ? null : 'angles')}
-                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Move className="w-4 h-4 text-white/60" />
-                          <span>Angles</span>
-                          {selectedPresets.angles && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
-                        </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'angles' ? 'rotate-180' : ''}`} />
-                      </button>
-                      {expandedPresetCategory === 'angles' && (
-                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
-                          {PRESETS.angles.map((preset) => (
-                            <button
-                              key={preset.id}
-                              disabled={!uploadedImage}
-                              onClick={() => setSelectedPresets(prev => ({
-                                ...prev,
-                                angles: prev.angles === preset.id ? null : preset.id
-                              }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
-                                selectedPresets.angles === preset.id
-                                  ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
-                              }`}
-                            >
-                              {preset.name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Shot Size / Framing */}
-                    <div className="rounded-lg border border-white/10 overflow-hidden">
-                      <button
-                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'shotSize' ? null : 'shotSize')}
+                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'framing' ? null : 'framing')}
                         className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
                       >
                         <div className="flex items-center gap-2">
                           <Scan className="w-4 h-4 text-white/60" />
-                          <span>Shot Size</span>
-                          {selectedPresets.shotSize && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+                          <span>Framing</span>
+                          {selectedPresets.framing && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'shotSize' ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'framing' ? 'rotate-180' : ''}`} />
                       </button>
-                      {expandedPresetCategory === 'shotSize' && (
+                      {expandedPresetCategory === 'framing' && (
                         <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
-                          {PRESETS.shotSize.map((preset) => (
+                          {PRESETS.framing.map((preset) => (
                             <button
                               key={preset.id}
                               disabled={!uploadedImage}
                               onClick={() => setSelectedPresets(prev => ({
                                 ...prev,
-                                shotSize: prev.shotSize === preset.id ? null : preset.id
+                                framing: prev.framing === preset.id ? null : preset.id
                               }))}
                               className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
-                                selectedPresets.shotSize === preset.id
+                                selectedPresets.framing === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
                                   : 'hover:bg-white/10 disabled:hover:bg-transparent'
                               }`}
@@ -3523,7 +3475,7 @@ function HomeContent() {
 
                     {/* Apply button - always rendered, visibility controlled by opacity */}
                     <div className={`mt-3 pt-3 border-t border-white/10 transition-opacity duration-150 ${
-                      (selectedPresets.lighting || selectedPresets.style || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.camera || selectedPresets.angles || selectedPresets.shotSize || selectedPresets.rotation)
+                      (selectedPresets.lighting || selectedPresets.style || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.camera || selectedPresets.framing || selectedPresets.rotation)
                         ? 'opacity-100'
                         : 'opacity-0 pointer-events-none'
                     }`}>
@@ -3536,7 +3488,7 @@ function HomeContent() {
                         Apply {Object.values(selectedPresets).filter(Boolean).length > 1 ? 'Presets' : 'Preset'}
                       </Button>
                       <button
-                        onClick={() => setSelectedPresets({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, angles: null, shotSize: null, rotation: null })}
+                        onClick={() => setSelectedPresets({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null })}
                         className="w-full mt-2 text-xs text-white/40 hover:text-white/60 transition-colors"
                       >
                         Clear selections
