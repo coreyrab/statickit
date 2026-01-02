@@ -2381,6 +2381,8 @@ function HomeContent() {
                         Processing{originalVersions[originalVersionIndex]?.prompt ? (
                           originalVersions[originalVersionIndex].prompt.includes('[preset]')
                             ? ` "${originalVersions[originalVersionIndex].prompt.replace(' [preset]', '')}"`
+                            : originalVersions[originalVersionIndex].prompt.includes('[background]')
+                            ? ` "${originalVersions[originalVersionIndex].prompt.replace('[background] ', '')}"`
                             : ` "${originalVersions[originalVersionIndex].prompt}"`
                         ) : ''}...
                       </span>
@@ -2391,6 +2393,11 @@ function HomeContent() {
                         <span>
                           <span className="text-amber-400">[preset]</span>
                           <span className="italic text-white/60"> {originalVersions[originalVersionIndex].prompt.replace(' [preset]', '')}</span>
+                        </span>
+                      ) : originalVersions[originalVersionIndex].prompt.includes('[background]') ? (
+                        <span>
+                          <span className="text-amber-400">[background]</span>
+                          <span className="italic text-white/60"> {originalVersions[originalVersionIndex].prompt.replace('[background] ', '')}</span>
                         </span>
                       ) : (
                         <span className="italic text-white/60">"{originalVersions[originalVersionIndex].prompt}"</span>
@@ -2438,6 +2445,14 @@ function HomeContent() {
                           <span>
                             <span className="text-amber-400">[preset]</span>
                             <span className="italic text-white/60"> {currentVersionPrompt.replace(' [preset]', '')}</span>
+                          </span>
+                        );
+                      }
+                      if (currentVersionPrompt.includes('[background]')) {
+                        return (
+                          <span>
+                            <span className="text-amber-400">[background]</span>
+                            <span className="italic text-white/60"> {currentVersionPrompt.replace('[background] ', '')}</span>
                           </span>
                         );
                       }
