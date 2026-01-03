@@ -21,57 +21,56 @@
 
 ---
 
-StaticKit is an open-source GUI for AI image generation. Think of it as a front-end for Gemini Imagen, Nano Banana Pro, and other image models. Upload any image and create endless variations — swap backgrounds, change models, adjust lighting, orbit the camera, and more.
+StaticKit is an open-source GUI for AI image generation. It works with Gemini Imagen, Fal, and other image models. Upload an image and generate variations: swap backgrounds, change models, adjust lighting, orbit the camera, resize to different aspect ratios.
 
-**Bring your own API key. No account required. Your keys never leave your browser.**
+**Bring your own API key. No account required. Keys stay in your browser.**
 
-## ✨ Features
+## Features
 
-- 🖼️ **AI Image Variations** — Generate unlimited variations of any image
-- 🎨 **Background Swap** — Change backgrounds with natural lighting match
-- 👤 **Model Replacement** — Swap models while preserving products/poses
-- 🔄 **Camera Orbit** — View subjects from different angles (front, side, behind)
-- 📐 **Smart Resize** — AI-powered resize to any aspect ratio
-- ☀️ **Lighting Presets** — Golden hour, blue hour, studio lighting
-- 🔑 **BYOK** — Bring your own Gemini API key (stored locally in browser)
-- 🔒 **Privacy First** — No accounts, no tracking, no data collection
+- Generate variations of any image
+- Swap backgrounds with matched lighting
+- Replace models while keeping products and poses
+- Orbit camera to different angles
+- Resize to any aspect ratio
+- Lighting presets (golden hour, studio, etc.)
+- BYOK: use your own Gemini API key, stored locally
+- No accounts, no tracking
 
-## 🚀 Quick Start
+## Quick Start
 
-1. **Clone the repo**
+1. Clone the repo
    ```bash
    git clone https://github.com/CoreyRab/statickit.git
    cd statickit
    ```
 
-2. **Install dependencies**
+2. Install dependencies
    ```bash
    npm install
    ```
 
-3. **Run the app**
+3. Run the app
    ```bash
    npm run dev
    ```
 
-4. **Add your API key**
+4. Add your API key
    - Get a free Gemini API key from https://aistudio.google.com/apikey
-   - Paste it when prompted in the app
+   - Paste it when prompted
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Framework:** Next.js 16 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **UI Components:** Radix UI
-- **AI Model:** Google Gemini API
-- **State:** Zustand
+- Next.js 16 (App Router)
+- TypeScript
+- Tailwind CSS
+- Radix UI
+- Google Gemini API
+- Zustand
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! Please read our [CONTRIBUTING.md](.github/CONTRIBUTING.md) first.
+Contributions welcome. See [CONTRIBUTING.md](.github/CONTRIBUTING.md).
 
-## 📄 License
+## License
 
-[AGPL-3.0](LICENSE) — Free to use, modify, and distribute.
-If you run this as a network service, you must share your modifications.
+[AGPL-3.0](LICENSE)
