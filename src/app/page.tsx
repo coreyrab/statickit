@@ -3341,12 +3341,12 @@ function HomeContent() {
                     </div>
                   )}
 
-                  <div className="flex-1 overflow-y-auto space-y-2 touch-scroll">
+                  <div className="flex-1 overflow-y-auto space-y-2 touch-scroll pb-20 md:pb-2">
                     {/* Lighting */}
                     <div className="rounded-lg border border-white/10 overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'lighting' ? null : 'lighting')}
-                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
                       >
                         <div className="flex items-center gap-2">
                           <Sun className="w-4 h-4 text-white/60" />
@@ -3365,7 +3365,7 @@ function HomeContent() {
                                 ...prev,
                                 lighting: prev.lighting === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
                                 selectedPresets.lighting === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
                                   : 'hover:bg-white/10 disabled:hover:bg-transparent'
@@ -3382,7 +3382,7 @@ function HomeContent() {
                     <div className="rounded-lg border border-white/10 overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'style' ? null : 'style')}
-                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
                       >
                         <div className="flex items-center gap-2">
                           <Palette className="w-4 h-4 text-white/60" />
@@ -3401,7 +3401,7 @@ function HomeContent() {
                                 ...prev,
                                 style: prev.style === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
                                 selectedPresets.style === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
                                   : 'hover:bg-white/10 disabled:hover:bg-transparent'
@@ -3418,7 +3418,7 @@ function HomeContent() {
                     <div className="rounded-lg border border-white/10 overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'camera' ? null : 'camera')}
-                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
                       >
                         <div className="flex items-center gap-2">
                           <Camera className="w-4 h-4 text-white/60" />
@@ -3437,7 +3437,7 @@ function HomeContent() {
                                 ...prev,
                                 camera: prev.camera === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
                                 selectedPresets.camera === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
                                   : 'hover:bg-white/10 disabled:hover:bg-transparent'
@@ -3454,7 +3454,7 @@ function HomeContent() {
                     <div className="rounded-lg border border-white/10 overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'mood' ? null : 'mood')}
-                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
                       >
                         <div className="flex items-center gap-2">
                           <Sparkles className="w-4 h-4 text-white/60" />
@@ -3473,7 +3473,7 @@ function HomeContent() {
                                 ...prev,
                                 mood: prev.mood === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
                                 selectedPresets.mood === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
                                   : 'hover:bg-white/10 disabled:hover:bg-transparent'
@@ -3490,7 +3490,7 @@ function HomeContent() {
                     <div className="rounded-lg border border-white/10 overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'color' ? null : 'color')}
-                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
                       >
                         <div className="flex items-center gap-2">
                           <Droplets className="w-4 h-4 text-white/60" />
@@ -3509,7 +3509,7 @@ function HomeContent() {
                                 ...prev,
                                 color: prev.color === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
                                 selectedPresets.color === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
                                   : 'hover:bg-white/10 disabled:hover:bg-transparent'
@@ -3526,7 +3526,7 @@ function HomeContent() {
                     <div className="rounded-lg border border-white/10 overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'era' ? null : 'era')}
-                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
                       >
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-white/60" />
@@ -3545,7 +3545,7 @@ function HomeContent() {
                                 ...prev,
                                 era: prev.era === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
                                 selectedPresets.era === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
                                   : 'hover:bg-white/10 disabled:hover:bg-transparent'
@@ -3562,7 +3562,7 @@ function HomeContent() {
                     <div className="rounded-lg border border-white/10 overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'framing' ? null : 'framing')}
-                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
                       >
                         <div className="flex items-center gap-2">
                           <Scan className="w-4 h-4 text-white/60" />
@@ -3581,7 +3581,7 @@ function HomeContent() {
                                 ...prev,
                                 framing: prev.framing === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
                                 selectedPresets.framing === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
                                   : 'hover:bg-white/10 disabled:hover:bg-transparent'
@@ -3598,7 +3598,7 @@ function HomeContent() {
                     <div className="rounded-lg border border-white/10 overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'rotation' ? null : 'rotation')}
-                        className="w-full px-3 py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
                       >
                         <div className="flex items-center gap-2">
                           <RotateCw className="w-4 h-4 text-white/60" />
@@ -3617,7 +3617,7 @@ function HomeContent() {
                                 ...prev,
                                 rotation: prev.rotation === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
                                 selectedPresets.rotation === preset.id
                                   ? 'bg-amber-600/30 text-amber-300'
                                   : 'hover:bg-white/10 disabled:hover:bg-transparent'
@@ -3955,7 +3955,7 @@ function HomeContent() {
                 </button>
 
                 {/* Backgrounds Grid */}
-                <div className={`flex-1 overflow-y-auto touch-scroll ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className={`flex-1 overflow-y-auto touch-scroll pb-20 md:pb-2 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
                   <div className="grid grid-cols-2 gap-1.5">
                     {/* Separator above AI suggestions */}
                     {(isLoadingBackgroundSuggestions || backgroundSuggestions.length > 0) && (
@@ -4175,7 +4175,7 @@ function HomeContent() {
                 )}
 
                 {/* Model Builder */}
-                <div className="flex-1 overflow-y-auto space-y-3 touch-scroll">
+                <div className="flex-1 overflow-y-auto space-y-3 touch-scroll pb-20 md:pb-2">
                   <h3 className="text-xs text-white/40 uppercase tracking-wide">Model Builder</h3>
 
                   {/* Gender */}
@@ -4383,7 +4383,7 @@ function HomeContent() {
 
             {/* Variation Cards - Show for iterations tool when image uploaded */}
             {selectedTool === 'iterations' && uploadedImage && (
-              <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3 touch-scroll">
+              <div className="flex-1 overflow-y-auto px-4 pb-20 md:pb-4 space-y-3 touch-scroll">
                 {/* Base Version Cards - Original and any "New Versions" */}
                 {baseVersions.map((base, baseIdx) => {
                   const isActive = activeBaseId === base.id && selectedVariationId === null;
