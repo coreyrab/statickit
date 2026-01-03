@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef } from 'react';
-import { SignInButton } from '@clerk/nextjs';
 import { ArrowRight, Upload, Check, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +22,7 @@ export function LandingHero({ onUpload }: LandingHeroProps) {
   const uploadButton = (
     <Button
       variant="outline"
-      onClick={() => onUpload && fileInputRef.current?.click()}
+      onClick={() => fileInputRef.current?.click()}
       className="w-full h-auto p-5 justify-start"
     >
       <div className="flex items-center gap-4 w-full">
@@ -66,13 +65,7 @@ export function LandingHero({ onUpload }: LandingHeroProps) {
                 className="hidden"
               />
 
-              {onUpload ? (
-                uploadButton
-              ) : (
-                <SignInButton mode="modal">
-                  {uploadButton}
-                </SignInButton>
-              )}
+              {uploadButton}
 
               {/* See how it works - video CTA */}
               <Button

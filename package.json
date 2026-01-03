@@ -9,8 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.36.1",
-    "@clerk/themes": "^2.4.46",
     "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -22,12 +20,8 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@stripe/stripe-js": "^8.5.3",
-    "@upstash/ratelimit": "^2.0.7",
-    "@upstash/redis": "^1.35.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "convex": "^1.30.0",
     "lucide-react": "^0.555.0",
     "next": "16.0.6",
     "next-themes": "^0.4.6",
@@ -36,7 +30,6 @@
     "react-dropzone": "^14.3.8",
     "react-image-crop": "^11.0.10",
     "sonner": "^2.0.7",
-    "stripe": "^20.0.0",
     "tailwind-merge": "^3.4.0",
     "uuid": "^13.0.0",
     "zustand": "^5.0.9"

@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { auth } from '@clerk/nextjs/server';
-import { encryptApiKey } from '@/lib/encryption';
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { apiKey } = await request.json();
 
     if (!apiKey) {
@@ -59,15 +52,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Key is valid - encrypt it
-    const encrypted = encryptApiKey(apiKey);
-
-    return NextResponse.json({
-      valid: true,
-      encrypted: encrypted.encrypted,
-      iv: encrypted.iv,
-      authTag: encrypted.authTag,
-    });
+    // Key is valid
+    return NextResponse.json({ valid: true });
   } catch (error: any) {
     console.error('Key validation error:', error);
     return NextResponse.json(

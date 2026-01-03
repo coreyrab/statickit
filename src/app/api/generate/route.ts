@@ -1,60 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { generateRateLimiter, checkRateLimit } from '@/lib/rate-limit';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '../../../../convex/_generated/api';
-import { getGeminiClient } from '@/lib/user-api-key';
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-
-// Admin emails that bypass credit checks
-const ADMIN_EMAILS = ['coreyrab@gmail.com'];
+import { createGeminiClient } from '@/lib/user-api-key';
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify user is authenticated
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check rate limit (10 generations/day for free tier)
-    const rateLimitResult = await checkRateLimit(generateRateLimiter, userId, 'image generations');
-    if (!rateLimitResult.success) {
-      return rateLimitResult.response;
-    }
-
-    // Get user's Gemini client (uses their BYOK key if configured, otherwise server key)
-    const { genAI, isByok, user } = await getGeminiClient(userId);
-    const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
-
-    // BYOK users skip credit checks - they use their own API quota
-    // Non-BYOK users need credits
-    if (!isByok && !isAdmin) {
-      if (!user) {
-        return NextResponse.json(
-          {
-            error: 'Account required',
-            message: 'Please sign in and add an API key or subscribe to a plan.',
-          },
-          { status: 403 }
-        );
-      }
-
-      if (user.credits < 1) {
-        return NextResponse.json(
-          {
-            error: 'Insufficient credits',
-            message: 'You have run out of credits. Please upgrade your plan or add your own API key to continue.',
-            credits: user.credits,
-          },
-          { status: 402 } // Payment Required
-        );
-      }
-    }
-
-    const { image, mimeType, analysis, variationDescription, aspectRatio, isEdit, isBackgroundOnly, isModelOnly, keepClothing } =
+    const { apiKey, image, mimeType, analysis, variationDescription, aspectRatio, isEdit, isBackgroundOnly, isModelOnly, keepClothing } =
       await request.json();
+
+    if (!apiKey) {
+      return NextResponse.json({ error: 'API key required' }, { status: 400 });
+    }
 
     if (!image || !mimeType || !analysis || !variationDescription) {
       return NextResponse.json(
@@ -62,6 +16,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const { genAI } = createGeminiClient(apiKey);
 
     // Use Gemini 3 Pro Image - the latest high-fidelity image generation model
     // This model better preserves reference images and maintains product consistency
@@ -293,17 +249,7 @@ Generate the variation that implements the requested change while keeping the pr
           const imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
           console.log('Generated image successfully');
 
-          // Deduct 1 credit for successful generation (skip for BYOK users)
-          if (!isByok && !isAdmin) {
-            try {
-              await convex.mutation(api.users.useCredits, { amount: 1 });
-            } catch (creditError) {
-              console.error('Failed to deduct credit:', creditError);
-              // Continue anyway - don't block the user
-            }
-          }
-
-          return NextResponse.json({ imageUrl, isByok });
+          return NextResponse.json({ imageUrl });
         }
         if ('text' in part && part.text) {
           console.log('Text response:', part.text.substring(0, 100));

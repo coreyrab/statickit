@@ -1,26 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { generalRateLimiter, checkRateLimit } from '@/lib/rate-limit';
-import { getGeminiClient } from '@/lib/user-api-key';
+import { createGeminiClient } from '@/lib/user-api-key';
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify user is authenticated
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { apiKey, shortPrompt, analysis } = await request.json();
+
+    if (!apiKey) {
+      return NextResponse.json({ error: 'API key required' }, { status: 400 });
     }
-
-    // Check rate limit (200 requests/day for lighter operations)
-    const rateLimitResult = await checkRateLimit(generalRateLimiter, userId, 'API requests');
-    if (!rateLimitResult.success) {
-      return rateLimitResult.response;
-    }
-
-    // Get user's Gemini client (uses their BYOK key if configured)
-    const { genAI } = await getGeminiClient(userId);
-
-    const { shortPrompt, analysis } = await request.json();
 
     if (!shortPrompt) {
       return NextResponse.json(
@@ -29,6 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { genAI } = createGeminiClient(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `You are an expert advertising creative director. A user wants to create an ad variation and has provided a brief idea. Expand it into a detailed, specific prompt that would work well for AI image generation.
