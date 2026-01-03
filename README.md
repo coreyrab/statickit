@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="public/logo.svg" width="60" alt="StaticKit" />
+  <img src="public/banner.png" width="700" alt="StaticKit" />
 </p>
-
-<h1 align="center">StaticKit</h1>
 
 <p align="center">
   A free, open-source front-end for AI image models
