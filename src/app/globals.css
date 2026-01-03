@@ -161,3 +161,46 @@ input[type="range"].weirdness-slider::-moz-range-thumb {
 input[type="range"].weirdness-slider::-moz-range-thumb:hover {
   transform: scale(1.15);
 }
+
+/* Mobile-specific utilities */
+
+/* Safe area padding for notched devices (iPhone X+, etc.) */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-pt {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Prevent iOS zoom on input focus */
+@media (max-width: 767px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Improve touch scrolling */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text selection during touch interactions */
+.touch-none {
+  touch-action: none;
+}
+
+.touch-pan-y {
+  touch-action: pan-y;
+}
+
+/* Hide scrollbar on mobile but allow scrolling */
+@media (max-width: 767px) {
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
