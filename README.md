@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/banner.png" width="700" alt="StaticKit" />
+  <img src="public/banner.jpg" width="700" alt="StaticKit" />
 </p>
 
 <p align="center">
