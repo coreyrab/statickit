@@ -15,6 +15,10 @@
   </a>
 </p>
 
+<p align="center">
+  <a href="https://statickit.ai">Website</a> · <a href="https://github.com/CoreyRab/statickit">GitHub</a> · <a href="https://x.com/coreyrab">Twitter</a>
+</p>
+
 ---
 
 StaticKit is an open-source GUI for AI image generation. Think of it as a front-end for Gemini Imagen, Nano Banana Pro, and other image models. Upload any image and create endless variations — swap backgrounds, change models, adjust lighting, orbit the camera, and more.
