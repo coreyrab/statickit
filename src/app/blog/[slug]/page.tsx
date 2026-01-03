@@ -13,39 +13,237 @@ const posts: Record<string, {
   coverImage?: string;
   content: string;
 }> = {
-  'why-iteration-beats-creation': {
-    title: 'Why iteration beats creation',
-    date: '2024-12-22',
-    author: 'Corey Rabazinski',
-    authorUrl: 'https://www.linkedin.com/in/crabazinski/',
-    coverImage: '/blog/iteration-cover.png',
-    content: `Most marketers approach ad creative backwards.
+  'gemini-image-generation-no-watermark': {
+    title: 'How to use Gemini image generation without watermarks',
+    date: '2025-01-03',
+    author: 'StaticKit',
+    content: `Google's Gemini can generate and edit images. It's genuinely impressive. There's just one problem: every image comes with a watermark.
 
-They spend weeks concepting, designing, and producing a single "perfect" ad. Then they launch it, cross their fingers, and hope it works.
+If you're using Gemini through Google's free interfaces, your outputs are marked. For personal projects, that's fine. For anything you want to actually use? Not ideal.
 
-But the best performing ads aren't created this way. They're iterated.
+Here's the thing: the watermark isn't baked into Gemini itself. It's added by Google's consumer-facing products. Access the same model through the API with your own key, and the watermark disappears.
 
-## The iteration mindset
+## Why Gemini adds watermarks (and when it doesn't)
 
-When you have a winning ad, you don't need to reinvent the wheel. You need to test variations:
+Google adds watermarks to AI-generated images for content authenticity and responsible AI practices. These are reasonable goals. But they assume you're distributing images publicly without context.
 
-- **Same product, new background.** Your protein powder in a gym. Then a kitchen. Then outdoors. Same message, different context.
+If you're editing your own photos, creating assets for a project you control, or generating reference images for your own use, the watermark just gets in the way.
 
-- **Same message, new model.** Test different demographics. Different ages. Different styles. Find who resonates.
+The API doesn't add watermarks because it's designed for developers building their own applications. Google assumes if you're paying for API access, you'll handle content policies yourself.
 
-- **Same creative, new format.** Your 1:1 feed ad becomes a 9:16 story. Your landscape becomes a square. Every platform, every placement.
+## What you need
 
-## Why this works
+To generate watermark-free images with Gemini, you need:
 
-Creative fatigue is real. Your audience stops seeing ads they've seen before. But a slight variation—a new background, a different model—registers as "new" while maintaining the winning formula.
+- **A Google AI API key** Free to create, pay-per-use pricing
 
-The math is simple: instead of one ad that might work, you have ten variations of an ad that already works.
+- **A way to call the API** Either code or a tool with a GUI
 
-## What we're building
+The first part takes about 2 minutes. The second part is where most people get stuck.
 
-StaticKit is built for this workflow. Upload your winner. Generate variations. Resize for every platform. Edit with plain english.
+## Getting your Gemini API key
 
-Stop creating from scratch. Start iterating from success.`,
+Go to Google AI Studio (aistudio.google.com), click "Get API Key" in the left sidebar, create a new key or use an existing Google Cloud project, and copy your key somewhere safe.
+
+That's it. Google gives you free credits to start, and after that it's usage-based pricing. For image generation, costs are typically a few cents per image.
+
+## Option 1: Use the API directly
+
+If you're comfortable with code, you can call the Gemini API directly with Python or any other language. This works, but it's not exactly user-friendly for quick edits. You're writing code every time you want to change something.
+
+## Option 2: Use a GUI tool
+
+If you'd rather not write Python every time you want to edit an image, you need a tool that wraps the API in a usable interface.
+
+StaticKit is a free, open-source image editor that connects to Gemini using your own API key. You get natural language editing, one-click presets for common tasks, no watermarks, and no subscription fees.
+
+Setup takes about a minute: paste your API key, and you're editing.
+
+## The cost comparison
+
+For light to moderate use, paying per image through the API is significantly cheaper than a subscription. Gemini API costs roughly $0.01-0.05 per image edit. Compare that to $10-20/month for subscription tools. And you're not locked into any platform.
+
+## Key takeaways
+
+- **The watermark is a product decision, not a technical limitation.** Gemini's API outputs clean images.
+
+- **You need an API key.** Takes 2 minutes, free to create, pay-per-use after free credits.
+
+- **You need a way to use the API.** Either write code or use a GUI tool like StaticKit.
+
+- **BYOK is often cheaper than subscriptions** for anyone who isn't generating hundreds of images daily.`,
+  },
+  'natural-language-image-editing': {
+    title: 'Edit images by describing what you want',
+    date: '2025-01-03',
+    author: 'StaticKit',
+    content: `"Remove the coffee cup from the table."
+
+"Change her shirt to red."
+
+"Make it look like the photo was taken at sunset."
+
+This is image editing now. Not selection tools and layer masks. Not watching YouTube tutorials on how to use the clone stamp. Just describing what you want.
+
+Natural language image editing has gone from research demo to genuinely useful in the past year. The models are good enough that for most common edits, typing a sentence beats learning Photoshop.
+
+## What natural language editing actually means
+
+Traditional image editing is manipulation-based. You select pixels, apply transformations, paint over areas, blend layers. The software does exactly what you tell it, which means you need to know exactly what to tell it.
+
+Natural language editing is intent-based. You describe the outcome you want, and the AI figures out the manipulation. "Remove the background" triggers segmentation, masking, and inpainting, but you never touch any of those tools directly.
+
+The trade-off is obvious: you give up fine control for speed and accessibility. For surgical edits where every pixel matters, you still want traditional tools. For 80% of common editing tasks, natural language is faster.
+
+## What works well
+
+AI text-to-edit is particularly good at:
+
+- **Object removal** "Remove the trash can on the left." The AI identifies the object, masks it, and fills with contextually appropriate content.
+
+- **Color and lighting changes** "Make the lighting warmer" or "change the car to blue." Global adjustments that affect mood or specific objects.
+
+- **Background replacement** "Put them on a beach" or "change the background to a studio setting." The AI segments the foreground and generates or replaces the background.
+
+- **Style transfer** "Make it look like a film photo" or "add a cinematic look." Applies aesthetic changes across the image.
+
+- **Adding elements** "Add clouds to the sky" or "put a plant in the corner." Generates and composites new elements.
+
+## What doesn't work well (yet)
+
+Some edits are still hit-or-miss:
+
+- **Precise positioning** "Move the lamp 3 inches to the left." AI interprets intent loosely; exact measurements are unreliable.
+
+- **Complex multi-step edits** Better to do these as separate operations.
+
+- **Text in images** Editing or adding text is notoriously difficult for current models.
+
+For these cases, traditional tools or multiple simpler prompts work better.
+
+## How to get better results
+
+Even with good tooling, some prompting habits help:
+
+- **Be specific about what, not how.** Say "Remove the person in the red jacket" not "Use inpainting to mask the area."
+
+- **One change at a time.** "Change the sky to sunset" then "Add some birds" works better than combining them.
+
+- **Describe the outcome, not the process.** "Make it look like a professional product photo" beats listing specific adjustments.
+
+- **Use comparison language when helpful.** "Lighting like late afternoon, golden hour" gives the AI useful context.
+
+## Key takeaways
+
+- **Natural language editing is intent-based.** Describe outcomes, not manipulations.
+
+- **It's best for common edits.** Object removal, color changes, backgrounds, style adjustments.
+
+- **Simple prompts beat complex ones** when the tool has good prompt engineering underneath.
+
+- **The underlying model matters less than the implementation.** Same model, different results depending on the tool.`,
+  },
+  'best-free-ai-image-editors': {
+    title: 'Best free AI image editors in 2026',
+    date: '2025-01-03',
+    author: 'StaticKit',
+    content: `Searching for "free AI image editor" is an exercise in frustration. Half the results are subscription tools with a free trial. The other half are ad-riddled web apps that watermark everything.
+
+Genuinely free AI image editing exists. You just have to know where to look and what trade-offs you're accepting.
+
+This guide covers tools that are actually free. Not "free for 3 images" or "free with watermark." Each has limitations, but none will surprise you with a paywall mid-edit.
+
+## What "free" actually means
+
+Let's be clear about the different flavors of free:
+
+- **Free tier (limited)** You get X images/month, then pay. Fine for occasional use.
+
+- **Free with ads** The tool is free, you're the product. Usually web-based, often sketchy.
+
+- **Free + API costs (BYOK)** The tool is free, you pay the AI provider directly for usage. Often the best deal for regular users.
+
+- **Open source** Truly free, run it yourself. Requires some technical comfort.
+
+This list focuses on the last two categories.
+
+## StaticKit
+
+Free + BYOK (Gemini API)
+
+A desktop-quality image editor that runs in your browser and uses your own Google AI API key. No account required, no usage limits from the tool itself. You just pay Google's API rates.
+
+- **Best for** Regular users who want full AI editing capabilities without subscriptions.
+
+- **Strengths** Full natural language editing, smart presets for common tasks, no watermarks, no artificial limits, open source.
+
+- **Limitations** Requires setting up a Google AI API key (takes 2 minutes). Only supports Gemini models currently.
+
+- **True cost** Roughly $0.01-0.05 per image edit depending on complexity.
+
+## Photopea + AI Plugins
+
+Free with ads (optional paid to remove)
+
+Photopea is a Photoshop clone that runs in browser. It doesn't have built-in AI, but supports plugins that add AI capabilities. The base editor is legitimately powerful.
+
+- **Best for** Users who want traditional editing tools with optional AI assist.
+
+- **Strengths** Full Photoshop-level editing capability, PSD file support, no account required.
+
+- **Limitations** AI features depend on third-party plugins. Plugin quality varies. Ads (removable with $5/month).
+
+## GIMP + Stable Diffusion Plugins
+
+Open source
+
+GIMP is the original free Photoshop alternative. With community plugins, you can connect it to Stable Diffusion for AI generation and editing.
+
+- **Best for** Technical users comfortable with setup and configuration.
+
+- **Strengths** Completely free and open source, no usage limits, full control over models and settings.
+
+- **Limitations** Significant setup required, UI is dated, plugins require local Stable Diffusion installation.
+
+## Canva (Free Tier)
+
+Freemium
+
+Canva's free tier includes limited AI features. It's not unlimited, but the limits are reasonable for casual use.
+
+- **Best for** Casual users who want simple edits without setup.
+
+- **Strengths** Zero setup, works immediately, intuitive interface, includes design templates.
+
+- **Limitations** AI features limited on free tier, some features watermarked until you pay.
+
+## How to choose
+
+- **If you edit images regularly** and want real AI capabilities without subscriptions: StaticKit
+
+- **If you need Photoshop-level control** with optional AI: Photopea
+
+- **If you're technical** and want maximum control: GIMP + Stable Diffusion
+
+- **If you just need occasional simple edits**: Canva free tier
+
+## The hidden cost of "free"
+
+A note on sustainability: truly free tools either have a business model you can't see (ads, data) or are passion projects that may disappear.
+
+BYOK tools are transparent: the tool is free, you pay the AI provider. This is often the best deal because AI API costs are commoditized and dropping, you're not subsidizing other users, and the tool creator doesn't need to enshittify the product to make money.
+
+Know which model you're dealing with.
+
+## Key takeaways
+
+- **Actually free options exist.** BYOK and open source tools have no usage fees.
+
+- **BYOK is often the best deal** for regular users. Pay-per-use beats subscriptions for most people.
+
+- **"Free tier" usually means "limited trial."** Check what's actually included before committing.
+
+- **Consider the business model.** It tells you how the tool will evolve.`,
   },
 };
 

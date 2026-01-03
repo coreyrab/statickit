@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
@@ -34,6 +35,11 @@ export default function RootLayout({
           {children}
         </TooltipProvider>
         <Toaster />
+        <Script
+          src="https://cdn.usefathom.com/script.js"
+          data-site="GPULAWRW"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

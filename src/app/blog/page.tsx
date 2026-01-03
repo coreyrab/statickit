@@ -6,11 +6,25 @@ import { ArrowLeft } from 'lucide-react';
 // Blog posts data - add new posts here
 const posts = [
   {
-    slug: 'why-iteration-beats-creation',
-    title: 'Why iteration beats creation',
-    date: '2024-12-22',
-    excerpt: 'The best performing ads aren\'t created from scratch. They\'re iterated from winners.',
-    readTime: '3 min read',
+    slug: 'gemini-image-generation-no-watermark',
+    title: 'How to use Gemini image generation without watermarks',
+    date: '2025-01-03',
+    excerpt: 'Google\'s Gemini adds watermarks to AI-generated images — unless you use your own API key. Here\'s how.',
+    readTime: '5 min read',
+  },
+  {
+    slug: 'natural-language-image-editing',
+    title: 'Edit images by describing what you want',
+    date: '2025-01-03',
+    excerpt: '"Remove the background." "Make it warmer." "Change her shirt to blue." This is image editing now.',
+    readTime: '6 min read',
+  },
+  {
+    slug: 'best-free-ai-image-editors',
+    title: 'Best free AI image editors in 2026',
+    date: '2025-01-03',
+    excerpt: 'Most "free AI image editors" aren\'t really free. Here are the tools that actually deliver.',
+    readTime: '7 min read',
   },
 ];
 
@@ -51,7 +65,7 @@ export default function BlogPage() {
               Blog
             </h1>
             <p className="text-neutral-500 mb-16">
-              Thoughts on ad creative, iteration, and performance marketing.
+              Thoughts on AI image editing, creative tools, and making things easier.
             </p>
 
             {/* Posts list */}

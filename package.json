@@ -1,7 +1,16 @@
 {
-  "name": "ad-variation-saas",
-  "version": "0.1.0",
-  "private": true,
+  "name": "statickit",
+  "version": "1.0.0",
+  "description": "A free, open-source front-end for AI image models",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CoreyRab/statickit.git"
+  },
+  "homepage": "https://github.com/CoreyRab/statickit",
+  "bugs": "https://github.com/CoreyRab/statickit/issues",
+  "license": "AGPL-3.0",
+  "author": "CoreyRab",
+  "private": false,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
