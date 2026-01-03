@@ -192,7 +192,7 @@ export function ApiKeySetupModal({
 
           {/* Gemini API Key Input */}
           {!hasExistingKey && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <GeminiLogo className="w-4 h-4" />
@@ -202,14 +202,14 @@ export function ApiKeySetupModal({
                   href="https://aistudio.google.com/apikey"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                  className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1.5 py-1"
                 >
                   Get free key
-                  <ExternalLink className="w-3 h-3" />
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               </div>
-              <div className="flex gap-2">
-                <div className="flex-1 flex items-center gap-2 px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/50">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1 flex items-center gap-3 px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/50">
                   <GeminiLogo className="w-5 h-5 flex-shrink-0" />
                   <input
                     type="password"
@@ -225,23 +225,23 @@ export function ApiKeySetupModal({
                         handleSave();
                       }
                     }}
-                    className="flex-1 bg-transparent text-white placeholder:text-white/30 focus:outline-none text-sm"
+                    className="flex-1 bg-transparent text-white placeholder:text-white/30 focus:outline-none text-base"
                   />
                 </div>
                 <Button
                   onClick={handleSave}
                   disabled={isValidating || !apiKeyInput.trim() || success}
-                  className={`px-4 ${
+                  className={`w-full sm:w-auto px-6 py-3 text-base ${
                     success
                       ? "bg-emerald-600 hover:bg-emerald-600"
                       : "bg-blue-600 hover:bg-blue-500"
                   } text-white`}
                 >
                   {isValidating ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-5 h-5 animate-spin" />
                   ) : success ? (
                     <>
-                      <Check className="w-4 h-4 mr-1" />
+                      <Check className="w-5 h-5 mr-1.5" />
                       Saved
                     </>
                   ) : (
@@ -260,10 +260,10 @@ export function ApiKeySetupModal({
 
           {/* Skip option - only show when no existing key */}
           {!hasExistingKey && (
-            <div className="text-center pt-1">
+            <div className="text-center pt-2">
               <button
                 onClick={() => onOpenChange(false)}
-                className="text-sm text-white/50 hover:text-white/70 transition-colors"
+                className="text-sm text-white/50 hover:text-white/70 transition-colors py-2 px-4"
               >
                 No thanks, just looking around
               </button>
