@@ -1,36 +1,3 @@
-export interface User {
-  id: string;
-  email: string;
-  name: string | null;
-  avatar_url: string | null;
-  credits: number;
-  plan: 'free' | 'starter' | 'pro' | 'agency';
-  created_at: string;
-}
-
-export interface Project {
-  id: string;
-  user_id: string;
-  name: string;
-  website_url: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Ad {
-  id: string;
-  project_id: string;
-  original_image_url: string;
-  original_filename: string;
-  width: number;
-  height: number;
-  aspect_ratio: string;
-  aspect_ratio_decimal: number;
-  analysis: AdAnalysis | null;
-  status: 'uploaded' | 'analyzing' | 'analyzed' | 'error';
-  created_at: string;
-}
-
 export interface AdAnalysis {
   product: string;
   brand_style: string;
@@ -39,35 +6,6 @@ export interface AdAnalysis {
   target_audience: string;
   colors: string[];
   mood: string;
-}
-
-export interface Variation {
-  id: string;
-  ad_id: string;
-  title: string;
-  description: string;
-  icon: string;
-  status: 'suggested' | 'approved' | 'generating' | 'completed' | 'error';
-  created_at: string;
-}
-
-export interface GeneratedImage {
-  id: string;
-  variation_id: string;
-  image_url: string;
-  width: number;
-  height: number;
-  aspect_ratio: string;
-  created_at: string;
-}
-
-export interface CreditTransaction {
-  id: string;
-  user_id: string;
-  amount: number;
-  type: 'purchase' | 'usage' | 'bonus' | 'refund';
-  description: string;
-  created_at: string;
 }
 
 export const ASPECT_RATIOS = {
