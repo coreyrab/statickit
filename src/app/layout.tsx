@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "StaticKit - Free AI Image Editor",
+  title: "Free AI Image Editor - StaticKit",
   description: "Free, open-source AI image editor. Edit images with natural language, generate variations, resize intelligently. Bring your own API key.",
   keywords: ["AI image editor", "free AI image editor", "image editing", "AI photo editor", "Gemini image editor", "open source"],
 };
