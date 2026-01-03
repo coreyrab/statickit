@@ -143,6 +143,14 @@ export function ApiKeySetupModal({
         </DialogHeader>
 
         <div className="space-y-5 py-2">
+          {/* How it works - only show when no existing key */}
+          {!hasExistingKey && (
+            <p className="text-sm text-white/70 text-center">
+              StaticKit uses your own API key to connect directly to AI services.
+              Your images and key never touch our servers—everything runs in your browser.
+            </p>
+          )}
+
           {/* Security notice */}
           <div className="p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
             <div className="flex items-start gap-3">
@@ -247,6 +255,18 @@ export function ApiKeySetupModal({
                   {error}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Skip option - only show when no existing key */}
+          {!hasExistingKey && (
+            <div className="text-center pt-1">
+              <button
+                onClick={() => onOpenChange(false)}
+                className="text-sm text-white/50 hover:text-white/70 transition-colors"
+              >
+                No thanks, just looking around
+              </button>
             </div>
           )}
 
