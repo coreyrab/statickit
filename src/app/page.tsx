@@ -46,6 +46,9 @@ import {
   Expand,
   Menu,
   PanelLeft,
+  ZoomIn,
+  ZoomOut,
+  Minimize2,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -256,6 +259,12 @@ function HomeContent() {
 
   // Touch swipe state for image navigation
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+
+  // Zoom state for image preview
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const [initialPinchDistance, setInitialPinchDistance] = useState<number | null>(null);
+  const [initialZoom, setInitialZoom] = useState(1);
 
   // Presets state
   const [selectedPresets, setSelectedPresets] = useState<{
@@ -530,15 +539,49 @@ function HomeContent() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedVariationId, variations, originalVersions, originalVersionIndex]);
 
-  // Swipe gesture handlers for mobile image navigation
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    setTouchStart({
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY,
-    });
+  // Helper to calculate distance between two touch points
+  const getTouchDistance = useCallback((touches: React.TouchList) => {
+    if (touches.length < 2) return 0;
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
   }, []);
 
+  // Swipe/pinch gesture handlers for mobile image navigation and zoom
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      // Pinch gesture start
+      const distance = getTouchDistance(e.touches);
+      setInitialPinchDistance(distance);
+      setInitialZoom(zoomLevel);
+    } else if (e.touches.length === 1) {
+      // Single touch for swipe
+      setTouchStart({
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      });
+    }
+  }, [getTouchDistance, zoomLevel]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && initialPinchDistance) {
+      // Pinch zoom
+      const currentDistance = getTouchDistance(e.touches);
+      const scale = currentDistance / initialPinchDistance;
+      const newZoom = Math.min(Math.max(initialZoom * scale, 1), 4);
+      setZoomLevel(newZoom);
+
+      // Reset position when zooming back to 1
+      if (newZoom <= 1.05) {
+        setZoomPosition({ x: 0, y: 0 });
+      }
+    }
+  }, [initialPinchDistance, initialZoom, getTouchDistance]);
+
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    // Reset pinch state
+    setInitialPinchDistance(null);
+
     if (!touchStart) return;
 
     const touchEnd = {
@@ -549,9 +592,11 @@ function HomeContent() {
     const deltaX = touchEnd.x - touchStart.x;
     const deltaY = touchEnd.y - touchStart.y;
 
-    // Only register as swipe if horizontal movement is greater than vertical
-    // and the swipe distance is significant (> 50px)
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+    // Only register as swipe if:
+    // 1. Not zoomed in (zoom level is 1)
+    // 2. Horizontal movement is greater than vertical
+    // 3. Swipe distance is significant (> 50px)
+    if (zoomLevel === 1 && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
       const selectedVariation = variations.find(v => v.id === selectedVariationId);
       const isShowingGenerated = selectedVariation && selectedVariation.imageUrl;
 
@@ -585,7 +630,7 @@ function HomeContent() {
     }
 
     setTouchStart(null);
-  }, [touchStart, selectedVariationId, variations, originalVersions, originalVersionIndex, setVariations, setOriginalVersionIndex]);
+  }, [touchStart, selectedVariationId, variations, originalVersions, originalVersionIndex, setVariations, setOriginalVersionIndex, zoomLevel]);
 
   // Automatically analyze image when uploaded (for the image description tooltip)
   useEffect(() => {
@@ -745,6 +790,12 @@ function HomeContent() {
   const previewImage = getPreviewImage();
   const isShowingGenerated = selectedVariation?.imageUrl ? true : false;
   const isShowingResized = viewingResizedSize && selectedVariation?.resizedVersions.find(r => r.size === viewingResizedSize)?.imageUrl;
+
+  // Reset zoom when image changes
+  useEffect(() => {
+    setZoomLevel(1);
+    setZoomPosition({ x: 0, y: 0 });
+  }, [selectedVariationId, originalVersionIndex, uploadedImage?.url]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setError(null);
@@ -2704,6 +2755,7 @@ function HomeContent() {
             <div
               className="flex-1 flex items-center justify-center bg-white/[0.03] rounded-2xl border border-white/10 overflow-hidden relative min-h-0 p-4 md:p-8 touch-pan-y"
               onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
             >
               {previewImage && uploadedImage ? (
@@ -2722,13 +2774,14 @@ function HomeContent() {
 
                     return (
                       <div
-                        className="relative rounded-lg shadow-2xl overflow-hidden"
+                        className="relative rounded-lg shadow-2xl overflow-hidden transition-transform duration-100"
                         style={{
                           width: '100%',
                           height: '100%',
                           maxWidth: `min(100%, calc((100vh - 200px) * ${displayDimensions.width / displayDimensions.height}))`,
                           maxHeight: `min(100%, calc(100vw * ${displayDimensions.height / displayDimensions.width}))`,
                           aspectRatio: `${displayDimensions.width} / ${displayDimensions.height}`,
+                          transform: `scale(${zoomLevel}) translate(${zoomPosition.x}px, ${zoomPosition.y}px)`,
                         }}
                       >
                         <img
@@ -2767,6 +2820,41 @@ function HomeContent() {
                           Dismiss
                         </button>
                       </div>
+                    </div>
+                  )}
+                  {/* Zoom controls - show on mobile when zoomed or always on desktop */}
+                  {(zoomLevel > 1) && (
+                    <div className="absolute bottom-4 right-4 flex items-center gap-1 bg-black/70 backdrop-blur-sm rounded-lg p-1 border border-white/10">
+                      <button
+                        onClick={() => {
+                          setZoomLevel(Math.max(1, zoomLevel - 0.5));
+                          if (zoomLevel <= 1.5) setZoomPosition({ x: 0, y: 0 });
+                        }}
+                        className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                        aria-label="Zoom out"
+                      >
+                        <ZoomOut className="w-4 h-4" />
+                      </button>
+                      <span className="text-xs text-white/70 min-w-[3rem] text-center">
+                        {Math.round(zoomLevel * 100)}%
+                      </span>
+                      <button
+                        onClick={() => setZoomLevel(Math.min(4, zoomLevel + 0.5))}
+                        className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                        aria-label="Zoom in"
+                      >
+                        <ZoomIn className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setZoomLevel(1);
+                          setZoomPosition({ x: 0, y: 0 });
+                        }}
+                        className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md transition-colors border-l border-white/10 ml-1"
+                        aria-label="Reset zoom"
+                      >
+                        <Minimize2 className="w-4 h-4" />
+                      </button>
                     </div>
                   )}
                 </>
