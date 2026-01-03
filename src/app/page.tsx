@@ -254,6 +254,9 @@ function HomeContent() {
   const [usedBackgroundSuggestions, setUsedBackgroundSuggestions] = useState<Set<string>>(new Set());
   const [usedModelSuggestions, setUsedModelSuggestions] = useState<Set<string>>(new Set());
 
+  // Touch swipe state for image navigation
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+
   // Presets state
   const [selectedPresets, setSelectedPresets] = useState<{
     lighting: string | null;
@@ -526,6 +529,63 @@ function HomeContent() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedVariationId, variations, originalVersions, originalVersionIndex]);
+
+  // Swipe gesture handlers for mobile image navigation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    setTouchStart({
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    });
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStart) return;
+
+    const touchEnd = {
+      x: e.changedTouches[0].clientX,
+      y: e.changedTouches[0].clientY,
+    };
+
+    const deltaX = touchEnd.x - touchStart.x;
+    const deltaY = touchEnd.y - touchStart.y;
+
+    // Only register as swipe if horizontal movement is greater than vertical
+    // and the swipe distance is significant (> 50px)
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+      const selectedVariation = variations.find(v => v.id === selectedVariationId);
+      const isShowingGenerated = selectedVariation && selectedVariation.imageUrl;
+
+      if (deltaX > 0) {
+        // Swipe right = previous version
+        if (isShowingGenerated && selectedVariation.versions.length > 1) {
+          if (selectedVariation.currentVersionIndex > 0) {
+            setVariations(prev => prev.map(v =>
+              v.id === selectedVariationId
+                ? { ...v, currentVersionIndex: v.currentVersionIndex - 1 }
+                : v
+            ));
+          }
+        } else if (!isShowingGenerated && originalVersions.length > 1 && originalVersionIndex > 0) {
+          setOriginalVersionIndex(prev => prev - 1);
+        }
+      } else {
+        // Swipe left = next version
+        if (isShowingGenerated && selectedVariation.versions.length > 1) {
+          if (selectedVariation.currentVersionIndex < selectedVariation.versions.length - 1) {
+            setVariations(prev => prev.map(v =>
+              v.id === selectedVariationId
+                ? { ...v, currentVersionIndex: v.currentVersionIndex + 1 }
+                : v
+            ));
+          }
+        } else if (!isShowingGenerated && originalVersions.length > 1 && originalVersionIndex < originalVersions.length - 1) {
+          setOriginalVersionIndex(prev => prev + 1);
+        }
+      }
+    }
+
+    setTouchStart(null);
+  }, [touchStart, selectedVariationId, variations, originalVersions, originalVersionIndex, setVariations, setOriginalVersionIndex]);
 
   // Automatically analyze image when uploaded (for the image description tooltip)
   useEffect(() => {
@@ -2641,7 +2701,11 @@ function HomeContent() {
             </div>
 
             {/* Image Preview */}
-            <div className="flex-1 flex items-center justify-center bg-white/[0.03] rounded-2xl border border-white/10 overflow-hidden relative min-h-0 p-8">
+            <div
+              className="flex-1 flex items-center justify-center bg-white/[0.03] rounded-2xl border border-white/10 overflow-hidden relative min-h-0 p-4 md:p-8 touch-pan-y"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
               {previewImage && uploadedImage ? (
                 <>
                   {/*
@@ -3189,7 +3253,7 @@ function HomeContent() {
                     </div>
                   )}
 
-                  <div className="flex-1 overflow-y-auto space-y-2">
+                  <div className="flex-1 overflow-y-auto space-y-2 touch-scroll">
                     {/* Lighting */}
                     <div className="rounded-lg border border-white/10 overflow-hidden">
                       <button
@@ -3803,7 +3867,7 @@ function HomeContent() {
                 </button>
 
                 {/* Backgrounds Grid */}
-                <div className={`flex-1 overflow-y-auto ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className={`flex-1 overflow-y-auto touch-scroll ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
                   <div className="grid grid-cols-2 gap-1.5">
                     {/* Separator above AI suggestions */}
                     {(isLoadingBackgroundSuggestions || backgroundSuggestions.length > 0) && (
@@ -4023,7 +4087,7 @@ function HomeContent() {
                 )}
 
                 {/* Model Builder */}
-                <div className="flex-1 overflow-y-auto space-y-3">
+                <div className="flex-1 overflow-y-auto space-y-3 touch-scroll">
                   <h3 className="text-xs text-white/40 uppercase tracking-wide">Model Builder</h3>
 
                   {/* Gender */}
@@ -4231,7 +4295,7 @@ function HomeContent() {
 
             {/* Variation Cards - Show for iterations tool when image uploaded */}
             {selectedTool === 'iterations' && uploadedImage && (
-              <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
+              <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3 touch-scroll">
                 {/* Base Version Cards - Original and any "New Versions" */}
                 {baseVersions.map((base, baseIdx) => {
                   const isActive = activeBaseId === base.id && selectedVariationId === null;
