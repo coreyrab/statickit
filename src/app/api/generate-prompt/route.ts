@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { generalRateLimiter, checkRateLimit } from '@/lib/rate-limit';
-import { getGeminiClient } from '@/lib/user-api-key';
+import { createGeminiClient } from '@/lib/user-api-key';
 
 // Virality level descriptions - from standard ads to scroll-stopping viral content
 const WEIRDNESS_LEVELS = {
@@ -90,19 +88,11 @@ function getWeirdnessLevel(value: number) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify user is authenticated
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { apiKey, analysis, weirdnessLevel = 50 } = await request.json();
 
-    // Check rate limit (200 requests/day for lighter operations)
-    const rateLimitResult = await checkRateLimit(generalRateLimiter, userId, 'API requests');
-    if (!rateLimitResult.success) {
-      return rateLimitResult.response;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'API key required' }, { status: 400 });
     }
-
-    const { analysis, weirdnessLevel = 50 } = await request.json();
 
     if (!analysis) {
       return NextResponse.json(
@@ -111,8 +101,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user's Gemini client (uses their BYOK key if configured)
-    const { genAI } = await getGeminiClient(userId);
+    const { genAI } = createGeminiClient(apiKey);
 
     const level = getWeirdnessLevel(weirdnessLevel);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });

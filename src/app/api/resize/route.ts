@@ -1,27 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { resizeRateLimiter, checkRateLimit } from '@/lib/rate-limit';
-import { getGeminiClient } from '@/lib/user-api-key';
+import { createGeminiClient } from '@/lib/user-api-key';
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify user is authenticated
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check rate limit (100 resizes/day)
-    const rateLimitResult = await checkRateLimit(resizeRateLimiter, userId, 'image resizes');
-    if (!rateLimitResult.success) {
-      return rateLimitResult.response;
-    }
-
-    // Get user's Gemini client (uses their BYOK key if configured)
-    const { genAI } = await getGeminiClient(userId);
-
-    const { image, mimeType, targetWidth, targetHeight, targetRatio, originalWidth, originalHeight, analysis } =
+    const { apiKey, image, mimeType, targetWidth, targetHeight, targetRatio, originalWidth, originalHeight, analysis } =
       await request.json();
+
+    if (!apiKey) {
+      return NextResponse.json({ error: 'API key required' }, { status: 400 });
+    }
 
     if (!image || !mimeType || !targetWidth || !targetHeight || !targetRatio) {
       return NextResponse.json(
@@ -29,6 +16,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const { genAI } = createGeminiClient(apiKey);
 
     // Use same model as generate route for consistency
     const model = genAI.getGenerativeModel({

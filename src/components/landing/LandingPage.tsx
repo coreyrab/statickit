@@ -2,13 +2,12 @@
 
 import { useSearchParams } from 'next/navigation';
 import { ComingSoon } from './ComingSoon';
-import { LandingHero } from '../landing-backup/LandingHero';
-import { BentoGrid } from '../landing-backup/BentoGrid';
-import { HowItWorks } from '../landing-backup/HowItWorks';
-import { UseCases } from '../landing-backup/UseCases';
-// Pricing hidden for BYOK-only mode
-// import { Pricing } from '../landing-backup/Pricing';
-import { LandingCTA } from '../landing-backup/LandingCTA';
+import { LandingHero } from './LandingHero';
+import { BentoGrid } from './BentoGrid';
+import { HowItWorks } from './HowItWorks';
+import { UseCases } from './UseCases';
+import { Pricing } from './Pricing';
+import { LandingCTA } from './LandingCTA';
 
 interface LandingPageProps {
   onUpload?: (file: File) => void;
@@ -39,8 +38,8 @@ export function LandingPage({ onUpload }: LandingPageProps) {
         <BentoGrid />
         <HowItWorks />
         <UseCases />
-        {/* Pricing hidden for BYOK-only mode */}
-        <LandingCTA />
+        <Pricing onGetStarted={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
+        <LandingCTA onGetStarted={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
       </main>
     </div>
   );

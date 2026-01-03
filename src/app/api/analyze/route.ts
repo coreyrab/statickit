@@ -1,26 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { analyzeRateLimiter, checkRateLimit } from '@/lib/rate-limit';
-import { getGeminiClient } from '@/lib/user-api-key';
+import { createGeminiClient } from '@/lib/user-api-key';
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify user is authenticated
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { apiKey, image, mimeType, websiteUrl, additionalContext } = await request.json();
+
+    if (!apiKey) {
+      return NextResponse.json({ error: 'API key required' }, { status: 400 });
     }
-
-    // Check rate limit (50 analyses/day)
-    const rateLimitResult = await checkRateLimit(analyzeRateLimiter, userId, 'image analyses');
-    if (!rateLimitResult.success) {
-      return rateLimitResult.response;
-    }
-
-    // Get user's Gemini client (uses their BYOK key if configured)
-    const { genAI } = await getGeminiClient(userId);
-
-    const { image, mimeType, websiteUrl, additionalContext } = await request.json();
 
     if (!image || !mimeType) {
       return NextResponse.json(
@@ -29,6 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { genAI } = createGeminiClient(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `You are an expert photography and image analyst. Analyze this image and provide detailed information about its visual qualities.

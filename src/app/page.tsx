@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback, useEffect, Suspense } from 'react';
-import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
@@ -12,8 +11,6 @@ import {
   Loader2,
   Download,
   Plus,
-  LogIn,
-  FolderOpen,
   Edit3,
   Check,
   ChevronLeft,
@@ -26,7 +23,6 @@ import {
   Trash2,
   X,
   FolderDown,
-  Settings,
   Archive,
   ArchiveRestore,
   ChevronDown,
@@ -43,7 +39,6 @@ import {
   Move,
   Scan,
   Key,
-  AlertTriangle,
   RotateCw,
   Scaling,
   Ratio,
@@ -70,15 +65,10 @@ import {
 } from '@/components/ui/dialog';
 import { detectAspectRatio, AspectRatioKey } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
-import { useUser, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
 import { LandingPage } from '@/components/landing/LandingPage';
 import { Footer } from '@/components/landing/Footer';
-import { uploadFileToConvex, dataUrlToBlob } from '@/lib/convex-storage';
-import { WelcomeModal, ApiKeySetupModal, SecurityBadge } from '@/components/onboarding';
-// PlanSelectionModal hidden for BYOK-only mode
-// import { PlanSelectionModal } from '@/components/PlanSelectionModal';
+import { ApiKeySetupModal } from '@/components/onboarding';
+import { getStoredApiKey, setStoredApiKey, hasStoredApiKey } from '@/lib/api-key-storage';
 
 type Step = 'upload' | 'editor';
 type Tool = 'edit' | 'iterations' | 'backgrounds' | 'model' | 'export' | null;
@@ -180,10 +170,6 @@ function HomeContent() {
     onConfirm: () => void;
   } | null>(null);
   const [additionalContext, setAdditionalContext] = useState('');
-  const [showSignUpPrompt, setShowSignUpPrompt] = useState(false);
-  // const [showPlanSelection, setShowPlanSelection] = useState(false); // Hidden for BYOK-only mode
-  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showApiKeySetup, setShowApiKeySetup] = useState(false);
   const [showNewConfirmModal, setShowNewConfirmModal] = useState(false);
   const [isSuggestingIteration, setIsSuggestingIteration] = useState(false);
@@ -192,22 +178,14 @@ function HomeContent() {
   const [showCustomIteration, setShowCustomIteration] = useState(false);
   const [customIterationDescription, setCustomIterationDescription] = useState('');
 
-  // Get current user's subscription status and BYOK status
-  const dbUser = useQuery(api.users.getCurrent);
-  const hasApiKey = useQuery(api.users.hasApiKey);
-  const ADMIN_EMAILS = ['coreyrab@gmail.com'];
-  const isAdmin = dbUser?.email && ADMIN_EMAILS.includes(dbUser.email.toLowerCase());
-  const hasSubscription = isAdmin || (dbUser?.plan && dbUser.plan !== 'none' && dbUser.credits > 0);
-  // User can access editor if they have BYOK key OR subscription
-  const canAccessEditor = isAdmin || hasSubscription || hasApiKey;
-  // User can save to history only if they have subscription (BYOK-only users cannot save)
-  const canSaveToHistory = isAdmin || hasSubscription;
+  // API key state - loaded from localStorage
+  const [apiKey, setApiKeyState] = useState<string | null>(null);
+  const [isApiKeyLoaded, setIsApiKeyLoaded] = useState(false);
 
-  // Debug: log user info
-  console.log('dbUser:', dbUser, 'isAdmin:', isAdmin, 'hasSubscription:', hasSubscription, 'hasApiKey:', hasApiKey);
+  // User can access editor if they have an API key
+  const canAccessEditor = !!apiKey;
   const [showArchived, setShowArchived] = useState(false);
   const [showCustomVariationInput, setShowCustomVariationInput] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Original image editing state
   const [originalEditPrompt, setOriginalEditPrompt] = useState('');
@@ -451,36 +429,27 @@ function HomeContent() {
 
   const [viewingOriginalResizedSize, setViewingOriginalResizedSize] = useState<string | null>(null);
 
-  const { user, isLoaded: isUserLoaded } = useUser();
-  const createGeneration = useMutation(api.generations.create);
-  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
-  const getOrCreateUser = useMutation(api.users.getOrCreate);
-
-  // Create user in Convex when authenticated
+  // Load API key and default weirdness from localStorage on mount
   useEffect(() => {
-    if (user && dbUser === null) {
-      getOrCreateUser().catch(console.error);
-    }
-  }, [user, dbUser, getOrCreateUser]);
+    const storedKey = getStoredApiKey();
+    setApiKeyState(storedKey);
+    setIsApiKeyLoaded(true);
 
-  // Load default weirdness level from localStorage
-  useEffect(() => {
     const savedWeirdness = localStorage.getItem('defaultWeirdness');
     if (savedWeirdness) {
       setWeirdnessLevel(parseInt(savedWeirdness));
     }
+
+    // Show API key setup if no key stored
+    if (!storedKey) {
+      setShowApiKeySetup(true);
+    }
   }, []);
 
-  // Show welcome modal for non-signed-in users on every load
-  useEffect(() => {
-    if (isUserLoaded && !user) {
-      setShowWelcomeModal(true);
-    }
-  }, [isUserLoaded, user]);
-
-  // Handle welcome modal dismiss
-  const handleDismissWelcome = () => {
-    setShowWelcomeModal(false);
+  // Helper to update API key in both state and localStorage
+  const handleSetApiKey = (key: string) => {
+    setStoredApiKey(key);
+    setApiKeyState(key);
   };
 
   // Keyboard navigation for version control (left/right arrow keys)
@@ -566,6 +535,7 @@ function HomeContent() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            apiKey,
             image: base64,
             mimeType: uploadedImage.file.type,
           }),
@@ -786,6 +756,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           image: base64,
           mimeType: uploadedImage.file.type,
           additionalContext: additionalContext.trim() || undefined,
@@ -815,6 +786,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           analysis: analysisData,
           aspectRatio: uploadedImage.aspectRatio,
           additionalContext: additionalContext.trim() || undefined,
@@ -913,6 +885,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           image: base64,
           mimeType: uploadedImage.file.type,
           analysis,
@@ -1020,6 +993,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           analysis,
           weirdnessLevel,
         }),
@@ -1078,6 +1052,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           image: variation.imageUrl?.startsWith('data:')
             ? variation.imageUrl.split(',')[1]
             : base64,
@@ -1205,6 +1180,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           image: imageToEdit,
           mimeType: uploadedImage.file.type,
           analysis: analysisToUse,
@@ -1339,6 +1315,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           image: imageToEdit,
           mimeType: uploadedImage.file.type,
           analysis: analysisToUse,
@@ -1450,6 +1427,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           image: base64,
           mimeType: mimeType,
           analysis: analysisToUse,
@@ -1538,6 +1516,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           image: base64,
           mimeType: mimeType,
           analysis: analysisToUse,
@@ -1634,6 +1613,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           image: base64,
           mimeType: mimeType,
           analysis: analysisToUse,
@@ -1721,6 +1701,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           image: base64,
           mimeType: mimeType,
           analysis: analysisToUse,
@@ -1892,6 +1873,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           image: variation.imageUrl.startsWith('data:')
             ? variation.imageUrl.split(',')[1]
             : variation.imageUrl,
@@ -1981,6 +1963,7 @@ function HomeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          apiKey,
           image: imageData,
           mimeType: 'image/png',
           targetWidth: size.width,
@@ -2171,92 +2154,20 @@ function HomeContent() {
     }
   };
 
-  const handleSaveToHistory = async () => {
-    if (!user || !uploadedImage || !analysis) return;
-
-    // BYOK-only users cannot save to history
-    if (!canSaveToHistory) {
-      alert('Saving to history requires a subscription. You can still download your images directly.');
-      return;
-    }
-
-    const completedVariations = variations.filter(v => v.status === 'completed' && v.imageUrl);
-    if (completedVariations.length === 0) return;
-
-    try {
-      // Upload original image to Convex storage
-      const originalImageId = await uploadFileToConvex(generateUploadUrl, uploadedImage.file);
-
-      // Upload variation images to Convex storage
-      const variationsToSave = await Promise.all(
-        completedVariations.map(async (v) => {
-          let imageId;
-          if (v.imageUrl) {
-            // Convert data URL to blob and upload
-            const blob = dataUrlToBlob(v.imageUrl);
-            imageId = await uploadFileToConvex(generateUploadUrl, blob);
-          }
-          return {
-            id: v.id,
-            title: v.title,
-            description: v.description,
-            imageId: imageId,
-          };
-        })
-      );
-
-      await createGeneration({
-        originalImageId: originalImageId,
-        originalFilename: uploadedImage.filename,
-        aspectRatio: uploadedImage.aspectRatio,
-        analysis: analysis,
-        variations: variationsToSave,
-      });
-    } catch (err) {
-      console.error('Failed to save generation:', err);
-    }
-  };
-
   const completedCount = variations.filter(v => v.status === 'completed').length;
   const generatingCount = variations.filter(v => v.status === 'generating').length;
 
-  // Helper to check if action requires auth and subscription
-  const requireAuth = (action: () => void) => {
-    if (!user) {
-      setPendingAction(() => action);
-      setShowSignUpPrompt(true);
-      return;
-    }
-    // User is signed in, check if they have BYOK key configured
-    if (dbUser !== undefined && !canAccessEditor) {
-      // Show API key setup modal instead of redirecting
-      setPendingAction(() => action);
+  // Helper to check if API key is configured
+  const requireApiKey = (action: () => void) => {
+    if (!apiKey) {
       setShowApiKeySetup(true);
       return;
     }
     action();
   };
 
-  // Handle successful sign-in - check if API key is needed
-  useEffect(() => {
-    if (user && showSignUpPrompt) {
-      setShowSignUpPrompt(false);
-      // After sign-in, check if user needs to add API key (wait for dbUser to load)
-      if (dbUser !== undefined && !canAccessEditor) {
-        // Show API key setup modal instead of redirecting
-        setShowApiKeySetup(true);
-      } else if (pendingAction && canAccessEditor) {
-        // User has API key, execute pending action
-        pendingAction();
-        setPendingAction(null);
-      }
-    }
-  }, [user, dbUser, canAccessEditor, showSignUpPrompt, pendingAction]);
-
-  // Landing page removed - app now shows upload UI directly as homepage
-
-  // Show loading while checking auth
-  if (!isUserLoaded) {
+  // Show loading while checking API key
+  if (!isApiKeyLoaded) {
     return (
       <div className="min-h-screen bg-[#101318] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
@@ -2277,24 +2188,8 @@ function HomeContent() {
             </button>
           </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-3">
-            {user && (
-              <>
-                <Link href="/history">
-                  <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
-                    <FolderOpen className="w-4 h-4 mr-1.5" />
-                    My Ads
-                  </Button>
-                </Link>
-                <Link href="/settings">
-                  <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
-                    <Settings className="w-4 h-4" />
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
+          {/* Right: Placeholder for balance */}
+          <div className="flex items-center gap-3" />
         </div>
       </header>
 
@@ -2604,13 +2499,13 @@ function HomeContent() {
                       disabled={selectedVariation.isRegenerating}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && selectedVariation.editPrompt.trim() && !selectedVariation.isRegenerating) {
-                          requireAuth(() => handleRegenerateWithEdit(selectedVariation.id));
+                          handleRegenerateWithEdit(selectedVariation.id);
                         }
                       }}
                     />
                     <Button
                       size="sm"
-                      onClick={() => requireAuth(() => handleRegenerateWithEdit(selectedVariation.id))}
+                      onClick={() => handleRegenerateWithEdit(selectedVariation.id)}
                       disabled={!selectedVariation.editPrompt.trim() || selectedVariation.isRegenerating}
                       className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50"
                     >
@@ -2692,13 +2587,13 @@ function HomeContent() {
                             disabled={currentVersionProcessing}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && originalEditPrompt.trim() && !currentVersionProcessing) {
-                                requireAuth(handleEditOriginal);
+                                handleEditOriginal();
                               }
                             }}
                           />
                           <Button
                             size="sm"
-                            onClick={() => requireAuth(handleEditOriginal)}
+                            onClick={() => handleEditOriginal()}
                             disabled={!originalEditPrompt.trim() || currentVersionProcessing}
                             className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50"
                           >
@@ -2827,12 +2722,12 @@ function HomeContent() {
                             disabled={currentVersionProcessing}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && originalEditPrompt.trim() && !currentVersionProcessing) {
-                                requireAuth(handleEditOriginal);
+                                handleEditOriginal();
                               }
                             }}
                           />
                           <button
-                            onClick={() => requireAuth(handleEditOriginal)}
+                            onClick={() => handleEditOriginal()}
                             disabled={!originalEditPrompt.trim() || currentVersionProcessing}
                             className="p-2 rounded-full bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                           >
@@ -2862,19 +2757,15 @@ function HomeContent() {
                             disabled={currentVersionProcessing}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && backgroundCustomPrompt.trim() && !currentVersionProcessing) {
-                                requireAuth(() => {
-                                  handleApplyBackgroundChange(backgroundCustomPrompt, 'Custom background');
-                                  setBackgroundCustomPrompt('');
-                                });
+                                handleApplyBackgroundChange(backgroundCustomPrompt, 'Custom background');
+                                setBackgroundCustomPrompt('');
                               }
                             }}
                           />
                           <button
                             onClick={() => {
-                              requireAuth(() => {
-                                handleApplyBackgroundChange(backgroundCustomPrompt, 'Custom background');
-                                setBackgroundCustomPrompt('');
-                              });
+                              handleApplyBackgroundChange(backgroundCustomPrompt, 'Custom background');
+                              setBackgroundCustomPrompt('');
                             }}
                             disabled={!backgroundCustomPrompt.trim() || currentVersionProcessing}
                             className="p-2 rounded-full bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
@@ -2905,19 +2796,15 @@ function HomeContent() {
                             disabled={currentVersionProcessing}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && modelCustomPrompt.trim() && !currentVersionProcessing) {
-                                requireAuth(() => {
-                                  handleApplyModelChange(modelCustomPrompt, 'Custom');
-                                  setModelCustomPrompt('');
-                                });
+                                handleApplyModelChange(modelCustomPrompt, 'Custom');
+                                setModelCustomPrompt('');
                               }
                             }}
                           />
                           <button
                             onClick={() => {
-                              requireAuth(() => {
-                                handleApplyModelChange(modelCustomPrompt, 'Custom');
-                                setModelCustomPrompt('');
-                              });
+                              handleApplyModelChange(modelCustomPrompt, 'Custom');
+                              setModelCustomPrompt('');
                             }}
                             disabled={!modelCustomPrompt.trim() || currentVersionProcessing}
                             className="p-2 rounded-full bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
@@ -3173,7 +3060,7 @@ function HomeContent() {
                   {variations.length > 0 && generatingCount === 0 && variations.some(v => v.status === 'idle') && (
                     <Button
                       size="sm"
-                      onClick={() => requireAuth(handleGenerateAll)}
+                      onClick={() => handleGenerateAll()}
                       className="w-full mt-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500"
                     >
                       <Sparkles className="w-4 h-4 mr-1.5" />
@@ -3551,7 +3438,7 @@ function HomeContent() {
                         : 'opacity-0 pointer-events-none'
                     }`}>
                       <Button
-                        onClick={() => requireAuth(handleApplyPresets)}
+                        onClick={() => handleApplyPresets()}
                         disabled={originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing'}
                         className="w-full bg-amber-600 hover:bg-amber-500 text-white"
                       >
@@ -3646,7 +3533,7 @@ function HomeContent() {
                               if (isCompleted) {
                                 setViewingOriginalResizedSize(isViewing ? null : size.name);
                               } else if (!isResizing) {
-                                requireAuth(() => handleResizeOriginal(size));
+                                handleResizeOriginal(size);
                               }
                             }}
                             disabled={isResizing}
@@ -3689,9 +3576,7 @@ function HomeContent() {
                         return (
                           <button
                             onClick={() => {
-                              requireAuth(() => {
-                                ungeneratedSizes.forEach(size => handleResizeOriginal(size));
-                              });
+                              ungeneratedSizes.forEach(size => handleResizeOriginal(size));
                             }}
                             disabled={isAnyResizing}
                             className="w-full mt-2 text-xs text-amber-400 hover:text-amber-300 disabled:text-white/30 disabled:cursor-not-allowed transition-colors text-center py-1"
@@ -3896,10 +3781,8 @@ function HomeContent() {
                         <button
                           key={suggestion.id}
                           onClick={() => {
-                            requireAuth(() => {
-                              setUsedBackgroundSuggestions(prev => new Set([...prev, suggestion.id]));
-                              handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
-                            });
+                            setUsedBackgroundSuggestions(prev => new Set([...prev, suggestion.id]));
+                            handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
                           }}
                           className={`px-2.5 py-2 rounded-lg text-left text-xs flex items-center gap-1.5 transition-all ${
                             isUsed
@@ -3920,10 +3803,8 @@ function HomeContent() {
                         <button
                           key={suggestion.id}
                           onClick={() => {
-                            requireAuth(() => {
-                              setUsedBackgroundSuggestions(prev => new Set([...prev, suggestion.id]));
-                              handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
-                            });
+                            setUsedBackgroundSuggestions(prev => new Set([...prev, suggestion.id]));
+                            handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
                           }}
                           className={`px-2.5 py-2 rounded-lg text-left text-xs flex items-center gap-1.5 transition-all ${
                             isUsed
@@ -4074,10 +3955,8 @@ function HomeContent() {
                             <button
                               key={suggestion.id}
                               onClick={() => {
-                                requireAuth(() => {
-                                  setUsedModelSuggestions(prev => new Set([...prev, suggestion.id]));
-                                  handleApplyModelChange(suggestion.prompt, suggestion.name);
-                                });
+                                setUsedModelSuggestions(prev => new Set([...prev, suggestion.id]));
+                                handleApplyModelChange(suggestion.prompt, suggestion.name);
                               }}
                               className={`px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-all ${
                                 isUsed
@@ -4273,18 +4152,16 @@ function HomeContent() {
                   <button
                     onClick={(e) => {
                       const btn = e.currentTarget;
-                      requireAuth(() => {
-                        handleApplyModelBuilder();
-                        // Brief visual feedback
-                        btn.textContent = '✓ Generating';
-                        btn.classList.add('bg-green-600');
-                        btn.classList.remove('bg-amber-600');
-                        setTimeout(() => {
-                          btn.textContent = 'Generate';
-                          btn.classList.remove('bg-green-600');
-                          btn.classList.add('bg-amber-600');
-                        }, 800);
-                      });
+                      handleApplyModelBuilder();
+                      // Brief visual feedback
+                      btn.textContent = '✓ Generating';
+                      btn.classList.add('bg-green-600');
+                      btn.classList.remove('bg-amber-600');
+                      setTimeout(() => {
+                        btn.textContent = 'Generate';
+                        btn.classList.remove('bg-green-600');
+                        btn.classList.add('bg-amber-600');
+                      }, 800);
                     }}
                     disabled={!selectedGender && !selectedAgeRange && !selectedEthnicity && !selectedHairColor && !selectedHairType && !selectedBodyType && !selectedExpression && !selectedVibe}
                     className="flex-1 px-3 py-2 rounded-lg text-sm bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
@@ -4477,7 +4354,7 @@ function HomeContent() {
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        requireAuth(() => handleGenerateSingle(variation.id));
+                                        handleGenerateSingle(variation.id);
                                       }}
                                       className="p-1.5 rounded-lg hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 transition-colors"
                                     >
@@ -4669,151 +4546,30 @@ function HomeContent() {
               </div>
             )}
 
-            {/* Footer - Show for iterations tool */}
-            {selectedTool === 'iterations' && user && completedCount > 0 && (
-              <div className="p-4 border-t border-white/10">
-                {canSaveToHistory ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleSaveToHistory}
-                    className="w-full border-white/10 text-white/60 hover:text-white hover:bg-white/10"
-                  >
-                    Save to History
-                  </Button>
-                ) : (
-                  <div className="text-center">
-                    <p className="text-xs text-white/40">
-                      Download your images to keep them. History feature coming soon!
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
 
-            {/* User Section - Bottom of left panel */}
+            {/* API Key Button - Bottom of left panel */}
             <div className="absolute bottom-3 left-3">
-              {user ? (
-                <UserButton afterSignOutUrl="/" />
-              ) : (
-                <DropdownMenu open={userMenuOpen} onOpenChange={setUserMenuOpen}>
-                  <DropdownMenuTrigger asChild>
-                    <button className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
-                      <User className="w-6 h-6 text-white/50" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    side="top"
-                    className="w-72 bg-[#181c24] border-white/10 text-white mb-2"
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setShowApiKeySetup(true)}
+                    className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${
+                      apiKey
+                        ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
+                        : 'bg-amber-500/20 hover:bg-amber-500/30'
+                    }`}
                   >
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex items-center gap-3 py-1">
-                        <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                          <User className="w-5 h-5 text-white/50" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">Guest</span>
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-500/20 text-red-400 border border-red-500/30">
-                              <AlertTriangle className="w-3 h-3" />
-                              Data loss warning
-                            </span>
-                          </div>
-                          <div className="text-xs text-white/40">Sign up to securely save your keys</div>
-                        </div>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-white/10" />
-                    <div className="p-2 space-y-2">
-                      <SignInButton mode="modal">
-                        <button
-                          onClick={() => setUserMenuOpen(false)}
-                          className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center gap-2 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
-                        >
-                          <LogIn className="w-4 h-4" />
-                          Log in
-                        </button>
-                      </SignInButton>
-                      <SignUpButton mode="modal">
-                        <button
-                          onClick={() => setUserMenuOpen(false)}
-                          className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center gap-2 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
-                        >
-                          <User className="w-4 h-4" />
-                          Sign up free
-                        </button>
-                      </SignUpButton>
-                    </div>
-                    <DropdownMenuSeparator className="bg-white/10" />
-                    <div className="p-2">
-                      <button
-                        onClick={() => {
-                          setUserMenuOpen(false);
-                          setShowApiKeySetup(true);
-                        }}
-                        className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center gap-2 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
-                      >
-                        <Key className="w-4 h-4" />
-                        Add your API keys
-                      </button>
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+                    <Key className={`w-5 h-5 ${apiKey ? 'text-emerald-400' : 'text-amber-400'}`} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {apiKey ? 'API Key configured' : 'Add API Key'}
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </main>
 
-      {/* Sign Up Prompt Modal */}
-      <Dialog open={showSignUpPrompt} onOpenChange={setShowSignUpPrompt}>
-        <DialogContent className="sm:max-w-md !bg-[#181c24] border-white/10 text-white">
-          <DialogHeader>
-            <DialogTitle>Sign up to continue</DialogTitle>
-            <DialogDescription>
-              Create a free account to unlock AI-powered editing
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <p className="text-sm text-white/60">
-              You&apos;ll be able to:
-            </p>
-            <ul className="space-y-2 text-sm text-white/80">
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400" />
-                Generate unlimited variations
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400" />
-                Edit images with natural language
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400" />
-                Resize to any format
-              </li>
-            </ul>
-            <SecurityBadge variant="inline">
-              You&apos;ll need to add your own API key after signing up. All keys are encrypted and stored securely.
-            </SecurityBadge>
-          </div>
-          <DialogFooter className="flex-row gap-3">
-            <Button
-              onClick={() => setShowSignUpPrompt(false)}
-              className="flex-1 bg-transparent border border-white/20 text-white hover:bg-white/10"
-            >
-              Cancel
-            </Button>
-            <SignInButton mode="modal">
-              <Button className="flex-1 bg-violet-600 hover:bg-violet-500 text-white">
-                <LogIn className="w-4 h-4" />
-                Sign up free
-              </Button>
-            </SignInButton>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Plan Selection Modal - Hidden for BYOK-only mode */}
 
       {/* Download Confirmation Modal */}
       <Dialog open={!!downloadModal} onOpenChange={(open) => !open && setDownloadModal(null)}>
@@ -4881,17 +4637,12 @@ function HomeContent() {
         </DialogContent>
       </Dialog>
 
-      {/* Welcome Modal */}
-      <WelcomeModal
-        open={showWelcomeModal}
-        onOpenChange={setShowWelcomeModal}
-        onDismiss={handleDismissWelcome}
-      />
-
       {/* API Key Setup Modal */}
       <ApiKeySetupModal
         open={showApiKeySetup}
         onOpenChange={setShowApiKeySetup}
+        onApiKeySet={handleSetApiKey}
+        currentApiKey={apiKey}
       />
 
       {!uploadedImage && <Footer />}

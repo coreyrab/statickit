@@ -1,25 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { auth } from '@clerk/nextjs/server';
-import { generalRateLimiter, checkRateLimit } from '@/lib/rate-limit';
-
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
+import { createGeminiClient } from '@/lib/user-api-key';
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify user is authenticated
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { apiKey, image, mimeType, analysis, existingSuggestions } = await request.json();
 
-    // Check rate limit
-    const rateLimitResult = await checkRateLimit(generalRateLimiter, userId, 'API requests');
-    if (!rateLimitResult.success) {
-      return rateLimitResult.response;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'API key required' }, { status: 400 });
     }
-
-    const { image, mimeType, analysis, existingSuggestions } = await request.json();
 
     if (!image || !mimeType) {
       return NextResponse.json(
@@ -27,6 +15,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const { genAI } = createGeminiClient(apiKey);
 
     // Use vision model to analyze the image and suggest backgrounds
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });

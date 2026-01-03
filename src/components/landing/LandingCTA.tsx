@@ -1,10 +1,22 @@
 'use client';
 
-import { SignInButton } from '@clerk/nextjs';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export function LandingCTA() {
+interface LandingCTAProps {
+  onGetStarted?: () => void;
+}
+
+export function LandingCTA({ onGetStarted }: LandingCTAProps) {
+  const handleClick = () => {
+    if (onGetStarted) {
+      onGetStarted();
+    } else {
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="py-20 px-6 border-t border-border">
       <div className="max-w-4xl mx-auto text-center">
@@ -12,15 +24,13 @@ export function LandingCTA() {
           Start iterating on your winners
         </h2>
         <p className="text-muted-foreground mb-8">
-          Free to try. No credit card required.
+          Free to try. Just add your own API key.
         </p>
 
-        <SignInButton mode="modal">
-          <Button size="lg">
-            Get started
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-        </SignInButton>
+        <Button size="lg" onClick={handleClick}>
+          Get started
+          <ArrowRight className="w-4 h-4" />
+        </Button>
       </div>
     </section>
   );

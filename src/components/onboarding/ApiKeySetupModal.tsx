@@ -8,14 +8,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, X, ExternalLink, Shield, Lock } from "lucide-react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { useUser, SignUpButton } from "@clerk/nextjs";
+import { Loader2, Check, X, ExternalLink, Shield } from "lucide-react";
 
 interface ApiKeySetupModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onApiKeySet?: (apiKey: string) => void;
+  currentApiKey?: string | null;
 }
 
 // Official Google Gemini logo SVG component
@@ -55,32 +54,16 @@ const GeminiLogo = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const LOCAL_STORAGE_KEY = "statickit_gemini_api_key";
-
 export function ApiKeySetupModal({
   open,
   onOpenChange,
+  onApiKeySet,
+  currentApiKey,
 }: ApiKeySetupModalProps) {
-  const { user, isLoaded } = useUser();
-  const isGuest = isLoaded && !user;
-
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [localApiKey, setLocalApiKey] = useState<string | null>(null);
-  const [showSignUpPrompt, setShowSignUpPrompt] = useState(false);
-
-  const setApiKeyMutation = useMutation(api.users.setApiKey);
-  const hasApiKeyQuery = useQuery(api.users.hasApiKey);
-
-  // Load local API key on mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      setLocalApiKey(stored);
-    }
-  }, [open]);
 
   // Mask API key to show only first 2 characters
   const getMaskedKey = (key: string) => {
@@ -109,17 +92,9 @@ export function ApiKeySetupModal({
         return;
       }
 
-      if (isGuest) {
-        // For guests: store locally only
-        localStorage.setItem(LOCAL_STORAGE_KEY, apiKeyInput.trim());
-        setLocalApiKey(apiKeyInput.trim());
-      } else {
-        // For logged-in users: save encrypted key to Convex
-        await setApiKeyMutation({
-          encryptedApiKey: data.encrypted,
-          apiKeyIv: data.iv,
-          apiKeyAuthTag: data.authTag,
-        });
+      // Save to localStorage via parent callback
+      if (onApiKeySet) {
+        onApiKeySet(apiKeyInput.trim());
       }
 
       setSuccess(true);
@@ -138,9 +113,12 @@ export function ApiKeySetupModal({
     }
   };
 
-  const handleRemoveLocalKey = () => {
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-    setLocalApiKey(null);
+  const handleRemoveKey = () => {
+    if (onApiKeySet) {
+      // Clear the key by setting empty string (parent will handle removal)
+      localStorage.removeItem('statickit_gemini_api_key');
+      window.location.reload(); // Refresh to reset state
+    }
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -149,55 +127,37 @@ export function ApiKeySetupModal({
       setApiKeyInput("");
       setError(null);
       setSuccess(false);
-      setShowSignUpPrompt(false);
     }
     onOpenChange(newOpen);
   };
 
-  const hasExistingKey = isGuest ? !!localApiKey : hasApiKeyQuery;
+  const hasExistingKey = !!currentApiKey;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg !bg-[#181c24] border-white/10 text-white">
         <DialogHeader>
-          <DialogTitle className="text-xl text-center">Add your API Key</DialogTitle>
+          <DialogTitle className="text-xl text-center">
+            {hasExistingKey ? "API Key Settings" : "Add your API Key"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5 py-2">
-          {/* Security notice for guests */}
-          {isGuest && (
-            <div className="p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-              <div className="flex items-start gap-3">
-                <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                <div className="space-y-2">
-                  <p className="text-sm text-emerald-300 font-medium">
-                    Your API key stays on your device
-                  </p>
-                  <p className="text-xs text-white/60">
-                    Your key is stored locally in your browser only. It is <strong className="text-white/80">never sent to our servers</strong> and
-                    remains completely private on your device.
-                  </p>
-                  <div className="pt-1">
-                    <SignUpButton mode="modal">
-                      <button
-                        className="text-xs text-amber-400 hover:text-amber-300 underline underline-offset-2 flex items-center gap-1"
-                      >
-                        <Lock className="w-3 h-3" />
-                        Sign up to sync your key across devices
-                      </button>
-                    </SignUpButton>
-                  </div>
-                </div>
+          {/* Security notice */}
+          <div className="p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+            <div className="flex items-start gap-3">
+              <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-2">
+                <p className="text-sm text-emerald-300 font-medium">
+                  Your API key stays on your device
+                </p>
+                <p className="text-xs text-white/60">
+                  Your key is stored locally in your browser only. It is <strong className="text-white/80">never sent to our servers</strong> and
+                  remains completely private on your device.
+                </p>
               </div>
             </div>
-          )}
-
-          {/* Security notice for logged-in users */}
-          {!isGuest && (
-            <p className="text-sm text-white/60 text-center">
-              Your API key is encrypted with AES-256-GCM and stored securely on your account! It is only decrypted server-side when needed.
-            </p>
-          )}
+          </div>
 
           {/* Show existing key status */}
           {hasExistingKey && (
@@ -207,20 +167,18 @@ export function ApiKeySetupModal({
                 <div>
                   <span className="text-emerald-400 font-medium text-sm">Gemini API Key Connected</span>
                   <p className="text-xs text-white/40 font-mono mt-0.5">
-                    {isGuest && localApiKey ? getMaskedKey(localApiKey) : "AI••••••••••••"}
+                    {getMaskedKey(currentApiKey)}
                   </p>
                 </div>
               </div>
-              {isGuest && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleRemoveLocalKey}
-                  className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50"
-                >
-                  Remove
-                </Button>
-              )}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRemoveKey}
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50"
+              >
+                Remove
+              </Button>
             </div>
           )}
 
@@ -292,12 +250,10 @@ export function ApiKeySetupModal({
             </div>
           )}
 
-          {/* Footer note for guests */}
-          {isGuest && (
-            <p className="text-xs text-white/40 text-center pt-2">
-              Note: Since you&apos;re browsing as a guest, clearing your browser data will remove your saved key.
-            </p>
-          )}
+          {/* Footer note */}
+          <p className="text-xs text-white/40 text-center pt-2">
+            Note: Clearing your browser data will remove your saved key.
+          </p>
         </div>
       </DialogContent>
     </Dialog>
