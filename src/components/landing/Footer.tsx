@@ -4,10 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { TermsModal } from "./TermsModal";
 import { PrivacyModal } from "./PrivacyModal";
+import { MadeByHumanModal } from "./MadeByHumanModal";
 
 export function Footer() {
   const [termsOpen, setTermsOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [madeByHumanOpen, setMadeByHumanOpen] = useState(false);
 
   return (
     <>
@@ -15,12 +17,12 @@ export function Footer() {
         <div className="container mx-auto max-w-5xl">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <nav className="flex items-center gap-6 text-sm text-muted-foreground">
-              <Link
-                href="/about"
+              <button
+                onClick={() => setMadeByHumanOpen(true)}
                 className="hover:text-primary transition-colors"
               >
-                About
-              </Link>
+                Made by a human
+              </button>
               <button
                 onClick={() => setPrivacyOpen(true)}
                 className="hover:text-primary transition-colors"
@@ -49,6 +51,7 @@ export function Footer() {
 
       <TermsModal open={termsOpen} onOpenChange={setTermsOpen} />
       <PrivacyModal open={privacyOpen} onOpenChange={setPrivacyOpen} />
+      <MadeByHumanModal open={madeByHumanOpen} onOpenChange={setMadeByHumanOpen} />
     </>
   );
 }
