@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "StaticKit - AI Ad Iteration Tool",
-  description: "Iterate on your winning ads. Change one variable at a time. New locations, new people, same message.",
-  keywords: ["ad iteration", "AI advertising", "ad testing", "A/B testing", "meta ads", "google ads", "ad creative"],
+  title: "StaticKit - Free AI Image Editor",
+  description: "Free, open-source AI image editor. Edit images with natural language, generate variations, resize intelligently. Bring your own API key.",
+  keywords: ["AI image editor", "free AI image editor", "image editing", "AI photo editor", "Gemini image editor", "open source"],
 };
 
 export default function RootLayout({
