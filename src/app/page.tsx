@@ -2474,12 +2474,30 @@ function HomeContent() {
                 </div>
               </TooltipContent>
             </Tooltip>
-            {/* Theme toggle */}
+            {/* API Key button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setShowApiKeySetup(true)}
+                  className={`flex items-center justify-center w-9 h-9 rounded-lg border transition-colors ${
+                    apiKey
+                      ? 'border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20'
+                      : 'border-border hover:bg-muted'
+                  }`}
+                >
+                  <Key className={`w-4 h-4 ${apiKey ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                {apiKey ? 'API Key configured' : 'Add API Key'}
+              </TooltipContent>
+            </Tooltip>
+            {/* Theme toggle - desktop only */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors"
+                  className="hidden md:flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors"
                 >
                   {theme === 'dark' ? (
                     <Sun className="w-4 h-4 text-muted-foreground" />
@@ -5016,28 +5034,6 @@ function HomeContent() {
               )}
               </div>
             )}
-
-
-            {/* API Key Button - Bottom of left panel */}
-            <div className="absolute bottom-3 left-3">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setShowApiKeySetup(true)}
-                    className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${
-                      apiKey
-                        ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
-                        : 'bg-primary/20 hover:bg-primary/30'
-                    }`}
-                  >
-                    <Key className={`w-5 h-5 ${apiKey ? 'text-emerald-700 dark:text-emerald-400' : 'text-primary'}`} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  {apiKey ? 'API Key configured' : 'Add API Key'}
-                </TooltipContent>
-              </Tooltip>
-            </div>
           </div>
         </main>
 
