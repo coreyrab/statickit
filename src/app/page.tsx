@@ -3279,7 +3279,7 @@ function HomeContent() {
             fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[360px] transform transition-transform duration-300 ease-in-out
             md:relative md:inset-auto md:z-auto md:w-[360px] md:transform-none
             ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-            flex-shrink-0 border-r md:border border-border md:rounded-2xl bg-background md:bg-muted/30 flex flex-col overflow-y-auto overscroll-contain md:overflow-hidden md:order-first
+            flex-shrink-0 border-r md:border border-border md:rounded-2xl bg-background md:bg-muted/30 flex flex-col overflow-y-auto overscroll-contain pr-2 md:pr-0 md:overflow-hidden md:order-first
           `}>
             {/* Mobile Sidebar Header */}
             <div className="flex items-center justify-between p-4 border-b border-border md:hidden">
