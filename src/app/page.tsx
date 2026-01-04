@@ -30,6 +30,7 @@ import {
   Info,
   Layers,
   Sun,
+  Moon,
   Palette,
   Camera,
   Droplets,
@@ -74,6 +75,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Footer } from '@/components/landing/Footer';
 import { ApiKeySetupModal } from '@/components/onboarding';
 import { getStoredApiKey, setStoredApiKey, hasStoredApiKey } from '@/lib/api-key-storage';
+import { useTheme } from 'next-themes';
 
 type Step = 'upload' | 'editor';
 type Tool = 'edit' | 'iterations' | 'backgrounds' | 'model' | 'export' | null;
@@ -157,6 +159,7 @@ interface BaseVersion {
 function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [step, setStep] = useState<Step>('editor');
   const [selectedTool, setSelectedTool] = useState<Tool>('edit');
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
@@ -279,6 +282,7 @@ function HomeContent() {
     rotation: string | null;
   }>({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null });
   const [expandedPresetCategory, setExpandedPresetCategory] = useState<string | null>(null);
+  const [isModelBuilderExpanded, setIsModelBuilderExpanded] = useState(true);
   const [showImageDetails, setShowImageDetails] = useState(false);
   const [showBackgroundDetails, setShowBackgroundDetails] = useState(false);
   const [showModelDetails, setShowModelDetails] = useState(false);
@@ -860,6 +864,10 @@ function HomeContent() {
   // Generate iterations on-demand (called from the Iterations tool)
   const handleGenerateIterations = async () => {
     if (!uploadedImage) return;
+    if (!apiKey) {
+      setShowApiKeySetup(true);
+      return;
+    }
 
     setIsAnalyzingForIterations(true);
     setError(null);
@@ -985,6 +993,10 @@ function HomeContent() {
 
   const handleGenerateSingle = async (variationId: string) => {
     if (!uploadedImage || !analysis) return;
+    if (!apiKey) {
+      setShowApiKeySetup(true);
+      return;
+    }
 
     const variation = variations.find(v => v.id === variationId);
     if (!variation) return;
@@ -1101,6 +1113,10 @@ function HomeContent() {
 
   const handleGeneratePrompt = async () => {
     if (!analysis) return;
+    if (!apiKey) {
+      setShowApiKeySetup(true);
+      return;
+    }
 
     setIsGeneratingPrompt(true);
     try {
@@ -1127,7 +1143,7 @@ function HomeContent() {
 
   const getWeirdnessLabel = (value: number) => {
     if (value <= 20) return { label: 'Standard', color: 'text-blue-400' };
-    if (value <= 40) return { label: 'Lifestyle', color: 'text-green-400' };
+    if (value <= 40) return { label: 'Lifestyle', color: 'text-green-700 dark:text-green-400' };
     if (value <= 60) return { label: 'Attention', color: 'text-yellow-400' };
     if (value <= 80) return { label: 'Shareable', color: 'text-orange-400' };
     return { label: 'Viral', color: 'text-pink-400' };
@@ -1343,6 +1359,10 @@ function HomeContent() {
   // Apply presets to the current image
   const handleApplyPresets = async () => {
     if (!uploadedImage) return;
+    if (!apiKey) {
+      setShowApiKeySetup(true);
+      return;
+    }
 
     // Build combined prompt from selected presets
     const prompts: string[] = [];
@@ -1466,6 +1486,10 @@ function HomeContent() {
   // Apply a background change with background-scoped prompt
   const handleApplyBackgroundChange = async (prompt: string, label: string) => {
     if (!uploadedImage) return;
+    if (!apiKey) {
+      setShowApiKeySetup(true);
+      return;
+    }
 
     // Build background label for version history
     const backgroundLabel = `[background] ${label}`;
@@ -1580,6 +1604,10 @@ function HomeContent() {
   // Generate AI background suggestions based on current image
   const handleGenerateBackgroundSuggestions = async () => {
     if (!uploadedImage) return;
+    if (!apiKey) {
+      setShowApiKeySetup(true);
+      return;
+    }
 
     setIsLoadingBackgroundSuggestions(true);
 
@@ -1654,6 +1682,10 @@ function HomeContent() {
   // Apply model change - similar to background change but for model only
   const handleApplyModelChange = async (prompt: string, label: string) => {
     if (!uploadedImage) return;
+    if (!apiKey) {
+      setShowApiKeySetup(true);
+      return;
+    }
 
     // Build model label for version history
     const modelLabel = `[model] ${label}`;
@@ -1767,6 +1799,10 @@ function HomeContent() {
   // Generate AI model suggestions based on current image
   const handleGenerateModelSuggestions = async () => {
     if (!uploadedImage) return;
+    if (!apiKey) {
+      setShowApiKeySetup(true);
+      return;
+    }
 
     setIsLoadingModelSuggestions(true);
 
@@ -1838,6 +1874,11 @@ function HomeContent() {
 
   // Apply model builder selections
   const handleApplyModelBuilder = () => {
+    if (!apiKey) {
+      setShowApiKeySetup(true);
+      return;
+    }
+
     const parts: string[] = [];
 
     if (selectedGender && selectedGender !== 'any') {
@@ -2284,21 +2325,21 @@ function HomeContent() {
   // Show loading while checking API key
   if (!isApiKeyLoaded) {
     return (
-      <div className="min-h-screen bg-[#101318] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#101318] text-white flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header */}
-      <header className="border-b border-white/10 bg-[#101318]/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="px-4 md:px-6 h-14 flex items-center justify-between">
           {/* Mobile: Menu button */}
           <button
             onClick={() => setIsMobileSidebarOpen(true)}
-            className="md:hidden p-2 -ml-1 rounded-lg hover:bg-white/10 transition-colors"
+            className="md:hidden p-2 -ml-1 rounded-lg hover:bg-muted transition-colors"
             aria-label="Open edits drawer"
           >
             <Plus className="w-5 h-5" />
@@ -2307,7 +2348,21 @@ function HomeContent() {
           {/* Logo - centered on mobile, left-aligned on desktop */}
           <div className="flex-1 md:flex-none md:w-[360px] flex items-center justify-center md:justify-start md:pl-7">
             <button onClick={uploadedImage ? () => setShowNewConfirmModal(true) : handleReset} className="flex items-center gap-2 font-semibold hover:opacity-80 transition-opacity">
-              <img src="/logo.svg" alt="StaticKit" className="w-8 h-8" />
+              <svg className="w-8 h-8 text-foreground" viewBox="0 0 101 101" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M59.9691 26.3024C59.9691 28.6266 61.8532 30.5107 64.1774 30.5107C66.5016 30.5107 68.3857 28.6266 68.3857 26.3024C68.3857 23.9782 66.5016 22.0941 64.1774 22.0941C61.8532 22.0941 59.9691 23.9782 59.9691 26.3024Z"/>
+                <path d="M74.6982 26.3024C74.6982 28.6266 76.5824 30.5107 78.9066 30.5107C81.2308 30.5107 83.1149 28.6266 83.1149 26.3024C83.1149 23.9782 81.2308 22.0941 78.9066 22.0941C76.5824 22.0941 74.6982 23.9782 74.6982 26.3024Z"/>
+                <path d="M59.9691 74.6982C59.9691 77.0224 61.8532 78.9066 64.1774 78.9066C66.5016 78.9066 68.3857 77.0224 68.3857 74.6982C68.3857 72.374 66.5016 70.4899 64.1774 70.4899C61.8532 70.4899 59.9691 72.374 59.9691 74.6982Z"/>
+                <path d="M61.0212 13.6774C61.0212 15.4206 62.4343 16.8337 64.1774 16.8337C65.9206 16.8337 67.3337 15.4206 67.3337 13.6774C67.3337 11.9343 65.9206 10.5212 64.1774 10.5212C62.4343 10.5212 61.0212 11.9343 61.0212 13.6774Z"/>
+                <path d="M87.3232 42.0837C87.3232 43.8268 88.7363 45.2399 90.4795 45.2399C92.2226 45.2399 93.6357 43.8268 93.6357 42.0837C93.6357 40.3405 92.2226 38.9274 90.4795 38.9274C88.7363 38.9274 87.3232 40.3405 87.3232 42.0837Z"/>
+                <path d="M87.3232 58.917C87.3232 60.6601 88.7363 62.0732 90.4795 62.0732C92.2226 62.0732 93.6357 60.6601 93.6357 58.917C93.6357 57.1738 92.2226 55.7607 90.4795 55.7607C88.7363 55.7607 87.3232 57.1738 87.3232 58.917Z"/>
+                <path d="M61.0212 87.3232C61.0212 89.0664 62.4343 90.4795 64.1774 90.4795C65.9206 90.4795 67.3337 89.0664 67.3337 87.3232C67.3337 85.5801 65.9206 84.167 64.1774 84.167C62.4343 84.167 61.0212 85.5801 61.0212 87.3232Z"/>
+                <path d="M57.8649 42.0837C57.8649 45.57 60.6911 48.3962 64.1774 48.3962C67.6637 48.3962 70.4899 45.57 70.4899 42.0837C70.4899 38.5974 67.6637 35.7712 64.1774 35.7712C60.6911 35.7712 57.8649 38.5974 57.8649 42.0837Z"/>
+                <path d="M57.8649 58.917C57.8649 62.4033 60.6911 65.2295 64.1774 65.2295C67.6637 65.2295 70.4899 62.4033 70.4899 58.917C70.4899 55.4307 67.6637 52.6045 64.1774 52.6045C60.6911 52.6045 57.8649 55.4307 57.8649 58.917Z"/>
+                <path d="M74.6982 42.0837C74.6982 44.4079 76.5824 46.292 78.9066 46.292C81.2308 46.292 83.1149 44.4079 83.1149 42.0837C83.1149 39.7595 81.2308 37.8753 78.9066 37.8753C76.5824 37.8753 74.6982 39.7595 74.6982 42.0837Z"/>
+                <path d="M74.6982 58.917C74.6982 61.2412 76.5824 63.1253 78.9066 63.1253C81.2308 63.1253 83.1149 61.2412 83.1149 58.917C83.1149 56.5928 81.2308 54.7087 78.9066 54.7087C76.5824 54.7087 74.6982 56.5928 74.6982 58.917Z"/>
+                <path d="M74.6982 74.6982C74.6982 77.0224 76.5824 78.9066 78.9066 78.9066C81.2308 78.9066 83.1149 77.0224 83.1149 74.6982C83.1149 72.374 81.2308 70.4899 78.9066 70.4899C76.5824 70.4899 74.6982 72.374 74.6982 74.6982Z"/>
+                <path d="M50.5003 8.41699C52.2435 8.41699 53.6566 9.83009 53.6566 11.5732V89.4274C53.6566 91.1706 52.2435 92.5837 50.5003 92.5837C27.2583 92.5837 8.41699 73.7423 8.41699 50.5003C8.41699 27.2583 27.2583 8.41699 50.5003 8.41699Z"/>
+              </svg>
               <span className="text-lg">StaticKit</span>
             </button>
           </div>
@@ -2317,35 +2372,53 @@ function HomeContent() {
             {/* Keyboard shortcuts - desktop only */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="hidden md:flex items-center justify-center w-9 h-9 rounded-lg border border-white/20 hover:bg-white/10 transition-colors">
-                  <Keyboard className="w-4 h-4 text-white/60" />
+                <button className="hidden md:flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors">
+                  <Keyboard className="w-4 h-4 text-muted-foreground" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-xs">
                 <div className="space-y-2 text-xs">
-                  <p className="font-medium text-white mb-2">Keyboard Shortcuts</p>
-                  <div className="space-y-1 text-white/70">
+                  <p className="font-medium text-foreground mb-2">Keyboard Shortcuts</p>
+                  <div className="space-y-1 text-foreground/70">
                     <div className="flex justify-between gap-4">
                       <span>Navigate versions</span>
-                      <span className="text-white/50">← →</span>
+                      <span className="text-muted-foreground/80">← →</span>
                     </div>
                     <div className="flex justify-between gap-4">
                       <span>Switch tools</span>
-                      <span className="text-white/50">Shift + ← →</span>
+                      <span className="text-muted-foreground/80">Shift + ← →</span>
                     </div>
                     <div className="flex justify-between gap-4">
                       <span>Delete version</span>
-                      <span className="text-white/50">Backspace</span>
+                      <span className="text-muted-foreground/80">Backspace</span>
                     </div>
                   </div>
                 </div>
+              </TooltipContent>
+            </Tooltip>
+            {/* Theme toggle - desktop only */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="hidden md:flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors"
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <Moon className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                Switch to {theme === 'dark' ? 'light' : 'dark'} mode
               </TooltipContent>
             </Tooltip>
             <a
               href="https://github.com/CoreyRab/statickit"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 p-2 md:px-3 md:py-1.5 rounded-lg border border-white/20 hover:bg-white/10 transition-colors text-sm"
+              className="flex items-center gap-2 p-2 md:px-3 md:py-1.5 rounded-lg border border-border hover:bg-muted transition-colors text-sm"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
@@ -2370,13 +2443,13 @@ function HomeContent() {
           <div className="flex-1 flex flex-col min-w-0 order-1 md:order-none overflow-hidden">
             {/* Horizontal Toolbar - Above Image (hidden on mobile) */}
             <div className="hidden md:flex items-center justify-center mb-4">
-              <div className="flex items-center gap-1 p-1 bg-white/[0.02] border border-white/10 rounded-xl">
+              <div className="flex items-center gap-1 p-1 bg-muted/30 border border-border rounded-xl">
                 <button
                   onClick={() => setSelectedTool('iterations')}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'iterations'
-                      ? 'bg-amber-600 text-white gap-2'
-                      : 'text-white/50 hover:text-white hover:bg-white/10 gap-0'
+                      ? 'bg-primary text-primary-foreground gap-2'
+                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted gap-0'
                   }`}
                 >
                   <Layers className="w-4 h-4 flex-shrink-0" />
@@ -2393,8 +2466,8 @@ function HomeContent() {
                   onClick={() => setSelectedTool('edit')}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'edit'
-                      ? 'bg-amber-600 text-white gap-2'
-                      : 'text-white/50 hover:text-white hover:bg-white/10 gap-0'
+                      ? 'bg-primary text-primary-foreground gap-2'
+                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted gap-0'
                   }`}
                 >
                   <Wand2 className="w-4 h-4 flex-shrink-0" />
@@ -2411,8 +2484,8 @@ function HomeContent() {
                   onClick={() => setSelectedTool('backgrounds')}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'backgrounds'
-                      ? 'bg-amber-600 text-white gap-2'
-                      : 'text-white/50 hover:text-white hover:bg-white/10 gap-0'
+                      ? 'bg-primary text-primary-foreground gap-2'
+                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted gap-0'
                   }`}
                 >
                   <ImageIcon className="w-4 h-4 flex-shrink-0" />
@@ -2429,8 +2502,8 @@ function HomeContent() {
                   onClick={() => setSelectedTool('model')}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'model'
-                      ? 'bg-amber-600 text-white gap-2'
-                      : 'text-white/50 hover:text-white hover:bg-white/10 gap-0'
+                      ? 'bg-primary text-primary-foreground gap-2'
+                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted gap-0'
                   }`}
                 >
                   <User className="w-4 h-4 flex-shrink-0" />
@@ -2447,8 +2520,8 @@ function HomeContent() {
                   onClick={() => setSelectedTool('export')}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'export'
-                      ? 'bg-amber-600 text-white gap-2'
-                      : 'text-white/50 hover:text-white hover:bg-white/10 gap-0'
+                      ? 'bg-primary text-primary-foreground gap-2'
+                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted gap-0'
                   }`}
                 >
                   <Expand className="w-4 h-4 flex-shrink-0" />
@@ -2481,7 +2554,7 @@ function HomeContent() {
                         <Loader2
                           key={idx}
                           className={`w-2.5 h-2.5 animate-spin ${
-                            idx === originalVersionIndex ? 'text-emerald-500' : 'text-white/50'
+                            idx === originalVersionIndex ? 'text-emerald-500' : 'text-muted-foreground/80'
                           }`}
                         />
                       ) : (
@@ -2493,16 +2566,16 @@ function HomeContent() {
                               ? 'bg-red-500/50'
                               : idx === originalVersionIndex
                                 ? 'bg-emerald-500 scale-110'
-                                : 'bg-white/30 hover:bg-white/50'
+                                : 'bg-muted hover:bg-muted/500'
                           }`}
                         />
                       )
                     ))}
                   </div>
                   {/* Label row - changes but dots stay fixed */}
-                  <span className="text-xs text-white/50 text-center max-w-xs">
+                  <span className="text-xs text-muted-foreground/80 text-center max-w-xs">
                     {originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing' ? (
-                      <span className="italic text-white/40">
+                      <span className="italic text-muted-foreground/70">
                         Processing{originalVersions[originalVersionIndex]?.prompt ? (
                           originalVersions[originalVersionIndex].prompt.includes('[preset]')
                             ? ` "${originalVersions[originalVersionIndex].prompt.replace(' [preset]', '')}"`
@@ -2516,16 +2589,16 @@ function HomeContent() {
                     ) : originalVersions.length > 0 && originalVersions[originalVersionIndex]?.prompt ? (
                       originalVersions[originalVersionIndex].prompt.includes('[preset]') ? (
                         <span>
-                          <span className="text-amber-400">[preset]</span>
-                          <span className="italic text-white/60"> {originalVersions[originalVersionIndex].prompt.replace(' [preset]', '')}</span>
+                          <span className="text-primary">[preset]</span>
+                          <span className="italic text-muted-foreground"> {originalVersions[originalVersionIndex].prompt.replace(' [preset]', '')}</span>
                         </span>
                       ) : originalVersions[originalVersionIndex].prompt.includes('[background]') ? (
                         <span>
-                          <span className="text-amber-400">[background]</span>
-                          <span className="italic text-white/60"> {originalVersions[originalVersionIndex].prompt.replace('[background] ', '')}</span>
+                          <span className="text-primary">[background]</span>
+                          <span className="italic text-muted-foreground"> {originalVersions[originalVersionIndex].prompt.replace('[background] ', '')}</span>
                         </span>
                       ) : (
-                        <span className="italic text-white/60">"{originalVersions[originalVersionIndex].prompt}"</span>
+                        <span className="italic text-muted-foreground">"{originalVersions[originalVersionIndex].prompt}"</span>
                       )
                     ) : (
                       activeBase?.name || 'Original'
@@ -2552,36 +2625,36 @@ function HomeContent() {
                         className={`w-2.5 h-2.5 rounded-full transition-all ${
                           idx === selectedVariation.currentVersionIndex
                             ? 'bg-emerald-500 scale-110'
-                            : 'bg-white/30 hover:bg-white/50'
+                            : 'bg-muted hover:bg-muted/500'
                         }`}
                       />
                     ))}
                     {selectedVariation.isRegenerating && (
-                      <Loader2 className="w-2.5 h-2.5 text-white/50 animate-spin" />
+                      <Loader2 className="w-2.5 h-2.5 text-muted-foreground/80 animate-spin" />
                     )}
                   </div>
                   {/* Label row */}
-                  <span className="text-xs text-white/50 text-center">
+                  <span className="text-xs text-muted-foreground/80 text-center">
                     {(() => {
                       const currentVersionPrompt = selectedVariation.versions[selectedVariation.currentVersionIndex]?.prompt;
                       if (!currentVersionPrompt) return selectedVariation.title;
                       if (currentVersionPrompt.includes('[preset]')) {
                         return (
                           <span>
-                            <span className="text-amber-400">[preset]</span>
-                            <span className="italic text-white/60"> {currentVersionPrompt.replace(' [preset]', '')}</span>
+                            <span className="text-primary">[preset]</span>
+                            <span className="italic text-muted-foreground"> {currentVersionPrompt.replace(' [preset]', '')}</span>
                           </span>
                         );
                       }
                       if (currentVersionPrompt.includes('[background]')) {
                         return (
                           <span>
-                            <span className="text-amber-400">[background]</span>
-                            <span className="italic text-white/60"> {currentVersionPrompt.replace('[background] ', '')}</span>
+                            <span className="text-primary">[background]</span>
+                            <span className="italic text-muted-foreground"> {currentVersionPrompt.replace('[background] ', '')}</span>
                           </span>
                         );
                       }
-                      return <span className="italic text-white/60">"{currentVersionPrompt}"</span>;
+                      return <span className="italic text-muted-foreground">"{currentVersionPrompt}"</span>;
                     })()}
                   </span>
                 </>
@@ -2591,14 +2664,14 @@ function HomeContent() {
             {/* Legacy Controls Section - Removed, keeping closing structure */}
             <div className="hidden">
               {isShowingGenerated && selectedVariation?.status === 'completed' && (
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                <div className="p-4 rounded-xl bg-muted/50 border border-border">
                   {selectedVariation.versions.length > 1 && (
-                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/10">
+                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-border">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleVersionChange(selectedVariation.id, 'prev')}
                           disabled={selectedVariation.currentVersionIndex === 0}
-                          className="p-1 rounded hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1 rounded hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           <ChevronLeft className="w-4 h-4" />
                         </button>
@@ -2616,10 +2689,10 @@ function HomeContent() {
                                   }}
                                   className={`w-2.5 h-2.5 rounded-full transition-all ${
                                     idx === selectedVariation.currentVersionIndex
-                                      ? 'bg-amber-500 scale-110'
+                                      ? 'bg-primary scale-110'
                                       : idx === selectedVariation.versions.length - 1 && selectedVariation.hasNewVersion
                                       ? 'bg-green-500 animate-pulse'
-                                      : 'bg-white/30 hover:bg-white/50'
+                                      : 'bg-muted hover:bg-muted/500'
                                   }`}
                                 />
                               </TooltipTrigger>
@@ -2632,11 +2705,11 @@ function HomeContent() {
                         <button
                           onClick={() => handleVersionChange(selectedVariation.id, 'next')}
                           disabled={selectedVariation.currentVersionIndex === selectedVariation.versions.length - 1}
-                          className="p-1 rounded hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1 rounded hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           <ChevronRight className="w-4 h-4" />
                         </button>
-                        <span className="text-[10px] text-white/40 ml-1">
+                        <span className="text-[10px] text-muted-foreground/70 ml-1">
                           v{selectedVariation.currentVersionIndex + 1}
                           {selectedVariation.versions[selectedVariation.currentVersionIndex]?.prompt && (
                             <span className="italic ml-1">
@@ -2652,7 +2725,7 @@ function HomeContent() {
                   {selectedVariation.hasNewVersion && (
                     <button
                       onClick={() => handleViewLatestVersion(selectedVariation.id)}
-                      className="w-full mb-3 p-2 rounded-lg bg-green-500/20 border border-green-500/30 text-green-400 text-sm font-medium flex items-center justify-center gap-2 hover:bg-green-500/30 transition-colors"
+                      className="w-full mb-3 p-2 rounded-lg bg-green-500/20 border border-green-500/30 text-green-700 dark:text-green-400 text-sm font-medium flex items-center justify-center gap-2 hover:bg-green-500/30 transition-colors"
                     >
                       <Check className="w-4 h-4" />
                       New version ready - Click to view
@@ -2660,13 +2733,13 @@ function HomeContent() {
                   )}
 
                   {/* Refine prompt */}
-                  <p className="text-sm font-medium mb-2 text-white/70">Refine this image</p>
+                  <p className="text-sm font-medium mb-2 text-foreground/70">Refine this image</p>
                   <div className="flex gap-2">
                     <Input
                       placeholder="e.g., 'make the lighting warmer'"
                       value={selectedVariation.editPrompt}
                       onChange={(e) => handleEditGenerated(selectedVariation.id, e.target.value)}
-                      className="flex-1 bg-white/5 border-white/10 text-white/80 text-sm placeholder:text-white/30"
+                      className="flex-1 bg-muted/50 border-border text-foreground/80 text-sm placeholder:text-muted-foreground/50"
                       disabled={selectedVariation.isRegenerating}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && selectedVariation.editPrompt.trim() && !selectedVariation.isRegenerating) {
@@ -2678,7 +2751,7 @@ function HomeContent() {
                       size="sm"
                       onClick={() => handleRegenerateWithEdit(selectedVariation.id)}
                       disabled={!selectedVariation.editPrompt.trim() || selectedVariation.isRegenerating}
-                      className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50"
+                      className="bg-primary hover:bg-primary/90 disabled:opacity-50"
                     >
                       {selectedVariation.isRegenerating ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -2693,15 +2766,15 @@ function HomeContent() {
 
               {/* Edit controls for original image */}
               {!isShowingGenerated && uploadedImage && (
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                <div className="p-4 rounded-xl bg-muted/50 border border-border">
                   {/* Version indicator and navigation */}
                   {originalVersions.length > 1 && (
-                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/10">
+                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-border">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleOriginalVersionChange('prev')}
                           disabled={originalVersionIndex === 0}
-                          className="p-1 rounded hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1 rounded hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           <ChevronLeft className="w-4 h-4" />
                         </button>
@@ -2714,7 +2787,7 @@ function HomeContent() {
                                   className={`w-2.5 h-2.5 rounded-full transition-all ${
                                     idx === originalVersionIndex
                                       ? 'bg-emerald-500 scale-110'
-                                      : 'bg-white/30 hover:bg-white/50'
+                                      : 'bg-muted hover:bg-muted/500'
                                   }`}
                                 />
                               </TooltipTrigger>
@@ -2727,11 +2800,11 @@ function HomeContent() {
                         <button
                           onClick={() => handleOriginalVersionChange('next')}
                           disabled={originalVersionIndex === originalVersions.length - 1}
-                          className="p-1 rounded hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1 rounded hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           <ChevronRight className="w-4 h-4" />
                         </button>
-                        <span className="text-[10px] text-white/40 ml-1">
+                        <span className="text-[10px] text-muted-foreground/70 ml-1">
                           {originalVersionIndex === 0 ? (activeBase?.name || 'Original') : `${activeBase?.name || 'Original'} v${originalVersionIndex + 1}`}
                           {originalVersions[originalVersionIndex]?.prompt && (
                             <span className="italic ml-1">
@@ -2744,7 +2817,7 @@ function HomeContent() {
                   )}
 
                   {/* Edit prompt */}
-                  <p className="text-sm font-medium mb-2 text-white/70">Edit this image</p>
+                  <p className="text-sm font-medium mb-2 text-foreground/70">Edit this image</p>
                   <div className="flex gap-2">
                     {(() => {
                       const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
@@ -2754,7 +2827,7 @@ function HomeContent() {
                             placeholder="e.g., 'make the background brighter'"
                             value={originalEditPrompt}
                             onChange={(e) => setOriginalEditPrompt(e.target.value)}
-                            className="flex-1 bg-white/5 border-white/10 text-white/80 text-sm placeholder:text-white/30"
+                            className="flex-1 bg-muted/50 border-border text-foreground/80 text-sm placeholder:text-muted-foreground/50"
                             disabled={currentVersionProcessing}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && originalEditPrompt.trim() && !currentVersionProcessing) {
@@ -2766,7 +2839,7 @@ function HomeContent() {
                             size="sm"
                             onClick={() => handleEditOriginal()}
                             disabled={!originalEditPrompt.trim() || currentVersionProcessing}
-                            className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50"
+                            className="bg-primary hover:bg-primary/90 disabled:opacity-50"
                           >
                             <RefreshCw className="w-4 h-4" />
                           </Button>
@@ -2781,7 +2854,7 @@ function HomeContent() {
 
             {/* Image Preview */}
             <div
-              className="flex-1 flex items-center justify-center bg-white/[0.03] rounded-2xl border border-white/10 overflow-hidden relative min-h-0 p-4 md:p-8 touch-pan-y"
+              className="flex-1 flex items-center justify-center bg-muted/40 rounded-2xl border border-border overflow-hidden relative min-h-0 p-4 md:p-8 touch-pan-y"
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
@@ -2823,7 +2896,7 @@ function HomeContent() {
                   {/* Loading overlay when viewing a processing version */}
                   {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing' && (
                     <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
-                      <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
                     </div>
                   )}
                   {/* Error overlay when viewing a failed version */}
@@ -2833,8 +2906,8 @@ function HomeContent() {
                         <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
                           <X className="w-6 h-6 text-red-400" />
                         </div>
-                        <span className="text-sm font-medium text-white">Generation Failed</span>
-                        <span className="text-xs text-white/50">The AI couldn't process this edit. This can happen with certain prompts or images. Try a different edit or preset.</span>
+                        <span className="text-sm font-medium text-foreground">Generation Failed</span>
+                        <span className="text-xs text-muted-foreground/80">The AI couldn't process this edit. This can happen with certain prompts or images. Try a different edit or preset.</span>
                         <button
                           onClick={() => {
                             // Remove the failed version and go back to previous
@@ -2843,7 +2916,7 @@ function HomeContent() {
                             setOriginalVersions(prev => prev.filter((_, idx) => idx !== failedIndex));
                             setOriginalVersionIndex(Math.max(0, parentIndex));
                           }}
-                          className="mt-2 px-4 py-2 text-xs bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                          className="mt-2 px-4 py-2 text-xs bg-muted hover:bg-muted rounded-lg transition-colors"
                         >
                           Dismiss
                         </button>
@@ -2852,23 +2925,23 @@ function HomeContent() {
                   )}
                   {/* Zoom controls - show on mobile when zoomed or always on desktop */}
                   {(zoomLevel > 1) && (
-                    <div className="absolute bottom-4 right-4 flex items-center gap-1 bg-black/70 backdrop-blur-sm rounded-lg p-1 border border-white/10">
+                    <div className="absolute bottom-4 right-4 flex items-center gap-1 bg-card/90 backdrop-blur-sm rounded-lg p-1 border border-border">
                       <button
                         onClick={() => {
                           setZoomLevel(Math.max(1, zoomLevel - 0.5));
                           if (zoomLevel <= 1.5) setZoomPosition({ x: 0, y: 0 });
                         }}
-                        className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                        className="p-2 text-foreground/70 hover:text-foreground hover:bg-muted rounded-md transition-colors"
                         aria-label="Zoom out"
                       >
                         <ZoomOut className="w-4 h-4" />
                       </button>
-                      <span className="text-xs text-white/70 min-w-[3rem] text-center">
+                      <span className="text-xs text-foreground/70 min-w-[3rem] text-center">
                         {Math.round(zoomLevel * 100)}%
                       </span>
                       <button
                         onClick={() => setZoomLevel(Math.min(4, zoomLevel + 0.5))}
-                        className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                        className="p-2 text-foreground/70 hover:text-foreground hover:bg-muted rounded-md transition-colors"
                         aria-label="Zoom in"
                       >
                         <ZoomIn className="w-4 h-4" />
@@ -2878,7 +2951,7 @@ function HomeContent() {
                           setZoomLevel(1);
                           setZoomPosition({ x: 0, y: 0 });
                         }}
-                        className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md transition-colors border-l border-white/10 ml-1"
+                        className="p-2 text-foreground/70 hover:text-foreground hover:bg-muted rounded-md transition-colors border-l border-border ml-1"
                         aria-label="Reset zoom"
                       >
                         <Minimize2 className="w-4 h-4" />
@@ -2890,7 +2963,7 @@ function HomeContent() {
                     (isShowingGenerated && selectedVariation && selectedVariation.versions.length > 1)) &&
                     zoomLevel === 1 && (
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:hidden">
-                      <span className="text-[10px] text-white/40 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full">
+                      <span className="text-[10px] text-muted-foreground/70 bg-card/80 backdrop-blur-sm px-2 py-1 rounded-full">
                         Swipe to navigate versions
                       </span>
                     </div>
@@ -2902,35 +2975,35 @@ function HomeContent() {
                     {...getRootProps()}
                     className={`flex flex-col items-center justify-center max-w-2xl w-full h-96 gap-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
                       isDragActive
-                        ? 'border-amber-500 bg-amber-500/10'
-                        : 'border-white/20 hover:border-white/40 bg-white/5'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-border bg-muted/50'
                     }`}
                   >
                     <input {...getInputProps()} />
-                    <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center">
-                      <Upload className="w-7 h-7 text-white/60" />
+                    <div className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center">
+                      <Upload className="w-7 h-7 text-muted-foreground" />
                     </div>
                     {isDragActive ? (
-                      <p className="text-amber-400 font-medium">Drop your ad here...</p>
+                      <p className="text-primary font-medium">Drop your ad here...</p>
                     ) : (
                       <>
                         <div className="text-center">
                           <p className="font-medium mb-1">Drop your ad image here</p>
-                          <p className="text-white/50 text-sm">or click to browse</p>
+                          <p className="text-muted-foreground/80 text-sm">or click to browse</p>
                         </div>
-                        <p className="text-xs text-white/30">PNG, JPG, WebP • Max 10MB</p>
+                        <p className="text-xs text-muted-foreground/50">PNG, JPG, WebP • Max 10MB</p>
                       </>
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="text-white/30">No image</div>
+                <div className="text-muted-foreground/50">No image</div>
               )}
 
               {/* Floating Edit Chat Input - shows when edit tool selected */}
               {selectedTool === 'edit' && !isShowingGenerated && uploadedImage && (
                 <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
-                  <div className="bg-black/70 backdrop-blur-md rounded-full border border-white/20 shadow-2xl flex items-center gap-2 pl-4 pr-1.5 py-1.5">
+                  <div className="bg-background/70 backdrop-blur-xl rounded-full border border-border/50 shadow-lg flex items-center gap-2 pl-4 pr-1.5 py-1.5">
                     {(() => {
                       const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
                       return (
@@ -2940,7 +3013,7 @@ function HomeContent() {
                             placeholder="Describe an edit..."
                             value={originalEditPrompt}
                             onChange={(e) => setOriginalEditPrompt(e.target.value)}
-                            className="flex-1 bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
+                            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 outline-none"
                             disabled={currentVersionProcessing}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && originalEditPrompt.trim() && !currentVersionProcessing) {
@@ -2951,9 +3024,9 @@ function HomeContent() {
                           <button
                             onClick={() => handleEditOriginal()}
                             disabled={!originalEditPrompt.trim() || currentVersionProcessing}
-                            className="p-2 rounded-full bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            className="p-2 rounded-full bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                           >
-                            <Send className="w-4 h-4 text-white" />
+                            <Send className="w-4 h-4 text-primary-foreground" />
                           </button>
                         </>
                       );
@@ -2965,7 +3038,7 @@ function HomeContent() {
               {/* Floating Background Input - shows when backgrounds tool selected */}
               {selectedTool === 'backgrounds' && !isShowingGenerated && uploadedImage && (
                 <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
-                  <div className="bg-black/70 backdrop-blur-md rounded-full border border-white/20 shadow-2xl flex items-center gap-2 pl-4 pr-1.5 py-1.5">
+                  <div className="bg-background/70 backdrop-blur-xl rounded-full border border-border/50 shadow-lg flex items-center gap-2 pl-4 pr-1.5 py-1.5">
                     {(() => {
                       const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
                       return (
@@ -2975,7 +3048,7 @@ function HomeContent() {
                             placeholder="Describe a background..."
                             value={backgroundCustomPrompt}
                             onChange={(e) => setBackgroundCustomPrompt(e.target.value)}
-                            className="flex-1 bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
+                            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 outline-none"
                             disabled={currentVersionProcessing}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && backgroundCustomPrompt.trim() && !currentVersionProcessing) {
@@ -2990,9 +3063,9 @@ function HomeContent() {
                               setBackgroundCustomPrompt('');
                             }}
                             disabled={!backgroundCustomPrompt.trim() || currentVersionProcessing}
-                            className="p-2 rounded-full bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            className="p-2 rounded-full bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                           >
-                            <Send className="w-4 h-4 text-white" />
+                            <Send className="w-4 h-4 text-primary-foreground" />
                           </button>
                         </>
                       );
@@ -3004,7 +3077,7 @@ function HomeContent() {
               {/* Floating Model Input - shows when model tool selected */}
               {selectedTool === 'model' && !isShowingGenerated && uploadedImage && (
                 <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
-                  <div className="bg-black/70 backdrop-blur-md rounded-full border border-white/20 shadow-2xl flex items-center gap-2 pl-4 pr-1.5 py-1.5">
+                  <div className="bg-background/70 backdrop-blur-xl rounded-full border border-border/50 shadow-lg flex items-center gap-2 pl-4 pr-1.5 py-1.5">
                     {(() => {
                       const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
                       return (
@@ -3014,7 +3087,7 @@ function HomeContent() {
                             placeholder="Describe a model..."
                             value={modelCustomPrompt}
                             onChange={(e) => setModelCustomPrompt(e.target.value)}
-                            className="flex-1 bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
+                            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 outline-none"
                             disabled={currentVersionProcessing}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && modelCustomPrompt.trim() && !currentVersionProcessing) {
@@ -3029,9 +3102,9 @@ function HomeContent() {
                               setModelCustomPrompt('');
                             }}
                             disabled={!modelCustomPrompt.trim() || currentVersionProcessing}
-                            className="p-2 rounded-full bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            className="p-2 rounded-full bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                           >
-                            <Send className="w-4 h-4 text-white" />
+                            <Send className="w-4 h-4 text-primary-foreground" />
                           </button>
                         </>
                       );
@@ -3050,7 +3123,7 @@ function HomeContent() {
                         <button
                           onClick={handleDeleteVersion}
                           disabled={originalVersionIndex === 0 || originalVersions[originalVersionIndex]?.status === 'processing'}
-                          className="p-2 rounded-lg bg-black/50 hover:bg-red-600/80 backdrop-blur-sm text-white/70 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-black/50 disabled:cursor-not-allowed"
+                          className="p-2 rounded-lg bg-card/80 hover:bg-red-600/80 backdrop-blur-sm text-foreground/70 hover:text-foreground transition-colors disabled:opacity-30 disabled:hover:bg-card/80 disabled:cursor-not-allowed"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -3071,7 +3144,7 @@ function HomeContent() {
                           handleCreateVersion(previewImage, sourceLabel);
                         }}
                         disabled={!isShowingGenerated && originalVersionIndex === 0}
-                        className="p-2 rounded-lg bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white/70 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-black/50 disabled:cursor-not-allowed"
+                        className="p-2 rounded-lg bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground transition-colors disabled:opacity-30 disabled:hover:bg-card/80 disabled:cursor-not-allowed"
                       >
                         <Layers className="w-4 h-4" />
                       </button>
@@ -3091,7 +3164,7 @@ function HomeContent() {
                             : uploadedImage?.filename || 'image.png';
                           handleDownload(previewImage, filename);
                         }}
-                        className="p-2 rounded-lg bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white/70 hover:text-white transition-colors"
+                        className="p-2 rounded-lg bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground transition-colors"
                       >
                         <Download className="w-4 h-4" />
                       </button>
@@ -3105,7 +3178,7 @@ function HomeContent() {
                   <Button
                     size="sm"
                     onClick={() => handleDuplicateVariation(selectedVariation.id)}
-                    className="bg-white/10 hover:bg-white/20 backdrop-blur-sm"
+                    className="bg-muted hover:bg-muted backdrop-blur-sm"
                   >
                     <Copy className="w-4 h-4 mr-1.5" />
                     Duplicate
@@ -3120,14 +3193,14 @@ function HomeContent() {
             fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[360px] transform transition-transform duration-300 ease-in-out
             md:relative md:inset-auto md:z-auto md:w-[360px] md:transform-none
             ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-            flex-shrink-0 border-r md:border border-white/10 md:rounded-2xl bg-[#101318] md:bg-white/[0.02] flex flex-col overflow-hidden md:order-first
+            flex-shrink-0 border-r md:border border-border md:rounded-2xl bg-background md:bg-muted/30 flex flex-col overflow-hidden md:order-first
           `}>
             {/* Mobile Sidebar Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/10 md:hidden">
+            <div className="flex items-center justify-between p-4 border-b border-border md:hidden">
               <span className="font-semibold">Tools</span>
               <button
                 onClick={() => setIsMobileSidebarOpen(false)}
-                className="p-2 -mr-2 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-2 -mr-2 rounded-lg hover:bg-muted transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -3136,15 +3209,15 @@ function HomeContent() {
             {selectedTool === 'iterations' && (
               <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col overflow-hidden">
                 {/* Image Section */}
-                <div className="p-4 border-b border-white/10">
+                <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-white/70">Image</h3>
+                    <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
                       className={`text-xs flex items-center gap-0.5 transition-colors ${
                         uploadedImage
-                          ? 'text-white/40 hover:text-white/70'
-                          : 'text-amber-500 hover:text-amber-400'
+                          ? 'text-muted-foreground/70 hover:text-foreground/70'
+                          : 'text-primary hover:text-primary'
                       }`}
                     >
                       <Plus className="w-3 h-3" />
@@ -3152,14 +3225,14 @@ function HomeContent() {
                     </button>
                   </div>
                   {uploadedImage ? (
-                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                    <div className="p-3 rounded-lg bg-muted/50 border border-border">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
-                        <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
+                        <span className="text-[11px] text-muted-foreground/70 truncate flex-1 mr-2">{uploadedImage.filename}</span>
+                        <span className="text-[11px] text-muted-foreground/80">{uploadedImage.width}×{uploadedImage.height}</span>
                       </div>
                       {analysis && (
-                        <div className="mt-2 pt-2 border-t border-white/5">
-                          <p className="text-[10px] text-white/40 truncate">
+                        <div className="mt-2 pt-2 border-t border-border/50">
+                          <p className="text-[10px] text-muted-foreground/70 truncate">
                             {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
                           </p>
                         </div>
@@ -3168,9 +3241,9 @@ function HomeContent() {
                   ) : (
                     <button
                       onClick={openFileDialog}
-                      className="w-full p-3 rounded-lg border border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-colors"
+                      className="w-full p-3 rounded-lg border border-dashed border-border hover:border-border hover:bg-muted/50 transition-colors"
                     >
-                      <span className="text-[11px] text-white/30">No image uploaded</span>
+                      <span className="text-[11px] text-muted-foreground/50">No image uploaded</span>
                     </button>
                   )}
                 </div>
@@ -3179,7 +3252,7 @@ function HomeContent() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="font-semibold mb-1">Versions</h2>
-                      <p className="text-xs text-white/50">Saved edits you can continue to build on.</p>
+                      <p className="text-xs text-muted-foreground/80">Saved edits you can continue to build on.</p>
                     </div>
                     {variations.length > 0 && (
                       <div className="flex items-center gap-3">
@@ -3196,7 +3269,7 @@ function HomeContent() {
                                     onConfirm: downloadAllGenerations,
                                   });
                                 }}
-                                className="flex items-center gap-1 text-xs text-white/50 hover:text-white transition-colors"
+                                className="flex items-center gap-1 text-xs text-muted-foreground/80 hover:text-foreground transition-colors"
                               >
                                 <FolderDown className="w-3.5 h-3.5" />
                                 Download All
@@ -3207,7 +3280,7 @@ function HomeContent() {
                             </TooltipContent>
                           </Tooltip>
                         )}
-                        <span className="text-sm text-white/40">
+                        <span className="text-sm text-muted-foreground/70">
                           {completedCount}/{variations.length} generated
                         </span>
                       </div>
@@ -3218,7 +3291,7 @@ function HomeContent() {
                     <div className={`mt-4 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
                       {/* Number of generations */}
                       <div className="mb-3">
-                        <label className="text-xs text-white/40 mb-1.5 block">Generate suggestions</label>
+                        <label className="text-xs text-muted-foreground/70 mb-1.5 block">Generate suggestions</label>
                         <div className="flex items-center gap-2">
                           {[3, 5, 8, 10].map((num) => (
                             <button
@@ -3226,8 +3299,8 @@ function HomeContent() {
                               onClick={() => setNumGenerations(num)}
                               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                                 numGenerations === num
-                                  ? 'bg-amber-600 text-white'
-                                  : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70'
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'bg-muted/50 text-muted-foreground/80 hover:bg-muted hover:text-foreground/70'
                               }`}
                             >
                               {num}
@@ -3242,25 +3315,25 @@ function HomeContent() {
                           placeholder="Optional: add context to guide the AI-powered suggestions"
                           value={additionalContext}
                           onChange={(e) => setAdditionalContext(e.target.value)}
-                          className="w-full bg-white/5 border-white/10 text-white placeholder:text-white/30 min-h-[60px] resize-none text-sm"
+                          className="w-full bg-muted/50 border-border text-foreground placeholder:text-muted-foreground/50 min-h-[60px] resize-none text-sm"
                           rows={2}
                         />
                       </div>
 
                       <Button
                         onClick={handleGenerateIterations}
-                        className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500"
+                        className="w-full bg-primary hover:bg-primary/90"
                       >
                         <Sparkles className="w-4 h-4 mr-1.5" />
                         Generate suggestions
                       </Button>
 
                       {/* Custom iteration section */}
-                      <div className="mt-4 pt-4 border-t border-white/10">
+                      <div className="mt-4 pt-4 border-t border-border">
                         {!showCustomIteration ? (
                           <button
                             onClick={() => setShowCustomIteration(true)}
-                            className="w-full px-3 py-2.5 rounded-lg border border-dashed border-white/20 text-white/50 hover:text-white/70 hover:border-white/30 transition-all flex items-center justify-center gap-2 text-sm"
+                            className="w-full px-3 py-2.5 rounded-lg border border-dashed border-border text-muted-foreground/80 hover:text-foreground/70 hover:border-border transition-all flex items-center justify-center gap-2 text-sm"
                           >
                             <Plus className="w-4 h-4" />
                             Custom version
@@ -3271,7 +3344,7 @@ function HomeContent() {
                               placeholder="Describe the iteration you want to create..."
                               value={customIterationDescription}
                               onChange={(e) => setCustomIterationDescription(e.target.value)}
-                              className="w-full bg-white/5 border-white/10 text-white placeholder:text-white/30 min-h-[80px] resize-none text-sm"
+                              className="w-full bg-muted/50 border-border text-foreground placeholder:text-muted-foreground/50 min-h-[80px] resize-none text-sm"
                               rows={3}
                             />
                             <div className="flex gap-2">
@@ -3279,7 +3352,7 @@ function HomeContent() {
                                 onClick={handleAddCustomIteration}
                                 disabled={!customIterationDescription.trim()}
                                 size="sm"
-                                className="flex-1 bg-white/10 hover:bg-white/20 text-white"
+                                className="flex-1 bg-muted hover:bg-muted text-foreground"
                               >
                                 <Plus className="w-3.5 h-3.5 mr-1" />
                                 Add iteration
@@ -3291,7 +3364,7 @@ function HomeContent() {
                                 }}
                                 size="sm"
                                 variant="ghost"
-                                className="text-white/50 hover:text-white hover:bg-white/10"
+                                className="text-muted-foreground/80 hover:text-foreground hover:bg-muted"
                               >
                                 Cancel
                               </Button>
@@ -3304,9 +3377,9 @@ function HomeContent() {
                   {/* Loading state */}
                   {isAnalyzingForIterations && (
                     <div className="mt-4 text-center py-8">
-                      <Loader2 className="w-8 h-8 text-amber-500 animate-spin mx-auto mb-3" />
-                      <p className="text-sm text-white/60">Analyzing your ad...</p>
-                      <p className="text-xs text-white/40 mt-1">Generating version ideas (10-20 seconds)</p>
+                      <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">Analyzing your ad...</p>
+                      <p className="text-xs text-muted-foreground/70 mt-1">Generating version ideas (10-20 seconds)</p>
                     </div>
                   )}
                   {/* Create all button - show when variations exist but not all generated */}
@@ -3314,7 +3387,7 @@ function HomeContent() {
                     <Button
                       size="sm"
                       onClick={() => handleGenerateAll()}
-                      className="w-full mt-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500"
+                      className="w-full mt-3 bg-primary hover:bg-primary/90"
                     >
                       <Sparkles className="w-4 h-4 mr-1.5" />
                       Create all
@@ -3328,15 +3401,15 @@ function HomeContent() {
             {selectedTool === 'edit' && (
               <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col h-full">
                 {/* Image Section */}
-                <div className="p-4 border-b border-white/10">
+                <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-white/70">Image</h3>
+                    <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
                       className={`text-xs flex items-center gap-0.5 transition-colors ${
                         uploadedImage
-                          ? 'text-white/40 hover:text-white/70'
-                          : 'text-amber-500 hover:text-amber-400'
+                          ? 'text-muted-foreground/70 hover:text-foreground/70'
+                          : 'text-primary hover:text-primary'
                       }`}
                     >
                       <Plus className="w-3 h-3" />
@@ -3344,14 +3417,14 @@ function HomeContent() {
                     </button>
                   </div>
                   {uploadedImage ? (
-                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                    <div className="p-3 rounded-lg bg-muted/50 border border-border">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
-                        <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
+                        <span className="text-[11px] text-muted-foreground/70 truncate flex-1 mr-2">{uploadedImage.filename}</span>
+                        <span className="text-[11px] text-muted-foreground/80">{uploadedImage.width}×{uploadedImage.height}</span>
                       </div>
                       {analysis && (
-                        <div className="mt-2 pt-2 border-t border-white/5">
-                          <p className="text-[10px] text-white/40 truncate">
+                        <div className="mt-2 pt-2 border-t border-border/50">
+                          <p className="text-[10px] text-muted-foreground/70 truncate">
                             {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
                           </p>
                         </div>
@@ -3360,9 +3433,9 @@ function HomeContent() {
                   ) : (
                     <button
                       onClick={openFileDialog}
-                      className="w-full p-3 rounded-lg border border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-colors"
+                      className="w-full p-3 rounded-lg border border-dashed border-border hover:border-border hover:bg-muted/50 transition-colors"
                     >
-                      <span className="text-[11px] text-white/30">No image uploaded</span>
+                      <span className="text-[11px] text-muted-foreground/50">No image uploaded</span>
                     </button>
                   )}
                 </div>
@@ -3370,7 +3443,7 @@ function HomeContent() {
                 {/* Tool Content */}
                 <div className="p-4 flex-1 flex flex-col min-h-0">
                   <h2 className="font-semibold mb-1">Edit</h2>
-                  <div className="text-xs text-white/50 mb-3">
+                  <div className="text-xs text-muted-foreground/80 mb-3">
                     Apply preset effects for lighting, style, camera angles, and more.
                     {uploadedImage && (
                       <Tooltip>
@@ -3380,8 +3453,8 @@ function HomeContent() {
                             disabled={!analysis?.imageDescription}
                             className={`inline-flex items-center gap-1 ml-1.5 transition-colors ${
                               analysis?.imageDescription
-                                ? 'text-white/60 hover:text-white/80 cursor-pointer'
-                                : 'text-white/30 cursor-not-allowed'
+                                ? 'text-muted-foreground hover:text-foreground/80 cursor-pointer'
+                                : 'text-muted-foreground/50 cursor-not-allowed'
                             }`}
                           >
                             <span>Image Details</span>
@@ -3397,27 +3470,27 @@ function HomeContent() {
                     )}
                   </div>
                   {showImageDetails && analysis?.imageDescription && (
-                    <div className="mb-3 p-2.5 rounded-lg bg-white/5 border border-white/10">
-                      <p className="text-[11px] text-white/50 italic leading-relaxed">{analysis.imageDescription}</p>
+                    <div className="mb-3 p-2.5 rounded-lg bg-muted/50 border border-border">
+                      <p className="text-[11px] text-muted-foreground/80 italic leading-relaxed">{analysis.imageDescription}</p>
                     </div>
                   )}
 
-                  <div className="flex-1 overflow-y-auto space-y-2 touch-scroll pb-20 md:pb-2">
+                  <div className="flex-1 overflow-y-auto space-y-2 touch-scroll pb-20 md:pb-16">
                     {/* Lighting */}
-                    <div className="rounded-lg border border-white/10 overflow-hidden">
+                    <div className="rounded-lg border border-border overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'lighting' ? null : 'lighting')}
-                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Sun className="w-4 h-4 text-white/60" />
+                          <Sun className="w-4 h-4 text-muted-foreground" />
                           <span>Lighting</span>
-                          {selectedPresets.lighting && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+                          {selectedPresets.lighting && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'lighting' ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'lighting' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'lighting' && (
-                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.lighting.map((preset) => (
                             <button
                               key={preset.id}
@@ -3426,10 +3499,10 @@ function HomeContent() {
                                 ...prev,
                                 lighting: prev.lighting === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
                                 selectedPresets.lighting === preset.id
-                                  ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'hover:bg-muted disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3440,20 +3513,20 @@ function HomeContent() {
                     </div>
 
                     {/* Style */}
-                    <div className="rounded-lg border border-white/10 overflow-hidden">
+                    <div className="rounded-lg border border-border overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'style' ? null : 'style')}
-                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Palette className="w-4 h-4 text-white/60" />
+                          <Palette className="w-4 h-4 text-muted-foreground" />
                           <span>Style</span>
-                          {selectedPresets.style && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+                          {selectedPresets.style && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'style' ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'style' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'style' && (
-                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.style.map((preset) => (
                             <button
                               key={preset.id}
@@ -3462,10 +3535,10 @@ function HomeContent() {
                                 ...prev,
                                 style: prev.style === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
                                 selectedPresets.style === preset.id
-                                  ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'hover:bg-muted disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3476,20 +3549,20 @@ function HomeContent() {
                     </div>
 
                     {/* Camera */}
-                    <div className="rounded-lg border border-white/10 overflow-hidden">
+                    <div className="rounded-lg border border-border overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'camera' ? null : 'camera')}
-                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Camera className="w-4 h-4 text-white/60" />
+                          <Camera className="w-4 h-4 text-muted-foreground" />
                           <span>Camera</span>
-                          {selectedPresets.camera && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+                          {selectedPresets.camera && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'camera' ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'camera' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'camera' && (
-                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.camera.map((preset) => (
                             <button
                               key={preset.id}
@@ -3498,10 +3571,10 @@ function HomeContent() {
                                 ...prev,
                                 camera: prev.camera === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
                                 selectedPresets.camera === preset.id
-                                  ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'hover:bg-muted disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3512,20 +3585,20 @@ function HomeContent() {
                     </div>
 
                     {/* Mood */}
-                    <div className="rounded-lg border border-white/10 overflow-hidden">
+                    <div className="rounded-lg border border-border overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'mood' ? null : 'mood')}
-                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Sparkles className="w-4 h-4 text-white/60" />
+                          <Sparkles className="w-4 h-4 text-muted-foreground" />
                           <span>Mood</span>
-                          {selectedPresets.mood && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+                          {selectedPresets.mood && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'mood' ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'mood' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'mood' && (
-                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.mood.map((preset) => (
                             <button
                               key={preset.id}
@@ -3534,10 +3607,10 @@ function HomeContent() {
                                 ...prev,
                                 mood: prev.mood === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
                                 selectedPresets.mood === preset.id
-                                  ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'hover:bg-muted disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3548,20 +3621,20 @@ function HomeContent() {
                     </div>
 
                     {/* Color */}
-                    <div className="rounded-lg border border-white/10 overflow-hidden">
+                    <div className="rounded-lg border border-border overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'color' ? null : 'color')}
-                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Droplets className="w-4 h-4 text-white/60" />
+                          <Droplets className="w-4 h-4 text-muted-foreground" />
                           <span>Color</span>
-                          {selectedPresets.color && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+                          {selectedPresets.color && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'color' ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'color' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'color' && (
-                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.color.map((preset) => (
                             <button
                               key={preset.id}
@@ -3570,10 +3643,10 @@ function HomeContent() {
                                 ...prev,
                                 color: prev.color === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
                                 selectedPresets.color === preset.id
-                                  ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'hover:bg-muted disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3584,20 +3657,20 @@ function HomeContent() {
                     </div>
 
                     {/* Era */}
-                    <div className="rounded-lg border border-white/10 overflow-hidden">
+                    <div className="rounded-lg border border-border overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'era' ? null : 'era')}
-                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-white/60" />
+                          <Clock className="w-4 h-4 text-muted-foreground" />
                           <span>Era</span>
-                          {selectedPresets.era && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+                          {selectedPresets.era && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'era' ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'era' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'era' && (
-                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.era.map((preset) => (
                             <button
                               key={preset.id}
@@ -3606,10 +3679,10 @@ function HomeContent() {
                                 ...prev,
                                 era: prev.era === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
                                 selectedPresets.era === preset.id
-                                  ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'hover:bg-muted disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3620,20 +3693,20 @@ function HomeContent() {
                     </div>
 
                     {/* Framing */}
-                    <div className="rounded-lg border border-white/10 overflow-hidden">
+                    <div className="rounded-lg border border-border overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'framing' ? null : 'framing')}
-                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Scan className="w-4 h-4 text-white/60" />
+                          <Scan className="w-4 h-4 text-muted-foreground" />
                           <span>Framing</span>
-                          {selectedPresets.framing && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+                          {selectedPresets.framing && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'framing' ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'framing' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'framing' && (
-                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.framing.map((preset) => (
                             <button
                               key={preset.id}
@@ -3642,10 +3715,10 @@ function HomeContent() {
                                 ...prev,
                                 framing: prev.framing === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
                                 selectedPresets.framing === preset.id
-                                  ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'hover:bg-muted disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3656,20 +3729,20 @@ function HomeContent() {
                     </div>
 
                     {/* Rotation */}
-                    <div className="rounded-lg border border-white/10 overflow-hidden">
+                    <div className="rounded-lg border border-border overflow-hidden">
                       <button
                         onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'rotation' ? null : 'rotation')}
-                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-white/5 hover:bg-white/10 transition-colors touch-manipulation active:bg-white/15"
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <RotateCw className="w-4 h-4 text-white/60" />
+                          <RotateCw className="w-4 h-4 text-muted-foreground" />
                           <span>Rotation</span>
-                          {selectedPresets.rotation && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+                          {selectedPresets.rotation && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${expandedPresetCategory === 'rotation' ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'rotation' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'rotation' && (
-                        <div className={`p-2 space-y-1 bg-black/20 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
                           {PRESETS.rotation.map((preset) => (
                             <button
                               key={preset.id}
@@ -3678,10 +3751,10 @@ function HomeContent() {
                                 ...prev,
                                 rotation: prev.rotation === preset.id ? null : preset.id
                               }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-white/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-white/20 ${
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
                                 selectedPresets.rotation === preset.id
-                                  ? 'bg-amber-600/30 text-amber-300'
-                                  : 'hover:bg-white/10 disabled:hover:bg-transparent'
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'hover:bg-muted disabled:hover:bg-transparent'
                               }`}
                             >
                               {preset.name}
@@ -3692,7 +3765,7 @@ function HomeContent() {
                     </div>
 
                     {/* Apply button - always rendered, visibility controlled by opacity */}
-                    <div className={`mt-3 pt-3 border-t border-white/10 transition-opacity duration-150 ${
+                    <div className={`mt-3 pt-3 border-t border-border transition-opacity duration-150 ${
                       (selectedPresets.lighting || selectedPresets.style || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.camera || selectedPresets.framing || selectedPresets.rotation)
                         ? 'opacity-100'
                         : 'opacity-0 pointer-events-none'
@@ -3700,14 +3773,14 @@ function HomeContent() {
                       <Button
                         onClick={() => handleApplyPresets()}
                         disabled={originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing'}
-                        className="w-full bg-amber-600 hover:bg-amber-500 text-white"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                       >
                         <Wand2 className="w-4 h-4 mr-2" />
                         Apply {Object.values(selectedPresets).filter(Boolean).length > 1 ? 'Presets' : 'Preset'}
                       </Button>
                       <button
                         onClick={() => setSelectedPresets({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null })}
-                        className="w-full mt-2 text-xs text-white/40 hover:text-white/60 transition-colors"
+                        className="w-full mt-2 text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors"
                       >
                         Clear selections
                       </button>
@@ -3722,15 +3795,15 @@ function HomeContent() {
             {selectedTool === 'export' && (
               <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col h-full">
                 {/* Image Section */}
-                <div className="p-4 border-b border-white/10">
+                <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-white/70">Image</h3>
+                    <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
                       className={`text-xs flex items-center gap-0.5 transition-colors ${
                         uploadedImage
-                          ? 'text-white/40 hover:text-white/70'
-                          : 'text-amber-500 hover:text-amber-400'
+                          ? 'text-muted-foreground/70 hover:text-foreground/70'
+                          : 'text-primary hover:text-primary'
                       }`}
                     >
                       <Plus className="w-3 h-3" />
@@ -3738,14 +3811,14 @@ function HomeContent() {
                     </button>
                   </div>
                   {uploadedImage ? (
-                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                    <div className="p-3 rounded-lg bg-muted/50 border border-border">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
-                        <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
+                        <span className="text-[11px] text-muted-foreground/70 truncate flex-1 mr-2">{uploadedImage.filename}</span>
+                        <span className="text-[11px] text-muted-foreground/80">{uploadedImage.width}×{uploadedImage.height}</span>
                       </div>
                       {analysis && (
-                        <div className="mt-2 pt-2 border-t border-white/5">
-                          <p className="text-[10px] text-white/40 truncate">
+                        <div className="mt-2 pt-2 border-t border-border/50">
+                          <p className="text-[10px] text-muted-foreground/70 truncate">
                             {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
                           </p>
                         </div>
@@ -3754,9 +3827,9 @@ function HomeContent() {
                   ) : (
                     <button
                       onClick={openFileDialog}
-                      className="w-full p-3 rounded-lg border border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-colors"
+                      className="w-full p-3 rounded-lg border border-dashed border-border hover:border-border hover:bg-muted/50 transition-colors"
                     >
-                      <span className="text-[11px] text-white/30">No image uploaded</span>
+                      <span className="text-[11px] text-muted-foreground/50">No image uploaded</span>
                     </button>
                   )}
                 </div>
@@ -3764,7 +3837,7 @@ function HomeContent() {
                 {/* Tool Content */}
                 <div className="p-4 flex-1 flex flex-col overflow-hidden">
                   <h2 className="font-semibold mb-1">Resize</h2>
-                  <p className="text-xs text-white/50 mb-3">
+                  <p className="text-xs text-muted-foreground/80 mb-3">
                     AI-powered resizing to fit any aspect ratio or platform.
                   </p>
 
@@ -3778,14 +3851,14 @@ function HomeContent() {
                         className={`w-full px-3 py-2 rounded-lg border transition-all text-left flex items-center justify-between text-sm ${
                           !viewingOriginalResizedSize
                             ? 'bg-emerald-600/20 border-emerald-500/40'
-                            : 'bg-white/5 border-white/10 hover:bg-white/10'
+                            : 'bg-muted/50 border-border hover:bg-muted'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <Check className={`w-3.5 h-3.5 ${!viewingOriginalResizedSize ? 'text-emerald-400' : 'text-white/40'}`} />
-                          <span className={!viewingOriginalResizedSize ? 'text-emerald-300' : ''}>Original</span>
+                          <Check className={`w-3.5 h-3.5 ${!viewingOriginalResizedSize ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground/70'}`} />
+                          <span className={!viewingOriginalResizedSize ? 'text-emerald-700 dark:text-emerald-700 dark:text-emerald-400' : ''}>Original</span>
                         </div>
-                        <span className="text-white/40 text-xs">{uploadedImage.width}×{uploadedImage.height}</span>
+                        <span className="text-muted-foreground/70 text-xs">{uploadedImage.width}×{uploadedImage.height}</span>
                       </button>
                       {/* Resize options */}
                       {AD_SIZES.map((size) => {
@@ -3808,27 +3881,27 @@ function HomeContent() {
                               isViewing
                                 ? 'bg-emerald-600/20 border-emerald-500/40'
                                 : isCompleted
-                                ? 'bg-amber-600/10 border-amber-500/30 hover:bg-amber-600/20'
-                                : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                ? 'bg-primary/10 border-primary/30 hover:bg-primary/20'
+                                : 'bg-muted/50 border-border hover:bg-muted'
                             }`}
                           >
                             <div className="flex items-center gap-2.5">
                               {isResizing ? (
-                                <Loader2 className="w-3.5 h-3.5 animate-spin text-white/50" />
+                                <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground/80" />
                               ) : isCompleted ? (
-                                <Check className={`w-3.5 h-3.5 ${isViewing ? 'text-emerald-400' : 'text-amber-400'}`} />
+                                <Check className={`w-3.5 h-3.5 ${isViewing ? 'text-emerald-700 dark:text-emerald-400' : 'text-primary'}`} />
                               ) : (
                                 <div
-                                  className="bg-white/20 border border-white/30 rounded-[2px]"
+                                  className="bg-muted border border-border rounded-[2px]"
                                   style={{
                                     width: size.width >= size.height ? 14 : 14 * (size.width / size.height),
                                     height: size.height >= size.width ? 14 : 14 * (size.height / size.width),
                                   }}
                                 />
                               )}
-                              <span className={isViewing ? 'text-emerald-300' : isCompleted ? 'text-amber-300' : ''}>{size.label}</span>
+                              <span className={isViewing ? 'text-emerald-700 dark:text-emerald-700 dark:text-emerald-400' : isCompleted ? 'text-primary' : ''}>{size.label}</span>
                             </div>
-                            <span className="text-white/40 text-xs">{size.name}</span>
+                            <span className="text-muted-foreground/70 text-xs">{size.name}</span>
                           </button>
                         );
                       })}
@@ -3846,7 +3919,7 @@ function HomeContent() {
                               ungeneratedSizes.forEach(size => handleResizeOriginal(size));
                             }}
                             disabled={isAnyResizing}
-                            className="w-full mt-2 text-xs text-amber-400 hover:text-amber-300 disabled:text-white/30 disabled:cursor-not-allowed transition-colors text-center py-1"
+                            className="w-full mt-2 text-xs text-primary hover:text-primary disabled:text-muted-foreground/50 disabled:cursor-not-allowed transition-colors text-center py-1"
                           >
                             {isAnyResizing ? 'Resizing (may take a minute)...' : `Generate all ${ungeneratedSizes.length} sizes`}
                           </button>
@@ -3858,9 +3931,9 @@ function HomeContent() {
 
                 {/* Download Section */}
                 <div className={`mt-auto space-y-2 ${!uploadedImage ? 'opacity-50' : ''}`}>
-                  <h3 className="text-xs text-white/40 uppercase tracking-wide mb-2">Download</h3>
+                  <h3 className="text-xs text-muted-foreground/70 uppercase tracking-wide mb-2">Download</h3>
                   {!uploadedImage && (
-                    <div className="text-sm text-white/40 italic">No images to download</div>
+                    <div className="text-sm text-muted-foreground/70 italic">No images to download</div>
                   )}
                   {uploadedImage && (
                     <button
@@ -3874,12 +3947,12 @@ function HomeContent() {
                           handleDownload(uploadedImage.url, uploadedImage.filename);
                         }
                       }}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-left flex items-center gap-3"
+                      className="w-full px-4 py-3 rounded-lg bg-muted/50 border border-border hover:bg-muted transition-all text-left flex items-center gap-3"
                     >
-                      <Download className="w-4 h-4 text-white/60" />
+                      <Download className="w-4 h-4 text-muted-foreground" />
                       <div>
                         <div className="font-medium">Current View</div>
-                        <div className="text-xs text-white/40">
+                        <div className="text-xs text-muted-foreground/70">
                           {viewingOriginalResizedSize || `${uploadedImage.width}×${uploadedImage.height}`}
                         </div>
                       </div>
@@ -3896,12 +3969,12 @@ function HomeContent() {
                           await new Promise(resolve => setTimeout(resolve, 300));
                         }
                       }}
-                      className="w-full px-4 py-3 rounded-lg bg-amber-600/20 border border-amber-500/30 hover:bg-amber-600/30 transition-all text-left flex items-center gap-3"
+                      className="w-full px-4 py-3 rounded-lg bg-primary/20 border border-primary/30 hover:bg-primary/30 transition-all text-left flex items-center gap-3"
                     >
-                      <FolderDown className="w-4 h-4 text-amber-400" />
+                      <FolderDown className="w-4 h-4 text-primary" />
                       <div>
-                        <div className="font-medium text-amber-300">Download All Sizes</div>
-                        <div className="text-xs text-white/40">
+                        <div className="font-medium text-primary">Download All Sizes</div>
+                        <div className="text-xs text-muted-foreground/70">
                           {originalResizedVersions.filter(r => r.status === 'completed').length + 1} sizes
                         </div>
                       </div>
@@ -3918,12 +3991,12 @@ function HomeContent() {
                           onConfirm: downloadAllGenerations,
                         });
                       }}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-left flex items-center gap-3"
+                      className="w-full px-4 py-3 rounded-lg bg-muted/50 border border-border hover:bg-muted transition-all text-left flex items-center gap-3"
                     >
-                      <FolderDown className="w-4 h-4 text-white/60" />
+                      <FolderDown className="w-4 h-4 text-muted-foreground" />
                       <div>
                         <div className="font-medium">Download All Versions</div>
-                        <div className="text-xs text-white/40">{completedCount} generated images</div>
+                        <div className="text-xs text-muted-foreground/70">{completedCount} generated images</div>
                       </div>
                     </button>
                   )}
@@ -3936,15 +4009,15 @@ function HomeContent() {
             {selectedTool === 'backgrounds' && (
               <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col h-full">
                 {/* Image Section */}
-                <div className="p-4 border-b border-white/10">
+                <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-white/70">Image</h3>
+                    <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
                       className={`text-xs flex items-center gap-0.5 transition-colors ${
                         uploadedImage
-                          ? 'text-white/40 hover:text-white/70'
-                          : 'text-amber-500 hover:text-amber-400'
+                          ? 'text-muted-foreground/70 hover:text-foreground/70'
+                          : 'text-primary hover:text-primary'
                       }`}
                     >
                       <Plus className="w-3 h-3" />
@@ -3952,14 +4025,14 @@ function HomeContent() {
                     </button>
                   </div>
                   {uploadedImage ? (
-                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                    <div className="p-3 rounded-lg bg-muted/50 border border-border">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
-                        <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
+                        <span className="text-[11px] text-muted-foreground/70 truncate flex-1 mr-2">{uploadedImage.filename}</span>
+                        <span className="text-[11px] text-muted-foreground/80">{uploadedImage.width}×{uploadedImage.height}</span>
                       </div>
                       {analysis && (
-                        <div className="mt-2 pt-2 border-t border-white/5">
-                          <p className="text-[10px] text-white/40 truncate">
+                        <div className="mt-2 pt-2 border-t border-border/50">
+                          <p className="text-[10px] text-muted-foreground/70 truncate">
                             {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
                           </p>
                         </div>
@@ -3968,9 +4041,9 @@ function HomeContent() {
                   ) : (
                     <button
                       onClick={openFileDialog}
-                      className="w-full p-3 rounded-lg border border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-colors"
+                      className="w-full p-3 rounded-lg border border-dashed border-border hover:border-border hover:bg-muted/50 transition-colors"
                     >
-                      <span className="text-[11px] text-white/30">No image uploaded</span>
+                      <span className="text-[11px] text-muted-foreground/50">No image uploaded</span>
                     </button>
                   )}
                 </div>
@@ -3978,7 +4051,7 @@ function HomeContent() {
                 {/* Tool Content */}
                 <div className="p-4 flex flex-col flex-1 overflow-hidden">
                   <h2 className="font-semibold mb-1">Backgrounds</h2>
-                  <div className="text-xs text-white/50 mb-3">
+                  <div className="text-xs text-muted-foreground/80 mb-3">
                     Change the background while preserving the product and any models.
                     {uploadedImage && (
                       <Tooltip>
@@ -3988,8 +4061,8 @@ function HomeContent() {
                             disabled={!analysis?.backgroundDescription}
                             className={`inline-flex items-center gap-1 ml-1.5 transition-colors ${
                               analysis?.backgroundDescription
-                                ? 'text-white/60 hover:text-white/80 cursor-pointer'
-                                : 'text-white/30 cursor-not-allowed'
+                                ? 'text-muted-foreground hover:text-foreground/80 cursor-pointer'
+                                : 'text-muted-foreground/50 cursor-not-allowed'
                             }`}
                           >
                             <span>Current Background</span>
@@ -4005,8 +4078,8 @@ function HomeContent() {
                     )}
                   </div>
                   {showBackgroundDetails && analysis?.backgroundDescription && (
-                    <div className="mb-3 p-2.5 rounded-lg bg-white/5 border border-white/10">
-                      <p className="text-[11px] text-white/50 italic leading-relaxed">{analysis.backgroundDescription}</p>
+                    <div className="mb-3 p-2.5 rounded-lg bg-muted/50 border border-border">
+                      <p className="text-[11px] text-muted-foreground/80 italic leading-relaxed">{analysis.backgroundDescription}</p>
                     </div>
                   )}
 
@@ -4014,27 +4087,27 @@ function HomeContent() {
                 <button
                   onClick={handleGenerateBackgroundSuggestions}
                   disabled={isLoadingBackgroundSuggestions || !uploadedImage}
-                  className="w-full px-3 py-2 mb-4 rounded-lg text-sm border border-white/20 hover:border-amber-500/50 hover:bg-amber-500/10 text-white/70 hover:text-amber-400 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 mb-4 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isLoadingBackgroundSuggestions ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-white/50">Analyzing...</span>
+                      <span className="text-muted-foreground/80">Analyzing...</span>
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4 text-amber-500/70" />
+                      <Sparkles className="w-4 h-4 text-primary/70" />
                       Suggest backgrounds
                     </>
                   )}
                 </button>
 
                 {/* Backgrounds Grid */}
-                <div className={`flex-1 overflow-y-auto touch-scroll pb-20 md:pb-2 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className={`flex-1 overflow-y-auto touch-scroll pb-20 md:pb-16 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
                   <div className="grid grid-cols-2 gap-1.5">
                     {/* Separator above AI suggestions */}
                     {(isLoadingBackgroundSuggestions || backgroundSuggestions.length > 0) && (
-                      <div className="col-span-2 h-px bg-white/10 my-1" />
+                      <div className="col-span-2 h-px bg-muted my-1" />
                     )}
 
                     {/* AI-Generated Suggestions */}
@@ -4044,7 +4117,7 @@ function HomeContent() {
                         {[1, 2, 3, 4].map((i) => (
                           <div
                             key={`skeleton-${i}`}
-                            className="h-9 rounded-lg bg-amber-500/5 border border-amber-500/20 animate-pulse"
+                            className="h-9 rounded-lg bg-primary/5 border border-primary/20 animate-pulse"
                           />
                         ))}
                       </>
@@ -4060,8 +4133,8 @@ function HomeContent() {
                           }}
                           className={`px-2.5 py-2 rounded-lg text-left text-xs flex items-center gap-1.5 transition-all ${
                             isUsed
-                              ? 'bg-green-500/10 border border-green-500/30 text-green-300'
-                              : 'bg-amber-500/5 border border-amber-500/40 hover:bg-amber-500/10 hover:border-amber-500/60 text-white/80'
+                              ? 'bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-700 dark:text-green-400'
+                              : 'bg-primary/5 border border-primary/40 hover:bg-primary/10 hover:border-primary/60 text-foreground/80'
                           }`}
                         >
                           {isUsed && <Check className="w-3 h-3 flex-shrink-0" />}
@@ -4082,8 +4155,8 @@ function HomeContent() {
                           }}
                           className={`px-2.5 py-2 rounded-lg text-left text-xs flex items-center gap-1.5 transition-all ${
                             isUsed
-                              ? 'bg-green-500/10 border border-green-500/30 text-green-300'
-                              : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white/80'
+                              ? 'bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-700 dark:text-green-400'
+                              : 'bg-muted/50 border border-border hover:bg-muted hover:border-border text-foreground/80'
                           }`}
                         >
                           {isUsed && <Check className="w-3 h-3 flex-shrink-0" />}
@@ -4102,15 +4175,15 @@ function HomeContent() {
             {selectedTool === 'model' && (
               <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col h-full overflow-hidden">
                 {/* Image Section */}
-                <div className="p-4 border-b border-white/10">
+                <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-white/70">Image</h3>
+                    <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
                       className={`text-xs flex items-center gap-0.5 transition-colors ${
                         uploadedImage
-                          ? 'text-white/40 hover:text-white/70'
-                          : 'text-amber-500 hover:text-amber-400'
+                          ? 'text-muted-foreground/70 hover:text-foreground/70'
+                          : 'text-primary hover:text-primary'
                       }`}
                     >
                       <Plus className="w-3 h-3" />
@@ -4118,14 +4191,14 @@ function HomeContent() {
                     </button>
                   </div>
                   {uploadedImage ? (
-                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                    <div className="p-3 rounded-lg bg-muted/50 border border-border">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
-                        <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
+                        <span className="text-[11px] text-muted-foreground/70 truncate flex-1 mr-2">{uploadedImage.filename}</span>
+                        <span className="text-[11px] text-muted-foreground/80">{uploadedImage.width}×{uploadedImage.height}</span>
                       </div>
                       {analysis && (
-                        <div className="mt-2 pt-2 border-t border-white/5">
-                          <p className="text-[10px] text-white/40 truncate">
+                        <div className="mt-2 pt-2 border-t border-border/50">
+                          <p className="text-[10px] text-muted-foreground/70 truncate">
                             {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
                           </p>
                         </div>
@@ -4134,9 +4207,9 @@ function HomeContent() {
                   ) : (
                     <button
                       onClick={openFileDialog}
-                      className="w-full p-3 rounded-lg border border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-colors"
+                      className="w-full p-3 rounded-lg border border-dashed border-border hover:border-border hover:bg-muted/50 transition-colors"
                     >
-                      <span className="text-[11px] text-white/30">No image uploaded</span>
+                      <span className="text-[11px] text-muted-foreground/50">No image uploaded</span>
                     </button>
                   )}
                 </div>
@@ -4144,7 +4217,7 @@ function HomeContent() {
                 {/* Tool Content */}
                 <div className="p-4 flex flex-col flex-1 overflow-hidden">
                   <h2 className="font-semibold mb-1">Model</h2>
-                  <div className="text-xs text-white/50 mb-3">
+                  <div className="text-xs text-muted-foreground/80 mb-3">
                     Change the model while preserving background, lighting & product.
                     {uploadedImage && (
                       <Tooltip>
@@ -4154,8 +4227,8 @@ function HomeContent() {
                             disabled={!analysis?.subjectDescription}
                             className={`inline-flex items-center gap-1 ml-1.5 transition-colors ${
                               analysis?.subjectDescription
-                                ? 'text-white/60 hover:text-white/80 cursor-pointer'
-                                : 'text-white/30 cursor-not-allowed'
+                                ? 'text-muted-foreground hover:text-foreground/80 cursor-pointer'
+                                : 'text-muted-foreground/50 cursor-not-allowed'
                             }`}
                           >
                             <span>Current Model</span>
@@ -4171,20 +4244,20 @@ function HomeContent() {
                     )}
                   </div>
                   {showModelDetails && analysis?.subjectDescription && (
-                    <div className="mb-3 p-2.5 rounded-lg bg-white/5 border border-white/10">
-                      <p className="text-[11px] text-white/50 italic leading-relaxed">{analysis.subjectDescription}</p>
+                    <div className="mb-3 p-2.5 rounded-lg bg-muted/50 border border-border">
+                      <p className="text-[11px] text-muted-foreground/80 italic leading-relaxed">{analysis.subjectDescription}</p>
                     </div>
                   )}
 
                 {/* Model controls wrapper - disabled when no image */}
                 <div className={!uploadedImage ? 'opacity-50 pointer-events-none' : ''}>
                   {/* Preserve Outfit Toggle */}
-                  <div className="flex items-center justify-between mb-4 p-2 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-sm text-white/70">Preserve outfit</span>
+                  <div className="flex items-center justify-between mb-4 p-2 rounded-lg bg-muted/50 border border-border">
+                    <span className="text-sm text-foreground/70">Preserve outfit</span>
                     <button
                       onClick={() => setKeepClothing(!keepClothing)}
                       className={`w-10 h-6 rounded-full transition-colors relative ${
-                        keepClothing ? 'bg-amber-600' : 'bg-white/20'
+                        keepClothing ? 'bg-primary' : 'bg-muted'
                       }`}
                     >
                       <div
@@ -4199,16 +4272,16 @@ function HomeContent() {
                   <button
                     onClick={handleGenerateModelSuggestions}
                     disabled={isLoadingModelSuggestions || !uploadedImage}
-                    className="w-full px-3 py-2 mb-4 rounded-lg text-sm border border-white/20 hover:border-amber-500/50 hover:bg-amber-500/10 text-white/70 hover:text-amber-400 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-full px-3 py-2 mb-4 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                   {isLoadingModelSuggestions ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-white/50">Analyzing...</span>
+                      <span className="text-muted-foreground/80">Analyzing...</span>
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4 text-amber-500/70" />
+                      <Sparkles className="w-4 h-4 text-primary/70" />
                       Suggest models
                     </>
                   )}
@@ -4217,14 +4290,14 @@ function HomeContent() {
                 {/* AI-Generated Suggestions with Skeleton Loading */}
                 {(isLoadingModelSuggestions || modelSuggestions.length > 0) && (
                   <div className="mb-4">
-                    <h3 className="text-xs text-white/40 uppercase tracking-wide mb-2">AI Suggestions</h3>
+                    <h3 className="text-xs text-muted-foreground/70 uppercase tracking-wide mb-2">AI Suggestions</h3>
                     <div className="flex flex-wrap gap-2">
                       {isLoadingModelSuggestions ? (
                         <>
                           {[1, 2, 3, 4, 5].map((i) => (
                             <div
                               key={i}
-                              className="h-8 rounded-full bg-white/5 border border-white/10 animate-pulse"
+                              className="h-8 rounded-full bg-muted/50 border border-border animate-pulse"
                               style={{ width: `${80 + Math.random() * 50}px` }}
                             />
                           ))}
@@ -4241,8 +4314,8 @@ function HomeContent() {
                               }}
                               className={`px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-all ${
                                 isUsed
-                                  ? 'bg-green-500/20 border border-green-500/40 text-green-300'
-                                  : 'bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 hover:border-amber-500/60 text-amber-300'
+                                  ? 'bg-green-500/20 border border-green-500/40 text-green-700 dark:text-green-700 dark:text-green-400'
+                                  : 'bg-primary/20 border border-primary/40 hover:bg-primary/30 hover:border-primary/60 text-primary'
                               }`}
                               title={suggestion.description}
                             >
@@ -4257,12 +4330,21 @@ function HomeContent() {
                 )}
 
                 {/* Model Builder */}
-                <div className="flex-1 overflow-y-auto space-y-3 touch-scroll pb-20 md:pb-2">
-                  <h3 className="text-xs text-white/40 uppercase tracking-wide">Model Builder</h3>
+                <div className="flex-1 overflow-y-auto touch-scroll pb-20 md:pb-16">
+                  {/* Collapsible Header */}
+                  <button
+                    onClick={() => setIsModelBuilderExpanded(!isModelBuilderExpanded)}
+                    className="w-full flex items-center justify-between py-2 text-xs text-muted-foreground/70 uppercase tracking-wide hover:text-foreground/70 transition-colors"
+                  >
+                    <span>Model Builder</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${isModelBuilderExpanded ? 'rotate-180' : ''}`} />
+                  </button>
 
+                  {isModelBuilderExpanded && (
+                  <div className="space-y-3">
                   {/* Gender */}
                   <div>
-                    <label className="text-xs text-white/50 mb-1.5 block">Gender</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Gender</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.gender.map((option) => (
                         <button
@@ -4270,8 +4352,8 @@ function HomeContent() {
                           onClick={() => setSelectedGender(selectedGender === option.id ? null : option.id)}
                           className={`px-2.5 py-1.5 rounded-lg text-xs transition-all ${
                             selectedGender === option.id
-                              ? 'bg-amber-600 text-white border border-amber-500'
-                              : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
+                              ? 'bg-primary text-primary-foreground border border-primary'
+                              : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
                           {option.label}
@@ -4282,7 +4364,7 @@ function HomeContent() {
 
                   {/* Age Range */}
                   <div>
-                    <label className="text-xs text-white/50 mb-1.5 block">Age Range</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Age Range</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.ageRange.map((option) => (
                         <button
@@ -4290,8 +4372,8 @@ function HomeContent() {
                           onClick={() => setSelectedAgeRange(selectedAgeRange === option.id ? null : option.id)}
                           className={`px-2.5 py-1.5 rounded-lg text-xs transition-all ${
                             selectedAgeRange === option.id
-                              ? 'bg-amber-600 text-white border border-amber-500'
-                              : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
+                              ? 'bg-primary text-primary-foreground border border-primary'
+                              : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
                           {option.label}
@@ -4302,7 +4384,7 @@ function HomeContent() {
 
                   {/* Ethnicity */}
                   <div>
-                    <label className="text-xs text-white/50 mb-1.5 block">Ethnicity</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Ethnicity</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.ethnicity.map((option) => (
                         <button
@@ -4310,8 +4392,8 @@ function HomeContent() {
                           onClick={() => setSelectedEthnicity(selectedEthnicity === option.id ? null : option.id)}
                           className={`px-2.5 py-1.5 rounded-lg text-xs transition-all ${
                             selectedEthnicity === option.id
-                              ? 'bg-amber-600 text-white border border-amber-500'
-                              : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
+                              ? 'bg-primary text-primary-foreground border border-primary'
+                              : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
                           {option.label}
@@ -4322,7 +4404,7 @@ function HomeContent() {
 
                   {/* Hair Color */}
                   <div>
-                    <label className="text-xs text-white/50 mb-1.5 block">Hair Color</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Hair Color</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.hairColor.map((option) => (
                         <button
@@ -4330,8 +4412,8 @@ function HomeContent() {
                           onClick={() => setSelectedHairColor(selectedHairColor === option.id ? null : option.id)}
                           className={`px-2.5 py-1.5 rounded-lg text-xs transition-all ${
                             selectedHairColor === option.id
-                              ? 'bg-amber-600 text-white border border-amber-500'
-                              : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
+                              ? 'bg-primary text-primary-foreground border border-primary'
+                              : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
                           {option.label}
@@ -4342,7 +4424,7 @@ function HomeContent() {
 
                   {/* Hair Type */}
                   <div>
-                    <label className="text-xs text-white/50 mb-1.5 block">Hair Type</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Hair Type</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.hairType.map((option) => (
                         <button
@@ -4350,8 +4432,8 @@ function HomeContent() {
                           onClick={() => setSelectedHairType(selectedHairType === option.id ? null : option.id)}
                           className={`px-2.5 py-1.5 rounded-lg text-xs transition-all ${
                             selectedHairType === option.id
-                              ? 'bg-amber-600 text-white border border-amber-500'
-                              : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
+                              ? 'bg-primary text-primary-foreground border border-primary'
+                              : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
                           {option.label}
@@ -4362,7 +4444,7 @@ function HomeContent() {
 
                   {/* Body Type */}
                   <div>
-                    <label className="text-xs text-white/50 mb-1.5 block">Body Type</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Body Type</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.bodyType.map((option) => (
                         <button
@@ -4370,8 +4452,8 @@ function HomeContent() {
                           onClick={() => setSelectedBodyType(selectedBodyType === option.id ? null : option.id)}
                           className={`px-2.5 py-1.5 rounded-lg text-xs transition-all ${
                             selectedBodyType === option.id
-                              ? 'bg-amber-600 text-white border border-amber-500'
-                              : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
+                              ? 'bg-primary text-primary-foreground border border-primary'
+                              : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
                           {option.label}
@@ -4382,7 +4464,7 @@ function HomeContent() {
 
                   {/* Expression/Mood */}
                   <div>
-                    <label className="text-xs text-white/50 mb-1.5 block">Expression</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Expression</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.expression.map((option) => (
                         <button
@@ -4390,8 +4472,8 @@ function HomeContent() {
                           onClick={() => setSelectedExpression(selectedExpression === option.id ? null : option.id)}
                           className={`px-2.5 py-1.5 rounded-lg text-xs transition-all ${
                             selectedExpression === option.id
-                              ? 'bg-amber-600 text-white border border-amber-500'
-                              : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
+                              ? 'bg-primary text-primary-foreground border border-primary'
+                              : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
                           {option.label}
@@ -4402,7 +4484,7 @@ function HomeContent() {
 
                   {/* Vibe/Energy */}
                   <div>
-                    <label className="text-xs text-white/50 mb-1.5 block">Vibe</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Vibe</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.vibe.map((option) => (
                         <button
@@ -4410,8 +4492,8 @@ function HomeContent() {
                           onClick={() => setSelectedVibe(selectedVibe === option.id ? null : option.id)}
                           className={`px-2.5 py-1.5 rounded-lg text-xs transition-all ${
                             selectedVibe === option.id
-                              ? 'bg-amber-600 text-white border border-amber-500'
-                              : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
+                              ? 'bg-primary text-primary-foreground border border-primary'
+                              : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
                           {option.label}
@@ -4420,13 +4502,11 @@ function HomeContent() {
                     </div>
                   </div>
 
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2 mt-4 pt-4 border-t border-white/10">
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 mt-4 pt-4 border-t border-border">
                   <button
                     onClick={clearModelSelections}
-                    className="flex-1 px-3 py-2 rounded-lg text-sm bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-white/70"
+                    className="flex-1 px-3 py-2 rounded-lg text-sm bg-muted/50 hover:bg-muted border border-border transition-colors text-foreground/70"
                   >
                     Clear
                   </button>
@@ -4437,18 +4517,21 @@ function HomeContent() {
                       // Brief visual feedback
                       btn.textContent = '✓ Generating';
                       btn.classList.add('bg-green-600');
-                      btn.classList.remove('bg-amber-600');
+                      btn.classList.remove('bg-primary');
                       setTimeout(() => {
                         btn.textContent = 'Generate';
                         btn.classList.remove('bg-green-600');
-                        btn.classList.add('bg-amber-600');
+                        btn.classList.add('bg-primary');
                       }, 800);
                     }}
                     disabled={!selectedGender && !selectedAgeRange && !selectedEthnicity && !selectedHairColor && !selectedHairType && !selectedBodyType && !selectedExpression && !selectedVibe}
-                    className="flex-1 px-3 py-2 rounded-lg text-sm bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                    className="flex-1 px-3 py-2 rounded-lg text-sm bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                   >
                     Generate
                   </button>
+                  </div>
+                  </div>
+                  )}
                 </div>
                 </div>
                 </div>
@@ -4458,8 +4541,8 @@ function HomeContent() {
             {/* No tool selected */}
             {selectedTool === null && uploadedImage && (
               <div className="animate-in fade-in duration-200 p-4 flex-1 flex flex-col items-center justify-center text-center">
-                <Info className="w-8 h-8 text-white/20 mb-3" />
-                <p className="text-white/40 text-sm">Select a tool from the sidebar to get started</p>
+                <Info className="w-8 h-8 text-foreground/20 mb-3" />
+                <p className="text-muted-foreground/70 text-sm">Select a tool from the sidebar to get started</p>
               </div>
             )}
 
@@ -4484,13 +4567,13 @@ function HomeContent() {
                       className={`rounded-xl border transition-all cursor-pointer ${
                         isActive
                           ? isOriginal ? 'border-emerald-500 bg-emerald-500/10' : 'border-blue-500 bg-blue-500/10'
-                          : 'border-white/10 bg-white/5 hover:border-white/20'
+                          : 'border-border bg-muted/50 hover:border-border'
                       }`}
                     >
                       <div className="p-4">
                         <div className="flex gap-3">
                           {/* Thumbnail */}
-                          <div className="w-16 h-20 rounded-lg bg-white/10 overflow-hidden flex-shrink-0">
+                          <div className="w-16 h-20 rounded-lg bg-muted overflow-hidden flex-shrink-0">
                             <img
                               src={base.baseImageUrl}
                               alt={base.name}
@@ -4501,29 +4584,29 @@ function HomeContent() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                               {isOriginal ? (
-                                <ImageIcon className="w-4 h-4 text-emerald-400" />
+                                <ImageIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                               ) : (
                                 <Layers className="w-4 h-4 text-blue-400" />
                               )}
-                              <span className={`font-medium text-sm ${isOriginal ? 'text-emerald-400' : 'text-blue-400'}`}>
+                              <span className={`font-medium text-sm ${isOriginal ? 'text-emerald-700 dark:text-emerald-400' : 'text-blue-400'}`}>
                                 {base.name}
                               </span>
                               {editCount > 0 && (
-                                <span className="text-xs text-white/40 bg-white/10 px-1.5 py-0.5 rounded">
+                                <span className="text-xs text-muted-foreground/70 bg-muted px-1.5 py-0.5 rounded">
                                   {editCount} edit{editCount > 1 ? 's' : ''}
                                 </span>
                               )}
                               {resizeCount > 0 && (
-                                <span className="text-xs text-amber-400/80 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                                <span className="text-xs text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded">
                                   {resizeCount + 1} sizes
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-white/50 truncate">
+                            <p className="text-xs text-muted-foreground/80 truncate">
                               {isOriginal ? uploadedImage.filename : base.sourceLabel}
                             </p>
                             {isOriginal && (
-                              <p className="text-xs text-white/40 mt-1">
+                              <p className="text-xs text-muted-foreground/70 mt-1">
                                 {uploadedImage.aspectRatio.includes('(')
                                   ? uploadedImage.aspectRatio
                                   : `${uploadedImage.aspectRatio} • ${uploadedImage.width}×${uploadedImage.height}`}
@@ -4539,9 +4622,9 @@ function HomeContent() {
               {/* Divider - only show when there are variations */}
               {variations.length > 0 && (
                 <div className="flex items-center gap-2 py-1">
-                  <div className="flex-1 border-t border-white/10"></div>
-                  <span className="text-xs text-white/30 uppercase tracking-wide">Suggested</span>
-                  <div className="flex-1 border-t border-white/10"></div>
+                  <div className="flex-1 border-t border-border"></div>
+                  <span className="text-xs text-muted-foreground/50 uppercase tracking-wide">Suggested</span>
+                  <div className="flex-1 border-t border-border"></div>
                 </div>
               )}
 
@@ -4551,18 +4634,18 @@ function HomeContent() {
                   onClick={() => variation.imageUrl && setSelectedVariationId(variation.id)}
                   className={`rounded-xl border transition-all ${
                     selectedVariationId === variation.id
-                      ? 'border-amber-500 bg-amber-500/10'
+                      ? 'border-primary bg-primary/10'
                       : variation.hasNewVersion
                       ? 'border-green-500/50 bg-green-500/5 hover:border-green-500'
-                      : 'border-white/10 bg-white/5 hover:border-white/20'
+                      : 'border-border bg-muted/50 hover:border-border'
                   } ${variation.imageUrl ? 'cursor-pointer' : ''}`}
                 >
                   <div className="p-4">
                     <div className="flex gap-3">
                       {/* Thumbnail */}
-                      <div className="w-16 h-20 rounded-lg bg-white/10 overflow-hidden flex-shrink-0 flex items-center justify-center relative">
+                      <div className="w-16 h-20 rounded-lg bg-muted overflow-hidden flex-shrink-0 flex items-center justify-center relative">
                         {variation.status === 'generating' ? (
-                          <Loader2 className="w-5 h-5 text-amber-400 animate-spin" />
+                          <Loader2 className="w-5 h-5 text-primary animate-spin" />
                         ) : variation.imageUrl ? (
                           <>
                             <img
@@ -4573,12 +4656,12 @@ function HomeContent() {
                             {/* Regenerating overlay */}
                             {variation.isRegenerating && (
                               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
+                                <Loader2 className="w-4 h-4 text-primary animate-spin" />
                               </div>
                             )}
                           </>
                         ) : (
-                          <div className="text-white/20 text-xs text-center px-1">
+                          <div className="text-foreground/20 text-xs text-center px-1">
                             Not generated
                           </div>
                         )}
@@ -4597,10 +4680,10 @@ function HomeContent() {
                                     key={idx}
                                     className={`w-1.5 h-1.5 rounded-full ${
                                       idx === variation.currentVersionIndex
-                                        ? 'bg-amber-500'
+                                        ? 'bg-primary'
                                         : idx === variation.versions.length - 1 && variation.hasNewVersion
                                         ? 'bg-green-500 animate-pulse'
-                                        : 'bg-white/30'
+                                        : 'bg-muted'
                                     }`}
                                   />
                                 ))}
@@ -4608,7 +4691,7 @@ function HomeContent() {
                             )}
                             {/* New version indicator */}
                             {variation.hasNewVersion && (
-                              <span className="text-[10px] text-green-400 font-medium">
+                              <span className="text-[10px] text-green-700 dark:text-green-400 font-medium">
                                 NEW
                               </span>
                             )}
@@ -4623,7 +4706,7 @@ function HomeContent() {
                                         e.stopPropagation();
                                         toggleEditing(variation.id);
                                       }}
-                                      className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+                                      className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground/70 hover:text-foreground transition-colors"
                                     >
                                       <Edit3 className="w-3.5 h-3.5" />
                                     </button>
@@ -4637,7 +4720,7 @@ function HomeContent() {
                                         e.stopPropagation();
                                         handleGenerateSingle(variation.id);
                                       }}
-                                      className="p-1.5 rounded-lg hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 transition-colors"
+                                      className="p-1.5 rounded-lg hover:bg-primary/20 text-primary hover:text-primary transition-colors"
                                     >
                                       <Sparkles className="w-3.5 h-3.5" />
                                     </button>
@@ -4651,7 +4734,7 @@ function HomeContent() {
                                         e.stopPropagation();
                                         handleDeleteVariation(variation.id);
                                       }}
-                                      className="p-1.5 rounded-lg hover:bg-red-500/20 text-white/40 hover:text-red-400 transition-colors"
+                                      className="p-1.5 rounded-lg hover:bg-red-500/20 text-muted-foreground/70 hover:text-red-400 transition-colors"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
                                     </button>
@@ -4669,20 +4752,20 @@ function HomeContent() {
                                         e.stopPropagation();
                                         handleArchiveVariation(variation.id);
                                       }}
-                                      className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white/60 transition-colors"
+                                      className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground/70 hover:text-muted-foreground transition-colors"
                                     >
                                       <Archive className="w-3.5 h-3.5" />
                                     </button>
                                   </TooltipTrigger>
                                   <TooltipContent>Archive</TooltipContent>
                                 </Tooltip>
-                                <span className="text-green-400">
+                                <span className="text-green-700 dark:text-green-400">
                                   <Check className="w-4 h-4" />
                                 </span>
                               </>
                             )}
                             {variation.isRegenerating && (
-                              <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
+                              <Loader2 className="w-4 h-4 text-primary animate-spin" />
                             )}
                           </div>
                         </div>
@@ -4692,7 +4775,7 @@ function HomeContent() {
                             <Textarea
                               value={variation.description}
                               onChange={(e) => handleUpdateDescription(variation.id, e.target.value)}
-                              className="text-xs bg-white/5 border-white/10 text-white/80 min-h-[60px] resize-none"
+                              className="text-xs bg-muted/50 border-border text-foreground/80 min-h-[60px] resize-none"
                               rows={3}
                               autoFocus
                               onBlur={() => toggleEditing(variation.id)}
@@ -4709,7 +4792,7 @@ function HomeContent() {
                                 toggleEditing(variation.id);
                               }
                             }}
-                            className={`text-xs text-white/50 line-clamp-3 ${variation.status === 'idle' ? 'cursor-text hover:text-white/70' : ''}`}
+                            className={`text-xs text-muted-foreground/80 line-clamp-3 ${variation.status === 'idle' ? 'cursor-text hover:text-foreground/70' : ''}`}
                           >
                             {variation.description}
                           </p>
@@ -4721,19 +4804,19 @@ function HomeContent() {
                             <div className="flex items-center gap-1.5 flex-wrap">
                               {variation.resizedVersions.length > 0 && (
                                 <>
-                                  <span className="text-[10px] text-white/30">Sizes:</span>
+                                  <span className="text-[10px] text-muted-foreground/50">Sizes:</span>
                                   {variation.resizedVersions
                                     .filter(r => r.status === 'completed')
                                     .map(r => (
                                       <span
                                         key={r.size}
-                                        className="px-1.5 py-0.5 text-[10px] rounded bg-green-500/20 text-green-400 border border-green-500/30"
+                                        className="px-1.5 py-0.5 text-[10px] rounded bg-green-500/20 text-green-700 dark:text-green-400 border border-green-500/30"
                                       >
                                         {r.size}
                                       </span>
                                     ))}
                                   {variation.resizedVersions.some(r => r.status === 'resizing') && (
-                                    <span className="px-1.5 py-0.5 text-[10px] rounded bg-white/10 text-white/50 flex items-center gap-1">
+                                    <span className="px-1.5 py-0.5 text-[10px] rounded bg-muted text-muted-foreground/80 flex items-center gap-1">
                                       <Loader2 className="w-2.5 h-2.5 animate-spin" />
                                       resizing...
                                     </span>
@@ -4753,7 +4836,7 @@ function HomeContent() {
                                     onConfirm: () => downloadVariationAll(variation),
                                   });
                                 }}
-                                className="flex items-center gap-1 text-[10px] text-white/40 hover:text-white transition-colors"
+                                className="flex items-center gap-1 text-[10px] text-muted-foreground/70 hover:text-foreground transition-colors"
                               >
                                 <FolderDown className="w-3 h-3" />
                                 All ({getVariationFileCount(variation)})
@@ -4772,13 +4855,13 @@ function HomeContent() {
                 <div className="mt-4">
                   <button
                     onClick={() => setShowArchived(!showArchived)}
-                    className="w-full flex items-center justify-between py-2 px-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+                    className="w-full flex items-center justify-between py-2 px-3 rounded-lg bg-muted/50 border border-border hover:bg-muted transition-colors"
                   >
-                    <div className="flex items-center gap-2 text-sm text-white/50">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground/80">
                       <Archive className="w-4 h-4" />
                       <span>Archived ({variations.filter(v => v.isArchived).length})</span>
                     </div>
-                    <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${showArchived ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 text-muted-foreground/70 transition-transform ${showArchived ? 'rotate-180' : ''}`} />
                   </button>
 
                   {showArchived && (
@@ -4786,11 +4869,11 @@ function HomeContent() {
                       {variations.filter(v => v.isArchived).map((variation) => (
                         <div
                           key={variation.id}
-                          className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
+                          className="rounded-xl border border-border bg-muted/30 p-3"
                         >
                           <div className="flex gap-3">
                             {/* Thumbnail */}
-                            <div className="w-12 h-14 rounded-lg bg-white/10 overflow-hidden flex-shrink-0">
+                            <div className="w-12 h-14 rounded-lg bg-muted overflow-hidden flex-shrink-0">
                               {variation.imageUrl && (
                                 <img
                                   src={variation.imageUrl}
@@ -4802,12 +4885,12 @@ function HomeContent() {
                             {/* Content */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
-                                <h4 className="text-sm font-medium text-white/50 truncate">{variation.title}</h4>
+                                <h4 className="text-sm font-medium text-muted-foreground/80 truncate">{variation.title}</h4>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <button
                                       onClick={() => handleRestoreVariation(variation.id)}
-                                      className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white/70 transition-colors"
+                                      className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground/70 hover:text-foreground/70 transition-colors"
                                     >
                                       <ArchiveRestore className="w-3.5 h-3.5" />
                                     </button>
@@ -4815,7 +4898,7 @@ function HomeContent() {
                                   <TooltipContent>Restore</TooltipContent>
                                 </Tooltip>
                               </div>
-                              <p className="text-xs text-white/30 line-clamp-2 mt-0.5">{variation.description}</p>
+                              <p className="text-xs text-muted-foreground/50 line-clamp-2 mt-0.5">{variation.description}</p>
                             </div>
                           </div>
                         </div>
@@ -4837,10 +4920,10 @@ function HomeContent() {
                     className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${
                       apiKey
                         ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
-                        : 'bg-amber-500/20 hover:bg-amber-500/30'
+                        : 'bg-primary/20 hover:bg-primary/30'
                     }`}
                   >
-                    <Key className={`w-5 h-5 ${apiKey ? 'text-emerald-400' : 'text-amber-400'}`} />
+                    <Key className={`w-5 h-5 ${apiKey ? 'text-emerald-700 dark:text-emerald-400' : 'text-primary'}`} />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top">
@@ -4852,7 +4935,7 @@ function HomeContent() {
         </main>
 
       {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#101318] border-t border-white/10 p-2 z-30 md:hidden safe-area-pb">
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 z-30 md:hidden safe-area-pb">
         <div className="flex items-center justify-around gap-1">
           <button
             onClick={() => {
@@ -4860,7 +4943,7 @@ function HomeContent() {
               setIsMobileSidebarOpen(true);
             }}
             className={`flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-colors ${
-              selectedTool === 'iterations' ? 'bg-amber-600 text-white' : 'text-white/50'
+              selectedTool === 'iterations' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground/80'
             }`}
           >
             <Layers className="w-5 h-5" />
@@ -4872,7 +4955,7 @@ function HomeContent() {
               setIsMobileSidebarOpen(true);
             }}
             className={`flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-colors ${
-              selectedTool === 'edit' ? 'bg-amber-600 text-white' : 'text-white/50'
+              selectedTool === 'edit' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground/80'
             }`}
           >
             <Wand2 className="w-5 h-5" />
@@ -4884,7 +4967,7 @@ function HomeContent() {
               setIsMobileSidebarOpen(true);
             }}
             className={`flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-colors ${
-              selectedTool === 'backgrounds' ? 'bg-amber-600 text-white' : 'text-white/50'
+              selectedTool === 'backgrounds' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground/80'
             }`}
           >
             <ImageIcon className="w-5 h-5" />
@@ -4896,7 +4979,7 @@ function HomeContent() {
               setIsMobileSidebarOpen(true);
             }}
             className={`flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-colors ${
-              selectedTool === 'model' ? 'bg-amber-600 text-white' : 'text-white/50'
+              selectedTool === 'model' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground/80'
             }`}
           >
             <User className="w-5 h-5" />
@@ -4908,7 +4991,7 @@ function HomeContent() {
               setIsMobileSidebarOpen(true);
             }}
             className={`flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-colors ${
-              selectedTool === 'export' ? 'bg-amber-600 text-white' : 'text-white/50'
+              selectedTool === 'export' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground/80'
             }`}
           >
             <Expand className="w-5 h-5" />
@@ -4950,10 +5033,10 @@ function HomeContent() {
 
       {/* New Image Confirmation Modal */}
       <Dialog open={showNewConfirmModal} onOpenChange={setShowNewConfirmModal}>
-        <DialogContent className="sm:max-w-md !bg-[#181c24] border-white/10 text-white">
+        <DialogContent className="sm:max-w-md !bg-card border-border text-foreground">
           <DialogHeader>
             <DialogTitle className="text-xl">Start Fresh?</DialogTitle>
-            <DialogDescription className="text-white/70 mt-2">
+            <DialogDescription className="text-foreground/70 mt-2">
               Uploading a new image will delete this session and all your current work.
             </DialogDescription>
           </DialogHeader>
@@ -4964,7 +5047,7 @@ function HomeContent() {
                 setSelectedTool('export');
               }}
               variant="outline"
-              className="w-full bg-white/10 hover:bg-white/20 border-white/20 text-white"
+              className="w-full bg-muted hover:bg-muted border-border text-foreground"
             >
               <Download className="w-4 h-4 mr-2" />
               Download First
@@ -4975,7 +5058,7 @@ function HomeContent() {
                 // Open file picker after clearing state
                 setTimeout(() => openFileDialog(), 0);
               }}
-              className="w-full bg-amber-600 hover:bg-amber-500 text-white"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               Continue
             </Button>
@@ -5011,8 +5094,8 @@ function fileToBase64(file: File): Promise<string> {
 export default function Home() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#101318] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     }>
       <HomeContent />

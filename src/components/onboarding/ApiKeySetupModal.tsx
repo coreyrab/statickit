@@ -135,7 +135,7 @@ export function ApiKeySetupModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg !bg-[#181c24] border-white/10 text-white">
+      <DialogContent className="sm:max-w-lg bg-card border-border text-foreground">
         <DialogHeader>
           <DialogTitle className="text-xl text-center">
             {hasExistingKey ? "API Key Settings" : "Add your API Key"}
@@ -145,12 +145,12 @@ export function ApiKeySetupModal({
         <div className="space-y-5 py-2">
           {/* How it works - only show when no existing key */}
           {!hasExistingKey && (
-            <div className="text-center space-y-2">
-              <p className="text-sm text-white/70">
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
                 Your API key powers all the AI features: generating versions,
                 swapping backgrounds, changing models, and more.
               </p>
-              <p className="text-xs text-white/50">
+              <p className="text-xs text-muted-foreground/70">
                 Get a free key from Google in under a minute. You only pay for what you use.
               </p>
             </div>
@@ -158,15 +158,14 @@ export function ApiKeySetupModal({
 
           {/* Security notice */}
           <div className="p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-            <div className="flex items-start gap-3">
-              <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-              <div className="space-y-2">
-                <p className="text-sm text-emerald-300 font-medium">
+            <div className="flex items-start gap-2.5">
+              <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">
                   Your API key stays on your device
                 </p>
-                <p className="text-xs text-white/60">
-                  Your key is stored locally in your browser only. It is <strong className="text-white/80">never sent to our servers</strong> and
-                  remains completely private on your device.
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Stored locally in your browser only—<strong className="text-foreground/80">never sent to our servers</strong>.
                 </p>
               </div>
             </div>
@@ -178,8 +177,8 @@ export function ApiKeySetupModal({
               <div className="flex items-center gap-3">
                 <GeminiLogo className="w-5 h-5" />
                 <div>
-                  <span className="text-emerald-400 font-medium text-sm">Gemini API Key Connected</span>
-                  <p className="text-xs text-white/40 font-mono mt-0.5">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium text-sm">Gemini API Key Connected</span>
+                  <p className="text-xs text-muted-foreground/70 font-mono mt-0.5">
                     {getMaskedKey(currentApiKey)}
                   </p>
                 </div>
@@ -198,27 +197,15 @@ export function ApiKeySetupModal({
           {/* Gemini API Key Input */}
           {!hasExistingKey && (
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <GeminiLogo className="w-4 h-4" />
-                  <span className="text-sm font-medium text-white">Google Gemini API Key</span>
-                </div>
-                <a
-                  href="https://aistudio.google.com/apikey"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1.5 py-1"
-                >
-                  Get free key
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
+              <div className="flex items-center gap-2">
+                <GeminiLogo className="w-4 h-4" />
+                <span className="text-sm font-medium text-foreground">Google Gemini API Key</span>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="flex-1 flex items-center gap-3 px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/50">
-                  <GeminiLogo className="w-5 h-5 flex-shrink-0" />
+              <div className="flex items-stretch gap-2">
+                <div className="flex-1 flex items-center gap-3 px-4 bg-muted/50 border border-border rounded-lg focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50">
                   <input
                     type="password"
-                    placeholder="AIza..."
+                    placeholder="Paste your API key here..."
                     value={apiKeyInput}
                     onChange={(e) => {
                       setApiKeyInput(e.target.value);
@@ -230,23 +217,23 @@ export function ApiKeySetupModal({
                         handleSave();
                       }
                     }}
-                    className="flex-1 bg-transparent text-white placeholder:text-white/30 focus:outline-none text-base"
+                    className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 focus:outline-none text-sm py-3"
                   />
                 </div>
                 <Button
                   onClick={handleSave}
                   disabled={isValidating || !apiKeyInput.trim() || success}
-                  className={`w-full sm:w-auto px-6 py-3 text-base ${
+                  className={`px-5 h-auto ${
                     success
                       ? "bg-emerald-600 hover:bg-emerald-600"
                       : "bg-blue-600 hover:bg-blue-500"
                   } text-white`}
                 >
                   {isValidating ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : success ? (
                     <>
-                      <Check className="w-5 h-5 mr-1.5" />
+                      <Check className="w-4 h-4 mr-1.5" />
                       Saved
                     </>
                   ) : (
@@ -260,25 +247,34 @@ export function ApiKeySetupModal({
                   {error}
                 </div>
               )}
+              <a
+                href="https://aistudio.google.com/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 inline-flex items-center gap-1.5"
+              >
+                Get a free API key from Google
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
           )}
 
+          {/* Footer note */}
+          <p className="text-xs text-muted-foreground/60 pt-1">
+            Note: Clearing your browser data will remove your saved key.
+          </p>
+
           {/* Skip option - only show when no existing key */}
           {!hasExistingKey && (
-            <div className="text-center pt-2">
+            <div className="pt-2 border-t border-border">
               <button
                 onClick={() => onOpenChange(false)}
-                className="text-sm text-white/50 hover:text-white/70 transition-colors py-2 px-4"
+                className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors"
               >
                 Skip for now
               </button>
             </div>
           )}
-
-          {/* Footer note */}
-          <p className="text-xs text-white/40 text-center pt-2">
-            Note: Clearing your browser data will remove your saved key.
-          </p>
         </div>
       </DialogContent>
     </Dialog>
