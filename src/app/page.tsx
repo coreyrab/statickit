@@ -2814,7 +2814,7 @@ function HomeContent() {
                       >
                         <img
                           src={previewImage}
-                          alt={isShowingGenerated ? 'Generated variation' : 'Original ad'}
+                          alt={isShowingGenerated ? 'Generated version' : 'Original ad'}
                           className="absolute inset-0 w-full h-full object-cover"
                         />
                       </div>
@@ -3203,7 +3203,7 @@ function HomeContent() {
                               </button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              Download all {completedCount} generated variations
+                              Download all {completedCount} generated versions
                             </TooltipContent>
                           </Tooltip>
                         )}
@@ -3306,7 +3306,7 @@ function HomeContent() {
                     <div className="mt-4 text-center py-8">
                       <Loader2 className="w-8 h-8 text-amber-500 animate-spin mx-auto mb-3" />
                       <p className="text-sm text-white/60">Analyzing your ad...</p>
-                      <p className="text-xs text-white/40 mt-1">Generating variation ideas (10-20 seconds)</p>
+                      <p className="text-xs text-white/40 mt-1">Generating version ideas (10-20 seconds)</p>
                     </div>
                   )}
                   {/* Create all button - show when variations exist but not all generated */}
@@ -3922,7 +3922,7 @@ function HomeContent() {
                     >
                       <FolderDown className="w-4 h-4 text-white/60" />
                       <div>
-                        <div className="font-medium">Download All Variations</div>
+                        <div className="font-medium">Download All Versions</div>
                         <div className="text-xs text-white/40">{completedCount} generated images</div>
                       </div>
                     </button>

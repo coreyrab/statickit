@@ -147,7 +147,7 @@ export function ApiKeySetupModal({
           {!hasExistingKey && (
             <div className="text-center space-y-2">
               <p className="text-sm text-white/70">
-                Your API key powers all the AI features: generating variations,
+                Your API key powers all the AI features: generating versions,
                 swapping backgrounds, changing models, and more.
               </p>
               <p className="text-xs text-white/50">
