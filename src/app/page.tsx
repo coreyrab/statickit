@@ -3928,24 +3928,25 @@ function HomeContent() {
                   </p>
 
                   {/* Smart Resize Section */}
-                {uploadedImage && (
-                  <div className="mb-4">
+                  <div className={`mb-4 ${!uploadedImage ? 'opacity-60' : ''}`}>
                     <div className="space-y-1.5">
-                      {/* Original size button */}
-                      <button
-                        onClick={() => setViewingOriginalResizedSize(null)}
-                        className={`w-full px-3 py-2 rounded-lg border transition-all text-left flex items-center justify-between text-sm ${
-                          !viewingOriginalResizedSize
-                            ? 'bg-emerald-600/20 border-emerald-500/40'
-                            : 'bg-muted/50 border-border hover:bg-muted'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Check className={`w-3.5 h-3.5 ${!viewingOriginalResizedSize ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground/70'}`} />
-                          <span className={!viewingOriginalResizedSize ? 'text-emerald-700 dark:text-emerald-400' : ''}>Original</span>
-                        </div>
-                        <span className="text-muted-foreground/70 text-xs">{uploadedImage.width}×{uploadedImage.height}</span>
-                      </button>
+                      {/* Original size button - only show when image uploaded */}
+                      {uploadedImage && (
+                        <button
+                          onClick={() => setViewingOriginalResizedSize(null)}
+                          className={`w-full px-3 py-2 rounded-lg border transition-all text-left flex items-center justify-between text-sm ${
+                            !viewingOriginalResizedSize
+                              ? 'bg-emerald-600/20 border-emerald-500/40'
+                              : 'bg-muted/50 border-border hover:bg-muted'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Check className={`w-3.5 h-3.5 ${!viewingOriginalResizedSize ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground/70'}`} />
+                            <span className={!viewingOriginalResizedSize ? 'text-emerald-700 dark:text-emerald-400' : ''}>Original</span>
+                          </div>
+                          <span className="text-muted-foreground/70 text-xs">{uploadedImage.width}×{uploadedImage.height}</span>
+                        </button>
+                      )}
                       {/* Resize options */}
                       {AD_SIZES.map((size) => {
                         const resized = originalResizedVersions.find(r => r.size === size.name);
@@ -3956,19 +3957,20 @@ function HomeContent() {
                           <button
                             key={size.name}
                             onClick={() => {
+                              if (!uploadedImage) return;
                               if (isCompleted) {
                                 setViewingOriginalResizedSize(isViewing ? null : size.name);
                               } else if (!isResizing) {
                                 handleResizeOriginal(size);
                               }
                             }}
-                            disabled={isResizing}
-                            className={`w-full px-3 py-2 rounded-lg border transition-all text-left flex items-center justify-between text-sm ${
+                            disabled={isResizing || !uploadedImage}
+                            className={`w-full px-3 py-2 rounded-lg border transition-all text-left flex items-center justify-between text-sm disabled:cursor-default ${
                               isViewing
                                 ? 'bg-emerald-600/20 border-emerald-500/40'
                                 : isCompleted
                                 ? 'bg-primary/10 border-primary/30 hover:bg-primary/20'
-                                : 'bg-muted/50 border-border hover:bg-muted'
+                                : 'bg-muted/50 border-border hover:bg-muted disabled:hover:bg-muted/50'
                             }`}
                           >
                             <div className="flex items-center gap-2.5">
@@ -3991,8 +3993,8 @@ function HomeContent() {
                           </button>
                         );
                       })}
-                      {/* Generate All link */}
-                      {(() => {
+                      {/* Generate All link - only show when image uploaded */}
+                      {uploadedImage && (() => {
                         const ungeneratedSizes = AD_SIZES.filter(size => {
                           const resized = originalResizedVersions.find(r => r.size === size.name);
                           return !resized || resized.status === 'idle' || resized.status === 'error';
@@ -4013,7 +4015,6 @@ function HomeContent() {
                       })()}
                     </div>
                   </div>
-                )}
 
                 {/* Download Section */}
                 <div className={`mt-auto space-y-2 ${!uploadedImage ? 'opacity-50' : ''}`}>
