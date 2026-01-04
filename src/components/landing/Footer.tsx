@@ -13,8 +13,8 @@ export function Footer() {
 
   return (
     <>
-      <footer className="border-t border-border/50 py-6 px-4 md:px-6">
-        <div className="flex flex-wrap items-center gap-x-1 gap-y-2 text-sm text-muted-foreground">
+      <footer className="border-t border-border/50 py-4 md:py-6 px-3 md:px-6">
+        <div className="flex items-center justify-center gap-x-1 text-xs md:text-sm text-muted-foreground">
             <button
               onClick={() => setPrivacyOpen(true)}
               className="hover:text-foreground transition-colors"
