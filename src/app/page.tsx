@@ -2474,42 +2474,31 @@ function HomeContent() {
                 </div>
               </TooltipContent>
             </Tooltip>
-            {/* API Key button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setShowApiKeySetup(true)}
-                  className={`flex items-center justify-center w-9 h-9 rounded-lg border transition-colors ${
-                    apiKey
-                      ? 'border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20'
-                      : 'border-border hover:bg-muted'
-                  }`}
-                >
-                  <Key className={`w-4 h-4 ${apiKey ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`} />
+            {/* Settings Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors">
+                  <Menu className="w-4 h-4 text-muted-foreground" />
                 </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                {apiKey ? 'API Key configured' : 'Add API Key'}
-              </TooltipContent>
-            </Tooltip>
-            {/* Theme toggle - desktop only */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="hidden md:flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors"
-                >
-                  {theme === 'dark' ? (
-                    <Sun className="w-4 h-4 text-muted-foreground" />
-                  ) : (
-                    <Moon className="w-4 h-4 text-muted-foreground" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => setShowApiKeySetup(true)} className="cursor-pointer">
+                  <Key className={`w-4 h-4 ${apiKey ? 'text-emerald-600 dark:text-emerald-400' : ''}`} />
+                  <span>API Key</span>
+                  {apiKey && (
+                    <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400">Active</span>
                   )}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                Switch to {theme === 'dark' ? 'light' : 'dark'} mode
-              </TooltipContent>
-            </Tooltip>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="cursor-pointer">
+                  {theme === 'dark' ? (
+                    <Sun className="w-4 h-4" />
+                  ) : (
+                    <Moon className="w-4 h-4" />
+                  )}
+                  <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <a
               href="https://github.com/CoreyRab/statickit"
               target="_blank"
