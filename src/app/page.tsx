@@ -2857,6 +2857,16 @@ function HomeContent() {
                       </button>
                     </div>
                   )}
+                  {/* Swipe hint - show on mobile when there are multiple versions */}
+                  {((originalVersions.length > 1 && !isShowingGenerated) ||
+                    (isShowingGenerated && selectedVariation && selectedVariation.versions.length > 1)) &&
+                    zoomLevel === 1 && (
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:hidden">
+                      <span className="text-[10px] text-white/40 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full">
+                        Swipe to navigate versions
+                      </span>
+                    </div>
+                  )}
                 </>
               ) : !uploadedImage ? (
                 <div className="flex items-center justify-center w-full h-full">
@@ -3039,7 +3049,9 @@ function HomeContent() {
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {!isShowingGenerated && originalVersionIndex === 0 ? "Edit image first to create version" : "Create new version"}
+                      {!isShowingGenerated && originalVersionIndex === 0
+                        ? "Edit image first to create version"
+                        : "Save as new starting point for more edits"}
                     </TooltipContent>
                   </Tooltip>
                   <Tooltip>
