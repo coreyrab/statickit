@@ -395,8 +395,27 @@ export default function BlogPostPage() {
               {renderContent(post.content)}
             </div>
 
+            {/* CTA */}
+            <div className="mt-16 p-6 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+              <h3 className="text-lg font-medium text-neutral-100 mb-2">
+                Try StaticKit free
+              </h3>
+              <p className="text-neutral-400 text-sm mb-4">
+                Edit images with AI using your own API key. No account required, no watermarks.
+              </p>
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-neutral-900 font-medium text-sm rounded-lg transition-colors"
+              >
+                Start editing
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </Link>
+            </div>
+
             {/* Back link */}
-            <div className="mt-16 pt-8 border-t border-neutral-900">
+            <div className="mt-8 pt-8 border-t border-neutral-900">
               <Link
                 href="/blog"
                 className="text-neutral-500 text-sm hover:text-neutral-300 transition-colors inline-flex items-center gap-1"
