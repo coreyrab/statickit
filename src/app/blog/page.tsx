@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
 
 // Blog posts data - add new posts here
 const posts = [
@@ -29,31 +31,47 @@ const posts = [
 ];
 
 export default function BlogPage() {
-  return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      {/* Subtle grid background */}
-      <div
-        className="fixed inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}
-      />
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
+  // Avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
       <div className="relative">
         {/* Header */}
         <header className="px-6 py-8">
           <div className="max-w-xl mx-auto flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 text-neutral-300 text-sm hover:text-neutral-100 transition-colors">
-              <img src="/logo.svg" alt="StaticKit" className="w-5 h-5" />
+            <Link href="/" className="flex items-center gap-2 text-foreground/70 text-sm hover:text-foreground transition-colors">
+              <img src="/logo.svg" alt="StaticKit" className="w-5 h-5 dark:invert" />
               <span className="font-medium">StaticKit</span>
             </Link>
-            <Link
-              href="/"
-              className="text-neutral-500 text-sm hover:text-neutral-300 transition-colors flex items-center gap-1"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Link>
+            <div className="flex items-center gap-3">
+              {/* Theme toggle */}
+              {mounted && (
+                <button
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="w-4 h-4" />
+                  ) : (
+                    <Moon className="w-4 h-4" />
+                  )}
+                </button>
+              )}
+              <Link
+                href="/"
+                className="text-muted-foreground text-sm hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </Link>
+            </div>
           </div>
         </header>
 
@@ -61,10 +79,10 @@ export default function BlogPage() {
         <main className="px-6 pt-16 pb-32">
           <div className="max-w-xl mx-auto">
             {/* Page title */}
-            <h1 className="font-serif text-3xl sm:text-4xl text-neutral-100 mb-4">
+            <h1 className="font-serif text-3xl sm:text-4xl text-foreground mb-4">
               Blog
             </h1>
-            <p className="text-neutral-500 mb-16">
+            <p className="text-muted-foreground mb-16">
               Thoughts on AI image editing, creative tools, and making things easier.
             </p>
 
@@ -74,20 +92,20 @@ export default function BlogPage() {
                 {posts.map((post) => (
                   <article key={post.slug} className="group">
                     <Link href={`/blog/${post.slug}`} className="block">
-                      <time className="text-neutral-600 text-xs font-mono">
+                      <time className="text-muted-foreground/70 text-xs font-mono">
                         {new Date(post.date).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
                         })}
                       </time>
-                      <h2 className="text-neutral-100 text-xl mt-2 mb-2 group-hover:text-amber-400 transition-colors">
+                      <h2 className="text-foreground text-xl mt-2 mb-2 group-hover:text-primary transition-colors">
                         {post.title}
                       </h2>
-                      <p className="text-neutral-500 text-sm leading-relaxed mb-2">
+                      <p className="text-muted-foreground text-sm leading-relaxed mb-2">
                         {post.excerpt}
                       </p>
-                      <span className="text-neutral-600 text-xs font-mono">
+                      <span className="text-muted-foreground/70 text-xs font-mono">
                         {post.readTime}
                       </span>
                     </Link>
@@ -95,7 +113,7 @@ export default function BlogPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-neutral-600 text-sm font-mono">
+              <p className="text-muted-foreground/70 text-sm font-mono">
                 No posts yet. Check back soon.
               </p>
             )}

@@ -13,39 +13,37 @@ export function Footer() {
 
   return (
     <>
-      <footer className="border-t border-white/5 py-8 px-4">
-        <div className="container mx-auto max-w-5xl">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <nav className="flex items-center gap-6 text-sm text-muted-foreground">
-              <button
-                onClick={() => setMadeByHumanOpen(true)}
-                className="hover:text-primary transition-colors"
-              >
-                Made by a human
-              </button>
-              <button
-                onClick={() => setPrivacyOpen(true)}
-                className="hover:text-primary transition-colors"
-              >
-                Privacy
-              </button>
-              <button
-                onClick={() => setTermsOpen(true)}
-                className="hover:text-primary transition-colors"
-              >
-                Terms
-              </button>
-              <Link
-                href="/blog"
-                className="hover:text-primary transition-colors"
-              >
-                Blog
-              </Link>
-            </nav>
-            <p className="text-sm text-muted-foreground">
-              &copy; 2026 StaticKit
-            </p>
-          </div>
+      <footer className="border-t border-border/50 py-6 px-4 md:px-6">
+        <div className="flex flex-wrap items-center gap-x-1 gap-y-2 text-sm text-muted-foreground">
+            <button
+              onClick={() => setPrivacyOpen(true)}
+              className="hover:text-foreground transition-colors"
+            >
+              Privacy
+            </button>
+            <span className="text-muted-foreground/40">·</span>
+            <button
+              onClick={() => setTermsOpen(true)}
+              className="hover:text-foreground transition-colors"
+            >
+              Terms
+            </button>
+            <span className="text-muted-foreground/40">·</span>
+            <Link
+              href="/blog"
+              className="hover:text-foreground transition-colors"
+            >
+              Blog
+            </Link>
+            <span className="text-muted-foreground/40">·</span>
+            <button
+              onClick={() => setMadeByHumanOpen(true)}
+              className="hover:text-foreground transition-colors"
+            >
+              Made by a human
+            </button>
+            <span className="text-muted-foreground/40">·</span>
+            <span>&copy; 2025 StaticKit</span>
         </div>
       </footer>
 

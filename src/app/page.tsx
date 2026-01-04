@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDropzone } from 'react-dropzone';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -2217,12 +2218,43 @@ function HomeContent() {
 
     // Switch to viewing original (non-generated) to show the new version
     setSelectedVariationId(null);
+
+    // Switch to Versions tool so user sees where the new version is
+    setSelectedTool('iterations');
+
+    // Show confirmation toast
+    toast.success(`Version ${versionNumber} created`, {
+      description: 'Find it in the Versions panel on the left',
+      duration: 3000,
+    });
   };
 
   // Delete the current version and navigate to the previous one
   const handleDeleteVersion = () => {
-    if (originalVersionIndex === 0 || originalVersions.length <= 1) return;
+    const isOriginalBase = activeBaseId === 'original';
 
+    // If we're at index 0 (the base image of this version)
+    if (originalVersionIndex === 0) {
+      if (isOriginalBase) {
+        // Deleting original base - check if we can reset
+        const hasEdits = originalVersions.length > 1;
+        const hasOtherVersions = baseVersions.some(b => b.id !== 'original');
+        const hasVariations = variations.length > 0;
+
+        if (!hasEdits && !hasOtherVersions && !hasVariations) {
+          // No other work - safe to delete and reset
+          handleReset();
+          toast.success('Image deleted');
+        }
+        return;
+      } else {
+        // Deleting a non-original base version - delete the whole version
+        handleDeleteBaseVersion(activeBaseId);
+        return;
+      }
+    }
+
+    // Deleting an edit (not the base image)
     setOriginalVersions(prev => {
       const newVersions = prev.filter((_, idx) => idx !== originalVersionIndex);
       return newVersions;
@@ -2230,6 +2262,52 @@ function HomeContent() {
 
     // Navigate to previous version
     setOriginalVersionIndex(Math.max(0, originalVersionIndex - 1));
+    toast.success('Edit deleted');
+  };
+
+  // Delete a base version from the Versions panel
+  const handleDeleteBaseVersion = (baseId: string) => {
+    const isOriginal = baseId === 'original';
+
+    if (isOriginal) {
+      // Deleting original - check if we can reset
+      const hasEdits = originalVersions.length > 1;
+      const hasOtherVersions = baseVersions.some(b => b.id !== 'original');
+      const hasVariations = variations.length > 0;
+
+      if (!hasEdits && !hasOtherVersions && !hasVariations) {
+        // Safe to delete - reset to empty state
+        handleReset();
+        toast.success('Image deleted');
+      }
+      return;
+    }
+
+    // Deleting a non-original version
+    setBaseVersions(prev => prev.filter(b => b.id !== baseId));
+
+    // If we were viewing this version, switch to original
+    if (activeBaseId === baseId) {
+      setActiveBaseId('original');
+    }
+
+    toast.success('Version deleted');
+  };
+
+  // Check if a base version can be deleted
+  const canDeleteBaseVersion = (baseId: string) => {
+    const isOriginal = baseId === 'original';
+
+    if (isOriginal) {
+      // Original can only be deleted if there's no other work
+      const hasEdits = originalVersions.length > 1;
+      const hasOtherVersions = baseVersions.some(b => b.id !== 'original');
+      const hasVariations = variations.length > 0;
+      return !hasEdits && !hasOtherVersions && !hasVariations;
+    }
+
+    // Non-original versions can always be deleted
+    return true;
   };
 
   // Count files for a single variation (all versions + all resizes)
@@ -3116,43 +3194,51 @@ function HomeContent() {
               {/* Action buttons overlay */}
               {previewImage && (
                 <div className="absolute top-3 right-3 flex gap-2">
-                  {/* Delete Version button - disabled on original, enabled on edits */}
+                  {/* Delete Version button - enabled on edits, versions, or original if no other work exists */}
                   {!isShowingGenerated && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
                           onClick={handleDeleteVersion}
-                          disabled={originalVersionIndex === 0 || originalVersions[originalVersionIndex]?.status === 'processing'}
-                          className="p-2 rounded-lg bg-card/80 hover:bg-red-600/80 backdrop-blur-sm text-foreground/70 hover:text-foreground transition-colors disabled:opacity-30 disabled:hover:bg-card/80 disabled:cursor-not-allowed"
+                          disabled={
+                            originalVersions[originalVersionIndex]?.status === 'processing' ||
+                            (originalVersionIndex === 0 && activeBaseId === 'original' && !canDeleteBaseVersion('original'))
+                          }
+                          className="p-2 rounded-lg bg-card/80 hover:bg-red-500/20 backdrop-blur-sm text-foreground/70 hover:text-red-500 transition-colors disabled:opacity-30 disabled:hover:bg-card/80 disabled:hover:text-foreground/70 disabled:cursor-not-allowed"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {originalVersionIndex === 0 ? "Can't delete original" : "Delete this edit"}
+                        {originalVersionIndex === 0
+                          ? activeBaseId === 'original'
+                            ? canDeleteBaseVersion('original')
+                              ? "Delete image and start over"
+                              : "Can't delete original (has edits or variations)"
+                            : "Delete this version"
+                          : "Delete this edit"}
                       </TooltipContent>
                     </Tooltip>
                   )}
-                  {/* Create Version button - disabled on original, enabled on edits/variations */}
+                  {/* Create Version button - works on any image */}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => {
                           const sourceLabel = isShowingGenerated && selectedVariation
                             ? `From: ${selectedVariation.title}`
-                            : originalVersions[originalVersionIndex]?.prompt || 'Edited version';
+                            : originalVersionIndex === 0
+                              ? 'From: Original'
+                              : originalVersions[originalVersionIndex]?.prompt || 'From: Edit';
                           handleCreateVersion(previewImage, sourceLabel);
                         }}
-                        disabled={!isShowingGenerated && originalVersionIndex === 0}
-                        className="p-2 rounded-lg bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground transition-colors disabled:opacity-30 disabled:hover:bg-card/80 disabled:cursor-not-allowed"
+                        className="p-2 rounded-lg bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground transition-colors"
                       >
                         <Layers className="w-4 h-4" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {!isShowingGenerated && originalVersionIndex === 0
-                        ? "Edit image first to create version"
-                        : "Save as new starting point for more edits"}
+                      Create new version from this image
                     </TooltipContent>
                   </Tooltip>
                   <Tooltip>
@@ -3856,7 +3942,7 @@ function HomeContent() {
                       >
                         <div className="flex items-center gap-2.5">
                           <Check className={`w-3.5 h-3.5 ${!viewingOriginalResizedSize ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground/70'}`} />
-                          <span className={!viewingOriginalResizedSize ? 'text-emerald-700 dark:text-emerald-700 dark:text-emerald-400' : ''}>Original</span>
+                          <span className={!viewingOriginalResizedSize ? 'text-emerald-700 dark:text-emerald-400' : ''}>Original</span>
                         </div>
                         <span className="text-muted-foreground/70 text-xs">{uploadedImage.width}×{uploadedImage.height}</span>
                       </button>
@@ -3899,7 +3985,7 @@ function HomeContent() {
                                   }}
                                 />
                               )}
-                              <span className={isViewing ? 'text-emerald-700 dark:text-emerald-700 dark:text-emerald-400' : isCompleted ? 'text-primary' : ''}>{size.label}</span>
+                              <span className={isViewing ? 'text-emerald-700 dark:text-emerald-400' : isCompleted ? 'text-primary' : ''}>{size.label}</span>
                             </div>
                             <span className="text-muted-foreground/70 text-xs">{size.name}</span>
                           </button>
@@ -4566,7 +4652,7 @@ function HomeContent() {
                       }}
                       className={`rounded-xl border transition-all cursor-pointer ${
                         isActive
-                          ? isOriginal ? 'border-emerald-500 bg-emerald-500/10' : 'border-blue-500 bg-blue-500/10'
+                          ? isOriginal ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-500/10' : 'border-primary bg-primary/10'
                           : 'border-border bg-muted/50 hover:border-border'
                       }`}
                     >
@@ -4582,13 +4668,13 @@ function HomeContent() {
                           </div>
                           {/* Content */}
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <div className="flex items-center gap-2 mb-1">
                               {isOriginal ? (
                                 <ImageIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                               ) : (
-                                <Layers className="w-4 h-4 text-blue-400" />
+                                <Layers className="w-4 h-4 text-primary" />
                               )}
-                              <span className={`font-medium text-sm ${isOriginal ? 'text-emerald-700 dark:text-emerald-400' : 'text-blue-400'}`}>
+                              <span className={`font-medium text-sm ${isOriginal ? 'text-emerald-700 dark:text-emerald-400' : 'text-primary'}`}>
                                 {base.name}
                               </span>
                               {editCount > 0 && (
@@ -4601,6 +4687,26 @@ function HomeContent() {
                                   {resizeCount + 1} sizes
                                 </span>
                               )}
+                              {/* Delete button */}
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteBaseVersion(base.id);
+                                    }}
+                                    disabled={!canDeleteBaseVersion(base.id)}
+                                    className="ml-auto p-1 rounded hover:bg-red-500/20 text-muted-foreground/50 hover:text-red-500 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground/50 disabled:cursor-not-allowed"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {canDeleteBaseVersion(base.id)
+                                    ? isOriginal ? 'Delete image' : 'Delete version'
+                                    : 'Cannot delete (has edits or variations)'}
+                                </TooltipContent>
+                              </Tooltip>
                             </div>
                             <p className="text-xs text-muted-foreground/80 truncate">
                               {isOriginal ? uploadedImage.filename : base.sourceLabel}
