@@ -49,6 +49,7 @@ import {
   ZoomIn,
   ZoomOut,
   Minimize2,
+  Keyboard,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -2311,8 +2312,35 @@ function HomeContent() {
             </button>
           </div>
 
-          {/* Right: GitHub Star - icon only on mobile */}
-          <div className="flex items-center gap-3">
+          {/* Right: Keyboard shortcuts & GitHub Star */}
+          <div className="flex items-center gap-2">
+            {/* Keyboard shortcuts - desktop only */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="hidden md:flex items-center justify-center w-9 h-9 rounded-lg border border-white/20 hover:bg-white/10 transition-colors">
+                  <Keyboard className="w-4 h-4 text-white/60" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs">
+                <div className="space-y-2 text-xs">
+                  <p className="font-medium text-white mb-2">Keyboard Shortcuts</p>
+                  <div className="space-y-1 text-white/70">
+                    <div className="flex justify-between gap-4">
+                      <span>Navigate versions</span>
+                      <span className="text-white/50">← →</span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span>Switch tools</span>
+                      <span className="text-white/50">Shift + ← →</span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span>Delete version</span>
+                      <span className="text-white/50">Backspace</span>
+                    </div>
+                  </div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
             <a
               href="https://github.com/CoreyRab/statickit"
               target="_blank"
@@ -2786,7 +2814,7 @@ function HomeContent() {
                       >
                         <img
                           src={previewImage}
-                          alt={isShowingGenerated ? 'Generated variation' : 'Original ad'}
+                          alt={isShowingGenerated ? 'Generated version' : 'Original ad'}
                           className="absolute inset-0 w-full h-full object-cover"
                         />
                       </div>
@@ -3129,6 +3157,13 @@ function HomeContent() {
                         <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
                         <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
                       </div>
+                      {analysis && (
+                        <div className="mt-2 pt-2 border-t border-white/5">
+                          <p className="text-[10px] text-white/40 truncate">
+                            {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <button
@@ -3149,21 +3184,28 @@ function HomeContent() {
                     {variations.length > 0 && (
                       <div className="flex items-center gap-3">
                         {completedCount > 0 && (
-                          <button
-                            onClick={() => {
-                              const count = getAllFileCount();
-                              setDownloadModal({
-                                isOpen: true,
-                                title: 'Download All',
-                                fileCount: count,
-                                onConfirm: downloadAllGenerations,
-                              });
-                            }}
-                            className="flex items-center gap-1 text-xs text-white/50 hover:text-white transition-colors"
-                          >
-                            <FolderDown className="w-3.5 h-3.5" />
-                            Download All
-                          </button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => {
+                                  const count = getAllFileCount();
+                                  setDownloadModal({
+                                    isOpen: true,
+                                    title: 'Download All',
+                                    fileCount: count,
+                                    onConfirm: downloadAllGenerations,
+                                  });
+                                }}
+                                className="flex items-center gap-1 text-xs text-white/50 hover:text-white transition-colors"
+                              >
+                                <FolderDown className="w-3.5 h-3.5" />
+                                Download All
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              Download all {completedCount} generated versions
+                            </TooltipContent>
+                          </Tooltip>
                         )}
                         <span className="text-sm text-white/40">
                           {completedCount}/{variations.length} generated
@@ -3264,7 +3306,7 @@ function HomeContent() {
                     <div className="mt-4 text-center py-8">
                       <Loader2 className="w-8 h-8 text-amber-500 animate-spin mx-auto mb-3" />
                       <p className="text-sm text-white/60">Analyzing your ad...</p>
-                      <p className="text-xs text-white/40 mt-1">Generating variation ideas</p>
+                      <p className="text-xs text-white/40 mt-1">Generating version ideas (10-20 seconds)</p>
                     </div>
                   )}
                   {/* Create all button - show when variations exist but not all generated */}
@@ -3307,6 +3349,13 @@ function HomeContent() {
                         <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
                         <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
                       </div>
+                      {analysis && (
+                        <div className="mt-2 pt-2 border-t border-white/5">
+                          <p className="text-[10px] text-white/40 truncate">
+                            {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <button
@@ -3694,6 +3743,13 @@ function HomeContent() {
                         <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
                         <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
                       </div>
+                      {analysis && (
+                        <div className="mt-2 pt-2 border-t border-white/5">
+                          <p className="text-[10px] text-white/40 truncate">
+                            {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <button
@@ -3792,7 +3848,7 @@ function HomeContent() {
                             disabled={isAnyResizing}
                             className="w-full mt-2 text-xs text-amber-400 hover:text-amber-300 disabled:text-white/30 disabled:cursor-not-allowed transition-colors text-center py-1"
                           >
-                            {isAnyResizing ? 'Generating...' : `Generate all ${ungeneratedSizes.length} sizes`}
+                            {isAnyResizing ? 'Resizing (may take a minute)...' : `Generate all ${ungeneratedSizes.length} sizes`}
                           </button>
                         );
                       })()}
@@ -3866,7 +3922,7 @@ function HomeContent() {
                     >
                       <FolderDown className="w-4 h-4 text-white/60" />
                       <div>
-                        <div className="font-medium">Download All Variations</div>
+                        <div className="font-medium">Download All Versions</div>
                         <div className="text-xs text-white/40">{completedCount} generated images</div>
                       </div>
                     </button>
@@ -3901,6 +3957,13 @@ function HomeContent() {
                         <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
                         <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
                       </div>
+                      {analysis && (
+                        <div className="mt-2 pt-2 border-t border-white/5">
+                          <p className="text-[10px] text-white/40 truncate">
+                            {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <button
@@ -4060,6 +4123,13 @@ function HomeContent() {
                         <span className="text-[11px] text-white/40 truncate flex-1 mr-2">{uploadedImage.filename}</span>
                         <span className="text-[11px] text-white/50">{uploadedImage.width}×{uploadedImage.height}</span>
                       </div>
+                      {analysis && (
+                        <div className="mt-2 pt-2 border-t border-white/5">
+                          <p className="text-[10px] text-white/40 truncate">
+                            {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <button

@@ -145,10 +145,15 @@ export function ApiKeySetupModal({
         <div className="space-y-5 py-2">
           {/* How it works - only show when no existing key */}
           {!hasExistingKey && (
-            <p className="text-sm text-white/70 text-center">
-              StaticKit uses your own API key to connect directly to AI services.
-              Your images and key never touch our servers—everything runs in your browser.
-            </p>
+            <div className="text-center space-y-2">
+              <p className="text-sm text-white/70">
+                Your API key powers all the AI features: generating versions,
+                swapping backgrounds, changing models, and more.
+              </p>
+              <p className="text-xs text-white/50">
+                Get a free key from Google in under a minute. You only pay for what you use.
+              </p>
+            </div>
           )}
 
           {/* Security notice */}
