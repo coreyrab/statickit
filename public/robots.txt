@@ -1,0 +1,6 @@
+# StaticKit robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://statickit.ai/sitemap.xml
