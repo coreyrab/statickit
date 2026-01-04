@@ -265,7 +265,7 @@ export function ApiKeySetupModal({
                 onClick={() => onOpenChange(false)}
                 className="text-sm text-white/50 hover:text-white/70 transition-colors py-2 px-4"
               >
-                No thanks, just looking around
+                Skip for now
               </button>
             </div>
           )}
