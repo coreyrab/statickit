@@ -3561,7 +3561,7 @@ function HomeContent() {
                     </div>
                   )}
 
-                  <div className="flex-1 overflow-y-auto space-y-2 touch-scroll pb-20 md:pb-16">
+                  <div className="flex-1 overflow-y-auto space-y-2 touch-scroll pr-2 md:pr-0 pb-20 md:pb-16">
                     {/* Lighting */}
                     <div className="rounded-lg border border-border overflow-hidden">
                       <button
@@ -4189,7 +4189,7 @@ function HomeContent() {
                 </button>
 
                 {/* Backgrounds Grid */}
-                <div className={`flex-1 overflow-y-auto touch-scroll pb-20 md:pb-16 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className={`flex-1 overflow-y-auto touch-scroll pr-2 md:pr-0 pb-20 md:pb-16 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
                   <div className="grid grid-cols-2 gap-1.5">
                     {/* Separator above AI suggestions */}
                     {(isLoadingBackgroundSuggestions || backgroundSuggestions.length > 0) && (
@@ -4416,7 +4416,7 @@ function HomeContent() {
                 )}
 
                 {/* Model Builder */}
-                <div className="flex-1 overflow-y-auto touch-scroll pb-20 md:pb-16">
+                <div className="flex-1 overflow-y-auto touch-scroll pr-2 md:pr-0 pb-20 md:pb-16">
                   {/* Collapsible Header */}
                   <button
                     onClick={() => setIsModelBuilderExpanded(!isModelBuilderExpanded)}
@@ -4634,7 +4634,7 @@ function HomeContent() {
 
             {/* Variation Cards - Show for iterations tool when image uploaded */}
             {selectedTool === 'iterations' && uploadedImage && (
-              <div className="flex-1 overflow-y-auto px-4 pb-20 md:pb-4 space-y-3 touch-scroll">
+              <div className="flex-1 overflow-y-auto px-4 pr-2 md:pr-4 pb-20 md:pb-4 space-y-3 touch-scroll">
                 {/* Base Version Cards - Original and any "New Versions" */}
                 {baseVersions.map((base, baseIdx) => {
                   const isActive = activeBaseId === base.id && selectedVariationId === null;
