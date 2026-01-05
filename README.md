@@ -21,14 +21,14 @@
 
 ---
 
-StaticKit is an open-source frontend for AI image models. Instead of copy-pasting prompts into a chat interface, StaticKit gives you a proper editing UI with prompt engineering baked into presets. One click to swap a background, change lighting, or replace a model — the complex prompts happen under the hood.
+StaticKit is an open-source frontend for AI image models. Instead of copy-pasting prompts into a chat interface, StaticKit gives you a proper editing UI with prompt engineering baked into presets. One click to swap a background, change lighting, or replace a model. The complex prompts happen under the hood.
 
 **Bring your own API key. No watermarks. No subscriptions. Keys stay in your browser.**
 
 ## Features
 
 **Core Editing**
-- Natural language image editing — describe what you want
+- Natural language image editing
 - Background swap with automatic lighting matching
 - Model/person replacement while preserving pose and product
 - Smart resize to any aspect ratio (extends or crops intelligently)
@@ -40,7 +40,7 @@ StaticKit is an open-source frontend for AI image models. Instead of copy-pastin
 - Composite subjects into new environments
 
 **Workflow**
-- Version history with branching — experiment without losing work
+- Version history with branching
 - Compare mode for A/B testing variations side-by-side
 - Batch download all versions and sizes
 - Keyboard shortcuts for power users
