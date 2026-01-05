@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, X, ExternalLink, Shield } from "lucide-react";
+import { Loader2, Check, X, ExternalLink } from "lucide-react";
 
 interface ApiKeySetupModalProps {
   open: boolean;
@@ -151,28 +151,12 @@ export function ApiKeySetupModal({
         </DialogHeader>
 
         <div className="space-y-5 py-2">
-          {/* How it works - only show when no existing key */}
+          {/* Description - only show when no existing key */}
           {!hasExistingKey && (
             <p className="text-sm text-muted-foreground">
-              Your API key powers all the AI features: generating versions,
-              swapping backgrounds, changing models, and more.
+              Stored locally in your browser only, never sent to our servers. Only pay for what you use.
             </p>
           )}
-
-          {/* Security notice */}
-          <div className="p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-            <div className="flex items-start gap-2.5">
-              <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
-              <div className="space-y-0.5">
-                <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">
-                  Your API key stays on your device
-                </p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Stored locally in your browser only, <strong className="text-foreground/80">never sent to our servers</strong>. Only pay for what you use.
-                </p>
-              </div>
-            </div>
-          </div>
 
           {/* Show existing key status */}
           {hasExistingKey && (
