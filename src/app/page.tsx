@@ -5048,7 +5048,7 @@ function HomeContent() {
               setSelectedTool('iterations');
               setIsMobileSidebarOpen(true);
             }}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'iterations' ? 'bg-orange-500/15' : ''}`}
           >
             <Layers className={`w-5 h-5 transition-colors ${selectedTool === 'iterations' ? 'text-orange-500' : 'text-muted-foreground'}`} />
             <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'iterations' ? 'text-orange-500' : 'text-muted-foreground'}`}>Versions</span>
@@ -5058,7 +5058,7 @@ function HomeContent() {
               setSelectedTool('edit');
               setIsMobileSidebarOpen(true);
             }}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'edit' ? 'bg-orange-500/15' : ''}`}
           >
             <Wand2 className={`w-5 h-5 transition-colors ${selectedTool === 'edit' ? 'text-orange-500' : 'text-muted-foreground'}`} />
             <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'edit' ? 'text-orange-500' : 'text-muted-foreground'}`}>Edit</span>
@@ -5068,7 +5068,7 @@ function HomeContent() {
               setSelectedTool('backgrounds');
               setIsMobileSidebarOpen(true);
             }}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'backgrounds' ? 'bg-orange-500/15' : ''}`}
           >
             <ImageIcon className={`w-5 h-5 transition-colors ${selectedTool === 'backgrounds' ? 'text-orange-500' : 'text-muted-foreground'}`} />
             <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'backgrounds' ? 'text-orange-500' : 'text-muted-foreground'}`}>Background</span>
@@ -5078,7 +5078,7 @@ function HomeContent() {
               setSelectedTool('model');
               setIsMobileSidebarOpen(true);
             }}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'model' ? 'bg-orange-500/15' : ''}`}
           >
             <User className={`w-5 h-5 transition-colors ${selectedTool === 'model' ? 'text-orange-500' : 'text-muted-foreground'}`} />
             <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'model' ? 'text-orange-500' : 'text-muted-foreground'}`}>Model</span>
@@ -5088,9 +5088,9 @@ function HomeContent() {
               setSelectedTool('export');
               setIsMobileSidebarOpen(true);
             }}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'export' ? 'bg-orange-500/15' : ''}`}
           >
-            <Expand className={`w-[18px] h-[18px] transition-colors ${selectedTool === 'export' ? 'text-orange-500' : 'text-muted-foreground'}`} />
+            <Expand className={`w-5 h-5 transition-colors ${selectedTool === 'export' ? 'text-orange-500' : 'text-muted-foreground'}`} />
             <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'export' ? 'text-orange-500' : 'text-muted-foreground'}`}>Resize</span>
           </button>
         </div>
