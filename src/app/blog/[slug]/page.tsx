@@ -19,6 +19,7 @@ const posts: Record<string, {
     title: 'How to use Gemini image generation without watermarks',
     date: '2025-01-03',
     author: 'StaticKit',
+    coverImage: '/blog/geminiwatermark_blog.jpg',
     content: `Google's Gemini can generate and edit images. It's genuinely impressive. There's just one problem: every image comes with a watermark.
 
 If you're using Gemini through Google's free interfaces, your outputs are marked. For personal projects, that's fine. For anything you want to actually use? Not ideal.
@@ -57,7 +58,7 @@ If you're comfortable with code, you can call the Gemini API directly with Pytho
 
 If you'd rather not write Python every time you want to edit an image, you need a tool that wraps the API in a usable interface.
 
-StaticKit is a free, open-source image editor that connects to Gemini using your own API key. You get natural language editing, one-click presets for common tasks, no watermarks, and no subscription fees.
+[StaticKit](https://statickit.ai) is a free, open-source image editor that connects to Gemini using your own API key. You get natural language editing, one-click presets for common tasks, no watermarks, and no subscription fees.
 
 Setup takes about a minute: paste your API key, and you're editing.
 
@@ -71,7 +72,7 @@ For light to moderate use, paying per image through the API is significantly che
 
 - **You need an API key.** Takes 2 minutes, free to create, pay-per-use after free credits.
 
-- **You need a way to use the API.** Either write code or use a GUI tool like StaticKit.
+- **You need a way to use the API.** Either write code or use a GUI tool like [StaticKit](https://statickit.ai).
 
 - **BYOK is often cheaper than subscriptions** for anyone who isn't generating hundreds of images daily.`,
   },
@@ -79,6 +80,7 @@ For light to moderate use, paying per image through the API is significantly che
     title: 'Edit images by describing what you want',
     date: '2025-01-03',
     author: 'StaticKit',
+    coverImage: '/blog/painting_with_words.jpg',
     content: `"Remove the coffee cup from the table."
 
 "Change her shirt to red."
@@ -95,7 +97,7 @@ Traditional image editing is manipulation-based. You select pixels, apply transf
 
 Natural language editing is intent-based. You describe the outcome you want, and the AI figures out the manipulation. "Remove the background" triggers segmentation, masking, and inpainting, but you never touch any of those tools directly.
 
-The trade-off is obvious: you give up fine control for speed and accessibility. For surgical edits where every pixel matters, you still want traditional tools. For 80% of common editing tasks, natural language is faster.
+The trade-off is obvious: you give up fine control for speed and accessibility. For surgical edits where every pixel matters, you still want traditional tools. For 80% of common editing tasks, natural language is faster. Tools like [StaticKit](https://statickit.ai) make this accessible without any learning curve.
 
 ## What works well
 
@@ -143,12 +145,13 @@ Even with good tooling, some prompting habits help:
 
 - **Simple prompts beat complex ones** when the tool has good prompt engineering underneath.
 
-- **The underlying model matters less than the implementation.** Same model, different results depending on the tool.`,
+- **The underlying model matters less than the implementation.** Same model, different results depending on the tool. [StaticKit](https://statickit.ai) is built with optimized prompts under the hood so you don't have to be a prompt engineer.`,
   },
   'best-free-ai-image-editors': {
     title: 'Best free AI image editors in 2026',
     date: '2025-01-03',
     author: 'StaticKit',
+    coverImage: '/blog/statickit_before_after.jpg',
     content: `Searching for "free AI image editor" is an exercise in frustration. Half the results are subscription tools with a free trial. The other half are ad-riddled web apps that watermark everything.
 
 Genuinely free AI image editing exists. You just have to know where to look and what trade-offs you're accepting.
@@ -173,7 +176,7 @@ This list focuses on the last two categories.
 
 Free + BYOK (Gemini API)
 
-A desktop-quality image editor that runs in your browser and uses your own Google AI API key. No account required, no usage limits from the tool itself. You just pay Google's API rates.
+[StaticKit](https://statickit.ai) is a desktop-quality image editor that runs in your browser and uses your own Google AI API key. No account required, no usage limits from the tool itself. You just pay Google's API rates.
 
 - **Best for** Regular users who want full AI editing capabilities without subscriptions.
 
@@ -221,7 +224,7 @@ Canva's free tier includes limited AI features. It's not unlimited, but the limi
 
 ## How to choose
 
-- **If you edit images regularly** and want real AI capabilities without subscriptions: StaticKit
+- **If you edit images regularly** and want real AI capabilities without subscriptions: [StaticKit](https://statickit.ai)
 
 - **If you need Photoshop-level control** with optional AI: Photopea
 
