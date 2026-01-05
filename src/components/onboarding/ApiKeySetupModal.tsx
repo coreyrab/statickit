@@ -135,7 +135,15 @@ export function ApiKeySetupModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-card border-border text-foreground">
+      <DialogContent
+        className="sm:max-w-lg bg-card border-border text-foreground"
+        onOpenAutoFocus={(e) => {
+          // Prevent auto-focus on mobile to avoid keyboard popup
+          if (window.innerWidth < 640) {
+            e.preventDefault();
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl text-center">
             {hasExistingKey ? "API Key Settings" : "Add your API Key"}
