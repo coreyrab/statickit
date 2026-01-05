@@ -154,7 +154,7 @@ export function ApiKeySetupModal({
           {/* Description - only show when no existing key */}
           {!hasExistingKey && (
             <p className="text-sm text-muted-foreground">
-              Stored locally in your browser only, never sent to our servers. Only pay for what you use.
+              Add your API key to unlock all features. Stored locally in your browser only, never sent to our servers. Only pay for what you use.
             </p>
           )}
 
