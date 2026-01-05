@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'sonner';
+import { ReactCompareSlider, ReactCompareSliderImage } from 'react-compare-slider';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -53,6 +54,7 @@ import {
   ZoomOut,
   Minimize2,
   Keyboard,
+  SplitSquareHorizontal,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -197,6 +199,11 @@ function HomeContent() {
   const canAccessEditor = !!apiKey;
   const [showArchived, setShowArchived] = useState(false);
   const [showCustomVariationInput, setShowCustomVariationInput] = useState(false);
+
+  // Comparison mode state
+  const [isCompareMode, setIsCompareMode] = useState(false);
+  const [compareLeftIndex, setCompareLeftIndex] = useState<number | null>(null);  // Locked reference (LEFT side)
+  const [compareRightIndex, setCompareRightIndex] = useState<number | null>(null); // Toggleable comparison (RIGHT side)
 
   // Original image editing state
   const [originalEditPrompt, setOriginalEditPrompt] = useState('');
@@ -571,6 +578,9 @@ function HomeContent() {
   }, [getTouchDistance, zoomLevel]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    // Disable pinch zoom in compare mode
+    if (isCompareMode) return;
+
     if (e.touches.length === 2 && initialPinchDistance) {
       // Pinch zoom
       const currentDistance = getTouchDistance(e.touches);
@@ -583,7 +593,7 @@ function HomeContent() {
         setZoomPosition({ x: 0, y: 0 });
       }
     }
-  }, [initialPinchDistance, initialZoom, getTouchDistance]);
+  }, [initialPinchDistance, initialZoom, getTouchDistance, isCompareMode]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     // Reset pinch state
@@ -803,6 +813,16 @@ function HomeContent() {
     setZoomLevel(1);
     setZoomPosition({ x: 0, y: 0 });
   }, [selectedVariationId, originalVersionIndex, uploadedImage?.url]);
+
+  // Exit compare mode when tool changes or when switching to variations
+  useEffect(() => {
+    if (isCompareMode) {
+      setIsCompareMode(false);
+      setCompareLeftIndex(null);
+      setCompareRightIndex(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTool, selectedVariationId]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setError(null);
@@ -2195,6 +2215,39 @@ function HomeContent() {
     }
   };
 
+  // Comparison mode handlers
+  const handleToggleCompare = () => {
+    if (isCompareMode) {
+      // Exit comparison mode
+      setIsCompareMode(false);
+      setCompareLeftIndex(null);
+      setCompareRightIndex(null);
+    } else {
+      // Enter comparison mode
+      setIsCompareMode(true);
+      setCompareLeftIndex(originalVersionIndex); // Lock current as reference (LEFT)
+
+      // Auto-select adjacent version for RIGHT side
+      if (originalVersionIndex < originalVersions.length - 1) {
+        setCompareRightIndex(originalVersionIndex + 1); // Next version
+      } else if (originalVersionIndex > 0) {
+        setCompareRightIndex(originalVersionIndex - 1); // Previous version
+      }
+    }
+  };
+
+  const handleCompareSelectRight = (index: number) => {
+    if (index !== compareLeftIndex) {
+      setCompareRightIndex(index);
+    }
+  };
+
+  const exitCompareMode = () => {
+    setIsCompareMode(false);
+    setCompareLeftIndex(null);
+    setCompareRightIndex(null);
+  };
+
   // Create a new base version from the current image
   // This adds a new card to the sidebar with its own fresh edit history
   const handleCreateVersion = (imageUrl: string, sourceLabel: string) => {
@@ -2232,6 +2285,11 @@ function HomeContent() {
 
   // Delete the current version and navigate to the previous one
   const handleDeleteVersion = () => {
+    // Exit compare mode if deleting one of the comparison versions
+    if (isCompareMode && (originalVersionIndex === compareLeftIndex || originalVersionIndex === compareRightIndex)) {
+      exitCompareMode();
+    }
+
     const isOriginalBase = activeBaseId === 'original';
 
     // If we're at index 0 (the base image of this version)
@@ -2653,19 +2711,39 @@ function HomeContent() {
                         <Loader2
                           key={idx}
                           className={`w-2.5 h-2.5 animate-spin ${
-                            idx === originalVersionIndex ? 'text-emerald-500' : 'text-muted-foreground/80'
+                            isCompareMode && idx === compareLeftIndex
+                              ? 'text-emerald-500'
+                              : isCompareMode && idx === compareRightIndex
+                                ? 'text-blue-500'
+                                : idx === originalVersionIndex
+                                  ? 'text-emerald-500'
+                                  : 'text-muted-foreground/80'
                           }`}
                         />
                       ) : (
                         <button
                           key={idx}
-                          onClick={() => version.status === 'completed' && setOriginalVersionIndex(idx)}
+                          onClick={() => {
+                            if (version.status !== 'completed') return;
+                            if (isCompareMode) {
+                              // In compare mode: clicking changes RIGHT side (blue dot)
+                              handleCompareSelectRight(idx);
+                            } else {
+                              // Normal mode: clicking navigates to that version
+                              setOriginalVersionIndex(idx);
+                            }
+                          }}
+                          disabled={isCompareMode && idx === compareLeftIndex}
                           className={`w-2.5 h-2.5 rounded-full transition-all ${
                             version.status === 'error'
                               ? 'bg-red-500/50'
-                              : idx === originalVersionIndex
-                                ? 'bg-emerald-500 scale-110'
-                                : 'bg-muted hover:bg-muted/500'
+                              : isCompareMode && idx === compareLeftIndex
+                                ? 'bg-emerald-500 scale-110 ring-2 ring-emerald-500/30 cursor-not-allowed'
+                                : isCompareMode && idx === compareRightIndex
+                                  ? 'bg-blue-500 scale-110 ring-2 ring-blue-500/30'
+                                  : idx === originalVersionIndex && !isCompareMode
+                                    ? 'bg-emerald-500 scale-110'
+                                    : 'bg-muted hover:bg-muted/50'
                           }`}
                         />
                       )
@@ -2966,32 +3044,79 @@ function HomeContent() {
                     - Resized versions: use the target size's aspect ratio (e.g., 9:16 for Story)
                     Uses CSS to calculate max size that fits container while preserving aspect ratio.
                   */}
-                  {(() => {
-                    // Determine display dimensions based on whether viewing a resize
-                    const displayDimensions = viewingOriginalResizedSize
-                      ? AD_SIZES.find(s => s.name === viewingOriginalResizedSize) || { width: uploadedImage.width, height: uploadedImage.height }
-                      : { width: uploadedImage.width, height: uploadedImage.height };
+                  {isCompareMode && compareLeftIndex !== null && compareRightIndex !== null ? (
+                    // Comparison slider mode
+                    <div
+                      className="relative rounded-lg shadow-2xl overflow-hidden"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        maxWidth: `min(100%, calc((100vh - 200px) * ${uploadedImage.width / uploadedImage.height}))`,
+                        maxHeight: `min(100%, calc(100vw * ${uploadedImage.height / uploadedImage.width}))`,
+                        aspectRatio: `${uploadedImage.width} / ${uploadedImage.height}`,
+                      }}
+                    >
+                      <ReactCompareSlider
+                        itemOne={
+                          <div className="relative w-full h-full">
+                            <ReactCompareSliderImage
+                              src={originalVersions[compareLeftIndex]?.imageUrl || uploadedImage?.url}
+                              alt="Reference"
+                              style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                            />
+                            {/* Left side label */}
+                            <div className="absolute top-3 left-3 px-2 py-1 rounded bg-black/60 text-white text-xs backdrop-blur-sm flex items-center gap-1.5">
+                              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                              {compareLeftIndex === 0 ? 'Original' : `Edit ${compareLeftIndex}`}
+                            </div>
+                          </div>
+                        }
+                        itemTwo={
+                          <div className="relative w-full h-full">
+                            <ReactCompareSliderImage
+                              src={originalVersions[compareRightIndex]?.imageUrl || uploadedImage?.url}
+                              alt="Comparison"
+                              style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                            />
+                            {/* Right side label */}
+                            <div className="absolute top-3 right-3 px-2 py-1 rounded bg-blue-500/80 text-white text-xs backdrop-blur-sm flex items-center gap-1.5">
+                              <div className="w-2 h-2 rounded-full bg-blue-400" />
+                              {compareRightIndex === 0 ? 'Original' : `Edit ${compareRightIndex}`}
+                            </div>
+                          </div>
+                        }
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    </div>
+                  ) : (
+                    // Normal single image view
+                    (() => {
+                      // Determine display dimensions based on whether viewing a resize
+                      const displayDimensions = viewingOriginalResizedSize
+                        ? AD_SIZES.find(s => s.name === viewingOriginalResizedSize) || { width: uploadedImage.width, height: uploadedImage.height }
+                        : { width: uploadedImage.width, height: uploadedImage.height };
 
-                    return (
-                      <div
-                        className="relative rounded-lg shadow-2xl overflow-hidden transition-transform duration-100"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          maxWidth: `min(100%, calc((100vh - 200px) * ${displayDimensions.width / displayDimensions.height}))`,
-                          maxHeight: `min(100%, calc(100vw * ${displayDimensions.height / displayDimensions.width}))`,
-                          aspectRatio: `${displayDimensions.width} / ${displayDimensions.height}`,
-                          transform: `scale(${zoomLevel}) translate(${zoomPosition.x}px, ${zoomPosition.y}px)`,
-                        }}
-                      >
-                        <img
-                          src={previewImage}
-                          alt={isShowingGenerated ? 'Generated version' : 'Original ad'}
-                          className="absolute inset-0 w-full h-full object-cover"
-                        />
-                      </div>
-                    );
-                  })()}
+                      return (
+                        <div
+                          className="relative rounded-lg shadow-2xl overflow-hidden transition-transform duration-100"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            maxWidth: `min(100%, calc((100vh - 200px) * ${displayDimensions.width / displayDimensions.height}))`,
+                            maxHeight: `min(100%, calc(100vw * ${displayDimensions.height / displayDimensions.width}))`,
+                            aspectRatio: `${displayDimensions.width} / ${displayDimensions.height}`,
+                            transform: `scale(${zoomLevel}) translate(${zoomPosition.x}px, ${zoomPosition.y}px)`,
+                          }}
+                        >
+                          <img
+                            src={previewImage}
+                            alt={isShowingGenerated ? 'Generated version' : 'Original ad'}
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                        </div>
+                      );
+                    })()
+                  )}
                   {/* Loading overlay when viewing a processing version */}
                   {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing' && (
                     <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
@@ -3022,8 +3147,8 @@ function HomeContent() {
                       </div>
                     </div>
                   )}
-                  {/* Zoom controls - show on mobile when zoomed or always on desktop */}
-                  {(zoomLevel > 1) && (
+                  {/* Zoom controls - show on mobile when zoomed or always on desktop (hidden in compare mode) */}
+                  {(zoomLevel > 1) && !isCompareMode && (
                     <div className="absolute bottom-4 right-4 flex items-center gap-1 bg-card/90 backdrop-blur-sm rounded-lg p-1 border border-border">
                       <button
                         onClick={() => {
@@ -3262,6 +3387,26 @@ function HomeContent() {
                       Create new version from this image
                     </TooltipContent>
                   </Tooltip>
+                  {/* Compare button - only show for original/edits with 2+ versions */}
+                  {!isShowingGenerated && originalVersions.length >= 2 && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={handleToggleCompare}
+                          className={`p-2 rounded-lg backdrop-blur-sm transition-colors ${
+                            isCompareMode
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-card/80 hover:bg-card text-foreground/70 hover:text-foreground'
+                          }`}
+                        >
+                          <SplitSquareHorizontal className="w-4 h-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {isCompareMode ? 'Exit comparison mode' : 'Compare versions'}
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button

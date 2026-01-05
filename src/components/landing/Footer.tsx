@@ -14,7 +14,7 @@ export function Footer() {
   return (
     <>
       <footer className="border-t border-border/50 py-4 md:py-6 px-3 md:px-6">
-        <div className="flex items-center justify-center gap-x-1 text-xs md:text-sm text-muted-foreground">
+        <div className="flex flex-nowrap items-center justify-center md:justify-start gap-x-1 text-xs md:text-sm text-muted-foreground">
             <button
               onClick={() => setPrivacyOpen(true)}
               className="hover:text-foreground transition-colors"
