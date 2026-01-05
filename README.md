@@ -21,20 +21,34 @@
 
 ---
 
-StaticKit is an open-source GUI for AI image generation. It works with Gemini Imagen, Fal, and other image models. Upload an image and generate variations: swap backgrounds, change models, adjust lighting, orbit the camera, resize to different aspect ratios.
+StaticKit is an open-source frontend for AI image models. Instead of copy-pasting prompts into a chat interface, StaticKit gives you a proper editing UI with prompt engineering baked into presets. One click to swap a background, change lighting, or replace a model — the complex prompts happen under the hood.
 
-**Bring your own API key. No account required. Keys stay in your browser.**
+**Bring your own API key. No watermarks. No subscriptions. Keys stay in your browser.**
 
 ## Features
 
-- Generate variations of any image
-- Swap backgrounds with matched lighting
-- Replace models while keeping products and poses
-- Orbit camera to different angles
-- Resize to any aspect ratio
-- Lighting presets (golden hour, studio, etc.)
-- BYOK: use your own Gemini API key, stored locally
-- No accounts, no tracking
+**Core Editing**
+- Natural language image editing — describe what you want
+- Background swap with automatic lighting matching
+- Model/person replacement while preserving pose and product
+- Smart resize to any aspect ratio (extends or crops intelligently)
+- Lighting presets (golden hour, studio, neon, etc.)
+
+**Reference Images**
+- Upload a reference photo to extract its background
+- Use a specific person from a reference as the model
+- Composite subjects into new environments
+
+**Workflow**
+- Version history with branching — experiment without losing work
+- Compare mode for A/B testing variations side-by-side
+- Batch download all versions and sizes
+- Keyboard shortcuts for power users
+
+**BYOK (Bring Your Own Key)**
+- Use your own Gemini API key
+- Keys stored locally in your browser
+- No accounts, no tracking, no vendor lock-in
 
 ## Quick Start
 
