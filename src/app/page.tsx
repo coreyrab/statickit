@@ -509,7 +509,18 @@ function HomeContent() {
           return currentIndex >= tools.length - 1 ? null : tools[currentIndex + 1];
         });
       } else if (e.key === 'ArrowLeft') {
-        if (isShowingGenerated && selectedVariation.versions.length > 1) {
+        if (isCompareMode && compareRightIndex !== null) {
+          // In compare mode: navigate the right side (blue dot)
+          if (compareRightIndex > 0) {
+            const newIndex = compareRightIndex - 1;
+            // Skip the locked left index
+            if (newIndex === compareLeftIndex && newIndex > 0) {
+              setCompareRightIndex(newIndex - 1);
+            } else if (newIndex !== compareLeftIndex) {
+              setCompareRightIndex(newIndex);
+            }
+          }
+        } else if (isShowingGenerated && selectedVariation.versions.length > 1) {
           // Navigate generated image versions
           if (selectedVariation.currentVersionIndex > 0) {
             setVariations(prev => prev.map(v =>
@@ -523,7 +534,18 @@ function HomeContent() {
           setOriginalVersionIndex(prev => prev - 1);
         }
       } else if (e.key === 'ArrowRight') {
-        if (isShowingGenerated && selectedVariation.versions.length > 1) {
+        if (isCompareMode && compareRightIndex !== null) {
+          // In compare mode: navigate the right side (blue dot)
+          if (compareRightIndex < originalVersions.length - 1) {
+            const newIndex = compareRightIndex + 1;
+            // Skip the locked left index
+            if (newIndex === compareLeftIndex && newIndex < originalVersions.length - 1) {
+              setCompareRightIndex(newIndex + 1);
+            } else if (newIndex !== compareLeftIndex) {
+              setCompareRightIndex(newIndex);
+            }
+          }
+        } else if (isShowingGenerated && selectedVariation.versions.length > 1) {
           // Navigate generated image versions
           if (selectedVariation.currentVersionIndex < selectedVariation.versions.length - 1) {
             setVariations(prev => prev.map(v =>
@@ -2473,17 +2495,17 @@ function HomeContent() {
       {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="px-4 md:px-6 h-14 flex items-center justify-between">
-          {/* Mobile: Menu button */}
-          <button
-            onClick={() => setIsMobileSidebarOpen(true)}
-            className="md:hidden p-2 -ml-1 rounded-lg hover:bg-muted transition-colors"
-            aria-label="Open edits drawer"
-          >
-            <SlidersHorizontal className="w-5 h-5" />
-          </button>
-
-          {/* Logo - centered on mobile, left-aligned on desktop */}
-          <div className="flex-1 md:flex-none md:w-[360px] flex items-center justify-center md:justify-start md:pl-7">
+          {/* Left section: Logo and mobile slider button */}
+          <div className="flex items-center gap-2">
+            {/* Mobile: Slider panel button */}
+            <button
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="md:hidden p-2 -ml-1 rounded-lg hover:bg-muted transition-colors"
+              aria-label="Open edits drawer"
+            >
+              <SlidersHorizontal className="w-5 h-5" />
+            </button>
+            {/* Logo - far left */}
             <button onClick={uploadedImage ? () => setShowNewConfirmModal(true) : handleReset} className="flex items-center gap-2 font-semibold hover:opacity-80 transition-opacity">
               <svg className="w-8 h-8 text-foreground" viewBox="0 0 101 101" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M59.9691 26.3024C59.9691 28.6266 61.8532 30.5107 64.1774 30.5107C66.5016 30.5107 68.3857 28.6266 68.3857 26.3024C68.3857 23.9782 66.5016 22.0941 64.1774 22.0941C61.8532 22.0941 59.9691 23.9782 59.9691 26.3024Z"/>
@@ -2504,7 +2526,7 @@ function HomeContent() {
             </button>
           </div>
 
-          {/* Right: Keyboard shortcuts & GitHub Star */}
+          {/* Right: Keyboard shortcuts, GitHub Star & Settings Menu */}
           <div className="flex items-center gap-2">
             {/* Keyboard shortcuts - desktop only */}
             <Tooltip>
@@ -2533,7 +2555,19 @@ function HomeContent() {
                 </div>
               </TooltipContent>
             </Tooltip>
-            {/* Settings Menu */}
+            {/* GitHub Star - desktop only */}
+            <a
+              href="https://github.com/CoreyRab/statickit"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors text-sm"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+              <span className="font-medium">Star</span>
+            </a>
+            {/* Settings Menu - Far right */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors">
@@ -2571,17 +2605,6 @@ function HomeContent() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <a
-              href="https://github.com/CoreyRab/statickit"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors text-sm"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-              </svg>
-              <span className="font-medium hidden md:inline">Star</span>
-            </a>
           </div>
         </div>
       </header>
