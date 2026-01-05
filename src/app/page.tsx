@@ -48,6 +48,7 @@ import {
   Expand,
   Menu,
   PanelLeft,
+  SlidersHorizontal,
   ZoomIn,
   ZoomOut,
   Minimize2,
@@ -2420,7 +2421,7 @@ function HomeContent() {
             className="md:hidden p-2 -ml-1 rounded-lg hover:bg-muted transition-colors"
             aria-label="Open edits drawer"
           >
-            <Plus className="w-5 h-5" />
+            <SlidersHorizontal className="w-5 h-5" />
           </button>
 
           {/* Logo - centered on mobile, left-aligned on desktop */}
