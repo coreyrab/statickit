@@ -153,15 +153,10 @@ export function ApiKeySetupModal({
         <div className="space-y-5 py-2">
           {/* How it works - only show when no existing key */}
           {!hasExistingKey && (
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">
-                Your API key powers all the AI features: generating versions,
-                swapping backgrounds, changing models, and more.
-              </p>
-              <p className="text-xs text-muted-foreground/70">
-                Get a free key from Google in under a minute. You only pay for what you use.
-              </p>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              Your API key powers all the AI features: generating versions,
+              swapping backgrounds, changing models, and more.
+            </p>
           )}
 
           {/* Security notice */}
@@ -173,7 +168,7 @@ export function ApiKeySetupModal({
                   Your API key stays on your device
                 </p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Stored locally in your browser only—<strong className="text-foreground/80">never sent to our servers</strong>.
+                  Stored locally in your browser only, <strong className="text-foreground/80">never sent to our servers</strong>. Only pay for what you use.
                 </p>
               </div>
             </div>
