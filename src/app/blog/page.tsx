@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
+import { Footer } from '@/components/landing/Footer';
 
 // Blog posts data - add new posts here
 const posts = [
@@ -43,8 +44,8 @@ export default function BlogPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="relative">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <div className="flex-1">
         {/* Header */}
         <header className="px-6 py-8">
           <div className="max-w-3xl mx-auto flex items-center justify-between">
@@ -79,7 +80,7 @@ export default function BlogPage() {
         </header>
 
         {/* Main */}
-        <main className="px-6 pt-16 pb-32">
+        <main className="px-6 pt-16 pb-20">
           <div className="max-w-3xl mx-auto">
             {/* Page title */}
             <h1 className="font-serif text-3xl sm:text-4xl text-foreground mb-4">
@@ -138,6 +139,7 @@ export default function BlogPage() {
           </div>
         </main>
       </div>
+      <Footer />
     </div>
   );
 }
