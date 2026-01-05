@@ -291,7 +291,7 @@ function HomeContent() {
     rotation: string | null;
   }>({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null });
   const [expandedPresetCategory, setExpandedPresetCategory] = useState<string | null>(null);
-  const [isModelBuilderExpanded, setIsModelBuilderExpanded] = useState(true);
+  const [isModelBuilderExpanded, setIsModelBuilderExpanded] = useState(false);
   const [showImageDetails, setShowImageDetails] = useState(false);
   const [showBackgroundDetails, setShowBackgroundDetails] = useState(false);
   const [showModelDetails, setShowModelDetails] = useState(false);
@@ -4610,10 +4610,10 @@ function HomeContent() {
                   {/* Collapsible Header */}
                   <button
                     onClick={() => setIsModelBuilderExpanded(!isModelBuilderExpanded)}
-                    className="w-full flex items-center justify-between py-2 text-xs text-muted-foreground/70 uppercase tracking-wide hover:text-foreground/70 transition-colors"
+                    className="w-full px-3 py-2 mb-3 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-center gap-2"
                   >
-                    <span>Model Builder</span>
                     <ChevronDown className={`w-4 h-4 transition-transform ${isModelBuilderExpanded ? 'rotate-180' : ''}`} />
+                    <span>Model Builder</span>
                   </button>
 
                   {isModelBuilderExpanded && (
