@@ -3744,11 +3744,33 @@ function HomeContent() {
                       </Tooltip>
                     )}
                   </div>
-                  {showImageDetails && analysis?.imageDescription && (
-                    <div className="mb-3 p-2.5 rounded-lg bg-muted/50 border border-border">
-                      <p className="text-[11px] text-muted-foreground/80 italic leading-relaxed">{analysis.imageDescription}</p>
+                  <div className={`grid transition-all duration-200 ease-out ${showImageDetails && analysis?.imageDescription ? 'grid-rows-[1fr] opacity-100 mb-3' : 'grid-rows-[0fr] opacity-0 mb-0'}`}>
+                    <div className="overflow-hidden">
+                      <div className="p-2.5 rounded-lg bg-muted/50 border border-border">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-[11px] text-muted-foreground/80 italic leading-relaxed flex-1">{analysis?.imageDescription}</p>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => {
+                                  if (analysis?.imageDescription) {
+                                    navigator.clipboard.writeText(analysis.imageDescription);
+                                    toast.success('Description copied');
+                                  }
+                                }}
+                                className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors text-muted-foreground/60 hover:text-muted-foreground"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="left">
+                              <p className="text-xs">Copy description</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </div>
                     </div>
-                  )}
+                  </div>
 
                   <div className="flex-1 overflow-y-auto space-y-2 touch-scroll pr-2 md:pr-0 pb-20 md:pb-16">
                     {/* Lighting */}

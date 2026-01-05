@@ -33,25 +33,40 @@ export async function POST(request: NextRequest) {
 
     if (isBackgroundOnly) {
       // Background-only mode - changes ONLY the background, protects everything else
-      prompt = `BACKGROUND CHANGE ONLY - Replace the background while making the subject look naturally placed in the new environment.
+      prompt = `BACKGROUND CHANGE ONLY - Replace the background while keeping the subject COMPLETELY FROZEN.
 
 BACKGROUND REQUEST:
 ${variationDescription}
 
-=== WHAT TO PROTECT (KEEP IDENTICAL) ===
+=== ABSOLUTE PROTECTION (NEVER CHANGE) ===
+
+**POSE & POSITION ARE LOCKED**: The subject's body is PRE-RECORDED and CANNOT be altered:
+- EXACT same pose - every limb, joint angle, and body position stays identical
+- EXACT same position in frame - do not shift, rotate, or reposition
+- EXACT same scale - do not resize the subject
+- Think of this as green-screen compositing: the subject footage is LOCKED
+
+**PEOPLE/MODELS**: Any people must remain EXACTLY as shown:
+- Same pose, expression, and body position (NON-NEGOTIABLE)
+- Same clothing, hair, and facial features
+- CRITICAL: Preserve the EXACT facial features and identity - same face shape, eyes, nose, mouth, skin texture
+- Do NOT alter any physical aspect of the person
+- Faces must be recognizable as the same person
 
 **PRODUCT/SUBJECT**: Must remain EXACTLY as shown:
 - Same position, size, angle, and physical appearance
 - Same colors, textures, and details
 - Any text, logos, or branding unchanged
-- Do NOT move, resize, or alter the product structure
 
-**PEOPLE/MODELS**: Any people must remain EXACTLY as shown:
-- Same pose, expression, and position
-- Same clothing, hair, and facial features
-- CRITICAL: Preserve the EXACT facial features and identity - same face shape, eyes, nose, mouth, skin texture
-- Do NOT alter any physical aspect of the person
-- Faces must be recognizable as the same person
+=== CRITICAL RULE: BACKGROUND ADAPTS TO POSE, NOT VICE VERSA ===
+
+If the requested background seems incompatible with the subject's current pose:
+- Do NOT adjust the pose to fit the background
+- Instead, ADAPT your interpretation of the background to fit the existing pose
+- Example: If subject is sitting but asked for "beach scene" → place them sitting on beach/sand/towel
+- Example: If subject is standing indoors but asked for "forest" → place them on a forest path
+- Example: If pose looks awkward for the scene → adjust the CAMERA ANGLE or CROP of the background, not the pose
+- The background must work AROUND the frozen subject
 
 === WHAT TO ADAPT (FOR NATURAL INTEGRATION) ===
 
@@ -60,7 +75,6 @@ ${variationDescription}
 - If the new background is cool/blue, adjust the subject's lighting accordingly
 - Match the direction of light (if background has light from the left, subject should too)
 - Add appropriate reflections, highlights, and ambient color from the new environment
-- The goal is to make the subject look NATURALLY LIT by the new scene, not composited
 
 **SHADOWS**: Update shadows to match the new environment:
 - Shadow direction should match the new lighting
@@ -71,10 +85,10 @@ ${variationDescription}
 Replace the background/environment with: ${variationDescription}
 
 OUTPUT REQUIREMENTS:
-- The subject must look like they BELONG in the new environment
+- Subject pose is IDENTICAL to reference (this is the #1 priority)
 - Professional advertising quality
 - Aspect ratio: ${aspectRatio}
-- No visible compositing artifacts - seamless integration`;
+- Seamless lighting integration between subject and new background`;
     } else if (isModelOnly) {
       // Model-only mode - changes ONLY the model/person, protects everything else
       const clothingInstruction = keepClothing

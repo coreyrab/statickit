@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -18,90 +19,77 @@ export function MadeByHumanModal({ open, onOpenChange }: MadeByHumanModalProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[85vh]">
         <DialogHeader>
-          <DialogTitle className="text-xl">Made by a Human</DialogTitle>
+          <DialogTitle className="text-xl">By a Human</DialogTitle>
         </DialogHeader>
 
         <ScrollArea className="h-[60vh] pr-4">
           <div className="space-y-6 text-sm text-muted-foreground">
+            {/* Profile and Signature Header */}
+            <div className="flex items-center gap-4">
+              <Image
+                src="/corey_profile.jpeg"
+                alt="Corey Rabazinski"
+                width={64}
+                height={64}
+                className="rounded-full object-cover flex-shrink-0"
+              />
+              <Image
+                src="/corey-rabazinski.svg"
+                alt="Corey Rabazinski signature"
+                width={180}
+                height={48}
+                className="dark:invert opacity-80"
+              />
+            </div>
+
             <p className="text-base text-foreground">
-              Hi, I&apos;m{" "}
+              Hi, I&apos;m Corey Rabazinski, and I built StaticKit.
+            </p>
+
+            <p>
+              I&apos;ve spent my career in marketing, leading teams at{" "}
               <a
-                href="https://x.com/coreyrab"
+                href="https://scite.ai"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
-                Corey Rabazinski
+                Scite.ai
+              </a>{" "}
+              (current),{" "}
+              <a
+                href="https://www.revenuecat.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                RevenueCat
               </a>
-              , and I built StaticKit.
+              , and several others. More recently, I&apos;ve been building AI tools
+              for marketing teams. Tools that solve the small but frustrating
+              problems that slow people down.
             </p>
 
-            <section className="space-y-3">
-              <h3 className="text-base font-semibold text-foreground">
-                Why I Built This
-              </h3>
-              <p>
-                I&apos;ve spent my career in marketing&mdash;leading teams at{" "}
-                <a
-                  href="https://www.revenuecat.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  RevenueCat
-                </a>
-                , Manifold (acquired by Snyk), and Code School (acquired by
-                Pluralsight). Before that, I ran digital advertising for brands
-                like Universal Studios and Holiday Inn.
-              </p>
-              <p>
-                Throughout all of it, I&apos;ve watched marketers struggle with
-                creative production. You have the ideas, but turning them into
-                polished visuals often means waiting on designers, learning
-                complex tools, or settling for &quot;good enough.&quot;
-              </p>
-              <p>
-                AI is changing that. But most AI tools are still built for
-                technical users, not marketers. I wanted to fix that.
-              </p>
-            </section>
+            <p>
+              My goal is to uncover hidden use cases for AI models through simple,
+              focused tools that help folks move faster.
+            </p>
 
-            <section className="space-y-3">
-              <h3 className="text-base font-semibold text-foreground">
-                Making AI Accessible
-              </h3>
-              <p>
-                StaticKit is designed to put powerful AI image editing directly
-                in the hands of marketers. No complex prompts. No steep learning
-                curve. Just upload your image, pick what you want to change, and
-                let AI do the heavy lifting.
-              </p>
-              <p>
-                It&apos;s open source because I believe these tools should be
-                accessible to everyone&mdash;whether you&apos;re at a Fortune
-                500 or running a one-person shop.
-              </p>
-            </section>
+            <p>
+              StaticKit was designed to make it easy to fly through image edits
+              with AI models rather than waiting around in a clunky chat interface.
+              No more copy-pasting prompts, wrestling with aspect ratios, or losing
+              track of your best outputs.
+            </p>
 
-            <section className="space-y-3">
-              <h3 className="text-base font-semibold text-foreground">
-                Other Projects
-              </h3>
-              <p>
-                I build tools for marketers. Check out{" "}
-                <a
-                  href="https://tinyfunnels.ai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  TinyFunnels
-                </a>{" "}
-                if you&apos;re interested in what else I&apos;m working on.
-              </p>
-            </section>
+            <p>
+              I&apos;ve baked in good prompts, presets, and tools that have been
+              helpful for me and my teams. This is very much a living project. If
+              you want to contribute or have ideas for how I can make StaticKit
+              better, I&apos;d love to hear from you.
+            </p>
 
-            <section className="space-y-3">
+            <section className="space-y-3 pt-2">
               <h3 className="text-base font-semibold text-foreground">
                 Get in Touch
               </h3>

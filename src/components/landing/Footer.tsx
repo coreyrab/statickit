@@ -40,7 +40,7 @@ export function Footer() {
               onClick={() => setMadeByHumanOpen(true)}
               className="hover:text-foreground transition-colors"
             >
-              Made by a human
+              By a human
             </button>
             <span className="text-muted-foreground/40">·</span>
             <span>&copy; 2025 StaticKit</span>
