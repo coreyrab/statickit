@@ -70,6 +70,21 @@ export default function RootLayout({
           data-site="GPULAWRW"
           strategy="afterInteractive"
         />
+        <Script id="openpanel-init" strategy="afterInteractive">
+          {`
+            window.op=window.op||function(){var n=[];return new Proxy(function(){arguments.length&&n.push([].slice.call(arguments))},{get:function(t,r){return"q"===r?n:function(){n.push([r].concat([].slice.call(arguments)))}},has:function(t,r){return"q"===r}})}();
+            window.op('init', {
+              clientId: '1b309e8f-6811-4f70-b2a3-efe533fbacc9',
+              trackScreenViews: true,
+              trackOutgoingLinks: true,
+              trackAttributes: true,
+            });
+          `}
+        </Script>
+        <Script
+          src="https://openpanel.dev/op1.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
