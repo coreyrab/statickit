@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, Suspense } from 'react';
+import { useState, useCallback, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'sonner';
@@ -55,6 +55,8 @@ import {
   Minimize2,
   Keyboard,
   SplitSquareHorizontal,
+  ImagePlus,
+  UserPlus,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -158,6 +160,16 @@ interface BaseVersion {
   versions: ImageVersion[]; // Edit history for this base
   currentVersionIndex: number; // Which edit is currently shown
   resizedVersions: ResizedVersion[]; // Resized versions for this base
+}
+
+// Reference image for Background/Model tools
+interface ReferenceImage {
+  id: string;
+  url: string;        // data URL for display
+  base64: string;     // for API calls
+  mimeType: string;
+  name: string;
+  type: 'background' | 'model';
 }
 
 function HomeContent() {
@@ -269,6 +281,16 @@ function HomeContent() {
   // Track used suggestions - to show visual indicator
   const [usedBackgroundSuggestions, setUsedBackgroundSuggestions] = useState<Set<string>>(new Set());
   const [usedModelSuggestions, setUsedModelSuggestions] = useState<Set<string>>(new Set());
+
+  // Reference images state (session-based)
+  const [backgroundReferences, setBackgroundReferences] = useState<ReferenceImage[]>([]);
+  const [modelReferences, setModelReferences] = useState<ReferenceImage[]>([]);
+  const [selectedBackgroundRef, setSelectedBackgroundRef] = useState<string | null>(null);
+  const [selectedModelRef, setSelectedModelRef] = useState<string | null>(null);
+
+  // File input refs for reference uploads
+  const backgroundRefInputRef = useRef<HTMLInputElement>(null);
+  const modelRefInputRef = useRef<HTMLInputElement>(null);
 
   // Touch swipe state for image navigation
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
@@ -481,6 +503,12 @@ function HomeContent() {
     setApiKeyState(key);
   };
 
+  // Refs to hold current values for keyboard handler (avoids stale closures without dep array issues)
+  const compareStateRef = useRef({ isCompareMode, compareLeftIndex, compareRightIndex });
+  useEffect(() => {
+    compareStateRef.current = { isCompareMode, compareLeftIndex, compareRightIndex };
+  }, [isCompareMode, compareLeftIndex, compareRightIndex]);
+
   // Keyboard navigation for version control (left/right arrow keys)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -491,6 +519,9 @@ function HomeContent() {
 
       const selectedVariation = variations.find(v => v.id === selectedVariationId);
       const isShowingGenerated = selectedVariation && selectedVariation.imageUrl;
+
+      // Read compare state from ref (always current)
+      const { isCompareMode: inCompareMode, compareLeftIndex: leftIdx, compareRightIndex: rightIdx } = compareStateRef.current;
 
       if (e.shiftKey && e.key === 'ArrowLeft') {
         // Shift + Left = Previous tool
@@ -509,14 +540,14 @@ function HomeContent() {
           return currentIndex >= tools.length - 1 ? null : tools[currentIndex + 1];
         });
       } else if (e.key === 'ArrowLeft') {
-        if (isCompareMode && compareRightIndex !== null) {
+        if (inCompareMode && rightIdx !== null) {
           // In compare mode: navigate the right side (blue dot)
-          if (compareRightIndex > 0) {
-            const newIndex = compareRightIndex - 1;
+          if (rightIdx > 0) {
+            const newIndex = rightIdx - 1;
             // Skip the locked left index
-            if (newIndex === compareLeftIndex && newIndex > 0) {
+            if (newIndex === leftIdx && newIndex > 0) {
               setCompareRightIndex(newIndex - 1);
-            } else if (newIndex !== compareLeftIndex) {
+            } else if (newIndex !== leftIdx) {
               setCompareRightIndex(newIndex);
             }
           }
@@ -534,14 +565,14 @@ function HomeContent() {
           setOriginalVersionIndex(prev => prev - 1);
         }
       } else if (e.key === 'ArrowRight') {
-        if (isCompareMode && compareRightIndex !== null) {
+        if (inCompareMode && rightIdx !== null) {
           // In compare mode: navigate the right side (blue dot)
-          if (compareRightIndex < originalVersions.length - 1) {
-            const newIndex = compareRightIndex + 1;
+          if (rightIdx < originalVersions.length - 1) {
+            const newIndex = rightIdx + 1;
             // Skip the locked left index
-            if (newIndex === compareLeftIndex && newIndex < originalVersions.length - 1) {
+            if (newIndex === leftIdx && newIndex < originalVersions.length - 1) {
               setCompareRightIndex(newIndex + 1);
-            } else if (newIndex !== compareLeftIndex) {
+            } else if (newIndex !== leftIdx) {
               setCompareRightIndex(newIndex);
             }
           }
@@ -1606,6 +1637,9 @@ function HomeContent() {
         mood: 'Not specified',
       };
 
+      // Get selected reference image if any
+      const selectedBgRef = backgroundReferences.find(r => r.id === selectedBackgroundRef);
+
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1618,6 +1652,11 @@ function HomeContent() {
           aspectRatio: uploadedImage.aspectRatio,
           isEdit: true,
           isBackgroundOnly: true,
+          // Include reference image if selected
+          ...(selectedBgRef && {
+            backgroundRefImage: selectedBgRef.base64,
+            backgroundRefMimeType: selectedBgRef.mimeType,
+          }),
         }),
       });
 
@@ -1800,6 +1839,9 @@ function HomeContent() {
         mood: 'Not specified',
       };
 
+      // Get selected reference image if any
+      const selectedModelReference = modelReferences.find(r => r.id === selectedModelRef);
+
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1813,6 +1855,11 @@ function HomeContent() {
           isEdit: true,
           isModelOnly: true,
           keepClothing: keepClothing,
+          // Include reference image if selected
+          ...(selectedModelReference && {
+            modelRefImage: selectedModelReference.base64,
+            modelRefMimeType: selectedModelReference.mimeType,
+          }),
         }),
       });
 
@@ -1966,6 +2013,60 @@ function HomeContent() {
     setSelectedBodyType(null);
     setSelectedExpression(null);
     setSelectedVibe(null);
+  };
+
+  // Handle background reference image upload
+  const handleBackgroundRefUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      const base64 = dataUrl.split(',')[1];
+
+      const newRef: ReferenceImage = {
+        id: `bg-ref-${Date.now()}`,
+        url: dataUrl,
+        base64,
+        mimeType: file.type,
+        name: file.name,
+        type: 'background',
+      };
+
+      setBackgroundReferences(prev => [...prev, newRef]);
+      setSelectedBackgroundRef(newRef.id);
+      setBackgroundCustomPrompt(`Use background from reference image`);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  // Handle model reference image upload
+  const handleModelRefUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      const base64 = dataUrl.split(',')[1];
+
+      const newRef: ReferenceImage = {
+        id: `model-ref-${Date.now()}`,
+        url: dataUrl,
+        base64,
+        mimeType: file.type,
+        name: file.name,
+        type: 'model',
+      };
+
+      setModelReferences(prev => [...prev, newRef]);
+      setSelectedModelRef(newRef.id);
+      setModelCustomPrompt(`Use person from reference image`);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   // Navigate original image versions
@@ -4463,6 +4564,82 @@ function HomeContent() {
                       );
                     })}
                   </div>
+
+                  {/* Reference Images Section */}
+                  <div className="border-t border-border/50 pt-3 mt-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-muted-foreground">Reference Images</span>
+                      {backgroundReferences.length > 0 && (
+                        <button
+                          onClick={() => {
+                            setBackgroundReferences([]);
+                            setSelectedBackgroundRef(null);
+                          }}
+                          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          Clear all
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Existing references grid */}
+                    {backgroundReferences.length > 0 && (
+                      <div className="grid grid-cols-4 gap-1.5 mb-2">
+                        {backgroundReferences.map((ref) => (
+                          <div
+                            key={ref.id}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => {
+                              setSelectedBackgroundRef(ref.id);
+                              setBackgroundCustomPrompt(`Use background from reference image`);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                setSelectedBackgroundRef(ref.id);
+                                setBackgroundCustomPrompt(`Use background from reference image`);
+                              }
+                            }}
+                            className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                              selectedBackgroundRef === ref.id
+                                ? 'border-primary ring-2 ring-primary/20'
+                                : 'border-border hover:border-primary/50'
+                            }`}
+                          >
+                            <img src={ref.url} alt={ref.name} className="w-full h-full object-cover" />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setBackgroundReferences(prev => prev.filter(r => r.id !== ref.id));
+                                if (selectedBackgroundRef === ref.id) setSelectedBackgroundRef(null);
+                              }}
+                              className="absolute top-0.5 right-0.5 p-0.5 rounded bg-black/50 hover:bg-black/70 transition-colors"
+                            >
+                              <X className="w-3 h-3 text-white" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Add reference button */}
+                    <button
+                      onClick={() => backgroundRefInputRef.current?.click()}
+                      className="w-full py-2 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition-colors flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                    >
+                      <ImagePlus className="w-4 h-4" />
+                      Add reference
+                    </button>
+
+                    {/* Hidden file input */}
+                    <input
+                      ref={backgroundRefInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleBackgroundRefUpload}
+                    />
+                  </div>
                 </div>
                 </div>
 
@@ -4584,6 +4761,82 @@ function HomeContent() {
                     </>
                   )}
                 </button>
+
+                {/* Reference Models Section */}
+                <div className="border-t border-border/50 pt-3 mt-1 mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-muted-foreground">Reference Models</span>
+                    {modelReferences.length > 0 && (
+                      <button
+                        onClick={() => {
+                          setModelReferences([]);
+                          setSelectedModelRef(null);
+                        }}
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Existing model references */}
+                  {modelReferences.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2 mb-2">
+                      {modelReferences.map((ref) => (
+                        <div
+                          key={ref.id}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => {
+                            setSelectedModelRef(ref.id);
+                            setModelCustomPrompt(`Use person from reference image`);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              setSelectedModelRef(ref.id);
+                              setModelCustomPrompt(`Use person from reference image`);
+                            }
+                          }}
+                          className={`relative aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                            selectedModelRef === ref.id
+                              ? 'border-primary ring-2 ring-primary/20'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <img src={ref.url} alt={ref.name} className="w-full h-full object-cover" />
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setModelReferences(prev => prev.filter(r => r.id !== ref.id));
+                              if (selectedModelRef === ref.id) setSelectedModelRef(null);
+                            }}
+                            className="absolute top-0.5 right-0.5 p-0.5 rounded bg-black/50 hover:bg-black/70 transition-colors"
+                          >
+                            <X className="w-3 h-3 text-white" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add model reference button */}
+                  <button
+                    onClick={() => modelRefInputRef.current?.click()}
+                    className="w-full py-2 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition-colors flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Add reference model
+                  </button>
+
+                  {/* Hidden file input */}
+                  <input
+                    ref={modelRefInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleModelRefUpload}
+                  />
+                </div>
 
                 {/* AI-Generated Suggestions with Skeleton Loading */}
                 {(isLoadingModelSuggestions || modelSuggestions.length > 0) && (

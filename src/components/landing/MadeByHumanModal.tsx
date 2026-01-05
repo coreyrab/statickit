@@ -24,24 +24,6 @@ export function MadeByHumanModal({ open, onOpenChange }: MadeByHumanModalProps) 
 
         <ScrollArea className="h-[60vh] pr-4">
           <div className="space-y-6 text-sm text-muted-foreground">
-            {/* Profile and Signature Header */}
-            <div className="flex items-center gap-4">
-              <Image
-                src="/corey_profile.jpeg"
-                alt="Corey Rabazinski"
-                width={64}
-                height={64}
-                className="rounded-full object-cover flex-shrink-0"
-              />
-              <Image
-                src="/corey-rabazinski.svg"
-                alt="Corey Rabazinski signature"
-                width={180}
-                height={48}
-                className="dark:invert opacity-80"
-              />
-            </div>
-
             <p className="text-base text-foreground">
               Hi, I&apos;m Corey Rabazinski, and I built StaticKit.
             </p>
@@ -115,6 +97,24 @@ export function MadeByHumanModal({ open, onOpenChange }: MadeByHumanModalProps) 
                 .
               </p>
             </section>
+
+            {/* Profile and Signature */}
+            <div className="flex items-center gap-4 pt-4">
+              <Image
+                src="/corey_profile.jpeg"
+                alt="Corey Rabazinski"
+                width={56}
+                height={56}
+                className="rounded-full object-cover flex-shrink-0"
+              />
+              <Image
+                src="/corey-rabazinski.svg"
+                alt="Corey Rabazinski signature"
+                width={160}
+                height={40}
+                className="dark:invert opacity-70"
+              />
+            </div>
           </div>
         </ScrollArea>
       </DialogContent>

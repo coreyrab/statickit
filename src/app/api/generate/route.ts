@@ -3,8 +3,13 @@ import { createGeminiClient } from '@/lib/user-api-key';
 
 export async function POST(request: NextRequest) {
   try {
-    const { apiKey, image, mimeType, analysis, variationDescription, aspectRatio, isEdit, isBackgroundOnly, isModelOnly, keepClothing } =
-      await request.json();
+    const {
+      apiKey, image, mimeType, analysis, variationDescription, aspectRatio,
+      isEdit, isBackgroundOnly, isModelOnly, keepClothing,
+      // Reference image params
+      backgroundRefImage, backgroundRefMimeType,
+      modelRefImage, modelRefMimeType,
+    } = await request.json();
 
     if (!apiKey) {
       return NextResponse.json({ error: 'API key required' }, { status: 400 });
@@ -32,8 +37,54 @@ export async function POST(request: NextRequest) {
     let prompt: string;
 
     if (isBackgroundOnly) {
-      // Background-only mode - changes ONLY the background, protects everything else
-      prompt = `BACKGROUND CHANGE ONLY - Replace the background while keeping the subject COMPLETELY FROZEN.
+      if (backgroundRefImage) {
+        // Reference-based background - extract background from reference and composite subject into it
+        prompt = `BACKGROUND EXTRACTION & COMPOSITE - Extract the background from the REFERENCE IMAGE and place the subject into it.
+
+You are given TWO images:
+1. MAIN IMAGE (first): Contains the subject/product to preserve
+2. REFERENCE IMAGE (second): Contains the target background/environment to extract
+
+=== SUBJECT PROTECTION (FROM MAIN IMAGE) ===
+
+**POSE & POSITION ARE LOCKED**: The subject's body is PRE-RECORDED and CANNOT be altered:
+- EXACT same pose - every limb, joint angle, and body position stays identical
+- EXACT same scale relative to the frame
+- Think of this as green-screen compositing: the subject footage is LOCKED
+
+**PEOPLE/MODELS**: Any people from the MAIN IMAGE must remain EXACTLY as shown:
+- Same pose, expression, and body position (NON-NEGOTIABLE)
+- Same clothing, hair, and facial features
+- CRITICAL: Preserve the EXACT facial identity - same face shape, eyes, nose, mouth, skin texture
+
+**PRODUCT/SUBJECT**: Must remain EXACTLY as shown in the MAIN IMAGE:
+- Same position, size, angle, and physical appearance
+- Same colors, textures, and details
+- Any text, logos, or branding unchanged
+
+=== BACKGROUND EXTRACTION (FROM REFERENCE IMAGE) ===
+
+Extract and use the LITERAL background from the reference image:
+- Use the actual environment, setting, and scenery from the reference
+- Preserve the reference's lighting direction, color temperature, and atmosphere
+- Match the perspective and depth of the reference scene
+- The goal is to make it look like the subject was photographed IN that exact location
+
+=== COMPOSITING RULES ===
+
+1. Place the subject naturally within the reference background
+2. Match lighting on subject to the reference environment's lighting
+3. Add appropriate shadows that match the reference lighting direction
+4. Scale subject appropriately for the reference scene's perspective
+5. Blend edges seamlessly
+
+Additional context from user: ${variationDescription || 'None'}
+
+OUTPUT: Professional composite that looks like the subject was photographed in the reference location.
+Aspect ratio: ${aspectRatio}`;
+      } else {
+        // Text-based background change - uses description to generate new background
+        prompt = `BACKGROUND CHANGE ONLY - Replace the background while keeping the subject COMPLETELY FROZEN.
 
 BACKGROUND REQUEST:
 ${variationDescription}
@@ -89,13 +140,64 @@ OUTPUT REQUIREMENTS:
 - Professional advertising quality
 - Aspect ratio: ${aspectRatio}
 - Seamless lighting integration between subject and new background`;
+      }
     } else if (isModelOnly) {
       // Model-only mode - changes ONLY the model/person, protects everything else
       const clothingInstruction = keepClothing
         ? 'The model must wear the EXACT same clothing as the original - same outfit, colors, fit, and styling. The clothes are part of the protected elements.'
         : 'The model may wear different clothing appropriate to their style, but should match the formality and context of the scene.';
 
-      prompt = `MODEL/PERSON CHANGE ONLY - Replace the model while preserving everything else exactly.
+      if (modelRefImage) {
+        // Reference-based model swap - use the specific person from the reference image
+        prompt = `EXACT PERSON SWAP - Use the SPECIFIC person from the REFERENCE IMAGE.
+
+You are given TWO images:
+1. MAIN IMAGE (first): Contains the scene, product, and composition to preserve
+2. REFERENCE IMAGE (second): Contains the person whose likeness to use
+
+=== USE THIS EXACT PERSON (FROM REFERENCE IMAGE) ===
+
+From the reference image, extract and use this SPECIFIC person:
+- Same face - identical facial features, bone structure, skin tone, and characteristics
+- Same hair color, texture, and style
+- Same body type and proportions
+- This person must be RECOGNIZABLE as the same individual from the reference
+- Do NOT create a generic person - use THIS SPECIFIC person
+
+=== PRESERVE FROM MAIN IMAGE ===
+
+**BACKGROUND**: Must remain EXACTLY as shown in the main image:
+- Same setting, environment, and all background elements
+- Identical composition and spatial arrangement
+
+**LIGHTING**: Must remain EXACTLY as shown:
+- Same light direction, color temperature, and intensity
+- The reference person must be lit IDENTICALLY to how the original model was lit
+
+**PRODUCT**: Must remain EXACTLY as shown:
+- Same position, size, angle, and appearance
+- Do NOT move, resize, or alter the product
+
+**POSE & POSITION**: The reference person MUST match the original pose EXACTLY:
+- IDENTICAL body pose - same arm positions, hand placement, body angle, stance
+- IDENTICAL head position and tilt angle
+- Occupy the exact same position in the frame
+- Mirror the original pose as precisely as possible
+
+**FACIAL EXPRESSION**: Match the ORIGINAL model's expression:
+- Same emotional expression (smiling, serious, etc.)
+- Same eye direction and gaze
+- The expression should match the original, not the reference photo's expression
+
+${clothingInstruction}
+
+INTEGRATION: Light the reference person to match the main image's lighting perfectly.
+
+OUTPUT: Professional result where the reference person appears in the main image's scene.
+Aspect ratio: ${aspectRatio}`;
+      } else {
+        // Text-based model change
+        prompt = `MODEL/PERSON CHANGE ONLY - Replace the model while preserving everything else exactly.
 
 MODEL CHANGE REQUEST:
 ${variationDescription}
@@ -161,6 +263,7 @@ OUTPUT REQUIREMENTS:
 - Seamless, natural result - indistinguishable from original photography
 - The model should look like they were actually photographed in this exact scene
 - CRITICAL: The new model's pose and facial expression must MATCH the original exactly - same body language, same emotion, same gaze direction`;
+      }
     } else if (isEdit) {
       // Edit/refinement prompt - focuses on making specific changes to the existing generated image
       prompt = `Edit this advertising image according to the following instructions.
@@ -240,15 +343,41 @@ Generate the variation that implements the requested change while keeping the pr
 
     console.log('Generating image with prompt:', prompt.substring(0, 200) + '...');
 
-    const result = await model.generateContent([
+    // Build content array - main image first, then reference if provided, then prompt
+    const contentParts: any[] = [
       {
         inlineData: {
           mimeType,
           data: image,
         },
       },
-      prompt,
-    ]);
+    ];
+
+    // Add reference image if provided (for background or model swap)
+    if (backgroundRefImage && backgroundRefMimeType) {
+      console.log('Including background reference image');
+      contentParts.push({
+        inlineData: {
+          mimeType: backgroundRefMimeType,
+          data: backgroundRefImage,
+        },
+      });
+    }
+
+    if (modelRefImage && modelRefMimeType) {
+      console.log('Including model reference image');
+      contentParts.push({
+        inlineData: {
+          mimeType: modelRefMimeType,
+          data: modelRefImage,
+        },
+      });
+    }
+
+    // Add the prompt last
+    contentParts.push(prompt);
+
+    const result = await model.generateContent(contentParts);
 
     // Extract the generated image from the response
     const response = result.response;
