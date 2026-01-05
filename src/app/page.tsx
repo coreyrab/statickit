@@ -5050,8 +5050,8 @@ function HomeContent() {
             }}
             className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
           >
-            <Layers className={`w-5 h-5 transition-colors ${selectedTool === 'iterations' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'iterations' ? 'text-primary' : 'text-muted-foreground'}`}>Versions</span>
+            <Layers className={`w-5 h-5 transition-colors ${selectedTool === 'iterations' ? 'text-orange-500' : 'text-muted-foreground'}`} />
+            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'iterations' ? 'text-orange-500' : 'text-muted-foreground'}`}>Versions</span>
           </button>
           <button
             onClick={() => {
@@ -5060,8 +5060,8 @@ function HomeContent() {
             }}
             className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
           >
-            <Wand2 className={`w-5 h-5 transition-colors ${selectedTool === 'edit' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'edit' ? 'text-primary' : 'text-muted-foreground'}`}>Edit</span>
+            <Wand2 className={`w-5 h-5 transition-colors ${selectedTool === 'edit' ? 'text-orange-500' : 'text-muted-foreground'}`} />
+            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'edit' ? 'text-orange-500' : 'text-muted-foreground'}`}>Edit</span>
           </button>
           <button
             onClick={() => {
@@ -5070,8 +5070,8 @@ function HomeContent() {
             }}
             className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
           >
-            <ImageIcon className={`w-5 h-5 transition-colors ${selectedTool === 'backgrounds' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'backgrounds' ? 'text-primary' : 'text-muted-foreground'}`}>Background</span>
+            <ImageIcon className={`w-5 h-5 transition-colors ${selectedTool === 'backgrounds' ? 'text-orange-500' : 'text-muted-foreground'}`} />
+            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'backgrounds' ? 'text-orange-500' : 'text-muted-foreground'}`}>Background</span>
           </button>
           <button
             onClick={() => {
@@ -5080,8 +5080,8 @@ function HomeContent() {
             }}
             className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
           >
-            <User className={`w-5 h-5 transition-colors ${selectedTool === 'model' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'model' ? 'text-primary' : 'text-muted-foreground'}`}>Model</span>
+            <User className={`w-5 h-5 transition-colors ${selectedTool === 'model' ? 'text-orange-500' : 'text-muted-foreground'}`} />
+            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'model' ? 'text-orange-500' : 'text-muted-foreground'}`}>Model</span>
           </button>
           <button
             onClick={() => {
@@ -5090,8 +5090,8 @@ function HomeContent() {
             }}
             className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
           >
-            <Expand className={`w-5 h-5 transition-colors ${selectedTool === 'export' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'export' ? 'text-primary' : 'text-muted-foreground'}`}>Resize</span>
+            <Expand className={`w-[18px] h-[18px] transition-colors ${selectedTool === 'export' ? 'text-orange-500' : 'text-muted-foreground'}`} />
+            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'export' ? 'text-orange-500' : 'text-muted-foreground'}`}>Resize</span>
           </button>
         </div>
       </div>
