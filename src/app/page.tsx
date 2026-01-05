@@ -82,6 +82,7 @@ import { Footer } from '@/components/landing/Footer';
 import { ApiKeySetupModal } from '@/components/onboarding';
 import { getStoredApiKey, setStoredApiKey, hasStoredApiKey } from '@/lib/api-key-storage';
 import { useTheme } from 'next-themes';
+import { track } from '@/lib/analytics';
 
 type Step = 'upload' | 'editor';
 type Tool = 'edit' | 'iterations' | 'backgrounds' | 'model' | 'export' | null;
@@ -914,6 +915,14 @@ function HomeContent() {
       setActiveBaseId('original');
       setStep('editor');
       setSelectedTool('edit'); // Default to edit tool
+
+      // Track upload
+      track('image_uploaded', {
+        width: img.width,
+        height: img.height,
+        aspectRatio: label,
+        fileSize: file.size,
+      });
     };
 
     img.onerror = () => {
@@ -1028,6 +1037,7 @@ function HomeContent() {
       }
 
       setVariations(variationsData);
+      track('variations_generated', { count: variationsData.length });
     } catch (err) {
       console.error('Analysis error:', err);
       setError('Failed to analyze image. Please try again.');
@@ -1097,9 +1107,11 @@ function HomeContent() {
       });
 
       let imageUrl: string;
+      let generationSucceeded = false;
       if (response.ok) {
         const data = await response.json();
         imageUrl = data.imageUrl;
+        generationSucceeded = true;
       } else {
         imageUrl = `https://placehold.co/400x500/6366f1/white?text=${encodeURIComponent(variation.title)}`;
       }
@@ -1113,6 +1125,10 @@ function HomeContent() {
           currentVersionIndex: 0,
         } : v))
       );
+
+      if (generationSucceeded) {
+        track('image_generated', { tool: 'iterate' });
+      }
 
       // Don't auto-select - let user stay where they are to avoid UI jump
     } catch (err) {
@@ -1297,6 +1313,7 @@ function HomeContent() {
           };
         })
       );
+      track('image_generated', { tool: 'edit' });
     } catch (err) {
       console.error('Edit generation error:', err);
       setVariations(prev =>
@@ -1667,6 +1684,7 @@ function HomeContent() {
             ? { ...v, imageUrl: data.imageUrl, status: 'completed' as const }
             : v
         ));
+        track('image_generated', { tool: 'background' });
       } else {
         setOriginalVersions(prev => prev.map((v, idx) =>
           idx === newVersionIndex
@@ -1870,6 +1888,7 @@ function HomeContent() {
             ? { ...v, imageUrl: data.imageUrl, status: 'completed' as const }
             : v
         ));
+        track('image_generated', { tool: 'model' });
       } else {
         setOriginalVersions(prev => prev.map((v, idx) =>
           idx === newVersionIndex
@@ -2203,6 +2222,7 @@ function HomeContent() {
           return { ...v, resizedVersions: updated };
         })
       );
+      track('image_generated', { tool: 'resize' });
     } catch (err) {
       console.error('Resize error:', err);
       setVariations(prev =>
@@ -2282,6 +2302,7 @@ function HomeContent() {
         setOriginalResizedVersions(prev =>
           prev.map(r => r.size === size.name ? { ...r, status: 'completed', imageUrl: data.imageUrl } : r)
         );
+        track('image_generated', { tool: 'resize' });
       } else {
         throw new Error('Failed to resize');
       }
@@ -2321,7 +2342,7 @@ function HomeContent() {
     setShowNewConfirmModal(false);
   };
 
-  const handleDownload = async (imageUrl: string, filename: string) => {
+  const handleDownload = async (imageUrl: string, filename: string, trackAs?: 'single' | 'batch' | 'all_sizes') => {
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
@@ -2333,6 +2354,9 @@ function HomeContent() {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
+      if (trackAs) {
+        track('image_downloaded', { type: trackAs });
+      }
     } catch (err) {
       console.error('Download error:', err);
     }
@@ -2356,6 +2380,8 @@ function HomeContent() {
       } else if (originalVersionIndex > 0) {
         setCompareRightIndex(originalVersionIndex - 1); // Previous version
       }
+
+      track('tool_used', { tool: 'compare' });
     }
   };
 
@@ -2536,6 +2562,7 @@ function HomeContent() {
 
   // Download everything
   const downloadAllGenerations = async () => {
+    track('image_downloaded', { type: 'batch' });
     // Download original
     if (uploadedImage) {
       await handleDownload(uploadedImage.url, `original_${uploadedImage.filename}`);
@@ -2560,6 +2587,7 @@ function HomeContent() {
     const currentVersion = variation.versions[variation.currentVersionIndex];
     if (!currentVersion || !currentVersion.imageUrl) return;
 
+    track('image_downloaded', { type: 'all_sizes' });
     // Download current version
     await handleDownload(currentVersion.imageUrl, `${variation.title}_v${variation.currentVersionIndex + 1}.png`);
 
@@ -3538,7 +3566,7 @@ function HomeContent() {
                           const filename = isShowingGenerated && selectedVariation
                             ? `${selectedVariation.title}${viewingResizedSize ? `_${viewingResizedSize}` : ''}.png`
                             : uploadedImage?.filename || 'image.png';
-                          handleDownload(previewImage, filename);
+                          handleDownload(previewImage, filename, 'single');
                         }}
                         className="p-2 rounded-lg bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground transition-colors"
                       >
@@ -4340,10 +4368,10 @@ function HomeContent() {
                         if (viewingOriginalResizedSize) {
                           const resized = originalResizedVersions.find(r => r.size === viewingOriginalResizedSize);
                           if (resized?.imageUrl) {
-                            handleDownload(resized.imageUrl, `${uploadedImage.filename.replace(/\.[^.]+$/, '')}_${viewingOriginalResizedSize}.png`);
+                            handleDownload(resized.imageUrl, `${uploadedImage.filename.replace(/\.[^.]+$/, '')}_${viewingOriginalResizedSize}.png`, 'single');
                           }
                         } else {
-                          handleDownload(uploadedImage.url, uploadedImage.filename);
+                          handleDownload(uploadedImage.url, uploadedImage.filename, 'single');
                         }
                       }}
                       className="w-full px-4 py-3 rounded-lg bg-muted/50 border border-border hover:bg-muted transition-all text-left flex items-center gap-3"
@@ -4360,6 +4388,7 @@ function HomeContent() {
                   {originalResizedVersions.filter(r => r.status === 'completed').length > 0 && (
                     <button
                       onClick={async () => {
+                        track('image_downloaded', { type: 'all_sizes' });
                         if (uploadedImage?.url) {
                           await handleDownload(uploadedImage.url, `original_${uploadedImage.width}x${uploadedImage.height}.png`);
                         }

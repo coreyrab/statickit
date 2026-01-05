@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check, X, ExternalLink } from "lucide-react";
+import { track } from "@/lib/analytics";
 
 interface ApiKeySetupModalProps {
   open: boolean;
@@ -89,6 +90,7 @@ export function ApiKeySetupModal({
 
       if (!data.valid) {
         setError(data.error || "Invalid API key");
+        track('api_key_validated', { success: false });
         return;
       }
 
@@ -97,6 +99,7 @@ export function ApiKeySetupModal({
         onApiKeySet(apiKeyInput.trim());
       }
 
+      track('api_key_validated', { success: true });
       setSuccess(true);
       setApiKeyInput("");
 
