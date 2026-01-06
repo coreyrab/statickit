@@ -4470,20 +4470,23 @@ function HomeContent() {
                           <button
                             key={size.name}
                             onClick={() => {
-                              if (!uploadedImage) return;
+                              if (!uploadedImage) {
+                                toast.info('Upload an image first');
+                                return;
+                              }
                               if (isCompleted) {
                                 setViewingOriginalResizedSize(isViewing ? null : size.name);
                               } else if (!isResizing) {
                                 handleResizeOriginal(size);
                               }
                             }}
-                            disabled={isResizing || !uploadedImage}
+                            disabled={isResizing}
                             className={`w-full px-3 py-2 rounded-lg border transition-all text-left flex items-center justify-between text-sm disabled:cursor-default ${
                               isViewing
                                 ? 'bg-emerald-600/20 border-emerald-500/40'
                                 : isCompleted
                                 ? 'bg-primary/10 border-primary/30 hover:bg-primary/20'
-                                : 'bg-muted/50 border-border hover:bg-muted disabled:hover:bg-muted/50'
+                                : 'bg-muted/50 border-border hover:bg-muted'
                             }`}
                           >
                             <div className="flex items-center gap-2.5">
@@ -4686,8 +4689,14 @@ function HomeContent() {
 
                 {/* Generate AI Suggestions Button - Top */}
                 <button
-                  onClick={handleGenerateBackgroundSuggestions}
-                  disabled={isLoadingBackgroundSuggestions || !uploadedImage}
+                  onClick={() => {
+                    if (!uploadedImage) {
+                      toast.info('Upload an image first');
+                      return;
+                    }
+                    handleGenerateBackgroundSuggestions();
+                  }}
+                  disabled={isLoadingBackgroundSuggestions}
                   className="w-full px-3 py-2 mb-4 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isLoadingBackgroundSuggestions ? (
@@ -4704,7 +4713,7 @@ function HomeContent() {
                 </button>
 
                 {/* Backgrounds Grid */}
-                <div className={`flex-1 overflow-y-auto touch-scroll pr-2 md:pr-0 pb-20 md:pb-16 ${!uploadedImage ? 'opacity-60' : ''}`}>
+                <div className="flex-1 overflow-y-auto touch-scroll pr-2 md:pr-0 pb-20 md:pb-16">
                   <div className="grid grid-cols-2 gap-1.5">
                     {/* Separator above AI suggestions */}
                     {(isLoadingBackgroundSuggestions || backgroundSuggestions.length > 0) && (
@@ -4729,6 +4738,10 @@ function HomeContent() {
                         <button
                           key={suggestion.id}
                           onClick={() => {
+                            if (!uploadedImage) {
+                              toast.info('Upload an image first');
+                              return;
+                            }
                             setUsedBackgroundSuggestions(prev => new Set([...prev, suggestion.id]));
                             handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
                           }}
@@ -4751,6 +4764,10 @@ function HomeContent() {
                         <button
                           key={suggestion.id}
                           onClick={() => {
+                            if (!uploadedImage) {
+                              toast.info('Upload an image first');
+                              return;
+                            }
                             setUsedBackgroundSuggestions(prev => new Set([...prev, suggestion.id]));
                             handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
                           }}
@@ -4978,8 +4995,14 @@ function HomeContent() {
 
                   {/* Generate AI Suggestions Button */}
                   <button
-                    onClick={handleGenerateModelSuggestions}
-                    disabled={isLoadingModelSuggestions || !uploadedImage}
+                    onClick={() => {
+                      if (!uploadedImage) {
+                        toast.info('Upload an image first');
+                        return;
+                      }
+                      handleGenerateModelSuggestions();
+                    }}
+                    disabled={isLoadingModelSuggestions}
                     className="w-full px-3 py-2 mb-4 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                   {isLoadingModelSuggestions ? (
@@ -5093,6 +5116,10 @@ function HomeContent() {
                             <button
                               key={suggestion.id}
                               onClick={() => {
+                                if (!uploadedImage) {
+                                  toast.info('Upload an image first');
+                                  return;
+                                }
                                 setUsedModelSuggestions(prev => new Set([...prev, suggestion.id]));
                                 handleApplyModelChange(suggestion.prompt, suggestion.name);
                               }}
