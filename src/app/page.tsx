@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { ReactCompareSlider, ReactCompareSliderImage } from 'react-compare-slider';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { AsciiGrid } from '@/components/ui/AsciiGrid';
 import {
   Upload,
   Sparkles,
@@ -3451,25 +3452,32 @@ function HomeContent() {
                 <div className="flex items-center justify-center w-full h-full">
                   <div
                     {...getRootProps()}
-                    className={`flex flex-col items-center justify-center max-w-2xl w-full h-96 gap-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
+                    className={`relative flex flex-col items-center justify-center max-w-2xl w-full h-96 gap-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden ${
                       isDragActive
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border hover:border-border bg-muted/50'
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-primary/50 bg-background'
                     }`}
                   >
+                    {/* ASCII Grid Background */}
+                    <AsciiGrid isDragActive={isDragActive} />
+
                     <input {...getInputProps()} />
-                    <div className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center">
-                      <Upload className="w-7 h-7 text-muted-foreground" />
+                    <div className={`relative z-10 w-14 h-14 rounded-xl flex items-center justify-center transition-colors ${
+                      isDragActive ? 'bg-primary/20' : 'bg-muted/80'
+                    }`}>
+                      <Upload className={`w-7 h-7 transition-colors ${
+                        isDragActive ? 'text-primary' : 'text-muted-foreground'
+                      }`} />
                     </div>
                     {isDragActive ? (
-                      <p className="text-primary font-medium">Drop your ad here...</p>
+                      <p className="relative z-10 text-primary font-medium">Drop your image here...</p>
                     ) : (
                       <>
-                        <div className="text-center">
-                          <p className="font-medium mb-1">Drop your ad image here</p>
+                        <div className="relative z-10 text-center">
+                          <p className="font-medium mb-1">Drop your image here</p>
                           <p className="text-muted-foreground/80 text-sm">or click to browse</p>
                         </div>
-                        <p className="text-xs text-muted-foreground/50">PNG, JPG, WebP • Max 10MB</p>
+                        <p className="relative z-10 text-xs text-muted-foreground/50">PNG, JPG, WebP • Max 10MB</p>
                       </>
                     )}
                   </div>
