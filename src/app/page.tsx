@@ -3494,9 +3494,9 @@ function HomeContent() {
                       left: cursorGlow.x,
                       top: cursorGlow.y,
                       transform: 'translate(-50%, -50%)',
-                      width: 400,
-                      height: 400,
-                      background: 'radial-gradient(circle, hsl(var(--primary) / 0.08) 0%, transparent 70%)',
+                      width: 500,
+                      height: 500,
+                      background: 'radial-gradient(circle, hsl(var(--primary) / 0.18) 0%, transparent 60%)',
                       opacity: cursorGlow.active ? 1 : 0,
                     }}
                   />
@@ -3775,7 +3775,7 @@ function HomeContent() {
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className={`text-xs flex items-center gap-0.5 transition-colors ${
+                      className={`text-xs flex items-center gap-0.5 transition-colors cursor-pointer ${
                         uploadedImage
                           ? 'text-muted-foreground/70 hover:text-foreground/70'
                           : 'text-primary hover:text-primary'
@@ -3967,7 +3967,7 @@ function HomeContent() {
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className={`text-xs flex items-center gap-0.5 transition-colors ${
+                      className={`text-xs flex items-center gap-0.5 transition-colors cursor-pointer ${
                         uploadedImage
                           ? 'text-muted-foreground/70 hover:text-foreground/70'
                           : 'text-primary hover:text-primary'
@@ -4423,7 +4423,7 @@ function HomeContent() {
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className={`text-xs flex items-center gap-0.5 transition-colors ${
+                      className={`text-xs flex items-center gap-0.5 transition-colors cursor-pointer ${
                         uploadedImage
                           ? 'text-muted-foreground/70 hover:text-foreground/70'
                           : 'text-primary hover:text-primary'
@@ -4639,7 +4639,7 @@ function HomeContent() {
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className={`text-xs flex items-center gap-0.5 transition-colors ${
+                      className={`text-xs flex items-center gap-0.5 transition-colors cursor-pointer ${
                         uploadedImage
                           ? 'text-muted-foreground/70 hover:text-foreground/70'
                           : 'text-primary hover:text-primary'
@@ -4912,7 +4912,7 @@ function HomeContent() {
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className={`text-xs flex items-center gap-0.5 transition-colors ${
+                      className={`text-xs flex items-center gap-0.5 transition-colors cursor-pointer ${
                         uploadedImage
                           ? 'text-muted-foreground/70 hover:text-foreground/70'
                           : 'text-primary hover:text-primary'
