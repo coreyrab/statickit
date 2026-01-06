@@ -962,7 +962,10 @@ function HomeContent() {
 
   // Generate iterations on-demand (called from the Iterations tool)
   const handleGenerateIterations = async () => {
-    if (!uploadedImage) return;
+    if (!uploadedImage) {
+      toast.info('Upload an image first to generate variations');
+      return;
+    }
     if (!apiKey) {
       setShowApiKeySetup(true);
       return;
@@ -1465,7 +1468,10 @@ function HomeContent() {
 
   // Apply presets to the current image
   const handleApplyPresets = async () => {
-    if (!uploadedImage) return;
+    if (!uploadedImage) {
+      toast.info('Upload an image first to apply presets');
+      return;
+    }
     if (!apiKey) {
       setShowApiKeySetup(true);
       return;
@@ -1592,7 +1598,10 @@ function HomeContent() {
 
   // Apply a background change with background-scoped prompt
   const handleApplyBackgroundChange = async (prompt: string, label: string) => {
-    if (!uploadedImage) return;
+    if (!uploadedImage) {
+      toast.info('Upload an image first to change its background');
+      return;
+    }
     if (!apiKey) {
       setShowApiKeySetup(true);
       return;
@@ -1719,7 +1728,10 @@ function HomeContent() {
 
   // Remove background using client-side AI (rembg-webgpu)
   const handleRemoveBackground = async () => {
-    if (!uploadedImage) return;
+    if (!uploadedImage) {
+      toast.info('Upload an image first to remove its background');
+      return;
+    }
 
     // Compute values BEFORE state update
     const currentVersions: ImageVersion[] = originalVersions.length === 0
@@ -1782,7 +1794,10 @@ function HomeContent() {
 
   // Generate AI background suggestions based on current image
   const handleGenerateBackgroundSuggestions = async () => {
-    if (!uploadedImage) return;
+    if (!uploadedImage) {
+      toast.info('Upload an image first to get background suggestions');
+      return;
+    }
     if (!apiKey) {
       setShowApiKeySetup(true);
       return;
@@ -1860,7 +1875,10 @@ function HomeContent() {
 
   // Apply model change - similar to background change but for model only
   const handleApplyModelChange = async (prompt: string, label: string) => {
-    if (!uploadedImage) return;
+    if (!uploadedImage) {
+      toast.info('Upload an image first to change its model');
+      return;
+    }
     if (!apiKey) {
       setShowApiKeySetup(true);
       return;
@@ -1986,7 +2004,10 @@ function HomeContent() {
 
   // Generate AI model suggestions based on current image
   const handleGenerateModelSuggestions = async () => {
-    if (!uploadedImage) return;
+    if (!uploadedImage) {
+      toast.info('Upload an image first to get model suggestions');
+      return;
+    }
     if (!apiKey) {
       setShowApiKeySetup(true);
       return;
@@ -2317,7 +2338,10 @@ function HomeContent() {
 
   // Resize original image
   const handleResizeOriginal = async (size: typeof AD_SIZES[number]) => {
-    if (!uploadedImage) return;
+    if (!uploadedImage) {
+      toast.info('Upload an image first to resize it');
+      return;
+    }
 
     // Get the current image to resize (either original or edited version)
     const currentImageUrl = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.imageUrl
@@ -3770,7 +3794,7 @@ function HomeContent() {
                   </div>
                   {/* Generate Iterations button - show when no variations yet */}
                   {variations.length === 0 && !isAnalyzingForIterations && (
-                    <div className={`mt-4 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className={`mt-4 ${!uploadedImage ? 'opacity-60' : ''}`}>
                       {/* Number of generations */}
                       <div className="mb-3">
                         <label className="text-xs text-muted-foreground/70 mb-1.5 block">Generate suggestions</label>
@@ -4609,7 +4633,7 @@ function HomeContent() {
                 </button>
 
                 {/* Backgrounds Grid */}
-                <div className={`flex-1 overflow-y-auto touch-scroll pr-2 md:pr-0 pb-20 md:pb-16 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className={`flex-1 overflow-y-auto touch-scroll pr-2 md:pr-0 pb-20 md:pb-16 ${!uploadedImage ? 'opacity-60' : ''}`}>
                   <div className="grid grid-cols-2 gap-1.5">
                     {/* Separator above AI suggestions */}
                     {(isLoadingBackgroundSuggestions || backgroundSuggestions.length > 0) && (
@@ -4862,8 +4886,8 @@ function HomeContent() {
                     </div>
                   )}
 
-                {/* Model controls wrapper - disabled when no image */}
-                <div className={!uploadedImage ? 'opacity-50 pointer-events-none' : ''}>
+                {/* Model controls wrapper */}
+                <div className={!uploadedImage ? 'opacity-60' : ''}>
                   {/* Preserve Outfit Toggle */}
                   <div className="flex items-center justify-between mb-4 p-2 rounded-lg bg-muted/50 border border-border">
                     <span className="text-sm text-foreground/70">Preserve outfit</span>

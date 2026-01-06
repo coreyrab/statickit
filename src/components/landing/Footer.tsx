@@ -19,35 +19,35 @@ export function Footer() {
         <div className="flex flex-nowrap items-center justify-center md:justify-start gap-x-1 text-xs text-muted-foreground">
             <button
               onClick={() => setAboutOpen(true)}
-              className="hover:text-foreground transition-colors"
+              className="hover:text-foreground transition-colors cursor-pointer"
             >
               About
             </button>
             <span className="text-muted-foreground/40">·</span>
             <button
               onClick={() => setPrivacyOpen(true)}
-              className="hover:text-foreground transition-colors"
+              className="hover:text-foreground transition-colors cursor-pointer"
             >
               Privacy
             </button>
             <span className="text-muted-foreground/40">·</span>
             <button
               onClick={() => setTermsOpen(true)}
-              className="hover:text-foreground transition-colors"
+              className="hover:text-foreground transition-colors cursor-pointer"
             >
               Terms
             </button>
             <span className="text-muted-foreground/40">·</span>
             <Link
               href="/blog"
-              className="hover:text-foreground transition-colors"
+              className="hover:text-foreground transition-colors cursor-pointer"
             >
               Blog
             </Link>
             <span className="text-muted-foreground/40">·</span>
             <button
               onClick={() => setMadeByHumanOpen(true)}
-              className="hover:text-foreground transition-colors"
+              className="hover:text-foreground transition-colors cursor-pointer"
             >
               By a human
             </button>
