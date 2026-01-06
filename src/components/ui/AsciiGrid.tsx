@@ -52,8 +52,8 @@ export function AsciiGrid({ className = '', isDragActive = false }: AsciiGridPro
     container.addEventListener('mousemove', handleMouseMove);
     container.addEventListener('mouseleave', handleMouseLeave);
 
-    const cellSize = 24;
-    const fontSize = 14;
+    const cellSize = 32;
+    const fontSize = 20;
 
     const animate = () => {
       const rect = container.getBoundingClientRect();
@@ -118,7 +118,7 @@ export function AsciiGrid({ className = '', isDragActive = false }: AsciiGridPro
   }, [isDragActive]);
 
   return (
-    <div ref={containerRef} className={`absolute inset-0 ${className}`}>
+    <div ref={containerRef} className={`absolute inset-0 hidden md:block ${className}`}>
       <canvas ref={canvasRef} className="absolute inset-0" />
     </div>
   );
