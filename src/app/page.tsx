@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { ReactCompareSlider, ReactCompareSliderImage } from 'react-compare-slider';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { AsciiGrid } from '@/components/ui/AsciiGrid';
 import {
   Upload,
   Sparkles,
@@ -3452,17 +3451,14 @@ function HomeContent() {
                 <div className="flex items-center justify-center w-full h-full">
                   <div
                     {...getRootProps()}
-                    className={`relative flex flex-col items-center justify-center max-w-2xl w-full h-96 gap-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden ${
+                    className={`flex flex-col items-center justify-center max-w-2xl w-full h-96 gap-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
                       isDragActive
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50 bg-background'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-primary/50 bg-muted/50'
                     }`}
                   >
-                    {/* ASCII Grid Background */}
-                    <AsciiGrid isDragActive={isDragActive} />
-
                     <input {...getInputProps()} />
-                    <div className={`relative z-10 w-14 h-14 rounded-xl flex items-center justify-center transition-colors ${
+                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-colors ${
                       isDragActive ? 'bg-primary/20' : 'bg-muted'
                     }`}>
                       <Upload className={`w-7 h-7 transition-colors ${
@@ -3470,14 +3466,14 @@ function HomeContent() {
                       }`} />
                     </div>
                     {isDragActive ? (
-                      <p className="relative z-10 text-primary font-medium">Drop your image here...</p>
+                      <p className="text-primary font-medium">Drop your image here...</p>
                     ) : (
                       <>
-                        <div className="relative z-10 text-center">
+                        <div className="text-center">
                           <p className="font-medium mb-1">Drop your image here</p>
                           <p className="text-muted-foreground/80 text-sm">or click to browse</p>
                         </div>
-                        <p className="relative z-10 text-xs text-muted-foreground/50">PNG, JPG, WebP • Max 10MB</p>
+                        <p className="text-xs text-muted-foreground/50">PNG, JPG, WebP • Max 10MB</p>
                       </>
                     )}
                   </div>
