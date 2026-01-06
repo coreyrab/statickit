@@ -3510,10 +3510,10 @@ function HomeContent() {
                   >
                     <input {...getInputProps()} />
                     <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-colors ${
-                      isDragActive ? 'bg-primary/20' : 'bg-amber-100 dark:bg-amber-900/30'
+                      isDragActive ? 'bg-primary/20' : 'bg-primary/10'
                     }`}>
                       <Upload className={`w-7 h-7 transition-colors ${
-                        isDragActive ? 'text-primary' : 'text-amber-600 dark:text-amber-400'
+                        isDragActive ? 'text-primary' : 'text-primary/70'
                       }`} />
                     </div>
                     {isDragActive ? (
