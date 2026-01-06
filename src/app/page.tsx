@@ -4757,12 +4757,12 @@ function HomeContent() {
                     <button
                       onClick={handleRemoveBackground}
                       disabled={isRemovingBackground || (originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing')}
-                      className="w-full px-3 py-2.5 rounded-lg text-left text-xs flex items-center gap-2 transition-all bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/30 hover:border-violet-500/50 hover:from-violet-500/15 hover:to-fuchsia-500/15 text-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-2 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition-colors flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isRemovingBackground ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin text-violet-500" />
-                          <span className="flex-1">
+                          <span>
                             {bgRemovalProgress?.phase === 'downloading' && `Downloading model... ${bgRemovalProgress.progress.toFixed(0)}%`}
                             {bgRemovalProgress?.phase === 'building' && `Building... ${bgRemovalProgress.progress.toFixed(0)}%`}
                             {bgRemovalProgress?.phase === 'processing' && 'Removing background...'}
@@ -4773,7 +4773,7 @@ function HomeContent() {
                       ) : (
                         <>
                           <Eraser className="w-4 h-4 text-violet-500" />
-                          <span>Remove background from image</span>
+                          <span>Remove background</span>
                         </>
                       )}
                     </button>
