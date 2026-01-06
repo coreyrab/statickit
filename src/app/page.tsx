@@ -4611,32 +4611,6 @@ function HomeContent() {
                 {/* Backgrounds Grid */}
                 <div className={`flex-1 overflow-y-auto touch-scroll pr-2 md:pr-0 pb-20 md:pb-16 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
                   <div className="grid grid-cols-2 gap-1.5">
-                    {/* Remove Background - Special feature (no API key needed) */}
-                    <button
-                      onClick={handleRemoveBackground}
-                      disabled={isRemovingBackground || (originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing')}
-                      className="col-span-2 px-3 py-2.5 rounded-lg text-left text-xs flex items-center gap-2 transition-all bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/30 hover:border-violet-500/50 hover:from-violet-500/15 hover:to-fuchsia-500/15 text-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isRemovingBackground ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin text-violet-500" />
-                          <span className="flex-1">
-                            {bgRemovalProgress?.phase === 'downloading' && `Downloading model... ${bgRemovalProgress.progress.toFixed(0)}%`}
-                            {bgRemovalProgress?.phase === 'building' && `Building... ${bgRemovalProgress.progress.toFixed(0)}%`}
-                            {bgRemovalProgress?.phase === 'processing' && 'Removing background...'}
-                            {bgRemovalProgress?.phase === 'ready' && 'Complete!'}
-                            {(!bgRemovalProgress || bgRemovalProgress.phase === 'idle') && 'Initializing...'}
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <Eraser className="w-4 h-4 text-violet-500" />
-                          <span className="flex-1">Remove Background</span>
-                          <span className="text-[10px] text-muted-foreground/70 bg-background/50 px-1.5 py-0.5 rounded">No API needed</span>
-                        </>
-                      )}
-                    </button>
-
                     {/* Separator above AI suggestions */}
                     {(isLoadingBackgroundSuggestions || backgroundSuggestions.length > 0) && (
                       <div className="col-span-2 h-px bg-muted my-1" />
@@ -4772,6 +4746,37 @@ function HomeContent() {
                       className="hidden"
                       onChange={handleBackgroundRefUpload}
                     />
+                  </div>
+
+                  {/* Remove Background - Special feature (no API key needed) */}
+                  <div className="border-t border-border/50 pt-3 mt-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-muted-foreground">Remove Background</span>
+                      <span className="text-[10px] text-muted-foreground/60">No API needed</span>
+                    </div>
+                    <button
+                      onClick={handleRemoveBackground}
+                      disabled={isRemovingBackground || (originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing')}
+                      className="w-full px-3 py-2.5 rounded-lg text-left text-xs flex items-center gap-2 transition-all bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/30 hover:border-violet-500/50 hover:from-violet-500/15 hover:to-fuchsia-500/15 text-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isRemovingBackground ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-violet-500" />
+                          <span className="flex-1">
+                            {bgRemovalProgress?.phase === 'downloading' && `Downloading model... ${bgRemovalProgress.progress.toFixed(0)}%`}
+                            {bgRemovalProgress?.phase === 'building' && `Building... ${bgRemovalProgress.progress.toFixed(0)}%`}
+                            {bgRemovalProgress?.phase === 'processing' && 'Removing background...'}
+                            {bgRemovalProgress?.phase === 'ready' && 'Complete!'}
+                            {(!bgRemovalProgress || bgRemovalProgress.phase === 'idle') && 'Initializing...'}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Eraser className="w-4 h-4 text-violet-500" />
+                          <span>Remove background from image</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
                 </div>
