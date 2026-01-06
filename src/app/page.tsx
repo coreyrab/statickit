@@ -57,6 +57,7 @@ import {
   SplitSquareHorizontal,
   ImagePlus,
   UserPlus,
+  Eraser,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -83,6 +84,7 @@ import { ApiKeySetupModal, WelcomeModal } from '@/components/onboarding';
 import { getStoredApiKey, setStoredApiKey, hasStoredApiKey } from '@/lib/api-key-storage';
 import { useTheme } from 'next-themes';
 import { track } from '@/lib/analytics';
+import { removeImageBackground, type ProgressState as BgRemovalProgress } from '@/lib/background-removal';
 
 type Step = 'upload' | 'editor';
 type Tool = 'edit' | 'iterations' | 'backgrounds' | 'model' | 'export' | null;
@@ -283,6 +285,10 @@ function HomeContent() {
   // Track used suggestions - to show visual indicator
   const [usedBackgroundSuggestions, setUsedBackgroundSuggestions] = useState<Set<string>>(new Set());
   const [usedModelSuggestions, setUsedModelSuggestions] = useState<Set<string>>(new Set());
+
+  // Background removal state
+  const [isRemovingBackground, setIsRemovingBackground] = useState(false);
+  const [bgRemovalProgress, setBgRemovalProgress] = useState<BgRemovalProgress | null>(null);
 
   // Reference images state (session-based)
   const [backgroundReferences, setBackgroundReferences] = useState<ReferenceImage[]>([]);
@@ -1708,6 +1714,69 @@ function HomeContent() {
           ? { ...v, status: 'error' as const }
           : v
       ));
+    }
+  };
+
+  // Remove background using client-side AI (rembg-webgpu)
+  const handleRemoveBackground = async () => {
+    if (!uploadedImage) return;
+
+    // Compute values BEFORE state update
+    const currentVersions: ImageVersion[] = originalVersions.length === 0
+      ? [{ imageUrl: uploadedImage.url, prompt: null, parentIndex: -1, status: 'completed' as const }]
+      : originalVersions;
+
+    const safeIndex = Math.min(originalVersionIndex, currentVersions.length - 1);
+    const currentVersion = currentVersions[safeIndex] || currentVersions[0];
+
+    // Only allow editing completed versions
+    if (!currentVersion || currentVersion.status !== 'completed') {
+      return;
+    }
+
+    const imageToUse = currentVersion.imageUrl || uploadedImage.url;
+    const newVersionIndex = currentVersions.length;
+
+    // Add processing version to state
+    const processingVersion: ImageVersion = {
+      imageUrl: null,
+      prompt: '[background] Remove Background',
+      parentIndex: safeIndex,
+      status: 'processing'
+    };
+
+    setOriginalVersions([...currentVersions, processingVersion]);
+    setIsRemovingBackground(true);
+    setBgRemovalProgress({ phase: 'idle', progress: 0 });
+
+    try {
+      const result = await removeImageBackground(imageToUse, (progress) => {
+        setBgRemovalProgress(progress);
+      });
+
+      // Create data URL from the result
+      const dataUrl = `data:image/png;base64,${result.base64}`;
+
+      // Update version with completed image
+      setOriginalVersions(prev => prev.map((v, idx) =>
+        idx === newVersionIndex
+          ? { ...v, imageUrl: dataUrl, status: 'completed' as const }
+          : v
+      ));
+
+      track('image_generated', { tool: 'background' });
+      toast.success(`Background removed in ${result.processingTimeSeconds.toFixed(1)}s`);
+    } catch (err) {
+      console.error('Background removal error:', err);
+      setOriginalVersions(prev => prev.map((v, idx) =>
+        idx === newVersionIndex
+          ? { ...v, status: 'error' as const }
+          : v
+      ));
+      toast.error('Failed to remove background. Your browser may not support this feature.');
+    } finally {
+      setIsRemovingBackground(false);
+      setBgRemovalProgress(null);
     }
   };
 
@@ -4542,6 +4611,32 @@ function HomeContent() {
                 {/* Backgrounds Grid */}
                 <div className={`flex-1 overflow-y-auto touch-scroll pr-2 md:pr-0 pb-20 md:pb-16 ${!uploadedImage ? 'opacity-50 pointer-events-none' : ''}`}>
                   <div className="grid grid-cols-2 gap-1.5">
+                    {/* Remove Background - Special feature (no API key needed) */}
+                    <button
+                      onClick={handleRemoveBackground}
+                      disabled={isRemovingBackground || (originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing')}
+                      className="col-span-2 px-3 py-2.5 rounded-lg text-left text-xs flex items-center gap-2 transition-all bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/30 hover:border-violet-500/50 hover:from-violet-500/15 hover:to-fuchsia-500/15 text-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isRemovingBackground ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-violet-500" />
+                          <span className="flex-1">
+                            {bgRemovalProgress?.phase === 'downloading' && `Downloading model... ${bgRemovalProgress.progress.toFixed(0)}%`}
+                            {bgRemovalProgress?.phase === 'building' && `Building... ${bgRemovalProgress.progress.toFixed(0)}%`}
+                            {bgRemovalProgress?.phase === 'processing' && 'Removing background...'}
+                            {bgRemovalProgress?.phase === 'ready' && 'Complete!'}
+                            {(!bgRemovalProgress || bgRemovalProgress.phase === 'idle') && 'Initializing...'}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Eraser className="w-4 h-4 text-violet-500" />
+                          <span className="flex-1">Remove Background</span>
+                          <span className="text-[10px] text-muted-foreground/70 bg-background/50 px-1.5 py-0.5 rounded">No API needed</span>
+                        </>
+                      )}
+                    </button>
+
                     {/* Separator above AI suggestions */}
                     {(isLoadingBackgroundSuggestions || backgroundSuggestions.length > 0) && (
                       <div className="col-span-2 h-px bg-muted my-1" />
