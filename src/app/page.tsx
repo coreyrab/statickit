@@ -3013,7 +3013,7 @@ function HomeContent() {
                                   ? 'bg-blue-500 scale-110 ring-2 ring-blue-500/30'
                                   : idx === originalVersionIndex && !isCompareMode
                                     ? 'bg-emerald-500 scale-110'
-                                    : 'bg-muted hover:bg-muted/50'
+                                    : 'bg-foreground/20 hover:bg-foreground/30'
                           }`}
                         />
                       )
@@ -3072,7 +3072,7 @@ function HomeContent() {
                         className={`w-2.5 h-2.5 rounded-full transition-all ${
                           idx === selectedVariation.currentVersionIndex
                             ? 'bg-emerald-500 scale-110'
-                            : 'bg-muted hover:bg-muted/500'
+                            : 'bg-foreground/20 hover:bg-foreground/30'
                         }`}
                       />
                     ))}
@@ -3139,7 +3139,7 @@ function HomeContent() {
                                       ? 'bg-primary scale-110'
                                       : idx === selectedVariation.versions.length - 1 && selectedVariation.hasNewVersion
                                       ? 'bg-green-500 animate-pulse'
-                                      : 'bg-muted hover:bg-muted/500'
+                                      : 'bg-foreground/20 hover:bg-foreground/30'
                                   }`}
                                 />
                               </TooltipTrigger>
@@ -3234,7 +3234,7 @@ function HomeContent() {
                                   className={`w-2.5 h-2.5 rounded-full transition-all ${
                                     idx === originalVersionIndex
                                       ? 'bg-emerald-500 scale-110'
-                                      : 'bg-muted hover:bg-muted/500'
+                                      : 'bg-foreground/20 hover:bg-foreground/30'
                                   }`}
                                 />
                               </TooltipTrigger>
