@@ -55,6 +55,12 @@ export function AsciiGrid({ className = '', isDragActive = false }: AsciiGridPro
     const cellSize = 32;
     const fontSize = 14;
 
+    // Seeded random function for consistent per-cell randomness
+    const seededRandom = (seed: number) => {
+      const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+      return x - Math.floor(x);
+    };
+
     const animate = () => {
       const rect = container.getBoundingClientRect();
       ctx.clearRect(0, 0, rect.width, rect.height);
@@ -66,6 +72,12 @@ export function AsciiGrid({ className = '', isDragActive = false }: AsciiGridPro
 
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
+          // Per-cell seed for consistent randomness
+          const seed = row * 1000 + col;
+          const rand1 = seededRandom(seed);
+          const rand2 = seededRandom(seed + 0.5);
+          const rand3 = seededRandom(seed + 0.7);
+
           const x = col * cellSize;
           const y = row * cellSize;
 
@@ -74,22 +86,41 @@ export function AsciiGrid({ className = '', isDragActive = false }: AsciiGridPro
           const distance = Math.sqrt(dx * dx + dy * dy);
           const maxDistance = 200;
 
-          // Character morphing based on proximity
+          // Character morphing based on proximity with randomness
           let charIndex = 0;
           if (distance < maxDistance) {
             const proximity = 1 - distance / maxDistance;
-            charIndex = Math.floor(proximity * (CHARS.length - 1));
+            // Add random jitter to character selection near cursor
+            const jitter = Math.sin(timeRef.current * 3 + rand1 * 10) * 0.3;
+            charIndex = Math.floor((proximity + jitter * proximity) * (CHARS.length - 1));
+            charIndex = Math.max(0, Math.min(CHARS.length - 1, charIndex));
           }
 
-          // Wave animation
-          const wave = Math.sin(timeRef.current + col * 0.3 + row * 0.2) * 0.5 + 0.5;
-          const baseOpacity = 0.15 + wave * 0.1;
+          // Wave animation with random phase offset per cell
+          const phaseOffset = rand2 * Math.PI * 2;
+          const speedVariation = 0.8 + rand3 * 0.4;
+          const wave = Math.sin(timeRef.current * speedVariation + col * 0.3 + row * 0.2 + phaseOffset) * 0.5 + 0.5;
+          const baseOpacity = 0.12 + wave * 0.13;
 
-          // Boost opacity near cursor
-          let opacity = baseOpacity;
+          // Random flicker effect
+          const flicker = 1 + Math.sin(timeRef.current * 5 + rand1 * 100) * 0.1;
+
+          // Boost opacity near cursor with random variation
+          let opacity = baseOpacity * flicker;
           if (distance < maxDistance) {
             const proximity = 1 - distance / maxDistance;
-            opacity = baseOpacity + proximity * 0.4;
+            const randomBoost = 0.3 + rand2 * 0.2;
+            opacity = baseOpacity + proximity * randomBoost;
+          }
+
+          // Slight position wobble near cursor
+          let drawX = x + cellSize / 2;
+          let drawY = y + cellSize / 2;
+          if (distance < maxDistance) {
+            const proximity = 1 - distance / maxDistance;
+            const wobbleAmount = proximity * 3;
+            drawX += Math.sin(timeRef.current * 4 + rand1 * 10) * wobbleAmount;
+            drawY += Math.cos(timeRef.current * 4 + rand2 * 10) * wobbleAmount;
           }
 
           // Amber color: rgb(251, 191, 36) - brighter when dragging
@@ -98,7 +129,7 @@ export function AsciiGrid({ className = '', isDragActive = false }: AsciiGridPro
           ctx.font = `${fontSize}px monospace`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(CHARS[charIndex], x + cellSize / 2, y + cellSize / 2);
+          ctx.fillText(CHARS[charIndex], drawX, drawY);
         }
       }
 
