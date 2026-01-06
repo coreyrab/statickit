@@ -63,7 +63,7 @@ export default function RootLayout({
           <TooltipProvider>
             {children}
           </TooltipProvider>
-          <Toaster />
+          <Toaster position="bottom-left" />
         </ThemeProvider>
         <Script
           src="https://cdn.usefathom.com/script.js"
