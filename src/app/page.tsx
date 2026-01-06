@@ -2877,13 +2877,7 @@ function HomeContent() {
                 </button>
 
                 <button
-                  onClick={() => {
-                    if (!uploadedImage) {
-                      toast.info('Upload an image first');
-                      return;
-                    }
-                    setSelectedTool('edit');
-                  }}
+                  onClick={() => setSelectedTool('edit')}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'edit'
                       ? 'bg-primary text-primary-foreground gap-2'
@@ -2901,13 +2895,7 @@ function HomeContent() {
                 </button>
 
                 <button
-                  onClick={() => {
-                    if (!uploadedImage) {
-                      toast.info('Upload an image first');
-                      return;
-                    }
-                    setSelectedTool('backgrounds');
-                  }}
+                  onClick={() => setSelectedTool('backgrounds')}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'backgrounds'
                       ? 'bg-primary text-primary-foreground gap-2'
@@ -2925,13 +2913,7 @@ function HomeContent() {
                 </button>
 
                 <button
-                  onClick={() => {
-                    if (!uploadedImage) {
-                      toast.info('Upload an image first');
-                      return;
-                    }
-                    setSelectedTool('model');
-                  }}
+                  onClick={() => setSelectedTool('model')}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'model'
                       ? 'bg-primary text-primary-foreground gap-2'
@@ -2949,13 +2931,7 @@ function HomeContent() {
                 </button>
 
                 <button
-                  onClick={() => {
-                    if (!uploadedImage) {
-                      toast.info('Upload an image first');
-                      return;
-                    }
-                    setSelectedTool('export');
-                  }}
+                  onClick={() => setSelectedTool('export')}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'export'
                       ? 'bg-primary text-primary-foreground gap-2'
@@ -5755,10 +5731,6 @@ function HomeContent() {
           </button>
           <button
             onClick={() => {
-              if (!uploadedImage) {
-                toast.info('Upload an image first');
-                return;
-              }
               setSelectedTool('edit');
               setIsMobileSidebarOpen(true);
             }}
@@ -5769,10 +5741,6 @@ function HomeContent() {
           </button>
           <button
             onClick={() => {
-              if (!uploadedImage) {
-                toast.info('Upload an image first');
-                return;
-              }
               setSelectedTool('backgrounds');
               setIsMobileSidebarOpen(true);
             }}
@@ -5783,10 +5751,6 @@ function HomeContent() {
           </button>
           <button
             onClick={() => {
-              if (!uploadedImage) {
-                toast.info('Upload an image first');
-                return;
-              }
               setSelectedTool('model');
               setIsMobileSidebarOpen(true);
             }}
@@ -5797,10 +5761,6 @@ function HomeContent() {
           </button>
           <button
             onClick={() => {
-              if (!uploadedImage) {
-                toast.info('Upload an image first');
-                return;
-              }
               setSelectedTool('export');
               setIsMobileSidebarOpen(true);
             }}
