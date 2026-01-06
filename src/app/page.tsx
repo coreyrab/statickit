@@ -86,6 +86,7 @@ import { useTheme } from 'next-themes';
 import { track } from '@/lib/analytics';
 import { removeImageBackground, type ProgressState as BgRemovalProgress } from '@/lib/background-removal';
 import { AsciiGrid } from '@/components/ui/AsciiGrid';
+import { UploadIcon, type UploadHandle } from '@/components/UploadIcon';
 
 type Step = 'upload' | 'editor';
 type Tool = 'edit' | 'iterations' | 'backgrounds' | 'model' | 'export' | null;
@@ -201,6 +202,7 @@ function HomeContent() {
   const [showApiKeySetup, setShowApiKeySetup] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showNewConfirmModal, setShowNewConfirmModal] = useState(false);
+  const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSuggestingIteration, setIsSuggestingIteration] = useState(false);
   const [isAnalyzingForIterations, setIsAnalyzingForIterations] = useState(false);
@@ -301,6 +303,9 @@ function HomeContent() {
   const backgroundRefInputRef = useRef<HTMLInputElement>(null);
   const modelRefInputRef = useRef<HTMLInputElement>(null);
 
+  // Animated upload icon ref
+  const uploadIconRef = useRef<UploadHandle>(null);
+
   // Touch swipe state for image navigation
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
 
@@ -326,6 +331,7 @@ function HomeContent() {
   const [showImageDetails, setShowImageDetails] = useState(false);
   const [showBackgroundDetails, setShowBackgroundDetails] = useState(false);
   const [showModelDetails, setShowModelDetails] = useState(false);
+  const [isImageDescExpanded, setIsImageDescExpanded] = useState(false);
   // isApplyingPreset removed - now tracking per-version with status field
 
   // Presets data - prompts optimized for AI image editing
@@ -960,6 +966,15 @@ function HomeContent() {
     disabled: uploadedImage !== null, // Only disabled when we have an image
     noClick: uploadedImage !== null, // Disable click when image exists
   });
+
+  // Trigger upload icon animation when dragging files over
+  useEffect(() => {
+    if (isDragActive) {
+      uploadIconRef.current?.startAnimation();
+    } else {
+      uploadIconRef.current?.stopAnimation();
+    }
+  }, [isDragActive]);
 
   // Generate iterations on-demand (called from the Iterations tool)
   const handleGenerateIterations = async () => {
@@ -3455,6 +3470,8 @@ function HomeContent() {
 
                   <div
                     {...getRootProps()}
+                    onMouseEnter={() => uploadIconRef.current?.startAnimation()}
+                    onMouseLeave={() => !isDragActive && uploadIconRef.current?.stopAnimation()}
                     className={`relative z-10 flex flex-col items-center justify-center max-w-2xl w-full h-96 gap-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
                       isDragActive
                         ? 'border-primary bg-primary/10'
@@ -3465,9 +3482,13 @@ function HomeContent() {
                     <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-colors ${
                       isDragActive ? 'bg-primary/20' : 'bg-primary/10'
                     }`}>
-                      <Upload className={`w-7 h-7 transition-colors ${
-                        isDragActive ? 'text-primary' : 'text-primary/70'
-                      }`} />
+                      <UploadIcon
+                        ref={uploadIconRef}
+                        size={28}
+                        className={`transition-colors ${
+                          isDragActive ? 'text-primary' : 'text-primary/70'
+                        }`}
+                      />
                     </div>
                     {isDragActive ? (
                       <p className="text-primary font-medium">Drop your image here...</p>
@@ -3733,13 +3754,24 @@ function HomeContent() {
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
-                    <button
-                      onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
-                    >
-                      <Plus className="w-3 h-3" />
-                      New
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {uploadedImage && (
+                        <button
+                          onClick={() => setShowClearConfirmModal(true)}
+                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Clear
+                        </button>
+                      )}
+                      <button
+                        onClick={uploadedImage ? handleNewClick : openFileDialog}
+                        className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
+                      >
+                        <Plus className="w-3 h-3" />
+                        New
+                      </button>
+                    </div>
                   </div>
                   {uploadedImage ? (
                     <div className="p-3 rounded-lg bg-muted/50 border border-border">
@@ -3749,9 +3781,44 @@ function HomeContent() {
                       </div>
                       {analysis && (
                         <div className="mt-2 pt-2 border-t border-border/50">
-                          <p className="text-[10px] text-muted-foreground/70 truncate">
-                            {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
-                          </p>
+                          <button
+                            onClick={() => setIsImageDescExpanded(!isImageDescExpanded)}
+                            className="w-full flex items-center justify-between gap-2 group"
+                          >
+                            <p className={`text-[10px] text-muted-foreground/70 text-left flex-1 ${isImageDescExpanded ? '' : 'truncate'}`}>
+                              {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
+                            </p>
+                            <ChevronDown className={`w-3 h-3 text-muted-foreground/50 group-hover:text-muted-foreground transition-all flex-shrink-0 ${isImageDescExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                          <div className={`grid transition-all duration-200 ease-out ${isImageDescExpanded ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+                            <div className="overflow-hidden">
+                              <div className="p-2 rounded-md bg-background/50 border border-border/30">
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className="text-[10px] text-muted-foreground/80 italic leading-relaxed flex-1">
+                                    {analysis.imageDescription || 'Analyzing image...'}
+                                  </p>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const text = analysis.imageDescription || `${analysis.product} · ${analysis.mood}`;
+                                          navigator.clipboard.writeText(text);
+                                          toast.success('Copied to clipboard');
+                                        }}
+                                        className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors text-muted-foreground/50 hover:text-muted-foreground"
+                                      >
+                                        <Copy className="w-3 h-3" />
+                                      </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left">
+                                      <p className="text-xs">Copy description</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -3768,7 +3835,19 @@ function HomeContent() {
                 <div className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h2 className="font-semibold mb-1">Versions</h2>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <h2 className="font-semibold">Versions</h2>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+                              <Info className="w-3.5 h-3.5" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-[140px]">
+                            <p className="text-xs">Snapshots you can branch from to test different approaches.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <p className="text-xs text-muted-foreground/80">Saved edits you can continue to build on.</p>
                     </div>
                     {variations.length > 0 && (
@@ -3921,13 +4000,24 @@ function HomeContent() {
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
-                    <button
-                      onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
-                    >
-                      <Plus className="w-3 h-3" />
-                      New
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {uploadedImage && (
+                        <button
+                          onClick={() => setShowClearConfirmModal(true)}
+                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Clear
+                        </button>
+                      )}
+                      <button
+                        onClick={uploadedImage ? handleNewClick : openFileDialog}
+                        className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
+                      >
+                        <Plus className="w-3 h-3" />
+                        New
+                      </button>
+                    </div>
                   </div>
                   {uploadedImage ? (
                     <div className="p-3 rounded-lg bg-muted/50 border border-border">
@@ -3937,9 +4027,44 @@ function HomeContent() {
                       </div>
                       {analysis && (
                         <div className="mt-2 pt-2 border-t border-border/50">
-                          <p className="text-[10px] text-muted-foreground/70 truncate">
-                            {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
-                          </p>
+                          <button
+                            onClick={() => setIsImageDescExpanded(!isImageDescExpanded)}
+                            className="w-full flex items-center justify-between gap-2 group"
+                          >
+                            <p className={`text-[10px] text-muted-foreground/70 text-left flex-1 ${isImageDescExpanded ? '' : 'truncate'}`}>
+                              {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
+                            </p>
+                            <ChevronDown className={`w-3 h-3 text-muted-foreground/50 group-hover:text-muted-foreground transition-all flex-shrink-0 ${isImageDescExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                          <div className={`grid transition-all duration-200 ease-out ${isImageDescExpanded ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+                            <div className="overflow-hidden">
+                              <div className="p-2 rounded-md bg-background/50 border border-border/30">
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className="text-[10px] text-muted-foreground/80 italic leading-relaxed flex-1">
+                                    {analysis.imageDescription || 'Analyzing image...'}
+                                  </p>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const text = analysis.imageDescription || `${analysis.product} · ${analysis.mood}`;
+                                          navigator.clipboard.writeText(text);
+                                          toast.success('Copied to clipboard');
+                                        }}
+                                        className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors text-muted-foreground/50 hover:text-muted-foreground"
+                                      >
+                                        <Copy className="w-3 h-3" />
+                                      </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left">
+                                      <p className="text-xs">Copy description</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -4373,13 +4498,24 @@ function HomeContent() {
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
-                    <button
-                      onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
-                    >
-                      <Plus className="w-3 h-3" />
-                      New
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {uploadedImage && (
+                        <button
+                          onClick={() => setShowClearConfirmModal(true)}
+                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Clear
+                        </button>
+                      )}
+                      <button
+                        onClick={uploadedImage ? handleNewClick : openFileDialog}
+                        className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
+                      >
+                        <Plus className="w-3 h-3" />
+                        New
+                      </button>
+                    </div>
                   </div>
                   {uploadedImage ? (
                     <div className="p-3 rounded-lg bg-muted/50 border border-border">
@@ -4389,9 +4525,44 @@ function HomeContent() {
                       </div>
                       {analysis && (
                         <div className="mt-2 pt-2 border-t border-border/50">
-                          <p className="text-[10px] text-muted-foreground/70 truncate">
-                            {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
-                          </p>
+                          <button
+                            onClick={() => setIsImageDescExpanded(!isImageDescExpanded)}
+                            className="w-full flex items-center justify-between gap-2 group"
+                          >
+                            <p className={`text-[10px] text-muted-foreground/70 text-left flex-1 ${isImageDescExpanded ? '' : 'truncate'}`}>
+                              {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
+                            </p>
+                            <ChevronDown className={`w-3 h-3 text-muted-foreground/50 group-hover:text-muted-foreground transition-all flex-shrink-0 ${isImageDescExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                          <div className={`grid transition-all duration-200 ease-out ${isImageDescExpanded ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+                            <div className="overflow-hidden">
+                              <div className="p-2 rounded-md bg-background/50 border border-border/30">
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className="text-[10px] text-muted-foreground/80 italic leading-relaxed flex-1">
+                                    {analysis.imageDescription || 'Analyzing image...'}
+                                  </p>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const text = analysis.imageDescription || `${analysis.product} · ${analysis.mood}`;
+                                          navigator.clipboard.writeText(text);
+                                          toast.success('Copied to clipboard');
+                                        }}
+                                        className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors text-muted-foreground/50 hover:text-muted-foreground"
+                                      >
+                                        <Copy className="w-3 h-3" />
+                                      </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left">
+                                      <p className="text-xs">Copy description</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -4588,13 +4759,24 @@ function HomeContent() {
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
-                    <button
-                      onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
-                    >
-                      <Plus className="w-3 h-3" />
-                      New
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {uploadedImage && (
+                        <button
+                          onClick={() => setShowClearConfirmModal(true)}
+                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Clear
+                        </button>
+                      )}
+                      <button
+                        onClick={uploadedImage ? handleNewClick : openFileDialog}
+                        className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
+                      >
+                        <Plus className="w-3 h-3" />
+                        New
+                      </button>
+                    </div>
                   </div>
                   {uploadedImage ? (
                     <div className="p-3 rounded-lg bg-muted/50 border border-border">
@@ -4604,9 +4786,44 @@ function HomeContent() {
                       </div>
                       {analysis && (
                         <div className="mt-2 pt-2 border-t border-border/50">
-                          <p className="text-[10px] text-muted-foreground/70 truncate">
-                            {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
-                          </p>
+                          <button
+                            onClick={() => setIsImageDescExpanded(!isImageDescExpanded)}
+                            className="w-full flex items-center justify-between gap-2 group"
+                          >
+                            <p className={`text-[10px] text-muted-foreground/70 text-left flex-1 ${isImageDescExpanded ? '' : 'truncate'}`}>
+                              {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
+                            </p>
+                            <ChevronDown className={`w-3 h-3 text-muted-foreground/50 group-hover:text-muted-foreground transition-all flex-shrink-0 ${isImageDescExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                          <div className={`grid transition-all duration-200 ease-out ${isImageDescExpanded ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+                            <div className="overflow-hidden">
+                              <div className="p-2 rounded-md bg-background/50 border border-border/30">
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className="text-[10px] text-muted-foreground/80 italic leading-relaxed flex-1">
+                                    {analysis.imageDescription || 'Analyzing image...'}
+                                  </p>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const text = analysis.imageDescription || `${analysis.product} · ${analysis.mood}`;
+                                          navigator.clipboard.writeText(text);
+                                          toast.success('Copied to clipboard');
+                                        }}
+                                        className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors text-muted-foreground/50 hover:text-muted-foreground"
+                                      >
+                                        <Copy className="w-3 h-3" />
+                                      </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left">
+                                      <p className="text-xs">Copy description</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -4754,10 +4971,22 @@ function HomeContent() {
                     })}
                   </div>
 
-                  {/* Reference Images Section */}
+                  {/* Reference Backgrounds Section */}
                   <div className="border-t border-border/50 pt-3 mt-3">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-muted-foreground">Reference Images</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground">Reference Backgrounds</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+                              <Info className="w-3 h-3" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-[140px]">
+                            <p className="text-xs">Upload a photo to extract its background and apply it to your image.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       {backgroundReferences.length > 0 && (
                         <button
                           onClick={() => {
@@ -4867,13 +5096,24 @@ function HomeContent() {
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
-                    <button
-                      onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
-                    >
-                      <Plus className="w-3 h-3" />
-                      New
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {uploadedImage && (
+                        <button
+                          onClick={() => setShowClearConfirmModal(true)}
+                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Clear
+                        </button>
+                      )}
+                      <button
+                        onClick={uploadedImage ? handleNewClick : openFileDialog}
+                        className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
+                      >
+                        <Plus className="w-3 h-3" />
+                        New
+                      </button>
+                    </div>
                   </div>
                   {uploadedImage ? (
                     <div className="p-3 rounded-lg bg-muted/50 border border-border">
@@ -4883,9 +5123,44 @@ function HomeContent() {
                       </div>
                       {analysis && (
                         <div className="mt-2 pt-2 border-t border-border/50">
-                          <p className="text-[10px] text-muted-foreground/70 truncate">
-                            {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
-                          </p>
+                          <button
+                            onClick={() => setIsImageDescExpanded(!isImageDescExpanded)}
+                            className="w-full flex items-center justify-between gap-2 group"
+                          >
+                            <p className={`text-[10px] text-muted-foreground/70 text-left flex-1 ${isImageDescExpanded ? '' : 'truncate'}`}>
+                              {analysis.product}{analysis.mood ? ` · ${analysis.mood}` : ''}{analysis.colors?.length > 0 ? ` · ${analysis.colors.slice(0, 2).join(', ')}` : ''}
+                            </p>
+                            <ChevronDown className={`w-3 h-3 text-muted-foreground/50 group-hover:text-muted-foreground transition-all flex-shrink-0 ${isImageDescExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                          <div className={`grid transition-all duration-200 ease-out ${isImageDescExpanded ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+                            <div className="overflow-hidden">
+                              <div className="p-2 rounded-md bg-background/50 border border-border/30">
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className="text-[10px] text-muted-foreground/80 italic leading-relaxed flex-1">
+                                    {analysis.imageDescription || 'Analyzing image...'}
+                                  </p>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const text = analysis.imageDescription || `${analysis.product} · ${analysis.mood}`;
+                                          navigator.clipboard.writeText(text);
+                                          toast.success('Copied to clipboard');
+                                        }}
+                                        className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors text-muted-foreground/50 hover:text-muted-foreground"
+                                      >
+                                        <Copy className="w-3 h-3" />
+                                      </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left">
+                                      <p className="text-xs">Copy description</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -4981,7 +5256,19 @@ function HomeContent() {
                 {/* Reference Models Section */}
                 <div className="border-t border-border/50 pt-3 mt-1 mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-muted-foreground">Reference Models</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground">Reference Models</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+                            <Info className="w-3 h-3" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-[140px]">
+                          <p className="text-xs">Upload a person's photo to swap them into your image, preserving pose.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     {modelReferences.length > 0 && (
                       <button
                         onClick={() => {
@@ -5820,6 +6107,37 @@ function HomeContent() {
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               Continue
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Workspace Confirmation Modal */}
+      <Dialog open={showClearConfirmModal} onOpenChange={setShowClearConfirmModal}>
+        <DialogContent className="sm:max-w-md !bg-card border-border text-foreground">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Clear Workspace?</DialogTitle>
+            <DialogDescription className="text-foreground/70 mt-2">
+              This will delete your uploaded image and all edits. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 mt-6">
+            <Button
+              onClick={() => setShowClearConfirmModal(false)}
+              variant="outline"
+              className="flex-1 bg-muted hover:bg-muted border-border text-foreground"
+            >
+              No thanks
+            </Button>
+            <Button
+              onClick={() => {
+                handleReset();
+                setShowClearConfirmModal(false);
+              }}
+              variant="destructive"
+              className="flex-1"
+            >
+              Yes, clear workspace
             </Button>
           </div>
         </DialogContent>
