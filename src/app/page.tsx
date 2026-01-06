@@ -2877,7 +2877,13 @@ function HomeContent() {
                 </button>
 
                 <button
-                  onClick={() => setSelectedTool('edit')}
+                  onClick={() => {
+                    if (!uploadedImage) {
+                      toast.info('Upload an image first');
+                      return;
+                    }
+                    setSelectedTool('edit');
+                  }}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'edit'
                       ? 'bg-primary text-primary-foreground gap-2'
@@ -2895,7 +2901,13 @@ function HomeContent() {
                 </button>
 
                 <button
-                  onClick={() => setSelectedTool('backgrounds')}
+                  onClick={() => {
+                    if (!uploadedImage) {
+                      toast.info('Upload an image first');
+                      return;
+                    }
+                    setSelectedTool('backgrounds');
+                  }}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'backgrounds'
                       ? 'bg-primary text-primary-foreground gap-2'
@@ -2913,7 +2925,13 @@ function HomeContent() {
                 </button>
 
                 <button
-                  onClick={() => setSelectedTool('model')}
+                  onClick={() => {
+                    if (!uploadedImage) {
+                      toast.info('Upload an image first');
+                      return;
+                    }
+                    setSelectedTool('model');
+                  }}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'model'
                       ? 'bg-primary text-primary-foreground gap-2'
@@ -2931,7 +2949,13 @@ function HomeContent() {
                 </button>
 
                 <button
-                  onClick={() => setSelectedTool('export')}
+                  onClick={() => {
+                    if (!uploadedImage) {
+                      toast.info('Upload an image first');
+                      return;
+                    }
+                    setSelectedTool('export');
+                  }}
                   className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
                     selectedTool === 'export'
                       ? 'bg-primary text-primary-foreground gap-2'
@@ -3486,10 +3510,10 @@ function HomeContent() {
                   >
                     <input {...getInputProps()} />
                     <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-colors ${
-                      isDragActive ? 'bg-primary/20' : 'bg-muted'
+                      isDragActive ? 'bg-primary/20' : 'bg-amber-100 dark:bg-amber-900/30'
                     }`}>
                       <Upload className={`w-7 h-7 transition-colors ${
-                        isDragActive ? 'text-primary' : 'text-muted-foreground'
+                        isDragActive ? 'text-primary' : 'text-amber-600 dark:text-amber-400'
                       }`} />
                     </div>
                     {isDragActive ? (
@@ -4049,19 +4073,24 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'lighting' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'lighting' && (
-                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className="p-2 space-y-1 bg-muted/50">
                           {PRESETS.lighting.map((preset) => (
                             <button
                               key={preset.id}
-                              disabled={!uploadedImage}
-                              onClick={() => setSelectedPresets(prev => ({
-                                ...prev,
-                                lighting: prev.lighting === preset.id ? null : preset.id
-                              }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
+                              onClick={() => {
+                                if (!uploadedImage) {
+                                  toast.info('Upload an image first');
+                                  return;
+                                }
+                                setSelectedPresets(prev => ({
+                                  ...prev,
+                                  lighting: prev.lighting === preset.id ? null : preset.id
+                                }));
+                              }}
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all touch-manipulation active:bg-muted ${
                                 selectedPresets.lighting === preset.id
                                   ? 'bg-primary/20 text-primary'
-                                  : 'hover:bg-muted disabled:hover:bg-transparent'
+                                  : 'hover:bg-muted'
                               }`}
                             >
                               {preset.name}
@@ -4085,19 +4114,24 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'style' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'style' && (
-                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className="p-2 space-y-1 bg-muted/50">
                           {PRESETS.style.map((preset) => (
                             <button
                               key={preset.id}
-                              disabled={!uploadedImage}
-                              onClick={() => setSelectedPresets(prev => ({
-                                ...prev,
-                                style: prev.style === preset.id ? null : preset.id
-                              }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
+                              onClick={() => {
+                                if (!uploadedImage) {
+                                  toast.info('Upload an image first');
+                                  return;
+                                }
+                                setSelectedPresets(prev => ({
+                                  ...prev,
+                                  style: prev.style === preset.id ? null : preset.id
+                                }));
+                              }}
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all touch-manipulation active:bg-muted ${
                                 selectedPresets.style === preset.id
                                   ? 'bg-primary/20 text-primary'
-                                  : 'hover:bg-muted disabled:hover:bg-transparent'
+                                  : 'hover:bg-muted'
                               }`}
                             >
                               {preset.name}
@@ -4121,19 +4155,24 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'camera' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'camera' && (
-                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className="p-2 space-y-1 bg-muted/50">
                           {PRESETS.camera.map((preset) => (
                             <button
                               key={preset.id}
-                              disabled={!uploadedImage}
-                              onClick={() => setSelectedPresets(prev => ({
-                                ...prev,
-                                camera: prev.camera === preset.id ? null : preset.id
-                              }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
+                              onClick={() => {
+                                if (!uploadedImage) {
+                                  toast.info('Upload an image first');
+                                  return;
+                                }
+                                setSelectedPresets(prev => ({
+                                  ...prev,
+                                  camera: prev.camera === preset.id ? null : preset.id
+                                }));
+                              }}
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all touch-manipulation active:bg-muted ${
                                 selectedPresets.camera === preset.id
                                   ? 'bg-primary/20 text-primary'
-                                  : 'hover:bg-muted disabled:hover:bg-transparent'
+                                  : 'hover:bg-muted'
                               }`}
                             >
                               {preset.name}
@@ -4157,19 +4196,24 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'mood' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'mood' && (
-                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className="p-2 space-y-1 bg-muted/50">
                           {PRESETS.mood.map((preset) => (
                             <button
                               key={preset.id}
-                              disabled={!uploadedImage}
-                              onClick={() => setSelectedPresets(prev => ({
-                                ...prev,
-                                mood: prev.mood === preset.id ? null : preset.id
-                              }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
+                              onClick={() => {
+                                if (!uploadedImage) {
+                                  toast.info('Upload an image first');
+                                  return;
+                                }
+                                setSelectedPresets(prev => ({
+                                  ...prev,
+                                  mood: prev.mood === preset.id ? null : preset.id
+                                }));
+                              }}
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all touch-manipulation active:bg-muted ${
                                 selectedPresets.mood === preset.id
                                   ? 'bg-primary/20 text-primary'
-                                  : 'hover:bg-muted disabled:hover:bg-transparent'
+                                  : 'hover:bg-muted'
                               }`}
                             >
                               {preset.name}
@@ -4193,19 +4237,24 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'color' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'color' && (
-                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className="p-2 space-y-1 bg-muted/50">
                           {PRESETS.color.map((preset) => (
                             <button
                               key={preset.id}
-                              disabled={!uploadedImage}
-                              onClick={() => setSelectedPresets(prev => ({
-                                ...prev,
-                                color: prev.color === preset.id ? null : preset.id
-                              }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
+                              onClick={() => {
+                                if (!uploadedImage) {
+                                  toast.info('Upload an image first');
+                                  return;
+                                }
+                                setSelectedPresets(prev => ({
+                                  ...prev,
+                                  color: prev.color === preset.id ? null : preset.id
+                                }));
+                              }}
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all touch-manipulation active:bg-muted ${
                                 selectedPresets.color === preset.id
                                   ? 'bg-primary/20 text-primary'
-                                  : 'hover:bg-muted disabled:hover:bg-transparent'
+                                  : 'hover:bg-muted'
                               }`}
                             >
                               {preset.name}
@@ -4229,19 +4278,24 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'era' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'era' && (
-                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className="p-2 space-y-1 bg-muted/50">
                           {PRESETS.era.map((preset) => (
                             <button
                               key={preset.id}
-                              disabled={!uploadedImage}
-                              onClick={() => setSelectedPresets(prev => ({
-                                ...prev,
-                                era: prev.era === preset.id ? null : preset.id
-                              }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
+                              onClick={() => {
+                                if (!uploadedImage) {
+                                  toast.info('Upload an image first');
+                                  return;
+                                }
+                                setSelectedPresets(prev => ({
+                                  ...prev,
+                                  era: prev.era === preset.id ? null : preset.id
+                                }));
+                              }}
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all touch-manipulation active:bg-muted ${
                                 selectedPresets.era === preset.id
                                   ? 'bg-primary/20 text-primary'
-                                  : 'hover:bg-muted disabled:hover:bg-transparent'
+                                  : 'hover:bg-muted'
                               }`}
                             >
                               {preset.name}
@@ -4265,19 +4319,24 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'framing' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'framing' && (
-                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className="p-2 space-y-1 bg-muted/50">
                           {PRESETS.framing.map((preset) => (
                             <button
                               key={preset.id}
-                              disabled={!uploadedImage}
-                              onClick={() => setSelectedPresets(prev => ({
-                                ...prev,
-                                framing: prev.framing === preset.id ? null : preset.id
-                              }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
+                              onClick={() => {
+                                if (!uploadedImage) {
+                                  toast.info('Upload an image first');
+                                  return;
+                                }
+                                setSelectedPresets(prev => ({
+                                  ...prev,
+                                  framing: prev.framing === preset.id ? null : preset.id
+                                }));
+                              }}
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all touch-manipulation active:bg-muted ${
                                 selectedPresets.framing === preset.id
                                   ? 'bg-primary/20 text-primary'
-                                  : 'hover:bg-muted disabled:hover:bg-transparent'
+                                  : 'hover:bg-muted'
                               }`}
                             >
                               {preset.name}
@@ -4301,19 +4360,24 @@ function HomeContent() {
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'rotation' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedPresetCategory === 'rotation' && (
-                        <div className={`p-2 space-y-1 bg-muted/50 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                        <div className="p-2 space-y-1 bg-muted/50">
                           {PRESETS.rotation.map((preset) => (
                             <button
                               key={preset.id}
-                              disabled={!uploadedImage}
-                              onClick={() => setSelectedPresets(prev => ({
-                                ...prev,
-                                rotation: prev.rotation === preset.id ? null : preset.id
-                              }))}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all disabled:cursor-not-allowed touch-manipulation active:bg-muted ${
+                              onClick={() => {
+                                if (!uploadedImage) {
+                                  toast.info('Upload an image first');
+                                  return;
+                                }
+                                setSelectedPresets(prev => ({
+                                  ...prev,
+                                  rotation: prev.rotation === preset.id ? null : preset.id
+                                }));
+                              }}
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all touch-manipulation active:bg-muted ${
                                 selectedPresets.rotation === preset.id
                                   ? 'bg-primary/20 text-primary'
-                                  : 'hover:bg-muted disabled:hover:bg-transparent'
+                                  : 'hover:bg-muted'
                               }`}
                             >
                               {preset.name}
@@ -4490,7 +4554,7 @@ function HomeContent() {
                   </div>
 
                 {/* Download Section */}
-                <div className={`mt-auto space-y-2 ${!uploadedImage ? 'opacity-50' : ''}`}>
+                <div className="mt-auto space-y-2">
                   <h3 className="text-xs text-muted-foreground/70 uppercase tracking-wide mb-2">Download</h3>
                   {!uploadedImage && (
                     <div className="text-sm text-muted-foreground/70 italic">No images to download</div>
@@ -5691,6 +5755,10 @@ function HomeContent() {
           </button>
           <button
             onClick={() => {
+              if (!uploadedImage) {
+                toast.info('Upload an image first');
+                return;
+              }
               setSelectedTool('edit');
               setIsMobileSidebarOpen(true);
             }}
@@ -5701,6 +5769,10 @@ function HomeContent() {
           </button>
           <button
             onClick={() => {
+              if (!uploadedImage) {
+                toast.info('Upload an image first');
+                return;
+              }
               setSelectedTool('backgrounds');
               setIsMobileSidebarOpen(true);
             }}
@@ -5711,6 +5783,10 @@ function HomeContent() {
           </button>
           <button
             onClick={() => {
+              if (!uploadedImage) {
+                toast.info('Upload an image first');
+                return;
+              }
               setSelectedTool('model');
               setIsMobileSidebarOpen(true);
             }}
@@ -5721,6 +5797,10 @@ function HomeContent() {
           </button>
           <button
             onClick={() => {
+              if (!uploadedImage) {
+                toast.info('Upload an image first');
+                return;
+              }
               setSelectedTool('export');
               setIsMobileSidebarOpen(true);
             }}
