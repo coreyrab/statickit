@@ -53,7 +53,7 @@ export function AsciiGrid({ className = '', isDragActive = false }: AsciiGridPro
     container.addEventListener('mouseleave', handleMouseLeave);
 
     const cellSize = 32;
-    const fontSize = 20;
+    const fontSize = 14;
 
     const animate = () => {
       const rect = container.getBoundingClientRect();
@@ -72,7 +72,7 @@ export function AsciiGrid({ className = '', isDragActive = false }: AsciiGridPro
           const dx = mouseRef.current.x - x;
           const dy = mouseRef.current.y - y;
           const distance = Math.sqrt(dx * dx + dy * dy);
-          const maxDistance = 120;
+          const maxDistance = 200;
 
           // Character morphing based on proximity
           let charIndex = 0;
