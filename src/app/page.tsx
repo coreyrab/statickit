@@ -3470,9 +3470,9 @@ function HomeContent() {
                       left: cursorGlow.x,
                       top: cursorGlow.y,
                       transform: 'translate(-50%, -50%)',
-                      width: 500,
-                      height: 500,
-                      background: 'radial-gradient(circle, hsl(var(--primary) / 0.18) 0%, transparent 60%)',
+                      width: 400,
+                      height: 400,
+                      background: 'radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, rgba(251, 191, 36, 0.08) 40%, transparent 70%)',
                       opacity: cursorGlow.active ? 1 : 0,
                     }}
                   />
