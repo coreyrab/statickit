@@ -325,7 +325,8 @@ function HomeContent() {
     camera: string | null;
     framing: string | null;
     rotation: string | null;
-  }>({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null });
+    enhance: string | null;
+  }>({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null, enhance: null });
   const [expandedPresetCategory, setExpandedPresetCategory] = useState<string | null>(null);
   const [isModelBuilderExpanded, setIsModelBuilderExpanded] = useState(false);
   const [showImageDetails, setShowImageDetails] = useState(false);
@@ -400,6 +401,20 @@ function HomeContent() {
       { id: 'orbit-behind', name: 'Orbit Behind', prompt: 'Render the ENTIRE scene from a different camera angle - position the virtual camera behind the subject. The floor, mats, props, furniture, and background must ALL be viewed from this new angle. POSE PRESERVATION: Every limb stays in the EXACT same position - same arm angles, same hand placement, same finger positions, same leg positions, same foot placement. The subject is like a 3D statue being viewed from behind. Head does NOT turn. IMPORTANT: Any text must not be changed.' },
       { id: 'orbit-45-right', name: 'Orbit 45° Right', prompt: 'Render the ENTIRE scene from a different camera angle - position the virtual camera 45 degrees to the subject\'s right. The floor, mats, props, furniture, and background must ALL be viewed from this new angle. POSE PRESERVATION: Every limb stays in the EXACT same position - same arm angles, same hand placement, same finger positions, same leg positions, same foot placement. The subject is like a 3D statue being viewed from a slight angle. Head does NOT turn, gaze does NOT change. IMPORTANT: Same facial features, expression, identity. Any text must not be changed.' },
       { id: 'orbit-45-left', name: 'Orbit 45° Left', prompt: 'Render the ENTIRE scene from a different camera angle - position the virtual camera 45 degrees to the subject\'s left. The floor, mats, props, furniture, and background must ALL be viewed from this new angle. POSE PRESERVATION: Every limb stays in the EXACT same position - same arm angles, same hand placement, same finger positions, same leg positions, same foot placement. The subject is like a 3D statue being viewed from a slight angle. Head does NOT turn, gaze does NOT change. IMPORTANT: Same facial features, expression, identity. Any text must not be changed.' },
+    ],
+    enhance: [
+      { id: 'smooth-skin', name: 'Smooth Skin', prompt: 'Apply natural skin retouching: gently smooth skin texture while preserving pores and natural detail, reduce visible blemishes and imperfections, even out skin tone, subtle frequency separation effect, professional beauty retouching that looks natural not plastic, maintain all other elements exactly as they are' },
+      { id: 'brighten-eyes', name: 'Brighten Eyes', prompt: 'Enhance the eyes: brighten the whites of the eyes, add subtle catchlight sparkle, increase iris clarity and definition, reduce any redness or tired appearance, make eyes appear more vibrant and engaging while keeping them natural, maintain all other elements exactly as they are' },
+      { id: 'whiten-teeth', name: 'Whiten Teeth', prompt: 'Naturally whiten teeth: remove yellow or stained appearance, brighten to natural white without looking artificially bleached, maintain tooth texture and natural variation, subtle professional whitening effect, maintain all other elements exactly as they are' },
+      { id: 'reduce-wrinkles', name: 'Reduce Wrinkles', prompt: 'Subtly reduce wrinkles and fine lines: soften crow\'s feet, forehead lines, and smile lines while maintaining natural facial character, professional anti-aging retouching that preserves personality, reduce without eliminating completely, maintain all other elements exactly as they are' },
+      { id: 'fix-flyaways', name: 'Fix Flyaways', prompt: 'Clean up hair flyaways and frizz: smooth stray hairs, tame wispy edges, clean up messy hair outline while maintaining natural hair texture and volume, professional hair retouching, maintain all other elements exactly as they are' },
+      { id: 'reduce-shine', name: 'Reduce Shine', prompt: 'Reduce oily skin shine and glare: mattify shiny forehead, nose, and cheeks, remove unwanted specular highlights on skin, maintain healthy skin appearance without looking flat or matte, professional shine reduction, maintain all other elements exactly as they are' },
+      { id: 'sharpen-details', name: 'Sharpen Details', prompt: 'Enhance sharpness and clarity: increase fine detail definition, apply intelligent sharpening to textures and edges, boost micro-contrast for crisp professional look, high-frequency detail enhancement without artifacts, maintain all other elements exactly as they are' },
+      { id: 'reduce-noise', name: 'Reduce Noise', prompt: 'Clean up image noise and grain: reduce high-ISO noise artifacts, smooth grainy areas while preserving detail and texture, denoise shadows and flat areas, professional noise reduction that maintains sharpness, maintain all other elements exactly as they are' },
+      { id: 'fix-colors', name: 'Fix Colors', prompt: 'Auto correct white balance and colors: neutralize color casts, fix incorrect white balance from mixed lighting, ensure accurate true-to-life colors, professional color correction for natural appearance, maintain all other elements exactly as they are' },
+      { id: 'remove-spots', name: 'Remove Spots', prompt: 'Clean up small imperfections: remove dust spots, sensor spots, small distracting marks, minor blemishes, healing brush style cleanup of unwanted specks and spots throughout the image, maintain all other elements exactly as they are' },
+      { id: 'enhance-textures', name: 'Enhance Textures', prompt: 'Enhance material textures: make fabric weaves more visible, bring out leather grain, enhance product surface details, boost texture definition for materials and surfaces, professional product photography enhancement, maintain all other elements exactly as they are' },
+      { id: 'lift-shadows', name: 'Lift Shadows', prompt: 'Brighten shadow areas: recover detail in dark regions, lift underexposed shadows without washing out, fill light effect, reveal hidden detail in dark areas while maintaining overall contrast and mood, maintain all other elements exactly as they are' },
     ],
   };
 
@@ -1523,7 +1538,7 @@ function HomeContent() {
     const presetLabel = presetNames.filter(Boolean).join(' + ') + ' [preset]';
 
     // Clear selections immediately
-    setSelectedPresets({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null });
+    setSelectedPresets({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null, enhance: null });
 
     try {
       // Get current image to edit - only from completed versions
@@ -4464,9 +4479,50 @@ function HomeContent() {
                       )}
                     </div>
 
+                    {/* Enhance/Touchup */}
+                    <div className="rounded-lg border border-border overflow-hidden">
+                      <button
+                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'enhance' ? null : 'enhance')}
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-muted-foreground" />
+                          <span>Enhance</span>
+                          {selectedPresets.enhance && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                        </div>
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'enhance' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedPresetCategory === 'enhance' && (
+                        <div className="p-2 space-y-1 bg-muted/50">
+                          {PRESETS.enhance.map((preset) => (
+                            <button
+                              key={preset.id}
+                              onClick={() => {
+                                if (!uploadedImage) {
+                                  toast.info('Upload an image first');
+                                  return;
+                                }
+                                setSelectedPresets(prev => ({
+                                  ...prev,
+                                  enhance: prev.enhance === preset.id ? null : preset.id
+                                }));
+                              }}
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all touch-manipulation active:bg-muted ${
+                                selectedPresets.enhance === preset.id
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'hover:bg-muted'
+                              }`}
+                            >
+                              {preset.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
                     {/* Apply button - always rendered, visibility controlled by opacity */}
                     <div className={`mt-3 pt-3 border-t border-border transition-opacity duration-150 ${
-                      (selectedPresets.lighting || selectedPresets.style || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.camera || selectedPresets.framing || selectedPresets.rotation)
+                      (selectedPresets.lighting || selectedPresets.style || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.camera || selectedPresets.framing || selectedPresets.rotation || selectedPresets.enhance)
                         ? 'opacity-100'
                         : 'opacity-0 pointer-events-none'
                     }`}>
@@ -4479,7 +4535,7 @@ function HomeContent() {
                         Apply {Object.values(selectedPresets).filter(Boolean).length > 1 ? 'Presets' : 'Preset'}
                       </Button>
                       <button
-                        onClick={() => setSelectedPresets({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null })}
+                        onClick={() => setSelectedPresets({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null, enhance: null })}
                         className="w-full mt-2 text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors"
                       >
                         Clear selections
