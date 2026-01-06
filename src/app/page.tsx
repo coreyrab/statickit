@@ -85,6 +85,7 @@ import { getStoredApiKey, setStoredApiKey, hasStoredApiKey } from '@/lib/api-key
 import { useTheme } from 'next-themes';
 import { track } from '@/lib/analytics';
 import { removeImageBackground, type ProgressState as BgRemovalProgress } from '@/lib/background-removal';
+import { AsciiGrid } from '@/components/ui/AsciiGrid';
 
 type Step = 'upload' | 'editor';
 type Tool = 'edit' | 'iterations' | 'backgrounds' | 'model' | 'export' | null;
@@ -289,9 +290,6 @@ function HomeContent() {
   // Background removal state
   const [isRemovingBackground, setIsRemovingBackground] = useState(false);
   const [bgRemovalProgress, setBgRemovalProgress] = useState<BgRemovalProgress | null>(null);
-
-  // Cursor glow effect for upload area
-  const [cursorGlow, setCursorGlow] = useState<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
 
   // Reference images state (session-based)
   const [backgroundReferences, setBackgroundReferences] = useState<ReferenceImage[]>([]);
@@ -3451,37 +3449,16 @@ function HomeContent() {
                   )}
                 </>
               ) : !uploadedImage ? (
-                <div
-                  className="relative flex items-center justify-center w-full h-full overflow-hidden"
-                  onMouseMove={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setCursorGlow({
-                      x: e.clientX - rect.left,
-                      y: e.clientY - rect.top,
-                      active: true
-                    });
-                  }}
-                  onMouseLeave={() => setCursorGlow(prev => ({ ...prev, active: false }))}
-                >
-                  {/* Cursor-following glow effect */}
-                  <div
-                    className="pointer-events-none absolute transition-opacity duration-300"
-                    style={{
-                      left: cursorGlow.x,
-                      top: cursorGlow.y,
-                      transform: 'translate(-50%, -50%)',
-                      width: 400,
-                      height: 400,
-                      background: 'radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, rgba(251, 191, 36, 0.08) 40%, transparent 70%)',
-                      opacity: cursorGlow.active ? 1 : 0,
-                    }}
-                  />
+                <div className="relative flex items-center justify-center w-full h-full overflow-hidden">
+                  {/* ASCII Grid Animation */}
+                  <AsciiGrid isDragActive={isDragActive} />
+
                   <div
                     {...getRootProps()}
                     className={`relative z-10 flex flex-col items-center justify-center max-w-2xl w-full h-96 gap-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
                       isDragActive
                         ? 'border-primary bg-primary/10'
-                        : 'border-border hover:border-primary/50 bg-muted/50'
+                        : 'border-border hover:border-primary/50 bg-background/80'
                     }`}
                   >
                     <input {...getInputProps()} />
@@ -3825,7 +3802,7 @@ function HomeContent() {
                   </div>
                   {/* Generate Iterations button - show when no variations yet */}
                   {variations.length === 0 && !isAnalyzingForIterations && (
-                    <div className={`mt-4 ${!uploadedImage ? 'opacity-60' : ''}`}>
+                    <div className="mt-4">
                       {/* Number of generations */}
                       <div className="mb-3">
                         <label className="text-xs text-muted-foreground/70 mb-1.5 block">Generate suggestions</label>
@@ -4441,7 +4418,7 @@ function HomeContent() {
                   </p>
 
                   {/* Smart Resize Section */}
-                  <div className={`mb-4 ${!uploadedImage ? 'opacity-60' : ''}`}>
+                  <div className="mb-4">
                     <div className="space-y-1.5">
                       {/* Original size button - only show when image uploaded */}
                       {uploadedImage && (
@@ -4975,7 +4952,7 @@ function HomeContent() {
                   )}
 
                 {/* Model controls wrapper */}
-                <div className={!uploadedImage ? 'opacity-60' : ''}>
+                <div>
                   {/* Preserve Outfit Toggle */}
                   <div className="flex items-center justify-between mb-4 p-2 rounded-lg bg-muted/50 border border-border">
                     <span className="text-sm text-foreground/70">Preserve outfit</span>
