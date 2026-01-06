@@ -3463,7 +3463,7 @@ function HomeContent() {
 
                     <input {...getInputProps()} />
                     <div className={`relative z-10 w-14 h-14 rounded-xl flex items-center justify-center transition-colors ${
-                      isDragActive ? 'bg-primary/20' : 'bg-muted/80'
+                      isDragActive ? 'bg-primary/20' : 'bg-muted'
                     }`}>
                       <Upload className={`w-7 h-7 transition-colors ${
                         isDragActive ? 'text-primary' : 'text-muted-foreground'
