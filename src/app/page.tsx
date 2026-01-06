@@ -290,6 +290,9 @@ function HomeContent() {
   const [isRemovingBackground, setIsRemovingBackground] = useState(false);
   const [bgRemovalProgress, setBgRemovalProgress] = useState<BgRemovalProgress | null>(null);
 
+  // Cursor glow effect for upload area
+  const [cursorGlow, setCursorGlow] = useState<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
+
   // Reference images state (session-based)
   const [backgroundReferences, setBackgroundReferences] = useState<ReferenceImage[]>([]);
   const [modelReferences, setModelReferences] = useState<ReferenceImage[]>([]);
@@ -3448,10 +3451,34 @@ function HomeContent() {
                   )}
                 </>
               ) : !uploadedImage ? (
-                <div className="flex items-center justify-center w-full h-full">
+                <div
+                  className="relative flex items-center justify-center w-full h-full overflow-hidden"
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setCursorGlow({
+                      x: e.clientX - rect.left,
+                      y: e.clientY - rect.top,
+                      active: true
+                    });
+                  }}
+                  onMouseLeave={() => setCursorGlow(prev => ({ ...prev, active: false }))}
+                >
+                  {/* Cursor-following glow effect */}
+                  <div
+                    className="pointer-events-none absolute transition-opacity duration-300"
+                    style={{
+                      left: cursorGlow.x,
+                      top: cursorGlow.y,
+                      transform: 'translate(-50%, -50%)',
+                      width: 400,
+                      height: 400,
+                      background: 'radial-gradient(circle, hsl(var(--primary) / 0.08) 0%, transparent 70%)',
+                      opacity: cursorGlow.active ? 1 : 0,
+                    }}
+                  />
                   <div
                     {...getRootProps()}
-                    className={`flex flex-col items-center justify-center max-w-2xl w-full h-96 gap-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
+                    className={`relative z-10 flex flex-col items-center justify-center max-w-2xl w-full h-96 gap-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
                       isDragActive
                         ? 'border-primary bg-primary/10'
                         : 'border-border hover:border-primary/50 bg-muted/50'
