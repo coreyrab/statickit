@@ -79,7 +79,7 @@ import {
 import { detectAspectRatio, AspectRatioKey } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import { Footer } from '@/components/landing/Footer';
-import { ApiKeySetupModal } from '@/components/onboarding';
+import { ApiKeySetupModal, WelcomeModal } from '@/components/onboarding';
 import { getStoredApiKey, setStoredApiKey, hasStoredApiKey } from '@/lib/api-key-storage';
 import { useTheme } from 'next-themes';
 import { track } from '@/lib/analytics';
@@ -196,6 +196,7 @@ function HomeContent() {
   } | null>(null);
   const [additionalContext, setAdditionalContext] = useState('');
   const [showApiKeySetup, setShowApiKeySetup] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [showNewConfirmModal, setShowNewConfirmModal] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSuggestingIteration, setIsSuggestingIteration] = useState(false);
@@ -492,9 +493,17 @@ function HomeContent() {
       setWeirdnessLevel(parseInt(savedWeirdness));
     }
 
-    // Show API key setup if no key stored
+    // Check if first visit
+    const hasVisited = localStorage.getItem('statickit_has_visited');
+
+    // Show welcome modal on first visit without API key
+    // Show API key setup on return visits without API key
     if (!storedKey) {
-      setShowApiKeySetup(true);
+      if (!hasVisited) {
+        setShowWelcome(true);
+      } else {
+        setShowApiKeySetup(true);
+      }
     }
   }, []);
 
@@ -5640,6 +5649,18 @@ function HomeContent() {
         onOpenChange={setShowApiKeySetup}
         onApiKeySet={handleSetApiKey}
         currentApiKey={apiKey}
+      />
+
+      {/* Welcome Modal (first visit only) */}
+      <WelcomeModal
+        open={showWelcome}
+        onOpenChange={(open) => {
+          setShowWelcome(open);
+          if (!open) {
+            localStorage.setItem('statickit_has_visited', 'true');
+          }
+        }}
+        onApiKeySet={handleSetApiKey}
       />
 
       {!uploadedImage && <Footer />}
