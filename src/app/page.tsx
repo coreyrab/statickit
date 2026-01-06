@@ -4151,6 +4151,47 @@ function HomeContent() {
                   </div>
 
                   <div className="flex-1 overflow-y-auto space-y-2 touch-scroll pr-2 md:pr-0 pb-20 md:pb-16">
+                    {/* Enhance/Touchup */}
+                    <div className="rounded-lg border border-border overflow-hidden">
+                      <button
+                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'enhance' ? null : 'enhance')}
+                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-muted-foreground" />
+                          <span>Enhance</span>
+                          {selectedPresets.enhance && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                        </div>
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'enhance' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedPresetCategory === 'enhance' && (
+                        <div className="p-2 space-y-1 bg-muted/50">
+                          {PRESETS.enhance.map((preset) => (
+                            <button
+                              key={preset.id}
+                              onClick={() => {
+                                if (!uploadedImage) {
+                                  toast.info('Upload an image first');
+                                  return;
+                                }
+                                setSelectedPresets(prev => ({
+                                  ...prev,
+                                  enhance: prev.enhance === preset.id ? null : preset.id
+                                }));
+                              }}
+                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all touch-manipulation active:bg-muted ${
+                                selectedPresets.enhance === preset.id
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'hover:bg-muted'
+                              }`}
+                            >
+                              {preset.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
                     {/* Lighting */}
                     <div className="rounded-lg border border-border overflow-hidden">
                       <button
@@ -4468,47 +4509,6 @@ function HomeContent() {
                               }}
                               className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all touch-manipulation active:bg-muted ${
                                 selectedPresets.rotation === preset.id
-                                  ? 'bg-primary/20 text-primary'
-                                  : 'hover:bg-muted'
-                              }`}
-                            >
-                              {preset.name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Enhance/Touchup */}
-                    <div className="rounded-lg border border-border overflow-hidden">
-                      <button
-                        onClick={() => setExpandedPresetCategory(expandedPresetCategory === 'enhance' ? null : 'enhance')}
-                        className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Sparkles className="w-4 h-4 text-muted-foreground" />
-                          <span>Enhance</span>
-                          {selectedPresets.enhance && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
-                        </div>
-                        <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'enhance' ? 'rotate-180' : ''}`} />
-                      </button>
-                      {expandedPresetCategory === 'enhance' && (
-                        <div className="p-2 space-y-1 bg-muted/50">
-                          {PRESETS.enhance.map((preset) => (
-                            <button
-                              key={preset.id}
-                              onClick={() => {
-                                if (!uploadedImage) {
-                                  toast.info('Upload an image first');
-                                  return;
-                                }
-                                setSelectedPresets(prev => ({
-                                  ...prev,
-                                  enhance: prev.enhance === preset.id ? null : preset.id
-                                }));
-                              }}
-                              className={`w-full px-3 py-2.5 md:py-1.5 rounded text-left text-xs text-foreground/70 transition-all touch-manipulation active:bg-muted ${
-                                selectedPresets.enhance === preset.id
                                   ? 'bg-primary/20 text-primary'
                                   : 'hover:bg-muted'
                               }`}
