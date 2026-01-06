@@ -3758,7 +3758,7 @@ function HomeContent() {
                       {uploadedImage && (
                         <button
                           onClick={() => setShowClearConfirmModal(true)}
-                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground hover:text-destructive"
+                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground/50 hover:text-muted-foreground"
                         >
                           <Trash2 className="w-3 h-3" />
                           Clear
@@ -4004,7 +4004,7 @@ function HomeContent() {
                       {uploadedImage && (
                         <button
                           onClick={() => setShowClearConfirmModal(true)}
-                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground hover:text-destructive"
+                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground/50 hover:text-muted-foreground"
                         >
                           <Trash2 className="w-3 h-3" />
                           Clear
@@ -4502,7 +4502,7 @@ function HomeContent() {
                       {uploadedImage && (
                         <button
                           onClick={() => setShowClearConfirmModal(true)}
-                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground hover:text-destructive"
+                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground/50 hover:text-muted-foreground"
                         >
                           <Trash2 className="w-3 h-3" />
                           Clear
@@ -4763,7 +4763,7 @@ function HomeContent() {
                       {uploadedImage && (
                         <button
                           onClick={() => setShowClearConfirmModal(true)}
-                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground hover:text-destructive"
+                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground/50 hover:text-muted-foreground"
                         >
                           <Trash2 className="w-3 h-3" />
                           Clear
@@ -5100,7 +5100,7 @@ function HomeContent() {
                       {uploadedImage && (
                         <button
                           onClick={() => setShowClearConfirmModal(true)}
-                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground hover:text-destructive"
+                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground/50 hover:text-muted-foreground"
                         >
                           <Trash2 className="w-3 h-3" />
                           Clear
