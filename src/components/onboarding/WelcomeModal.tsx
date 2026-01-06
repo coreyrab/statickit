@@ -124,13 +124,9 @@ export function WelcomeModal({
       >
         <div className="space-y-6 py-2">
           {/* Welcome Header */}
-          <div className="text-center space-y-2">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <img src="/logo.svg" alt="StaticKit" className="w-7 h-7 dark:invert" />
-              <span className="text-xl font-semibold">StaticKit</span>
-            </div>
+          <div className="text-center">
             <h2 className="text-2xl font-semibold text-foreground">
-              Welcome
+              Welcome to StaticKit 👋
             </h2>
           </div>
 
