@@ -284,7 +284,7 @@ function HomeContent() {
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
 
   // Track used suggestions - to show visual indicator
-  const [usedBackgroundSuggestions, setUsedBackgroundSuggestions] = useState<Set<string>>(new Set());
+  const [activeBackgroundId, setActiveBackgroundId] = useState<string | null>(null);
   const [usedModelSuggestions, setUsedModelSuggestions] = useState<Set<string>>(new Set());
 
   // Background removal state
@@ -3649,23 +3649,30 @@ function HomeContent() {
                       Create new version from this image
                     </TooltipContent>
                   </Tooltip>
-                  {/* Compare button - only show for original/edits with 2+ versions */}
-                  {!isShowingGenerated && originalVersions.length >= 2 && (
+                  {/* Compare button - always show for original/edits, ghosted when < 2 versions */}
+                  {!isShowingGenerated && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
-                          onClick={handleToggleCompare}
+                          onClick={originalVersions.length >= 2 ? handleToggleCompare : undefined}
+                          disabled={originalVersions.length < 2}
                           className={`p-2 rounded-lg backdrop-blur-sm transition-colors ${
                             isCompareMode
                               ? 'bg-blue-500 text-white'
-                              : 'bg-card/80 hover:bg-card text-foreground/70 hover:text-foreground'
+                              : originalVersions.length >= 2
+                                ? 'bg-card/80 hover:bg-card text-foreground/70 hover:text-foreground'
+                                : 'bg-card/80 text-foreground/30 cursor-not-allowed'
                           }`}
                         >
                           <SplitSquareHorizontal className="w-4 h-4" />
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {isCompareMode ? 'Exit comparison mode' : 'Compare versions'}
+                        {isCompareMode
+                          ? 'Exit comparison mode'
+                          : originalVersions.length >= 2
+                            ? 'Compare versions'
+                            : 'Make an edit to compare versions'}
                       </TooltipContent>
                     </Tooltip>
                   )}
@@ -3728,11 +3735,7 @@ function HomeContent() {
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className={`text-xs flex items-center gap-0.5 transition-colors cursor-pointer ${
-                        uploadedImage
-                          ? 'text-muted-foreground/70 hover:text-foreground/70'
-                          : 'text-primary hover:text-primary'
-                      }`}
+                      className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
                     >
                       <Plus className="w-3 h-3" />
                       New
@@ -3920,11 +3923,7 @@ function HomeContent() {
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className={`text-xs flex items-center gap-0.5 transition-colors cursor-pointer ${
-                        uploadedImage
-                          ? 'text-muted-foreground/70 hover:text-foreground/70'
-                          : 'text-primary hover:text-primary'
-                      }`}
+                      className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
                     >
                       <Plus className="w-3 h-3" />
                       New
@@ -4376,11 +4375,7 @@ function HomeContent() {
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className={`text-xs flex items-center gap-0.5 transition-colors cursor-pointer ${
-                        uploadedImage
-                          ? 'text-muted-foreground/70 hover:text-foreground/70'
-                          : 'text-primary hover:text-primary'
-                      }`}
+                      className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
                     >
                       <Plus className="w-3 h-3" />
                       New
@@ -4595,11 +4590,7 @@ function HomeContent() {
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className={`text-xs flex items-center gap-0.5 transition-colors cursor-pointer ${
-                        uploadedImage
-                          ? 'text-muted-foreground/70 hover:text-foreground/70'
-                          : 'text-primary hover:text-primary'
-                      }`}
+                      className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
                     >
                       <Plus className="w-3 h-3" />
                       New
@@ -4710,7 +4701,7 @@ function HomeContent() {
                       </>
                     )}
                     {backgroundSuggestions.map((suggestion) => {
-                      const isUsed = usedBackgroundSuggestions.has(suggestion.id);
+                      const isActive = activeBackgroundId === suggestion.id;
                       return (
                         <button
                           key={suggestion.id}
@@ -4719,16 +4710,17 @@ function HomeContent() {
                               toast.info('Upload an image first');
                               return;
                             }
-                            setUsedBackgroundSuggestions(prev => new Set([...prev, suggestion.id]));
+                            setActiveBackgroundId(suggestion.id);
+                            setTimeout(() => setActiveBackgroundId(null), 1500);
                             handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
                           }}
                           className={`px-2.5 py-2 rounded-lg text-left text-xs flex items-center gap-1.5 transition-all ${
-                            isUsed
-                              ? 'bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-700 dark:text-green-400'
+                            isActive
+                              ? 'bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400'
                               : 'bg-primary/5 border border-primary/40 hover:bg-primary/10 hover:border-primary/60 text-foreground/80'
                           }`}
                         >
-                          {isUsed && <Check className="w-3 h-3 flex-shrink-0" />}
+                          {isActive && <Check className="w-3 h-3 flex-shrink-0 animate-in fade-in duration-200" />}
                           <span>{suggestion.name}</span>
                         </button>
                       );
@@ -4736,7 +4728,7 @@ function HomeContent() {
 
                     {/* Common Backgrounds */}
                     {BACKGROUND_SUGGESTIONS.map((suggestion) => {
-                      const isUsed = usedBackgroundSuggestions.has(suggestion.id);
+                      const isActive = activeBackgroundId === suggestion.id;
                       return (
                         <button
                           key={suggestion.id}
@@ -4745,16 +4737,17 @@ function HomeContent() {
                               toast.info('Upload an image first');
                               return;
                             }
-                            setUsedBackgroundSuggestions(prev => new Set([...prev, suggestion.id]));
+                            setActiveBackgroundId(suggestion.id);
+                            setTimeout(() => setActiveBackgroundId(null), 1500);
                             handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
                           }}
                           className={`px-2.5 py-2 rounded-lg text-left text-xs flex items-center gap-1.5 transition-all ${
-                            isUsed
-                              ? 'bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-700 dark:text-green-400'
+                            isActive
+                              ? 'bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400'
                               : 'bg-muted/50 border border-border hover:bg-muted hover:border-border text-foreground/80'
                           }`}
                         >
-                          {isUsed && <Check className="w-3 h-3 flex-shrink-0" />}
+                          {isActive && <Check className="w-3 h-3 flex-shrink-0 animate-in fade-in duration-200" />}
                           <span>{suggestion.name}</span>
                         </button>
                       );
@@ -4851,13 +4844,7 @@ function HomeContent() {
                       {isRemovingBackground ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin text-violet-500" />
-                          <span>
-                            {bgRemovalProgress?.phase === 'downloading' && `Downloading model... ${bgRemovalProgress.progress.toFixed(0)}%`}
-                            {bgRemovalProgress?.phase === 'building' && `Building... ${bgRemovalProgress.progress.toFixed(0)}%`}
-                            {bgRemovalProgress?.phase === 'processing' && 'Removing background...'}
-                            {bgRemovalProgress?.phase === 'ready' && 'Complete!'}
-                            {(!bgRemovalProgress || bgRemovalProgress.phase === 'idle') && 'Initializing...'}
-                          </span>
+                          <span>Working on it...</span>
                         </>
                       ) : (
                         <>
@@ -4882,11 +4869,7 @@ function HomeContent() {
                     <h3 className="text-sm font-medium text-foreground/70">Image</h3>
                     <button
                       onClick={uploadedImage ? handleNewClick : openFileDialog}
-                      className={`text-xs flex items-center gap-0.5 transition-colors cursor-pointer ${
-                        uploadedImage
-                          ? 'text-muted-foreground/70 hover:text-foreground/70'
-                          : 'text-primary hover:text-primary'
-                      }`}
+                      className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
                     >
                       <Plus className="w-3 h-3" />
                       New
