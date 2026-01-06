@@ -100,7 +100,7 @@ export function AsciiGrid({ className = '', isDragActive = false }: AsciiGridPro
           const phaseOffset = rand2 * Math.PI * 2;
           const speedVariation = 0.8 + rand3 * 0.4;
           const wave = Math.sin(timeRef.current * speedVariation + col * 0.3 + row * 0.2 + phaseOffset) * 0.5 + 0.5;
-          const baseOpacity = 0.12 + wave * 0.13;
+          const baseOpacity = 0.08 + wave * 0.10;
 
           // Random flicker effect
           const flicker = 1 + Math.sin(timeRef.current * 5 + rand1 * 100) * 0.1;
