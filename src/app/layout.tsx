@@ -21,6 +21,15 @@ export const metadata: Metadata = {
   title: "Free AI photo editor - StaticKit",
   description: "Free, open-source AI image editor. Edit images with natural language, generate variations, resize intelligently. Bring your own API key.",
   keywords: ["AI image editor", "free AI image editor", "image editing", "AI photo editor", "Gemini image editor", "open source"],
+  icons: {
+    icon: [
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
+  },
+  manifest: "/site.webmanifest",
   openGraph: {
     title: "Free AI photo editor - StaticKit",
     description: "Edit images with AI using natural language. Generate variations, swap backgrounds, resize intelligently. Free and open source.",
