@@ -9,6 +9,14 @@ import { Footer } from '@/components/landing/Footer';
 // Blog posts data - add new posts here
 const posts = [
   {
+    slug: 'iterate-meta-ads-ai-image-editing',
+    title: 'How to Iterate on Winning Meta Ads Without Killing Performance',
+    date: '2025-01-09',
+    excerpt: 'Stop paying for expensive photoshoots every time you need a new ad variation. The AI-powered approach to creative testing.',
+    readTime: '10 min read',
+    coverImage: '/blog/meta-ads-iteration.jpg',
+  },
+  {
     slug: 'best-free-ai-image-editors',
     title: 'Best free AI image editors in 2026',
     date: '2025-01-03',
