@@ -3503,15 +3503,19 @@ function HomeContent() {
                             alt={isShowingGenerated ? 'Generated version' : 'Original ad'}
                             className="absolute inset-0 w-full h-full object-cover"
                           />
+                          {/* Processing overlay - inside image container so it only covers the image */}
+                          {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing' && (
+                            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                              <AsciiGrid variant="processing" />
+                            </div>
+                          )}
                         </div>
                       );
                     })()
                   )}
-                  {/* Loading overlay when viewing a processing version */}
+                  {/* Processing container overlay - dim over entire viewer */}
                   {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing' && (
-                    <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
-                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    </div>
+                    <div className="absolute inset-0 bg-black/40 rounded-2xl pointer-events-none" />
                   )}
                   {/* Error overlay when viewing a failed version */}
                   {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'error' && (
