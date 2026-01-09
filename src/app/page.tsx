@@ -60,6 +60,8 @@ import {
   UserPlus,
   Eraser,
   Paperclip,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -225,6 +227,7 @@ function HomeContent() {
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [compareLeftIndex, setCompareLeftIndex] = useState<number | null>(null);  // Locked reference (LEFT side)
   const [compareRightIndex, setCompareRightIndex] = useState<number | null>(null); // Toggleable comparison (RIGHT side)
+  const [isUIHidden, setIsUIHidden] = useState(false);  // Hide all overlay UI
 
   // Original image editing state
   const [originalEditPrompt, setOriginalEditPrompt] = useState('');
@@ -3390,6 +3393,7 @@ function HomeContent() {
                       }}
                     >
                       <ReactCompareSlider
+                        handle={isUIHidden ? <></> : undefined}
                         itemOne={
                           <div className="relative w-full h-full">
                             <ReactCompareSliderImage
@@ -3398,17 +3402,26 @@ function HomeContent() {
                               style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                             />
                             {/* Left side label */}
-                            <div className="absolute top-3 left-3 px-2 py-1.5 rounded bg-black/60 text-white text-xs backdrop-blur-sm">
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                                {compareLeftIndex === 0 ? 'Original' : `Edit ${compareLeftIndex}`}
-                              </div>
-                              {originalVersions[compareLeftIndex]?.prompt && (
-                                <div className="text-[10px] text-white/70 mt-0.5 max-w-[180px] truncate">
-                                  "{originalVersions[compareLeftIndex].prompt}"
+                            {!isUIHidden && (() => {
+                              const leftText = compareLeftIndex === 0 ? 'Original' : (originalVersions[compareLeftIndex]?.prompt || `Edit ${compareLeftIndex}`);
+                              const isTruncated = leftText.length > 22;
+                              const labelContent = (
+                                <div className={`absolute top-3 left-3 px-2 py-1 rounded bg-black/60 text-white text-xs backdrop-blur-sm max-w-[200px] ${isTruncated ? 'cursor-default' : ''}`}>
+                                  <div className="flex items-center gap-1.5">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                                    <span className="truncate">{leftText}</span>
+                                  </div>
                                 </div>
-                              )}
-                            </div>
+                              );
+                              return isTruncated ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>{labelContent}</TooltipTrigger>
+                                  <TooltipContent side="bottom" className="max-w-[300px]">
+                                    <p className="text-xs">{leftText}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              ) : labelContent;
+                            })()}
                           </div>
                         }
                         itemTwo={
@@ -3419,36 +3432,45 @@ function HomeContent() {
                               style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                             />
                             {/* Right side label */}
-                            <div className="absolute top-3 right-3 px-2 py-1.5 rounded bg-blue-500/80 text-white text-xs backdrop-blur-sm text-right">
-                              <div className="flex items-center justify-end gap-1.5">
-                                {compareRightIndex === 0 ? 'Original' : `Edit ${compareRightIndex}`}
-                                <div className="w-2 h-2 rounded-full bg-blue-400" />
-                              </div>
-                              {originalVersions[compareRightIndex]?.prompt && (
-                                <div className="text-[10px] text-white/70 mt-0.5 max-w-[180px] truncate">
-                                  "{originalVersions[compareRightIndex].prompt}"
+                            {!isUIHidden && (() => {
+                              const rightText = compareRightIndex === 0 ? 'Original' : (originalVersions[compareRightIndex]?.prompt || `Edit ${compareRightIndex}`);
+                              const isTruncated = rightText.length > 22;
+                              const labelContent = (
+                                <div className={`absolute top-3 right-3 px-2 py-1 rounded bg-blue-500/80 text-white text-xs backdrop-blur-sm max-w-[200px] ${isTruncated ? 'cursor-default' : ''}`}>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="truncate">{rightText}</span>
+                                    <div className="w-2 h-2 rounded-full bg-blue-400 shrink-0" />
+                                  </div>
                                 </div>
-                              )}
-                            </div>
+                              );
+                              return isTruncated ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>{labelContent}</TooltipTrigger>
+                                  <TooltipContent side="bottom" className="max-w-[300px]">
+                                    <p className="text-xs">{rightText}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              ) : labelContent;
+                            })()}
                           </div>
                         }
                         style={{ width: '100%', height: '100%' }}
                       />
                       {/* Comparison descriptions below slider */}
-                      {(originalVersions[compareLeftIndex]?.prompt || originalVersions[compareRightIndex]?.prompt) && (
-                        <div className="flex justify-between mt-3 text-xs text-muted-foreground gap-4">
+                      {!isUIHidden && (originalVersions[compareLeftIndex]?.prompt || originalVersions[compareRightIndex]?.prompt) && (
+                        <div className="flex justify-between mt-3 text-xs text-foreground gap-4">
                           <div className="flex-1">
                             {originalVersions[compareLeftIndex]?.prompt && (
                               <span className="flex items-center gap-1.5">
                                 <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                                <span className="italic">"{originalVersions[compareLeftIndex].prompt}"</span>
+                                <span>"{originalVersions[compareLeftIndex].prompt}"</span>
                               </span>
                             )}
                           </div>
                           <div className="flex-1 text-right">
                             {originalVersions[compareRightIndex]?.prompt && (
                               <span className="flex items-center justify-end gap-1.5">
-                                <span className="italic">"{originalVersions[compareRightIndex].prompt}"</span>
+                                <span>"{originalVersions[compareRightIndex].prompt}"</span>
                                 <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
                               </span>
                             )}
@@ -3515,8 +3537,8 @@ function HomeContent() {
                       </div>
                     </div>
                   )}
-                  {/* Zoom controls - show on mobile when zoomed or always on desktop (hidden in compare mode) */}
-                  {(zoomLevel > 1) && !isCompareMode && (
+                  {/* Zoom controls - show on mobile when zoomed or always on desktop (hidden in compare mode or when UI hidden) */}
+                  {!isUIHidden && (zoomLevel > 1) && !isCompareMode && (
                     <div className="absolute bottom-4 right-4 flex items-center gap-1 bg-card/90 backdrop-blur-sm rounded-lg p-1 border border-border">
                       <button
                         onClick={() => {
@@ -3551,7 +3573,7 @@ function HomeContent() {
                     </div>
                   )}
                   {/* Swipe hint - show on mobile when there are multiple versions */}
-                  {((originalVersions.length > 1 && !isShowingGenerated) ||
+                  {!isUIHidden && ((originalVersions.length > 1 && !isShowingGenerated) ||
                     (isShowingGenerated && selectedVariation && selectedVariation.versions.length > 1)) &&
                     zoomLevel === 1 && (
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:hidden">
@@ -3606,7 +3628,7 @@ function HomeContent() {
               )}
 
               {/* Floating Edit Chat Input - shows when edit tool selected */}
-              {selectedTool === 'edit' && !isShowingGenerated && uploadedImage && (
+              {!isUIHidden && selectedTool === 'edit' && !isShowingGenerated && uploadedImage && (
                 <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
                   {(() => {
                     const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
@@ -3615,13 +3637,15 @@ function HomeContent() {
                       <div className={`bg-background/70 backdrop-blur-xl border border-border/50 shadow-lg overflow-hidden transition-all duration-200 ${
                         selectedRef ? 'rounded-2xl' : 'rounded-full'
                       }`}>
-                        {/* Reference attachment row - shows when reference is selected (top) */}
-                        {selectedRef && (
-                          <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30 bg-background/30">
+                        {/* Reference attachment row - animates in/out smoothly */}
+                        <div className={`overflow-hidden transition-all duration-200 ease-out ${
+                          selectedRef ? 'max-h-12 opacity-100' : 'max-h-0 opacity-0'
+                        }`}>
+                          <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30">
                             <div className="relative">
                               <img
-                                src={selectedRef.url}
-                                alt={selectedRef.name}
+                                src={selectedRef?.url || ''}
+                                alt={selectedRef?.name || ''}
                                 className="w-6 h-6 rounded object-cover"
                               />
                               <div className="absolute -top-1 -left-1 p-0.5 rounded-full bg-primary">
@@ -3636,7 +3660,7 @@ function HomeContent() {
                               <X className="w-3 h-3" />
                             </button>
                           </div>
-                        )}
+                        </div>
                         {/* Main input row */}
                         <div className="flex items-center gap-2 pl-4 pr-1.5 py-1.5">
                           <input
@@ -3667,7 +3691,7 @@ function HomeContent() {
               )}
 
               {/* Floating Background Input - shows when backgrounds tool selected */}
-              {selectedTool === 'backgrounds' && !isShowingGenerated && uploadedImage && (
+              {!isUIHidden && selectedTool === 'backgrounds' && !isShowingGenerated && uploadedImage && (
                 <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
                   {(() => {
                     const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
@@ -3676,13 +3700,15 @@ function HomeContent() {
                       <div className={`bg-background/70 backdrop-blur-xl border border-border/50 shadow-lg overflow-hidden transition-all duration-200 ${
                         selectedRef ? 'rounded-2xl' : 'rounded-full'
                       }`}>
-                        {/* Reference attachment row - shows when reference is selected (top) */}
-                        {selectedRef && (
-                          <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30 bg-background/30">
+                        {/* Reference attachment row - animates in/out smoothly */}
+                        <div className={`overflow-hidden transition-all duration-200 ease-out ${
+                          selectedRef ? 'max-h-12 opacity-100' : 'max-h-0 opacity-0'
+                        }`}>
+                          <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30">
                             <div className="relative">
                               <img
-                                src={selectedRef.url}
-                                alt={selectedRef.name}
+                                src={selectedRef?.url || ''}
+                                alt={selectedRef?.name || ''}
                                 className="w-6 h-6 rounded object-cover"
                               />
                               <div className="absolute -top-1 -left-1 p-0.5 rounded-full bg-primary">
@@ -3691,13 +3717,16 @@ function HomeContent() {
                             </div>
                             <span className="text-xs text-primary font-medium">Reference</span>
                             <button
-                              onClick={() => setSelectedBackgroundRef(null)}
+                              onClick={() => {
+                                setSelectedBackgroundRef(null);
+                                setBackgroundCustomPrompt('');
+                              }}
                               className="p-0.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
                             >
                               <X className="w-3 h-3" />
                             </button>
                           </div>
-                        )}
+                        </div>
                         {/* Main input row */}
                         <div className="flex items-center gap-2 pl-4 pr-1.5 py-1.5">
                           <input
@@ -3732,7 +3761,7 @@ function HomeContent() {
               )}
 
               {/* Floating Model Input - shows when model tool selected */}
-              {selectedTool === 'model' && !isShowingGenerated && uploadedImage && (
+              {!isUIHidden && selectedTool === 'model' && !isShowingGenerated && uploadedImage && (
                 <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
                   {(() => {
                     const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
@@ -3741,13 +3770,15 @@ function HomeContent() {
                       <div className={`bg-background/70 backdrop-blur-xl border border-border/50 shadow-lg overflow-hidden transition-all duration-200 ${
                         selectedRef ? 'rounded-2xl' : 'rounded-full'
                       }`}>
-                        {/* Reference attachment row - shows when reference is selected (top) */}
-                        {selectedRef && (
-                          <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30 bg-background/30">
+                        {/* Reference attachment row - animates in/out smoothly */}
+                        <div className={`overflow-hidden transition-all duration-200 ease-out ${
+                          selectedRef ? 'max-h-12 opacity-100' : 'max-h-0 opacity-0'
+                        }`}>
+                          <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30">
                             <div className="relative">
                               <img
-                                src={selectedRef.url}
-                                alt={selectedRef.name}
+                                src={selectedRef?.url || ''}
+                                alt={selectedRef?.name || ''}
                                 className="w-6 h-6 rounded object-cover"
                               />
                               <div className="absolute -top-1 -left-1 p-0.5 rounded-full bg-primary">
@@ -3756,13 +3787,16 @@ function HomeContent() {
                             </div>
                             <span className="text-xs text-primary font-medium">Reference</span>
                             <button
-                              onClick={() => setSelectedModelRef(null)}
+                              onClick={() => {
+                                setSelectedModelRef(null);
+                                setModelCustomPrompt('');
+                              }}
                               className="p-0.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
                             >
                               <X className="w-3 h-3" />
                             </button>
                           </div>
-                        )}
+                        </div>
                         {/* Main input row */}
                         <div className="flex items-center gap-2 pl-4 pr-1.5 py-1.5">
                           <input
@@ -3913,6 +3947,23 @@ function HomeContent() {
                       </TooltipContent>
                     </Tooltip>
                   )}
+                  {/* Hide UI toggle */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setIsUIHidden(!isUIHidden)}
+                        disabled={!previewImage}
+                        className={`p-2 rounded-lg backdrop-blur-sm transition-colors ${
+                          isUIHidden
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-card/80 hover:bg-card text-foreground/70 hover:text-foreground disabled:opacity-30 disabled:hover:bg-card/80 disabled:hover:text-foreground/70 disabled:cursor-not-allowed'
+                        }`}
+                      >
+                        {isUIHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>{isUIHidden ? 'Show UI' : 'Hide UI'}</TooltipContent>
+                  </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
@@ -5334,6 +5385,7 @@ function HomeContent() {
                           onClick={() => {
                             setBackgroundReferences([]);
                             setSelectedBackgroundRef(null);
+                            setBackgroundCustomPrompt('');
                           }}
                           className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                         >
@@ -5371,7 +5423,10 @@ function HomeContent() {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setBackgroundReferences(prev => prev.filter(r => r.id !== ref.id));
-                                if (selectedBackgroundRef === ref.id) setSelectedBackgroundRef(null);
+                                if (selectedBackgroundRef === ref.id) {
+                                  setSelectedBackgroundRef(null);
+                                  setBackgroundCustomPrompt('');
+                                }
                               }}
                               className="absolute top-0.5 right-0.5 p-0.5 rounded bg-black/50 hover:bg-black/70 transition-colors"
                             >
@@ -5616,6 +5671,7 @@ function HomeContent() {
                         onClick={() => {
                           setModelReferences([]);
                           setSelectedModelRef(null);
+                          setModelCustomPrompt('');
                         }}
                         className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                       >
@@ -5653,7 +5709,10 @@ function HomeContent() {
                             onClick={(e) => {
                               e.stopPropagation();
                               setModelReferences(prev => prev.filter(r => r.id !== ref.id));
-                              if (selectedModelRef === ref.id) setSelectedModelRef(null);
+                              if (selectedModelRef === ref.id) {
+                                setSelectedModelRef(null);
+                                setModelCustomPrompt('');
+                              }
                             }}
                             className="absolute top-0.5 right-0.5 p-0.5 rounded bg-black/50 hover:bg-black/70 transition-colors"
                           >
