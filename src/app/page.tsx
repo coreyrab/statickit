@@ -3680,10 +3680,9 @@ function HomeContent() {
                 </div>
               )}
 
-              {/* AI Model selector - top left */}
-              {previewImage && (
-                <div className="absolute top-3 left-3 z-10">
-                  <DropdownMenu>
+              {/* AI Model selector - top left (always visible) */}
+              <div className="absolute top-3 left-3 z-10">
+                <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground rounded-lg transition-colors">
                         <Sparkles className="w-3.5 h-3.5" />
@@ -3717,18 +3716,17 @@ function HomeContent() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              )}
 
-              {/* Action buttons overlay */}
-              {previewImage && (
-                <div className="absolute top-3 right-3 flex gap-2">
+              {/* Action buttons overlay (always visible, ghosted when no image) */}
+              <div className="absolute top-3 right-3 flex gap-2">
                   {/* Delete Version button - enabled on edits, versions, or original if no other work exists */}
-                  {!isShowingGenerated && (
+                  {(!isShowingGenerated || !previewImage) && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
-                          onClick={handleDeleteVersion}
+                          onClick={previewImage ? handleDeleteVersion : undefined}
                           disabled={
+                            !previewImage ||
                             originalVersions[originalVersionIndex]?.status === 'processing' ||
                             (originalVersionIndex === 0 && activeBaseId === 'original' && !canDeleteBaseVersion('original'))
                           }
@@ -3738,13 +3736,15 @@ function HomeContent() {
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {originalVersionIndex === 0
-                          ? activeBaseId === 'original'
-                            ? canDeleteBaseVersion('original')
-                              ? "Delete image and start over"
-                              : "Can't delete original (has edits or variations)"
-                            : "Delete this version"
-                          : "Delete this edit"}
+                        {!previewImage
+                          ? "Upload an image first"
+                          : originalVersionIndex === 0
+                            ? activeBaseId === 'original'
+                              ? canDeleteBaseVersion('original')
+                                ? "Delete image and start over"
+                                : "Can't delete original (has edits or variations)"
+                              : "Delete this version"
+                            : "Delete this edit"}
                       </TooltipContent>
                     </Tooltip>
                   )}
@@ -3752,68 +3752,70 @@ function HomeContent() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
-                        onClick={() => {
+                        onClick={previewImage ? () => {
                           const sourceLabel = isShowingGenerated && selectedVariation
                             ? `From: ${selectedVariation.title}`
                             : originalVersionIndex === 0
                               ? 'From: Original'
                               : originalVersions[originalVersionIndex]?.prompt || 'From: Edit';
                           handleCreateVersion(previewImage, sourceLabel);
-                        }}
-                        className="p-2 rounded-lg bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground transition-colors"
+                        } : undefined}
+                        disabled={!previewImage}
+                        className="p-2 rounded-lg bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground transition-colors disabled:opacity-30 disabled:hover:bg-card/80 disabled:hover:text-foreground/70 disabled:cursor-not-allowed"
                       >
                         <Layers className="w-4 h-4" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      Create new version from this image
+                      {previewImage ? 'Create new version from this image' : 'Upload an image first'}
                     </TooltipContent>
                   </Tooltip>
-                  {/* Compare button - always show for original/edits, ghosted when < 2 versions */}
+                  {/* Compare button - always show for original/edits, ghosted when < 2 versions or no image */}
                   {!isShowingGenerated && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
-                          onClick={originalVersions.length >= 2 ? handleToggleCompare : undefined}
-                          disabled={originalVersions.length < 2}
+                          onClick={previewImage && originalVersions.length >= 2 ? handleToggleCompare : undefined}
+                          disabled={!previewImage || originalVersions.length < 2}
                           className={`p-2 rounded-lg backdrop-blur-sm transition-colors ${
                             isCompareMode
                               ? 'bg-blue-500 text-white'
-                              : originalVersions.length >= 2
-                                ? 'bg-card/80 hover:bg-card text-foreground/70 hover:text-foreground'
-                                : 'bg-card/80 text-foreground/30 cursor-not-allowed'
+                              : 'bg-card/80 hover:bg-card text-foreground/70 hover:text-foreground disabled:opacity-30 disabled:hover:bg-card/80 disabled:hover:text-foreground/70 disabled:cursor-not-allowed'
                           }`}
                         >
                           <SplitSquareHorizontal className="w-4 h-4" />
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {isCompareMode
-                          ? 'Exit comparison mode'
-                          : originalVersions.length >= 2
-                            ? 'Compare versions'
-                            : 'Make an edit to compare versions'}
+                        {!previewImage
+                          ? 'Upload an image first'
+                          : isCompareMode
+                            ? 'Exit comparison mode'
+                            : originalVersions.length >= 2
+                              ? 'Compare versions'
+                              : 'Make an edit to compare versions'}
                       </TooltipContent>
                     </Tooltip>
                   )}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
-                        onClick={() => {
+                        onClick={previewImage ? () => {
                           const filename = isShowingGenerated && selectedVariation
                             ? `${selectedVariation.title}${viewingResizedSize ? `_${viewingResizedSize}` : ''}.png`
                             : uploadedImage?.filename || 'image.png';
                           handleDownload(previewImage, filename, 'single');
-                        }}
-                        className="p-2 rounded-lg bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground transition-colors"
+                        } : undefined}
+                        disabled={!previewImage}
+                        className="p-2 rounded-lg bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground transition-colors disabled:opacity-30 disabled:hover:bg-card/80 disabled:hover:text-foreground/70 disabled:cursor-not-allowed"
                       >
                         <Download className="w-4 h-4" />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent>Download image</TooltipContent>
+                    <TooltipContent>{previewImage ? 'Download image' : 'Upload an image first'}</TooltipContent>
                   </Tooltip>
                 </div>
-              )}
+
               {isShowingGenerated && selectedVariation?.imageUrl && (
                 <div className="absolute bottom-4 right-4">
                   <Button
