@@ -59,6 +59,7 @@ import {
   ImagePlus,
   UserPlus,
   Eraser,
+  Paperclip,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -3607,14 +3608,40 @@ function HomeContent() {
               {/* Floating Edit Chat Input - shows when edit tool selected */}
               {selectedTool === 'edit' && !isShowingGenerated && uploadedImage && (
                 <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
-                  <div className="bg-background/70 backdrop-blur-xl rounded-full border border-border/50 shadow-lg flex items-center gap-2 pl-4 pr-1.5 py-1.5">
-                    {(() => {
-                      const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
-                      return (
-                        <>
+                  {(() => {
+                    const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
+                    const selectedRef = editReferences.find(r => r.id === selectedEditRef);
+                    return (
+                      <div className={`bg-background/70 backdrop-blur-xl border border-border/50 shadow-lg overflow-hidden transition-all duration-200 ${
+                        selectedRef ? 'rounded-2xl' : 'rounded-full'
+                      }`}>
+                        {/* Reference attachment row - shows when reference is selected (top) */}
+                        {selectedRef && (
+                          <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30 bg-background/30">
+                            <div className="relative">
+                              <img
+                                src={selectedRef.url}
+                                alt={selectedRef.name}
+                                className="w-6 h-6 rounded object-cover"
+                              />
+                              <div className="absolute -top-1 -left-1 p-0.5 rounded-full bg-primary">
+                                <Paperclip className="w-2.5 h-2.5 text-primary-foreground" />
+                              </div>
+                            </div>
+                            <span className="text-xs text-primary font-medium">Reference</span>
+                            <button
+                              onClick={() => setSelectedEditRef(null)}
+                              className="p-0.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                        {/* Main input row */}
+                        <div className="flex items-center gap-2 pl-4 pr-1.5 py-1.5">
                           <input
                             type="text"
-                            placeholder="Describe an edit..."
+                            placeholder={selectedRef ? "Describe how to use the reference..." : "Describe an edit..."}
                             value={originalEditPrompt}
                             onChange={(e) => setOriginalEditPrompt(e.target.value)}
                             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 outline-none"
@@ -3632,24 +3659,50 @@ function HomeContent() {
                           >
                             <Send className="w-4 h-4 text-primary-foreground" />
                           </button>
-                        </>
-                      );
-                    })()}
-                  </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 
               {/* Floating Background Input - shows when backgrounds tool selected */}
               {selectedTool === 'backgrounds' && !isShowingGenerated && uploadedImage && (
                 <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
-                  <div className="bg-background/70 backdrop-blur-xl rounded-full border border-border/50 shadow-lg flex items-center gap-2 pl-4 pr-1.5 py-1.5">
-                    {(() => {
-                      const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
-                      return (
-                        <>
+                  {(() => {
+                    const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
+                    const selectedRef = backgroundReferences.find(r => r.id === selectedBackgroundRef);
+                    return (
+                      <div className={`bg-background/70 backdrop-blur-xl border border-border/50 shadow-lg overflow-hidden transition-all duration-200 ${
+                        selectedRef ? 'rounded-2xl' : 'rounded-full'
+                      }`}>
+                        {/* Reference attachment row - shows when reference is selected (top) */}
+                        {selectedRef && (
+                          <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30 bg-background/30">
+                            <div className="relative">
+                              <img
+                                src={selectedRef.url}
+                                alt={selectedRef.name}
+                                className="w-6 h-6 rounded object-cover"
+                              />
+                              <div className="absolute -top-1 -left-1 p-0.5 rounded-full bg-primary">
+                                <Paperclip className="w-2.5 h-2.5 text-primary-foreground" />
+                              </div>
+                            </div>
+                            <span className="text-xs text-primary font-medium">Reference</span>
+                            <button
+                              onClick={() => setSelectedBackgroundRef(null)}
+                              className="p-0.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                        {/* Main input row */}
+                        <div className="flex items-center gap-2 pl-4 pr-1.5 py-1.5">
                           <input
                             type="text"
-                            placeholder="Describe a background..."
+                            placeholder={selectedRef ? "Describe how to use the reference..." : "Describe a background..."}
                             value={backgroundCustomPrompt}
                             onChange={(e) => setBackgroundCustomPrompt(e.target.value)}
                             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 outline-none"
@@ -3671,24 +3724,50 @@ function HomeContent() {
                           >
                             <Send className="w-4 h-4 text-primary-foreground" />
                           </button>
-                        </>
-                      );
-                    })()}
-                  </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 
               {/* Floating Model Input - shows when model tool selected */}
               {selectedTool === 'model' && !isShowingGenerated && uploadedImage && (
                 <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
-                  <div className="bg-background/70 backdrop-blur-xl rounded-full border border-border/50 shadow-lg flex items-center gap-2 pl-4 pr-1.5 py-1.5">
-                    {(() => {
-                      const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
-                      return (
-                        <>
+                  {(() => {
+                    const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
+                    const selectedRef = modelReferences.find(r => r.id === selectedModelRef);
+                    return (
+                      <div className={`bg-background/70 backdrop-blur-xl border border-border/50 shadow-lg overflow-hidden transition-all duration-200 ${
+                        selectedRef ? 'rounded-2xl' : 'rounded-full'
+                      }`}>
+                        {/* Reference attachment row - shows when reference is selected (top) */}
+                        {selectedRef && (
+                          <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30 bg-background/30">
+                            <div className="relative">
+                              <img
+                                src={selectedRef.url}
+                                alt={selectedRef.name}
+                                className="w-6 h-6 rounded object-cover"
+                              />
+                              <div className="absolute -top-1 -left-1 p-0.5 rounded-full bg-primary">
+                                <Paperclip className="w-2.5 h-2.5 text-primary-foreground" />
+                              </div>
+                            </div>
+                            <span className="text-xs text-primary font-medium">Reference</span>
+                            <button
+                              onClick={() => setSelectedModelRef(null)}
+                              className="p-0.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                        {/* Main input row */}
+                        <div className="flex items-center gap-2 pl-4 pr-1.5 py-1.5">
                           <input
                             type="text"
-                            placeholder="Describe a model..."
+                            placeholder={selectedRef ? "Describe how to use the reference..." : "Describe a model..."}
                             value={modelCustomPrompt}
                             onChange={(e) => setModelCustomPrompt(e.target.value)}
                             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 outline-none"
@@ -3710,10 +3789,10 @@ function HomeContent() {
                           >
                             <Send className="w-4 h-4 text-primary-foreground" />
                           </button>
-                        </>
-                      );
-                    })()}
-                  </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 
