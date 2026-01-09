@@ -8,8 +8,9 @@ export const size = {
 };
 export const contentType = 'image/png';
 
-// Blog posts titles - must match the slugs in page.tsx
+// Blog posts titles - must match the slugs in blog-posts.ts
 const postTitles: Record<string, string> = {
+  'iterate-meta-ads-ai-image-editing': 'How to Iterate on Winning Meta Ads Without Killing Performance',
   'gemini-image-generation-no-watermark': 'How to use Gemini image generation without watermarks',
   'natural-language-image-editing': 'Edit images by describing what you want',
   'best-free-ai-image-editors': 'Best free AI image editors in 2026',
