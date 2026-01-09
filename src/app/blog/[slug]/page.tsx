@@ -47,11 +47,15 @@ The fastest way to breathe new life into a winning static image ad is changing t
 
 - **The AI-Powered Way** With [StaticKit](https://statickit.com)'s background replacement, you can test location hypotheses before investing in production. Upload your winning creative, describe the new environment in natural language ("Replace background with a sunny outdoor café patio, European style, morning light"), and StaticKit automatically extracts your product/subject, generates the new environment, and adjusts lighting to match.
 
+![Background swap example showing the same model in two different locations](/blog/background_change.jpg)
+
 ## Pro Tip: Test Lighting Variations Too
 
 The same location can feel completely different with alternate lighting. Golden hour creates warm, aspirational, lifestyle vibes, perfect for wellness, travel, and premium products. Bright studio lighting feels clean, trustworthy, and professional, ideal for SaaS, B2B, and health products. Neon/moody lighting is edgy, youthful, and bold, great for fashion, nightlife, and Gen Z brands.
 
 StaticKit includes one-click lighting presets, so you can test whether your winning creative performs differently in "golden hour" vs. "studio" lighting, all without re-shooting.
+
+![Lighting change example showing day to night transformation](/blog/lighting_change_ai.jpg)
 
 ## Iteration Type #2: Subject Variations
 
@@ -60,6 +64,8 @@ Nick's second iteration lever is testing different people: "Say your winning ad 
 If your winning ad shows a 25-year-old using your product, you might be missing the 45-55 demographic who can't see themselves in the image, different cultural contexts that resonate with other segments, and gender variations that could unlock new audiences.
 
 StaticKit's reference image feature lets you extract a subject from one image, apply your product/context to that subject, and maintain pose and composition while changing the person.
+
+![Model swap example showing different person in the same pose and outfit](/blog/model_change_ai.jpg)
 
 ## From Iterations to Variations: Changing Multiple Elements
 
@@ -419,6 +425,25 @@ export default function BlogPostPage() {
     const paragraphs = content.split('\n\n').filter(p => p.trim());
 
     return paragraphs.map((paragraph, i) => {
+      // Image - ![alt text](src)
+      const imageMatch = paragraph.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+      if (imageMatch) {
+        return (
+          <figure key={i} className="my-8">
+            <img
+              src={imageMatch[2]}
+              alt={imageMatch[1]}
+              className="w-full rounded-lg border border-border"
+            />
+            {imageMatch[1] && (
+              <figcaption className="text-center text-sm text-muted-foreground mt-2">
+                {imageMatch[1]}
+              </figcaption>
+            )}
+          </figure>
+        );
+      }
+
       // Heading
       if (paragraph.startsWith('## ')) {
         return (
