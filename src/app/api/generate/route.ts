@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
       // Reference image params
       backgroundRefImage, backgroundRefMimeType,
       modelRefImage, modelRefMimeType,
+      editRefImage, editRefMimeType,
       // Model selection
       model,
     } = await request.json();
@@ -269,7 +270,50 @@ OUTPUT REQUIREMENTS:
       }
     } else if (isEdit) {
       // Edit/refinement prompt - focuses on making specific changes to the existing generated image
-      prompt = `Edit this advertising image according to the following instructions.
+      if (editRefImage) {
+        // Edit with reference image - user describes how to use the reference
+        prompt = `Edit this image according to the following instructions. A REFERENCE IMAGE is provided - use it as described in the edit request.
+
+You are given TWO images:
+1. MAIN IMAGE (first): The image to edit
+2. REFERENCE IMAGE (second): Use this as described in the edit request below
+
+EDIT REQUEST:
+${variationDescription}
+
+=== ABSOLUTE RULES ===
+
+**SCREEN PROTECTION**: If there is ANY screen (laptop, phone, monitor, TV, tablet):
+- Do NOT modify what is displayed on the screen
+- Screen content must remain EXACTLY the same
+- This is non-negotiable
+
+**PRODUCT PROTECTION**: The product must stay identical unless the edit specifically requests changes:
+- Same appearance, position, and details
+- Any text, logos, or UI elements unchanged
+
+**FACE PRESERVATION**: If any people are in the image:
+- CRITICAL: Preserve the EXACT facial features and identity
+- Same face shape, eyes, nose, mouth, jawline, and skin texture
+- Same facial expression and gaze direction
+- The person must be recognizable as the same individual
+- Do NOT distort, morph, or alter facial proportions
+
+=== REFERENCE IMAGE USAGE ===
+- The REFERENCE IMAGE should be used as described in the edit request above
+- Common uses: apply color grading/style, copy elements, match lighting, use as composition inspiration
+- Apply the relevant aspects from the reference while maintaining the main image's integrity
+
+=== EDIT GUIDELINES ===
+1. Apply the requested edit using the reference as described
+2. Keep overall composition similar unless specifically asked to change
+3. Maintain aspect ratio: ${aspectRatio}
+4. Preserve brand style: ${analysis.brand_style}
+
+Make the requested edit while maintaining quality and coherence.`;
+      } else {
+        // Standard edit without reference
+        prompt = `Edit this advertising image according to the following instructions.
 
 EDIT REQUEST:
 ${variationDescription}
@@ -299,6 +343,7 @@ ${variationDescription}
 4. Preserve brand style: ${analysis.brand_style}
 
 Make ONLY the requested edit. Everything else stays exactly the same.`;
+      }
     } else {
       // New variation prompt - A/B test variations with screen protection
       prompt = `You are creating an A/B test variation of this ad. The product must remain EXACTLY the same - you are changing the environment, lighting, or context around it.
@@ -373,6 +418,16 @@ Generate the variation that implements the requested change while keeping the pr
         inlineData: {
           mimeType: modelRefMimeType,
           data: modelRefImage,
+        },
+      });
+    }
+
+    if (editRefImage && editRefMimeType) {
+      console.log('Including edit reference image');
+      contentParts.push({
+        inlineData: {
+          mimeType: editRefMimeType,
+          data: editRefImage,
         },
       });
     }

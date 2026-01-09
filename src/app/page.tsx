@@ -175,7 +175,7 @@ interface ReferenceImage {
   base64: string;     // for API calls
   mimeType: string;
   name: string;
-  type: 'background' | 'model';
+  type: 'background' | 'model' | 'edit';
 }
 
 function HomeContent() {
@@ -297,8 +297,10 @@ function HomeContent() {
   // Reference images state (session-based)
   const [backgroundReferences, setBackgroundReferences] = useState<ReferenceImage[]>([]);
   const [modelReferences, setModelReferences] = useState<ReferenceImage[]>([]);
+  const [editReferences, setEditReferences] = useState<ReferenceImage[]>([]);
   const [selectedBackgroundRef, setSelectedBackgroundRef] = useState<string | null>(null);
   const [selectedModelRef, setSelectedModelRef] = useState<string | null>(null);
+  const [selectedEditRef, setSelectedEditRef] = useState<string | null>(null);
 
   // AI Model selection
   const [selectedAIModel, setSelectedAIModel] = useState<'gemini-3-pro-image-preview' | 'gemini-2.0-flash-exp'>('gemini-3-pro-image-preview');
@@ -306,6 +308,7 @@ function HomeContent() {
   // File input refs for reference uploads
   const backgroundRefInputRef = useRef<HTMLInputElement>(null);
   const modelRefInputRef = useRef<HTMLInputElement>(null);
+  const editRefInputRef = useRef<HTMLInputElement>(null);
 
   // Animated upload icon ref
   const uploadIconRef = useRef<UploadHandle>(null);
@@ -1454,6 +1457,9 @@ function HomeContent() {
         mood: 'Not specified',
       };
 
+      // Find selected edit reference (if any)
+      const selectedRef = editReferences.find(r => r.id === selectedEditRef);
+
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1466,6 +1472,11 @@ function HomeContent() {
           aspectRatio: aspectRatioToUse,
           isEdit: true,
           model: selectedAIModel,
+          // Include edit reference if selected
+          ...(selectedRef && {
+            editRefImage: selectedRef.base64,
+            editRefMimeType: selectedRef.mimeType,
+          }),
         }),
       });
 
@@ -2223,6 +2234,32 @@ function HomeContent() {
       setModelReferences(prev => [...prev, newRef]);
       setSelectedModelRef(newRef.id);
       setModelCustomPrompt(`Use person from reference image`);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  // Handle edit reference image upload
+  const handleEditRefUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      const base64 = dataUrl.split(',')[1];
+
+      const newRef: ReferenceImage = {
+        id: `edit-ref-${Date.now()}`,
+        url: dataUrl,
+        base64,
+        mimeType: file.type,
+        name: file.name,
+        type: 'edit',
+      };
+
+      setEditReferences(prev => [...prev, newRef]);
+      setSelectedEditRef(newRef.id);
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -4604,6 +4641,90 @@ function HomeContent() {
                           ))}
                         </div>
                       )}
+                    </div>
+
+                    {/* Reference Image Section */}
+                    <div className="border-t border-border/50 pt-3 mt-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground">Reference Image</span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+                                <Info className="w-3 h-3" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="max-w-[200px]">
+                              <p className="text-xs">Upload a reference image and describe how to use it in your edit prompt.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        {editReferences.length > 0 && (
+                          <button
+                            onClick={() => {
+                              setEditReferences([]);
+                              setSelectedEditRef(null);
+                            }}
+                            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Clear all
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Existing references grid */}
+                      {editReferences.length > 0 && (
+                        <div className="grid grid-cols-4 gap-1.5 mb-2">
+                          {editReferences.map((ref) => (
+                            <div
+                              key={ref.id}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => setSelectedEditRef(ref.id === selectedEditRef ? null : ref.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  setSelectedEditRef(ref.id === selectedEditRef ? null : ref.id);
+                                }
+                              }}
+                              className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                                selectedEditRef === ref.id
+                                  ? 'border-primary ring-2 ring-primary/20'
+                                  : 'border-border hover:border-primary/50'
+                              }`}
+                            >
+                              <img src={ref.url} alt={ref.name} className="w-full h-full object-cover" />
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditReferences(prev => prev.filter(r => r.id !== ref.id));
+                                  if (selectedEditRef === ref.id) setSelectedEditRef(null);
+                                }}
+                                className="absolute top-0.5 right-0.5 p-0.5 rounded bg-black/50 hover:bg-black/70 transition-colors"
+                              >
+                                <X className="w-3 h-3 text-white" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Add reference button */}
+                      <button
+                        onClick={() => editRefInputRef.current?.click()}
+                        className="w-full py-2 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition-colors flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                      >
+                        <ImagePlus className="w-4 h-4" />
+                        Add reference
+                      </button>
+
+                      {/* Hidden file input */}
+                      <input
+                        ref={editRefInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleEditRefUpload}
+                      />
                     </div>
 
                     {/* Apply button - always rendered, visibility controlled by opacity */}
