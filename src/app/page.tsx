@@ -3513,9 +3513,9 @@ function HomeContent() {
                       );
                     })()
                   )}
-                  {/* Processing container overlay - dim over entire viewer */}
+                  {/* Processing container overlay - subtle dim over entire viewer */}
                   {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing' && (
-                    <div className="absolute inset-0 bg-black/40 rounded-2xl pointer-events-none" />
+                    <div className="absolute inset-0 bg-black/25 rounded-2xl pointer-events-none" />
                   )}
                   {/* Error overlay when viewing a failed version */}
                   {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'error' && (
