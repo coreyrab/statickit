@@ -5,42 +5,13 @@ import { ArrowLeft, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { Footer } from '@/components/landing/Footer';
+import { posts as blogPosts, getAllPostSlugs } from '@/lib/blog-posts';
 
-// Blog posts data - add new posts here
-const posts = [
-  {
-    slug: 'iterate-meta-ads-ai-image-editing',
-    title: 'How to Iterate on Winning Meta Ads Without Killing Performance',
-    date: '2025-01-09',
-    excerpt: 'Stop paying for expensive photoshoots every time you need a new ad variation. The AI-powered approach to creative testing.',
-    readTime: '10 min read',
-    coverImage: '/blog/meta-ads-iteration.jpg',
-  },
-  {
-    slug: 'best-free-ai-image-editors',
-    title: 'Best free AI image editors in 2026',
-    date: '2025-01-03',
-    excerpt: 'Most "free AI image editors" aren\'t really free. Here are the tools that actually deliver.',
-    readTime: '7 min read',
-    coverImage: '/blog/statickit_before_after.jpg',
-  },
-  {
-    slug: 'natural-language-image-editing',
-    title: 'Edit images by describing what you want',
-    date: '2025-01-03',
-    excerpt: '"Remove the background." "Make it warmer." "Change her shirt to blue." This is image editing now.',
-    readTime: '6 min read',
-    coverImage: '/blog/painting_with_words.jpg',
-  },
-  {
-    slug: 'gemini-image-generation-no-watermark',
-    title: 'How to use Gemini image generation without watermarks',
-    date: '2025-01-03',
-    excerpt: 'Google\'s Gemini adds watermarks to AI-generated images — unless you use your own API key. Here\'s how.',
-    readTime: '5 min read',
-    coverImage: '/blog/geminiwatermark_blog.jpg',
-  },
-];
+// Transform posts data for listing with slug included
+const posts = getAllPostSlugs().map(slug => ({
+  slug,
+  ...blogPosts[slug],
+})).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 export default function BlogPage() {
   const { theme, setTheme } = useTheme();
