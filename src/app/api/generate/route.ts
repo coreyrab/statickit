@@ -9,6 +9,8 @@ export async function POST(request: NextRequest) {
       // Reference image params
       backgroundRefImage, backgroundRefMimeType,
       modelRefImage, modelRefMimeType,
+      // Model selection
+      model,
     } = await request.json();
 
     if (!apiKey) {
@@ -24,10 +26,11 @@ export async function POST(request: NextRequest) {
 
     const { genAI } = createGeminiClient(apiKey);
 
-    // Use Gemini 3 Pro Image - the latest high-fidelity image generation model
-    // This model better preserves reference images and maintains product consistency
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-3-pro-image-preview',
+    // Use selected model or default to Gemini 3 Pro Image
+    // Available models: gemini-3-pro-image-preview (default, best quality), gemini-2.0-flash-exp (faster & cheaper)
+    const selectedModel = model || 'gemini-3-pro-image-preview';
+    const generativeModel = genAI.getGenerativeModel({
+      model: selectedModel,
       generationConfig: {
         responseModalities: ['Text', 'Image'],
       } as any,
@@ -377,7 +380,7 @@ Generate the variation that implements the requested change while keeping the pr
     // Add the prompt last
     contentParts.push(prompt);
 
-    const result = await model.generateContent(contentParts);
+    const result = await generativeModel.generateContent(contentParts);
 
     // Extract the generated image from the response
     const response = result.response;

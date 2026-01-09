@@ -28,6 +28,7 @@ import {
   Archive,
   ArchiveRestore,
   ChevronDown,
+  ChevronUp,
   Maximize2,
   Info,
   Layers,
@@ -298,6 +299,9 @@ function HomeContent() {
   const [modelReferences, setModelReferences] = useState<ReferenceImage[]>([]);
   const [selectedBackgroundRef, setSelectedBackgroundRef] = useState<string | null>(null);
   const [selectedModelRef, setSelectedModelRef] = useState<string | null>(null);
+
+  // AI Model selection
+  const [selectedAIModel, setSelectedAIModel] = useState<'gemini-3-pro-image-preview' | 'gemini-2.0-flash-exp'>('gemini-3-pro-image-preview');
 
   // File input refs for reference uploads
   const backgroundRefInputRef = useRef<HTMLInputElement>(null);
@@ -1152,6 +1156,7 @@ function HomeContent() {
           analysis,
           variationDescription: variation.description,
           aspectRatio: uploadedImage.aspectRatio,
+          model: selectedAIModel,
         }),
       });
 
@@ -1332,6 +1337,7 @@ function HomeContent() {
           variationDescription: `${variation.description}\n\nEDIT REQUEST: ${editPromptUsed}`,
           aspectRatio: uploadedImage.aspectRatio,
           isEdit: true,
+          model: selectedAIModel,
         }),
       });
 
@@ -1459,6 +1465,7 @@ function HomeContent() {
           variationDescription: `EDIT REQUEST: ${editPromptUsed}`,
           aspectRatio: aspectRatioToUse,
           isEdit: true,
+          model: selectedAIModel,
         }),
       });
 
@@ -1601,6 +1608,7 @@ function HomeContent() {
           variationDescription: `PRESET APPLICATION: ${combinedPrompt}`,
           aspectRatio: uploadedImage.aspectRatio,
           isEdit: true,
+          model: selectedAIModel,
         }),
       });
 
@@ -1724,6 +1732,7 @@ function HomeContent() {
           aspectRatio: uploadedImage.aspectRatio,
           isEdit: true,
           isBackgroundOnly: true,
+          model: selectedAIModel,
           // Include reference image if selected
           ...(selectedBgRef && {
             backgroundRefImage: selectedBgRef.base64,
@@ -2000,6 +2009,7 @@ function HomeContent() {
           isEdit: true,
           isModelOnly: true,
           keepClothing: keepClothing,
+          model: selectedAIModel,
           // Include reference image if selected
           ...(selectedModelReference && {
             modelRefImage: selectedModelReference.base64,
@@ -2837,11 +2847,11 @@ function HomeContent() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => setShowApiKeySetup(true)} className="cursor-pointer">
-                  <Key className={`w-4 h-4 ${apiKey ? 'text-emerald-600 dark:text-emerald-400' : ''}`} />
+                <DropdownMenuItem onClick={() => setShowApiKeySetup(true)} className="cursor-pointer group">
+                  <Key className={`w-4 h-4 ${apiKey ? 'text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300' : ''}`} />
                   <span>API Key</span>
                   {apiKey && (
-                    <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400">Active</span>
+                    <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300">Active</span>
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="cursor-pointer">
@@ -3350,9 +3360,16 @@ function HomeContent() {
                               style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                             />
                             {/* Left side label */}
-                            <div className="absolute top-3 left-3 px-2 py-1 rounded bg-black/60 text-white text-xs backdrop-blur-sm flex items-center gap-1.5">
-                              <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                              {compareLeftIndex === 0 ? 'Original' : `Edit ${compareLeftIndex}`}
+                            <div className="absolute top-3 left-3 px-2 py-1.5 rounded bg-black/60 text-white text-xs backdrop-blur-sm">
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                {compareLeftIndex === 0 ? 'Original' : `Edit ${compareLeftIndex}`}
+                              </div>
+                              {originalVersions[compareLeftIndex]?.prompt && (
+                                <div className="text-[10px] text-white/70 mt-0.5 max-w-[180px] truncate">
+                                  "{originalVersions[compareLeftIndex].prompt}"
+                                </div>
+                              )}
                             </div>
                           </div>
                         }
@@ -3364,14 +3381,42 @@ function HomeContent() {
                               style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                             />
                             {/* Right side label */}
-                            <div className="absolute top-3 right-3 px-2 py-1 rounded bg-blue-500/80 text-white text-xs backdrop-blur-sm flex items-center gap-1.5">
-                              <div className="w-2 h-2 rounded-full bg-blue-400" />
-                              {compareRightIndex === 0 ? 'Original' : `Edit ${compareRightIndex}`}
+                            <div className="absolute top-3 right-3 px-2 py-1.5 rounded bg-blue-500/80 text-white text-xs backdrop-blur-sm text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                {compareRightIndex === 0 ? 'Original' : `Edit ${compareRightIndex}`}
+                                <div className="w-2 h-2 rounded-full bg-blue-400" />
+                              </div>
+                              {originalVersions[compareRightIndex]?.prompt && (
+                                <div className="text-[10px] text-white/70 mt-0.5 max-w-[180px] truncate">
+                                  "{originalVersions[compareRightIndex].prompt}"
+                                </div>
+                              )}
                             </div>
                           </div>
                         }
                         style={{ width: '100%', height: '100%' }}
                       />
+                      {/* Comparison descriptions below slider */}
+                      {(originalVersions[compareLeftIndex]?.prompt || originalVersions[compareRightIndex]?.prompt) && (
+                        <div className="flex justify-between mt-3 text-xs text-muted-foreground gap-4">
+                          <div className="flex-1">
+                            {originalVersions[compareLeftIndex]?.prompt && (
+                              <span className="flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                                <span className="italic">"{originalVersions[compareLeftIndex].prompt}"</span>
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1 text-right">
+                            {originalVersions[compareRightIndex]?.prompt && (
+                              <span className="flex items-center justify-end gap-1.5">
+                                <span className="italic">"{originalVersions[compareRightIndex].prompt}"</span>
+                                <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     // Normal single image view
@@ -3632,6 +3677,45 @@ function HomeContent() {
                       );
                     })()}
                   </div>
+                </div>
+              )}
+
+              {/* AI Model selector - top left */}
+              {previewImage && (
+                <div className="absolute top-3 left-3 z-10">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground rounded-lg transition-colors">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        {selectedAIModel === 'gemini-3-pro-image-preview' ? 'Gemini 3 Pro' : 'Gemini 2.0 Flash'}
+                        <ChevronDown className="w-3 h-3" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-[220px]">
+                      <DropdownMenuLabel className="text-xs text-muted-foreground">Choose your model</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => setSelectedAIModel('gemini-3-pro-image-preview')}
+                        className="flex items-center justify-between cursor-pointer group"
+                      >
+                        <div>
+                          <div className="font-medium group-hover:text-white">Gemini 3 Pro</div>
+                          <div className="text-xs text-muted-foreground group-hover:text-white/70">Best quality</div>
+                        </div>
+                        {selectedAIModel === 'gemini-3-pro-image-preview' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setSelectedAIModel('gemini-2.0-flash-exp')}
+                        className="flex items-center justify-between cursor-pointer group"
+                      >
+                        <div>
+                          <div className="font-medium group-hover:text-white">Gemini 2.0 Flash</div>
+                          <div className="text-xs text-muted-foreground group-hover:text-white/70">Faster & cheaper</div>
+                        </div>
+                        {selectedAIModel === 'gemini-2.0-flash-exp' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               )}
 
