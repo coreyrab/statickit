@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, Moon, Sun } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Footer } from '@/components/landing/Footer';
 
 // Blog posts content - add new posts here
@@ -384,7 +384,7 @@ export default function BlogPostPage() {
   // Parse markdown links into JSX
   const parseLinks = (text: string) => {
     const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-    const parts: (string | JSX.Element)[] = [];
+    const parts: React.ReactNode[] = [];
     let lastIndex = 0;
     let match;
 
