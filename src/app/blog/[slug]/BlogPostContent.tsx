@@ -6,6 +6,21 @@ import { useTheme } from 'next-themes';
 import React, { useEffect, useState, useRef } from 'react';
 import { Footer } from '@/components/landing/Footer';
 import type { BlogPost } from '@/lib/blog-posts';
+import TopBarProgress from 'react-topbar-progress-indicator';
+import topbar from 'topbar';
+
+// Configure topbar styling - disable autoRun to control progress manually via scroll
+TopBarProgress.config({
+  barColors: {
+    '0': 'hsl(var(--primary))',
+    '1.0': 'hsl(var(--primary))',
+  },
+  barThickness: 4,
+  shadowBlur: 0,
+} as Parameters<typeof TopBarProgress.config>[0] & { autoRun?: boolean });
+
+// Disable autoRun via topbar directly
+topbar.config({ autoRun: false });
 
 interface BlogPostContentProps {
   post: BlogPost;
@@ -14,32 +29,28 @@ interface BlogPostContentProps {
 export default function BlogPostContent({ post }: BlogPostContentProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [readingProgress, setReadingProgress] = useState(0);
 
   // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Track reading progress with smooth animation
+  // Track reading progress with topbar
   const rafRef = useRef<number | null>(null);
-  const progressRef = useRef(0);
 
   useEffect(() => {
     const updateProgress = () => {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      progressRef.current = Math.min(100, Math.max(0, progress));
-      setReadingProgress(progressRef.current);
+      const progress = docHeight > 0 ? scrollTop / docHeight : 0;
+      const clampedProgress = Math.min(1, Math.max(0, progress));
+      topbar.progress(clampedProgress);
     };
 
     const handleScroll = () => {
-      // Cancel any pending animation frame to avoid stacking
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
-      // Schedule update on next animation frame for smooth 60fps updates
       rafRef.current = requestAnimationFrame(updateProgress);
     };
 
@@ -156,15 +167,7 @@ export default function BlogPostContent({ post }: BlogPostContentProps) {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Reading Progress Bar */}
-      <div className="fixed top-0 left-0 right-0 h-1 bg-primary/20 z-50">
-        <div
-          className="h-full w-full bg-primary origin-left will-change-transform"
-          style={{
-            transform: `scaleX(${readingProgress / 100})`,
-            transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-          }}
-        />
-      </div>
+      {mounted && <TopBarProgress />}
 
       <div className="flex-1">
         {/* Header */}
