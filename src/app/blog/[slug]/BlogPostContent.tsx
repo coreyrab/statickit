@@ -3,27 +3,9 @@
 import Link from 'next/link';
 import { ArrowLeft, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Footer } from '@/components/landing/Footer';
 import type { BlogPost } from '@/lib/blog-posts';
-import dynamic from 'next/dynamic';
-
-// Dynamically import TopBarProgress to avoid SSR issues with window
-const TopBarProgress = dynamic(
-  () => import('react-topbar-progress-indicator').then((mod) => {
-    // Configure after import on client side
-    mod.default.config({
-      barColors: {
-        '0': 'hsl(var(--primary))',
-        '1.0': 'hsl(var(--primary))',
-      },
-      barThickness: 4,
-      shadowBlur: 0,
-    });
-    return mod;
-  }),
-  { ssr: false }
-);
 
 interface BlogPostContentProps {
   post: BlogPost;
@@ -32,49 +14,10 @@ interface BlogPostContentProps {
 export default function BlogPostContent({ post }: BlogPostContentProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const topbarRef = useRef<typeof import('topbar').default | null>(null);
 
   // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  // Track reading progress with topbar
-  const rafRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    // Dynamically import topbar on client side
-    import('topbar').then((topbarModule) => {
-      topbarRef.current = topbarModule.default;
-      topbarRef.current.config({ autoRun: false });
-    });
-  }, []);
-
-  useEffect(() => {
-    const updateProgress = () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = docHeight > 0 ? scrollTop / docHeight : 0;
-      const clampedProgress = Math.min(1, Math.max(0, progress));
-      topbarRef.current?.progress(clampedProgress);
-    };
-
-    const handleScroll = () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-      rafRef.current = requestAnimationFrame(updateProgress);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    updateProgress();
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
   }, []);
 
   // Parse markdown links into JSX
@@ -178,9 +121,6 @@ export default function BlogPostContent({ post }: BlogPostContentProps) {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Reading Progress Bar */}
-      {mounted && <TopBarProgress />}
-
       <div className="flex-1">
         {/* Header */}
         <header className="px-6 py-8">
