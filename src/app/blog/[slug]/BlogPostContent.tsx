@@ -14,10 +14,26 @@ interface BlogPostContentProps {
 export default function BlogPostContent({ post }: BlogPostContentProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [readingProgress, setReadingProgress] = useState(0);
 
   // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Track reading progress
+  useEffect(() => {
+    const updateProgress = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      setReadingProgress(Math.min(100, Math.max(0, progress)));
+    };
+
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    return () => window.removeEventListener('scroll', updateProgress);
   }, []);
 
   // Parse markdown links into JSX
@@ -121,6 +137,14 @@ export default function BlogPostContent({ post }: BlogPostContentProps) {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
+      {/* Reading Progress Bar */}
+      <div className="fixed top-0 left-0 right-0 h-1 bg-primary/20 z-50">
+        <div
+          className="h-full bg-primary transition-all duration-150 ease-out"
+          style={{ width: `${readingProgress}%` }}
+        />
+      </div>
+
       <div className="flex-1">
         {/* Header */}
         <header className="px-6 py-8">
