@@ -6,21 +6,24 @@ import { useTheme } from 'next-themes';
 import React, { useEffect, useState, useRef } from 'react';
 import { Footer } from '@/components/landing/Footer';
 import type { BlogPost } from '@/lib/blog-posts';
-import TopBarProgress from 'react-topbar-progress-indicator';
-import topbar from 'topbar';
+import dynamic from 'next/dynamic';
 
-// Configure topbar styling - disable autoRun to control progress manually via scroll
-TopBarProgress.config({
-  barColors: {
-    '0': 'hsl(var(--primary))',
-    '1.0': 'hsl(var(--primary))',
-  },
-  barThickness: 4,
-  shadowBlur: 0,
-} as Parameters<typeof TopBarProgress.config>[0] & { autoRun?: boolean });
-
-// Disable autoRun via topbar directly
-topbar.config({ autoRun: false });
+// Dynamically import TopBarProgress to avoid SSR issues with window
+const TopBarProgress = dynamic(
+  () => import('react-topbar-progress-indicator').then((mod) => {
+    // Configure after import on client side
+    mod.default.config({
+      barColors: {
+        '0': 'hsl(var(--primary))',
+        '1.0': 'hsl(var(--primary))',
+      },
+      barThickness: 4,
+      shadowBlur: 0,
+    });
+    return mod;
+  }),
+  { ssr: false }
+);
 
 interface BlogPostContentProps {
   post: BlogPost;
@@ -29,6 +32,7 @@ interface BlogPostContentProps {
 export default function BlogPostContent({ post }: BlogPostContentProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const topbarRef = useRef<typeof import('topbar').default | null>(null);
 
   // Avoid hydration mismatch
   useEffect(() => {
@@ -39,12 +43,20 @@ export default function BlogPostContent({ post }: BlogPostContentProps) {
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // Dynamically import topbar on client side
+    import('topbar').then((topbarModule) => {
+      topbarRef.current = topbarModule.default;
+      topbarRef.current.config({ autoRun: false });
+    });
+  }, []);
+
+  useEffect(() => {
     const updateProgress = () => {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = docHeight > 0 ? scrollTop / docHeight : 0;
       const clampedProgress = Math.min(1, Math.max(0, progress));
-      topbar.progress(clampedProgress);
+      topbarRef.current?.progress(clampedProgress);
     };
 
     const handleScroll = () => {
