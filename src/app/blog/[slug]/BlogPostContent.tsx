@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Footer } from '@/components/landing/Footer';
 import type { BlogPost } from '@/lib/blog-posts';
 
@@ -21,19 +21,37 @@ export default function BlogPostContent({ post }: BlogPostContentProps) {
     setMounted(true);
   }, []);
 
-  // Track reading progress
+  // Track reading progress with smooth animation
+  const rafRef = useRef<number | null>(null);
+  const progressRef = useRef(0);
+
   useEffect(() => {
     const updateProgress = () => {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      setReadingProgress(Math.min(100, Math.max(0, progress)));
+      progressRef.current = Math.min(100, Math.max(0, progress));
+      setReadingProgress(progressRef.current);
     };
 
-    window.addEventListener('scroll', updateProgress);
+    const handleScroll = () => {
+      // Cancel any pending animation frame to avoid stacking
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      // Schedule update on next animation frame for smooth 60fps updates
+      rafRef.current = requestAnimationFrame(updateProgress);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     updateProgress();
 
-    return () => window.removeEventListener('scroll', updateProgress);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
   }, []);
 
   // Parse markdown links into JSX
@@ -140,8 +158,11 @@ export default function BlogPostContent({ post }: BlogPostContentProps) {
       {/* Reading Progress Bar */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-primary/20 z-50">
         <div
-          className="h-full bg-primary transition-all duration-150 ease-out"
-          style={{ width: `${readingProgress}%` }}
+          className="h-full w-full bg-primary origin-left will-change-transform"
+          style={{
+            transform: `scaleX(${readingProgress / 100})`,
+            transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
         />
       </div>
 
