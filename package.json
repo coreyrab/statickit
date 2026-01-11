@@ -8,7 +8,7 @@
   },
   "homepage": "https://github.com/CoreyRab/statickit",
   "bugs": "https://github.com/CoreyRab/statickit/issues",
-  "license": "AGPL-3.0",
+  "license": "MIT",
   "author": "CoreyRab",
   "private": false,
   "scripts": {

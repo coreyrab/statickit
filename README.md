@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/CoreyRab/statickit/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="License" />
+    <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
   </a>
   <a href="https://github.com/CoreyRab/statickit/stargazers">
     <img src="https://img.shields.io/github/stars/CoreyRab/statickit?style=social" alt="Stars" />
@@ -87,4 +87,4 @@ Contributions welcome. See [CONTRIBUTING.md](.github/CONTRIBUTING.md).
 
 ## License
 
-[AGPL-3.0](LICENSE)
+[MIT](LICENSE)

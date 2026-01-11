@@ -85,8 +85,8 @@ export function TermsModal({ open, onOpenChange }: TermsModalProps) {
                 4. Intellectual Property
               </h3>
               <p>
-                StaticKit is open-source software licensed under the GNU AGPL
-                v3. You retain all rights to the images you create or edit using
+                StaticKit is open-source software licensed under the MIT
+                license. You retain all rights to the images you create or edit using
                 the Service. We claim no ownership over your content.
               </p>
             </section>
