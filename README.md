@@ -19,6 +19,10 @@
   <a href="https://statickit.ai">Website</a> · <a href="https://github.com/CoreyRab/statickit">GitHub</a> · <a href="https://x.com/coreyrab">Twitter</a>
 </p>
 
+<p align="center">
+  <i>If this helps you, please star ⭐</i>
+</p>
+
 ---
 
 StaticKit is an open-source frontend for AI image models. Instead of copy-pasting prompts into a chat interface, StaticKit gives you a proper editing UI with prompt engineering baked into presets. One click to swap a background, change lighting, or replace a model. The complex prompts happen under the hood.
