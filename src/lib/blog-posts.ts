@@ -149,7 +149,7 @@ For the technically curious, here's what powers StaticKit:
 - **localStorage** provides simple, secure API key persistence
 - **No backend database** means no user data to protect or breach
 
-The entire codebase is open source (AGPL-3.0). You can read every line, verify the claims in this post, or run your own instance.
+The entire codebase is open source (MIT licensed). You can read every line, verify the claims in this post, or run your own instance.
 
 ## Getting Started
 
