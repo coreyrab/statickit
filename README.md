@@ -10,6 +10,11 @@
   <a href="https://github.com/CoreyRab/statickit/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
   </a>
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white" alt="Next.js" />
+  <a href="https://github.com/CoreyRab/statickit/pulls">
+    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome" />
+  </a>
   <a href="https://github.com/CoreyRab/statickit/stargazers">
     <img src="https://img.shields.io/github/stars/CoreyRab/statickit?style=social" alt="Stars" />
   </a>
