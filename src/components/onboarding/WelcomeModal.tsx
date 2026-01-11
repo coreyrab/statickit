@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Loader2, Check, X, ExternalLink, Key } from "lucide-react";
 import { track } from "@/lib/analytics";
+import Link from "next/link";
 
 interface WelcomeModalProps {
   open: boolean;
@@ -133,7 +134,10 @@ export function WelcomeModal({
           {/* What is StaticKit */}
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              StaticKit is a free AI image editor. Adjust images, swap backgrounds, change models, resize to any aspect ratio, and more. Version control keeps track of every change so you can experiment without losing work.
+              StaticKit is a free AI image editor. Adjust images, swap backgrounds, change models, resize to any aspect ratio, and more. Version control keeps track of every change so you can experiment without losing work.{" "}
+              <Link href="/blog/how-statickit-works" className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300">
+                More about how it works here.
+              </Link>
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
               It&apos;s faster than a chat interface because common edits are one click, with optimized prompts built in.

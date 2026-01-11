@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Loader2, Check, X, ExternalLink } from "lucide-react";
 import { track } from "@/lib/analytics";
+import Link from "next/link";
 
 interface ApiKeySetupModalProps {
   open: boolean;
@@ -157,7 +158,10 @@ export function ApiKeySetupModal({
           {/* Description - only show when no existing key */}
           {!hasExistingKey && (
             <p className="text-sm text-muted-foreground">
-              Add your API key to unlock all features. Stored locally in your browser only, never sent to our servers. Only pay for what you use.
+              Your API key is stored locally in your browser, never sent to our servers.{" "}
+              <Link href="/blog/how-statickit-works" className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300">
+                More about how StaticKit works here.
+              </Link>
             </p>
           )}
 
