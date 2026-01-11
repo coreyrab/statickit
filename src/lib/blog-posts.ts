@@ -20,173 +20,114 @@ export const posts: Record<string, BlogPost> = {
     date: '2025-01-01',
     author: 'Corey Rabazinski',
     coverImage: '/blog/how_statickit_works.jpg',
-    content: `<p>Most AI image tools follow the same playbook: create an account, choose a subscription tier, upload your images to their servers, and hope they don't train on your data or disappear next month.</p>
+    content: `Most AI image tools follow the same playbook: create an account, choose a subscription tier, upload your images to their servers, and hope they don't train on your data or disappear next month.
 
-<p>StaticKit takes a fundamentally different approach. There's no account, no subscription, and your images never touch our servers. You bring your own AI, and everything runs through your browser.</p>
+StaticKit takes a fundamentally different approach. There's no account, no subscription, and your images never touch our servers. You bring your own AI, and everything runs through your browser.
 
-<p>Here's exactly how it works—and why this architecture benefits you.</p>
+Here's exactly how it works—and why this architecture benefits you.
 
-<h2>The Core Concept: You Bring the AI</h2>
+## The Core Concept: You Bring the AI
 
-<p>StaticKit is a front-end for AI image models. Think of it like a professional camera app that works with any camera sensor. The app provides the interface, controls, and presets. The sensor (in this case, Google's Gemini) provides the actual image processing power.</p>
+StaticKit is a front-end for AI image models. Think of it like a professional camera app that works with any camera sensor. The app provides the interface, controls, and presets. The sensor (in this case, Google's Gemini) provides the actual image processing power.
 
-<p>This is called BYOK: Bring Your Own Key.</p>
+This is called BYOK: Bring Your Own Key.
 
-<p>You get a free API key from Google AI Studio, paste it into StaticKit once, and you're editing. StaticKit handles the complex prompt engineering, UI, and workflow. Gemini handles the actual AI image generation and editing.</p>
+You get a free API key from Google AI Studio, paste it into StaticKit once, and you're editing. StaticKit handles the complex prompt engineering, UI, and workflow. Gemini handles the actual AI image generation and editing.
 
-<p>The result: professional-grade AI editing at API costs (pennies per image) instead of subscription prices ($10-20/month).</p>
+The result: professional-grade AI editing at API costs (pennies per image) instead of subscription prices ($10-20/month).
 
-<h2>How Your API Key Is Stored</h2>
+## How Your API Key Is Stored
 
-<p>This is where most people have questions—and rightfully so. Your API key is sensitive. Here's exactly what happens:</p>
+This is where most people have questions—and rightfully so. Your API key is sensitive. Here's exactly what happens:
 
-<p><strong>When you enter your API key:</strong></p>
+When you enter your API key, the key is saved to your browser's localStorage (the same place websites store preferences and session data). It never leaves your device except when making direct API calls to Google. StaticKit's servers never see, store, or log your key. The key persists across sessions until you clear your browser data or explicitly remove it.
 
-<ol>
-<li>The key is saved to your browser's localStorage (the same place websites store preferences and session data)</li>
-<li>It never leaves your device except when making direct API calls to Google</li>
-<li>StaticKit's servers never see, store, or log your key</li>
-<li>The key persists across sessions until you clear your browser data or explicitly remove it</li>
-</ol>
+What this means practically: Your key stays on your machine. Period. If you use StaticKit on a different device, you'll need to enter your key again. Clearing your browser data removes the key. No database breach can ever expose your key because we don't have a database of keys.
 
-<p><strong>What this means practically:</strong></p>
+This is a deliberate architectural choice. We could store keys server-side and make the experience slightly more convenient (sync across devices, password recovery, etc.). But that would mean building infrastructure that holds sensitive credentials—infrastructure that could be breached, subpoenaed, or misused.
 
-<ul>
-<li>Your key stays on your machine. Period.</li>
-<li>If you use StaticKit on a different device, you'll need to enter your key again</li>
-<li>Clearing your browser data removes the key</li>
-<li>No database breach can ever expose your key because we don't have a database of keys</li>
-</ul>
+By keeping everything client-side, there's nothing to breach.
 
-<p>This is a deliberate architectural choice. We could store keys server-side and make the experience slightly more convenient (sync across devices, password recovery, etc.). But that would mean building infrastructure that holds sensitive credentials—infrastructure that could be breached, subpoenaed, or misused.</p>
+## How Image Processing Works
 
-<p>By keeping everything client-side, there's nothing to breach.</p>
+When you edit an image in StaticKit, here's the actual data flow:
 
-<h2>How Image Processing Works</h2>
+Step 1: You upload an image. The image loads directly into your browser's memory. It's not uploaded to any server—it stays in your browser tab.
 
-<p>When you edit an image in StaticKit, here's the actual data flow:</p>
+Step 2: You describe an edit. "Change the background to a sunny beach" or "Make the lighting warmer" or just click a preset.
 
-<p><strong>Step 1: You upload an image</strong><br/>The image loads directly into your browser's memory. It's not uploaded to any server—it stays in your browser tab.</p>
+Step 3: StaticKit builds the API request. This is where the complexity happens. StaticKit constructs a carefully engineered prompt that preserves your subject while applying your requested changes. This prompt engineering is one of the main things you're getting from StaticKit—the difference between "make it a beach" (which might distort your product) and a multi-part prompt that maintains subject fidelity.
 
-<p><strong>Step 2: You describe an edit</strong><br/>"Change the background to a sunny beach" or "Make the lighting warmer" or just click a preset.</p>
+Step 4: Direct API call to Google. Your browser makes a direct HTTPS request to Google's Gemini API. The request includes your API key (from localStorage) and the image/prompt data. This goes directly from your browser to Google—StaticKit's servers are not involved.
 
-<p><strong>Step 3: StaticKit builds the API request</strong><br/>This is where the complexity happens. StaticKit constructs a carefully engineered prompt that preserves your subject while applying your requested changes. This prompt engineering is one of the main things you're getting from StaticKit—the difference between "make it a beach" (which might distort your product) and a multi-part prompt that maintains subject fidelity.</p>
+Step 5: Google returns the edited image. The response comes directly back to your browser, where you can review it, iterate, or download.
 
-<p><strong>Step 4: Direct API call to Google</strong><br/>Your browser makes a direct HTTPS request to Google's Gemini API. The request includes your API key (from localStorage) and the image/prompt data. This goes directly from your browser to Google—StaticKit's servers are not involved.</p>
+At no point does your image pass through StaticKit infrastructure. The only servers involved are yours (your browser) and Google's (the AI).
 
-<p><strong>Step 5: Google returns the edited image</strong><br/>The response comes directly back to your browser, where you can review it, iterate, or download.</p>
+## Why the BYOK Model Works
 
-<p>At no point does your image pass through StaticKit infrastructure. The only servers involved are yours (your browser) and Google's (the AI).</p>
+Skeptics often ask: "If it's free, what's the catch?" Here's why BYOK makes sense for everyone:
 
-<h2>Why the BYOK Model Works</h2>
+For users: No subscription treadmill—pay Google a few cents per edit instead of $15/month whether you use it or not. No lock-in—your API key works with any Gemini-compatible tool. You're not trapped in our ecosystem. No data concerns—your images go to Google (which you've agreed to by using their API) and nowhere else. Unlimited usage—there's no "you've used your 50 monthly credits" moment.
 
-<p>Skeptics often ask: "If it's free, what's the catch?" Here's why BYOK makes sense for everyone:</p>
+For StaticKit: No infrastructure costs—we don't run GPU servers, don't store images, don't manage user accounts. The biggest cost centers in AI SaaS don't exist. No billing complexity—we don't handle payments, refunds, subscription management, or failed charges. No liability—we're not holding your images or your credentials.
 
-<p><strong>For users:</strong></p>
+This model lets us focus entirely on building great software instead of managing a SaaS business.
 
-<ul>
-<li><strong>No subscription treadmill.</strong> Pay Google a few cents per edit instead of $15/month whether you use it or not.</li>
-<li><strong>No lock-in.</strong> Your API key works with any Gemini-compatible tool. You're not trapped in our ecosystem.</li>
-<li><strong>No data concerns.</strong> Your images go to Google (which you've agreed to by using their API) and nowhere else.</li>
-<li><strong>Unlimited usage.</strong> There's no "you've used your 50 monthly credits" moment.</li>
-</ul>
+## What Happens on Your Device vs. Google's Servers
 
-<p><strong>For StaticKit:</strong></p>
+Let's be precise about what runs where:
 
-<ul>
-<li><strong>No infrastructure costs.</strong> We don't run GPU servers, don't store images, don't manage user accounts. The biggest cost centers in AI SaaS don't exist.</li>
-<li><strong>No billing complexity.</strong> We don't handle payments, refunds, subscription management, or failed charges.</li>
-<li><strong>No liability.</strong> We're not holding your images or your credentials.</li>
-</ul>
+Entirely on your device (browser): Image upload and display, API key storage, background removal (WebGPU-powered, no server needed), version history and undo, export and download, and all UI interactions.
 
-<p>This model lets us focus entirely on building great software instead of managing a SaaS business.</p>
+On Google's servers (via direct API call): AI image generation and editing, image analysis, and prompt expansion.
 
-<h2>What Happens on Your Device vs. Google's Servers</h2>
+The only data that leaves your browser is what you explicitly send to Google for AI processing. And that's governed by Google's AI terms, not ours.
 
-<p>Let's be precise about what runs where:</p>
+## Privacy Compared to Traditional Tools
 
-<p><strong>Entirely on your device (browser):</strong></p>
-<ul>
-<li>Image upload and display</li>
-<li>API key storage</li>
-<li>Background removal (WebGPU-powered, no server needed)</li>
-<li>Version history and undo</li>
-<li>Export and download</li>
-<li>All UI interactions</li>
-</ul>
+Let's compare StaticKit's architecture to typical AI editing tools:
 
-<p><strong>On Google's servers (via direct API call):</strong></p>
-<ul>
-<li>AI image generation and editing</li>
-<li>Image analysis</li>
-<li>Prompt expansion</li>
-</ul>
+Traditional AI editor: You create an account (email, password stored on their servers). You upload images (stored on their servers, possibly indefinitely). Their servers call AI APIs (they see your images). Results stored on their servers (tied to your account). They may train on your images (check the ToS). Data breach exposes: your email, password, all images, usage history.
 
-<p>The only data that leaves your browser is what you explicitly send to Google for AI processing. And that's governed by Google's AI terms, not ours.</p>
+StaticKit: No account (nothing to store). Images stay in your browser (nothing to upload). Your browser calls Google directly (we never see images). Results stay in your browser (nothing to store). We can't train on images we never see. Data breach exposes: nothing (we have nothing).
 
-<h2>Privacy Compared to Traditional Tools</h2>
+The architecture makes privacy the default, not a policy promise.
 
-<p>Let's compare StaticKit's architecture to typical AI editing tools:</p>
+## The Technology Stack
 
-<p><strong>Traditional AI editor:</strong></p>
-<ol>
-<li>You create an account (email, password stored on their servers)</li>
-<li>You upload images (stored on their servers, possibly indefinitely)</li>
-<li>Their servers call AI APIs (they see your images)</li>
-<li>Results stored on their servers (tied to your account)</li>
-<li>They may train on your images (check the ToS)</li>
-<li>Data breach exposes: your email, password, all images, usage history</li>
-</ol>
+For the technically curious, here's what powers StaticKit:
 
-<p><strong>StaticKit:</strong></p>
-<ol>
-<li>No account (nothing to store)</li>
-<li>Images stay in your browser (nothing to upload)</li>
-<li>Your browser calls Google directly (we never see images)</li>
-<li>Results stay in your browser (nothing to store)</li>
-<li>We can't train on images we never see</li>
-<li>Data breach exposes: nothing (we have nothing)</li>
-</ol>
+- **Next.js** handles the web application framework
+- **Gemini API** (via @google/generative-ai) powers all AI image operations
+- **WebGPU + ONNX Runtime** enables client-side background removal without any server
+- **localStorage** provides simple, secure API key persistence
+- **No backend database** means no user data to protect or breach
 
-<p>The architecture makes privacy the default, not a policy promise.</p>
+The entire codebase is open source (MIT licensed). You can read every line, verify the claims in this post, or run your own instance.
 
-<h2>The Technology Stack</h2>
+## Getting Started
 
-<p>For the technically curious, here's what powers StaticKit:</p>
+If you've read this far, you understand the model. Here's how to start:
 
-<ul>
-<li><strong>Next.js</strong> handles the web application framework</li>
-<li><strong>Gemini API</strong> (via @google/generative-ai) powers all AI image operations</li>
-<li><strong>WebGPU + ONNX Runtime</strong> enables client-side background removal without any server</li>
-<li><strong>localStorage</strong> provides simple, secure API key persistence</li>
-<li><strong>No backend database</strong> means no user data to protect or breach</li>
-</ul>
+1. Get a Gemini API key (free): Go to [Google AI Studio](https://aistudio.google.com), click "Get API Key", and create one.
 
-<p>The entire codebase is open source (MIT licensed). You can read every line, verify the claims in this post, or run your own instance.</p>
+2. Open StaticKit: Visit [statickit.ai](https://statickit.ai) or run it locally from the GitHub repo.
 
-<h2>Getting Started</h2>
+3. Enter your key once: Paste your API key when prompted. It's saved to your browser.
 
-<p>If you've read this far, you understand the model. Here's how to start:</p>
+4. Start editing: Upload an image and describe what you want to change.
 
-<ol>
-<li><strong>Get a Gemini API key</strong> (free): Go to <a href="https://aistudio.google.com">Google AI Studio</a>, click "Get API Key", and create one.</li>
-<li><strong>Open StaticKit</strong>: Visit <a href="https://statickit.ai">statickit.ai</a> or run it locally from the GitHub repo.</li>
-<li><strong>Enter your key once</strong>: Paste your API key when prompted. It's saved to your browser.</li>
-<li><strong>Start editing</strong>: Upload an image and describe what you want to change.</li>
-</ol>
+That's it. No email confirmation, no credit card, no 14-day trial that auto-converts. Just software that works.
 
-<p>That's it. No email confirmation, no credit card, no 14-day trial that auto-converts. Just software that works.</p>
+## Key Takeaways
 
-<h2>Key Takeaways</h2>
+- **BYOK means you control the AI.** Your key, your usage, your costs.
+- **Client-side storage means true privacy.** We can't leak what we don't have.
+- **Direct API calls mean no middleman.** Your images go straight to Google and back.
+- **Open source means trust but verify.** Don't take our word for it—read the code.
 
-<ul>
-<li><strong>BYOK means you control the AI.</strong> Your key, your usage, your costs.</li>
-<li><strong>Client-side storage means true privacy.</strong> We can't leak what we don't have.</li>
-<li><strong>Direct API calls mean no middleman.</strong> Your images go straight to Google and back.</li>
-<li><strong>Open source means trust but verify.</strong> Don't take our word for it—read the code.</li>
-</ul>
-
-<p>The best software disappears. You don't think about the architecture, the business model, or the privacy policy. You just edit images. That's what we're building.</p>`,
+The best software disappears. You don't think about the architecture, the business model, or the privacy policy. You just edit images. That's what we're building.`,
   },
   'iterate-meta-ads-ai-image-editing': {
     title: 'How to Iterate on Winning Meta Ads Without Killing Performance',
