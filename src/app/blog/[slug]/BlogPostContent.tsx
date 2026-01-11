@@ -80,7 +80,7 @@ export default function BlogPostContent({ post }: BlogPostContentProps) {
       // Heading
       if (paragraph.startsWith('## ')) {
         return (
-          <h2 key={i} className="text-xl text-foreground font-serif mt-12 mb-4">
+          <h2 key={i} className="text-2xl text-foreground font-serif font-semibold mt-12 mb-4">
             {parseLinks(paragraph.replace('## ', ''))}
           </h2>
         );
