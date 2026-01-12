@@ -85,7 +85,8 @@ export function AsciiGrid({ className = '', isDragActive = false, variant = 'def
     container.addEventListener('mousemove', handleMouseMove);
     container.addEventListener('mouseleave', handleMouseLeave);
 
-    const cellSize = 32;
+    // Smaller cells for processing variant (tighter pixel grid)
+    const cellSize = variant === 'processing' ? 18 : 32;
     const fontSize = 14;
 
     // Seeded random function for consistent per-cell randomness
@@ -121,45 +122,43 @@ export function AsciiGrid({ className = '', isDragActive = false, variant = 'def
           let r: number, g: number, b: number;
 
           if (variant === 'processing') {
-            // Processing: pixelation grid animation - blocks that pulse and shift
+            // Processing: Claude-style thinking animation - pixels that toggle on/off rapidly
             const time = timeRef.current;
 
-            // Multiple overlapping noise fields at different scales create organic patches
-            const noiseScale1 = 0.12; // Large patches
-            const noiseScale2 = 0.22; // Medium patches
-            const noiseScale3 = 0.35; // Small detail
+            // Fast frame-based randomization (toggles every ~100ms)
+            const frameRate = 10;
+            const frame = Math.floor(time * frameRate);
+            const frameSeed = seed * 0.001 + frame * 0.1;
+            const frameRand = seededRandom(frameSeed);
 
-            // Animated noise using sine combinations (pseudo-perlin)
-            const noise1 = Math.sin(col * noiseScale1 + time * 0.6) * Math.cos(row * noiseScale1 + time * 0.4);
-            const noise2 = Math.sin(col * noiseScale2 - time * 0.9 + 50) * Math.cos(row * noiseScale2 + time * 0.7);
-            const noise3 = Math.sin(col * noiseScale3 + time * 1.3) * Math.cos(row * noiseScale3 - time * 1.0);
+            // Checkerboard base pattern with random variations
+            const isCheckerboard = (row + col) % 2 === 0;
+            const randomToggle = frameRand > 0.5;
 
-            // Combine noise layers with different weights
-            const combinedNoise = (noise1 * 0.5 + noise2 * 0.35 + noise3 * 0.15);
-            const normalizedNoise = (combinedNoise + 1) / 2; // 0 to 1
+            // Combine checkerboard with random toggle for that "thinking" look
+            const isVisible = isCheckerboard ? randomToggle : !randomToggle;
 
-            // Time-based flicker for block animation
-            const flickerRate = 6;
-            const flickerSeed = seed + Math.floor(time * flickerRate) * 0.1;
-            const flickerRand = seededRandom(flickerSeed);
+            // Additional randomness layer for more organic feel
+            const extraRand = seededRandom(frameSeed + 0.3);
+            const showPixel = isVisible || extraRand > 0.7;
 
-            // Activity level determines block visibility
-            const activity = normalizedNoise * 0.6 + flickerRand * 0.4;
+            if (!showPixel) {
+              continue;
+            }
 
-            // Block opacity - more visible in active areas
-            const baseOpacity = 0.15;
-            const activityBoost = activity * 0.45;
-            const blockOpacity = baseOpacity + activityBoost;
+            // Opacity varies per pixel for depth
+            const opacityRand = seededRandom(frameSeed + 0.5);
+            const blockOpacity = 0.15 + opacityRand * 0.35;
 
-            // Color variation - warm tones with slight hue shift based on position
-            const hueShift = Math.sin(col * 0.1 + row * 0.1 + time * 0.3) * 15;
-            const brightness = 180 + activity * 60;
-            r = Math.min(255, brightness + hueShift);
-            g = Math.min(255, brightness - 20 + hueShift * 0.5);
-            b = Math.min(255, brightness - 50);
+            // Warm neutral colors - slight variation per pixel
+            const colorRand = seededRandom(seed * 0.01);
+            const brightness = 140 + colorRand * 80;
+            r = Math.min(255, brightness + 20);
+            g = Math.min(255, brightness);
+            b = Math.min(255, brightness - 30);
 
-            // Draw filled rectangle
-            const blockPadding = 1;
+            // Draw filled rectangle with small gap
+            const blockPadding = 2;
             const blockSize = cellSize - blockPadding * 2;
 
             ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${blockOpacity})`;
