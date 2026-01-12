@@ -3647,11 +3647,13 @@ function HomeContent() {
                         }`}>
                           <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30">
                             <div className="relative">
-                              <img
-                                src={selectedRef?.url || ''}
-                                alt={selectedRef?.name || ''}
-                                className="w-6 h-6 rounded object-cover"
-                              />
+                              {selectedRef?.url && (
+                                <img
+                                  src={selectedRef.url}
+                                  alt={selectedRef.name || ''}
+                                  className="w-6 h-6 rounded object-cover"
+                                />
+                              )}
                               <div className="absolute -top-1 -left-1 p-0.5 rounded-full bg-primary">
                                 <Paperclip className="w-2.5 h-2.5 text-primary-foreground" />
                               </div>
@@ -3710,11 +3712,13 @@ function HomeContent() {
                         }`}>
                           <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30">
                             <div className="relative">
-                              <img
-                                src={selectedRef?.url || ''}
-                                alt={selectedRef?.name || ''}
-                                className="w-6 h-6 rounded object-cover"
-                              />
+                              {selectedRef?.url && (
+                                <img
+                                  src={selectedRef.url}
+                                  alt={selectedRef.name || ''}
+                                  className="w-6 h-6 rounded object-cover"
+                                />
+                              )}
                               <div className="absolute -top-1 -left-1 p-0.5 rounded-full bg-primary">
                                 <Paperclip className="w-2.5 h-2.5 text-primary-foreground" />
                               </div>
@@ -3780,11 +3784,13 @@ function HomeContent() {
                         }`}>
                           <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30">
                             <div className="relative">
-                              <img
-                                src={selectedRef?.url || ''}
-                                alt={selectedRef?.name || ''}
-                                className="w-6 h-6 rounded object-cover"
-                              />
+                              {selectedRef?.url && (
+                                <img
+                                  src={selectedRef.url}
+                                  alt={selectedRef.name || ''}
+                                  className="w-6 h-6 rounded object-cover"
+                                />
+                              )}
                               <div className="absolute -top-1 -left-1 p-0.5 rounded-full bg-primary">
                                 <Paperclip className="w-2.5 h-2.5 text-primary-foreground" />
                               </div>

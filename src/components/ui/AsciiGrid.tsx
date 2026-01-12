@@ -125,8 +125,8 @@ export function AsciiGrid({ className = '', isDragActive = false, variant = 'def
             // Processing: Claude-style thinking animation - pixels that toggle on/off rapidly
             const time = timeRef.current;
 
-            // Fast frame-based randomization (toggles every ~100ms)
-            const frameRate = 10;
+            // Frame-based randomization (toggles every ~140ms)
+            const frameRate = 7;
             const frame = Math.floor(time * frameRate);
             const frameSeed = seed * 0.001 + frame * 0.1;
             const frameRand = seededRandom(frameSeed);
