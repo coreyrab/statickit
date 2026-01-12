@@ -86,7 +86,7 @@ export function AsciiGrid({ className = '', isDragActive = false, variant = 'def
     container.addEventListener('mouseleave', handleMouseLeave);
 
     // Smaller cells for processing variant (tighter pixel grid)
-    const cellSize = variant === 'processing' ? 18 : 32;
+    const cellSize = variant === 'processing' ? 12 : 16;
     const fontSize = 14;
 
     // Seeded random function for consistent per-cell randomness
@@ -172,51 +172,67 @@ export function AsciiGrid({ className = '', isDragActive = false, variant = 'def
             // Skip the character drawing for processing variant
             continue;
           } else {
-            // Default: cursor-based animation
+            // Default: cursor-based pixel animation - only visible near cursor
             const dx = mouseRef.current.x - x;
             const dy = mouseRef.current.y - y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const maxDistance = 200;
+            const baseDistance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < maxDistance) {
-              const proximity = 1 - distance / maxDistance;
-              const jitter = Math.sin(timeRef.current * 3 + rand1 * 10) * 0.3;
-              charIndex = Math.floor((proximity + jitter * proximity) * (CHARS.length - 1));
-              charIndex = Math.max(0, Math.min(CHARS.length - 1, charIndex));
+            // Add organic noise to break up the circular shape
+            const noiseScale = 60 + rand1 * 80;
+            const distance = baseDistance + (rand2 - 0.5) * noiseScale;
+            const maxDistance = 220;
+
+            // Only show pixels near the cursor
+            if (distance >= maxDistance) {
+              continue;
             }
 
-            const phaseOffset = rand2 * Math.PI * 2;
-            const speedVariation = 0.8 + rand3 * 0.4;
-            const wave = Math.sin(timeRef.current * speedVariation + col * 0.3 + row * 0.2 + phaseOffset) * 0.5 + 0.5;
-            const baseOpacity = 0.04 + wave * 0.05;
-            const flicker = 1 + Math.sin(timeRef.current * 5 + rand1 * 100) * 0.1;
+            const time = timeRef.current;
 
-            opacity = baseOpacity * flicker;
-            if (distance < maxDistance) {
-              const proximity = 1 - distance / maxDistance;
-              const randomBoost = 0.15 + rand2 * 0.1;
-              opacity = baseOpacity + proximity * randomBoost;
+            // Frame-based randomization
+            const frameRate = 5;
+            const frame = Math.floor(time * frameRate);
+            const frameSeed = seed * 0.001 + frame * 0.1;
+            const frameRand = seededRandom(frameSeed);
+
+            // Checkerboard base pattern with random variations
+            const isCheckerboard = (row + col) % 2 === 0;
+            const randomToggle = frameRand > 0.5;
+            const isVisible = isCheckerboard ? randomToggle : !randomToggle;
+
+            // Additional randomness - sparser pixels
+            const extraRand = seededRandom(frameSeed + 0.3);
+            const showPixel = isVisible || extraRand > 0.85;
+
+            if (!showPixel) {
+              continue;
             }
 
-            if (distance < maxDistance) {
-              const proximity = 1 - distance / maxDistance;
-              const wobbleAmount = proximity * 3;
-              drawX += Math.sin(timeRef.current * 4 + rand1 * 10) * wobbleAmount;
-              drawY += Math.cos(timeRef.current * 4 + rand2 * 10) * wobbleAmount;
-            }
+            // Opacity based on cursor proximity - very subtle effect
+            const proximity = 1 - distance / maxDistance;
+            const blockOpacity = 0.015 + proximity * 0.04;
 
+            // Use primary color
             const primary = primaryColorRef.current || { r: 200, g: 120, b: 60 };
             r = primary.r;
             g = primary.g;
             b = primary.b;
-          }
 
-          const intensity = isDragActive ? 1.2 : 1;
-          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity * intensity})`;
-          ctx.font = `${fontSize}px monospace`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(CHARS[charIndex], drawX, drawY);
+            // Draw filled rectangle with small gap
+            const blockPadding = 2;
+            const blockSize = cellSize - blockPadding * 2;
+
+            const intensity = isDragActive ? 1.5 : 1;
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${blockOpacity * intensity})`;
+            ctx.fillRect(
+              x + blockPadding,
+              y + blockPadding,
+              blockSize,
+              blockSize
+            );
+
+            continue;
+          }
         }
       }
 

@@ -93,6 +93,23 @@ import { removeImageBackground, type ProgressState as BgRemovalProgress } from '
 import { AsciiGrid } from '@/components/ui/AsciiGrid';
 import { UploadIcon, type UploadHandle } from '@/components/UploadIcon';
 
+// Greyscale Google Gemini logo for model selector
+const GeminiLogoGrey = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65 65" style={{ opacity: 0.35 }}>
+    <path
+      d="M32.447 0c.68 0 1.273.465 1.439 1.125a38.904 38.904 0 001.999 5.905c2.152 5 5.105 9.376 8.854 13.125 3.751 3.75 8.126 6.703 13.125 8.855a38.98 38.98 0 005.906 1.999c.66.166 1.124.758 1.124 1.438 0 .68-.464 1.273-1.125 1.439a38.902 38.902 0 00-5.905 1.999c-5 2.152-9.375 5.105-13.125 8.854-3.749 3.751-6.702 8.126-8.854 13.125a38.973 38.973 0 00-2 5.906 1.485 1.485 0 01-1.438 1.124c-.68 0-1.272-.464-1.438-1.125a38.913 38.913 0 00-2-5.905c-2.151-5-5.103-9.375-8.854-13.125-3.75-3.749-8.125-6.702-13.125-8.854a38.973 38.973 0 00-5.905-2A1.485 1.485 0 010 32.448c0-.68.465-1.272 1.125-1.438a38.903 38.903 0 005.905-2c5-2.151 9.376-5.104 13.125-8.854 3.75-3.749 6.703-8.125 8.855-13.125a38.972 38.972 0 001.999-5.905A1.485 1.485 0 0132.447 0z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+// OpenAI logo for model selector
+const OpenAILogoGrey = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855l-5.833-3.387L15.119 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/>
+  </svg>
+);
+
 type Step = 'upload' | 'editor';
 type Tool = 'edit' | 'iterations' | 'backgrounds' | 'model' | 'export' | null;
 
@@ -579,7 +596,7 @@ function HomeContent() {
     switch (model) {
       case 'gemini-3-pro-image-preview': return 'Gemini 3 Pro';
       case 'gemini-2.0-flash-exp': return 'Gemini 2.0 Flash';
-      case 'gpt-image-1': return 'GPT Image';
+      case 'gpt-image-1': return 'GPT Image 1.5';
       default: return model;
     }
   };
@@ -3536,17 +3553,13 @@ function HomeContent() {
                           />
                           {/* Processing overlay - inside image container so it only covers the image */}
                           {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing' && (
-                            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                            <div className="absolute inset-0 overflow-hidden pointer-events-none bg-black/30">
                               <AsciiGrid variant="processing" />
                             </div>
                           )}
                         </div>
                       );
                     })()
-                  )}
-                  {/* Processing container overlay - subtle dim over entire viewer */}
-                  {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing' && (
-                    <div className="absolute inset-0 bg-black/25 rounded-2xl pointer-events-none" />
                   )}
                   {/* Error overlay when viewing a failed version */}
                   {!isShowingGenerated && originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'error' && (
@@ -3875,10 +3888,14 @@ function HomeContent() {
               <div className="absolute top-3 left-3 z-10">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground rounded-lg transition-colors">
-                        <Sparkles className="w-3.5 h-3.5" />
+                      <button className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-normal bg-card/80 hover:bg-card backdrop-blur-sm border border-border/50 text-foreground/40 hover:text-foreground/60 rounded-md transition-colors">
+                        {isOpenAIModel(selectedAIModel) ? (
+                          <OpenAILogoGrey className="w-3 h-3 opacity-30" />
+                        ) : (
+                          <GeminiLogoGrey className="w-3 h-3" />
+                        )}
                         {getModelDisplayName(selectedAIModel)}
-                        <ChevronDown className="w-3 h-3" />
+                        <ChevronDown className="w-2.5 h-2.5" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-[240px]">
@@ -3922,7 +3939,7 @@ function HomeContent() {
                             className="flex items-center justify-between cursor-pointer group"
                           >
                             <div>
-                              <div className="font-medium group-hover:text-white">GPT Image</div>
+                              <div className="font-medium group-hover:text-white">GPT Image 1.5</div>
                               <div className="text-xs text-muted-foreground group-hover:text-white/70">Best quality</div>
                             </div>
                             {selectedAIModel === 'gpt-image-1' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
@@ -4186,7 +4203,7 @@ function HomeContent() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-1.5 mb-2">
-                        <h2 className="font-semibold text-base flex items-center gap-2"><Layers className="w-4.5 h-4.5 text-primary" />Versions</h2>
+                        <h2 className="font-semibold text-base flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Layers className="w-3.5 h-3.5 text-primary-foreground" /></span>Versions</h2>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
@@ -4430,7 +4447,7 @@ function HomeContent() {
 
                 {/* Tool Content */}
                 <div className="p-4 flex-1 flex flex-col min-h-0">
-                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><Wand2 className="w-4.5 h-4.5 text-primary" />Edit</h2>
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Wand2 className="w-3.5 h-3.5 text-primary-foreground" /></span>Edit</h2>
                   <div className="text-xs text-muted-foreground/80 mb-3">
                     Apply preset effects for lighting, style, camera angles, and more.
                     {uploadedImage && (
@@ -4493,7 +4510,7 @@ function HomeContent() {
                         className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Sparkles className="w-4 h-4 text-muted-foreground" />
+                          <Sparkles className="w-4 h-4 text-muted-foreground/50" />
                           <span>Enhance</span>
                           {selectedPresets.enhance && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
@@ -4534,7 +4551,7 @@ function HomeContent() {
                         className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Sun className="w-4 h-4 text-muted-foreground" />
+                          <Sun className="w-4 h-4 text-muted-foreground/50" />
                           <span>Lighting</span>
                           {selectedPresets.lighting && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
@@ -4575,7 +4592,7 @@ function HomeContent() {
                         className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Palette className="w-4 h-4 text-muted-foreground" />
+                          <Palette className="w-4 h-4 text-muted-foreground/50" />
                           <span>Style</span>
                           {selectedPresets.style && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
@@ -4616,7 +4633,7 @@ function HomeContent() {
                         className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Camera className="w-4 h-4 text-muted-foreground" />
+                          <Camera className="w-4 h-4 text-muted-foreground/50" />
                           <span>Camera</span>
                           {selectedPresets.camera && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
@@ -4657,7 +4674,7 @@ function HomeContent() {
                         className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Heart className="w-4 h-4 text-muted-foreground" />
+                          <Heart className="w-4 h-4 text-muted-foreground/50" />
                           <span>Mood</span>
                           {selectedPresets.mood && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
@@ -4698,7 +4715,7 @@ function HomeContent() {
                         className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Droplets className="w-4 h-4 text-muted-foreground" />
+                          <Droplets className="w-4 h-4 text-muted-foreground/50" />
                           <span>Color</span>
                           {selectedPresets.color && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
@@ -4739,7 +4756,7 @@ function HomeContent() {
                         className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-muted-foreground" />
+                          <Clock className="w-4 h-4 text-muted-foreground/50" />
                           <span>Era</span>
                           {selectedPresets.era && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
@@ -4780,7 +4797,7 @@ function HomeContent() {
                         className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Scan className="w-4 h-4 text-muted-foreground" />
+                          <Scan className="w-4 h-4 text-muted-foreground/50" />
                           <span>Framing</span>
                           {selectedPresets.framing && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
@@ -4821,7 +4838,7 @@ function HomeContent() {
                         className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <RotateCw className="w-4 h-4 text-muted-foreground" />
+                          <RotateCw className="w-4 h-4 text-muted-foreground/50" />
                           <span>Rotation</span>
                           {selectedPresets.rotation && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
@@ -4925,7 +4942,7 @@ function HomeContent() {
                         onClick={() => editRefInputRef.current?.click()}
                         className="w-full py-2 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition-colors flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                       >
-                        <ImagePlus className="w-4 h-4" />
+                        <ImagePlus className="w-4 h-4 text-muted-foreground/50" />
                         Add reference
                       </button>
 
@@ -5053,7 +5070,7 @@ function HomeContent() {
 
                 {/* Tool Content */}
                 <div className="p-4 flex-1 flex flex-col overflow-hidden">
-                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><Expand className="w-4.5 h-4.5 text-primary" />Resize</h2>
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Expand className="w-3.5 h-3.5 text-primary-foreground" /></span>Resize</h2>
                   <p className="text-xs text-muted-foreground/80 mb-3">
                     AI-powered resizing to fit any aspect ratio or platform.
                   </p>
@@ -5108,19 +5125,21 @@ function HomeContent() {
                             }`}
                           >
                             <div className="flex items-center gap-2.5">
-                              {isResizing ? (
-                                <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground/80" />
-                              ) : isCompleted ? (
-                                <Check className={`w-3.5 h-3.5 ${isViewing ? 'text-emerald-700 dark:text-emerald-400' : 'text-primary'}`} />
-                              ) : (
-                                <div
-                                  className="bg-muted border border-border rounded-[2px]"
-                                  style={{
-                                    width: size.width >= size.height ? 14 : 14 * (size.width / size.height),
-                                    height: size.height >= size.width ? 14 : 14 * (size.height / size.width),
-                                  }}
-                                />
-                              )}
+                              <div className="w-3.5 h-3.5 flex items-center justify-center flex-shrink-0">
+                                {isResizing ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground/80" />
+                                ) : isCompleted ? (
+                                  <Check className={`w-3.5 h-3.5 ${isViewing ? 'text-emerald-700 dark:text-emerald-400' : 'text-primary'}`} />
+                                ) : (
+                                  <div
+                                    className="bg-muted-foreground/20 border-2 border-muted-foreground rounded-[2px]"
+                                    style={{
+                                      width: size.width >= size.height ? 14 : 14 * (size.width / size.height),
+                                      height: size.height >= size.width ? 14 : 14 * (size.height / size.width),
+                                    }}
+                                  />
+                                )}
+                              </div>
                               <span className={isViewing ? 'text-emerald-700 dark:text-emerald-400' : isCompleted ? 'text-primary' : ''}>{size.label}</span>
                             </div>
                             <span className="text-muted-foreground/70 text-xs">{size.name}</span>
@@ -5314,7 +5333,7 @@ function HomeContent() {
 
                 {/* Tool Content */}
                 <div className="p-4 flex flex-col flex-1 overflow-hidden">
-                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><ImageIcon className="w-4.5 h-4.5 text-primary" />Backgrounds</h2>
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><ImageIcon className="w-3.5 h-3.5 text-primary-foreground" /></span>Backgrounds</h2>
                   <div className="text-xs text-muted-foreground/80 mb-3">
                     Change the background while preserving the product and any models.
                     {uploadedImage && (
@@ -5552,7 +5571,7 @@ function HomeContent() {
                       onClick={() => backgroundRefInputRef.current?.click()}
                       className="w-full py-2 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition-colors flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                     >
-                      <ImagePlus className="w-4 h-4" />
+                      <ImagePlus className="w-4 h-4 text-muted-foreground/50" />
                       Add reference
                     </button>
 
@@ -5579,12 +5598,12 @@ function HomeContent() {
                     >
                       {isRemovingBackground ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin text-violet-500" />
+                          <Loader2 className="w-4 h-4 animate-spin text-muted-foreground/50" />
                           <span>Working on it...</span>
                         </>
                       ) : (
                         <>
-                          <Eraser className="w-4 h-4 text-violet-500" />
+                          <Eraser className="w-4 h-4 text-muted-foreground/50" />
                           <span>Remove background</span>
                         </>
                       )}
@@ -5683,7 +5702,7 @@ function HomeContent() {
 
                 {/* Tool Content */}
                 <div className="p-4 flex flex-col flex-1 overflow-hidden">
-                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><User className="w-4.5 h-4.5 text-primary" />Model</h2>
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><User className="w-3.5 h-3.5 text-primary-foreground" /></span>Model</h2>
                   <div className="text-xs text-muted-foreground/80 mb-3">
                     Change the model while preserving background, lighting & product.
                     {uploadedImage && (
@@ -5838,7 +5857,7 @@ function HomeContent() {
                     onClick={() => modelRefInputRef.current?.click()}
                     className="w-full py-2 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition-colors flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                   >
-                    <UserPlus className="w-4 h-4" />
+                    <UserPlus className="w-4 h-4 text-muted-foreground/50" />
                     Add reference model
                   </button>
 
