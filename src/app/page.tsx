@@ -34,6 +34,7 @@ import {
   Layers,
   Sun,
   Moon,
+  Heart,
   Palette,
   Camera,
   Droplets,
@@ -294,6 +295,7 @@ function HomeContent() {
 
   // Track used suggestions - to show visual indicator
   const [activeBackgroundId, setActiveBackgroundId] = useState<string | null>(null);
+  const [backgroundUseCounts, setBackgroundUseCounts] = useState<Record<string, number>>({});
   const [usedModelSuggestions, setUsedModelSuggestions] = useState<Set<string>>(new Set());
 
   // Background removal state
@@ -2988,92 +2990,57 @@ function HomeContent() {
               <div className="flex items-center gap-1 p-1 bg-muted/30 border border-border rounded-xl">
                 <button
                   onClick={() => setSelectedTool('iterations')}
-                  className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
+                  className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${
                     selectedTool === 'iterations'
-                      ? 'bg-primary text-primary-foreground gap-2'
-                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted gap-0'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
                   }`}
                 >
-                  <Layers className="w-4 h-4 flex-shrink-0" />
-                  <span className={`overflow-hidden whitespace-nowrap transition-all duration-200 ease-out ${
-                    selectedTool === 'iterations'
-                      ? 'max-w-[80px] opacity-100'
-                      : 'max-w-0 opacity-0'
-                  }`}>
-                    Versions
-                  </span>
+                  <Layers className="w-4 h-4" />
                 </button>
 
                 <button
                   onClick={() => setSelectedTool('edit')}
-                  className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
+                  className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${
                     selectedTool === 'edit'
-                      ? 'bg-primary text-primary-foreground gap-2'
-                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted gap-0'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
                   }`}
                 >
-                  <Wand2 className="w-4 h-4 flex-shrink-0" />
-                  <span className={`overflow-hidden whitespace-nowrap transition-all duration-200 ease-out ${
-                    selectedTool === 'edit'
-                      ? 'max-w-[80px] opacity-100'
-                      : 'max-w-0 opacity-0'
-                  }`}>
-                    Edit
-                  </span>
+                  <Wand2 className="w-4 h-4" />
                 </button>
 
                 <button
                   onClick={() => setSelectedTool('backgrounds')}
-                  className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
+                  className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${
                     selectedTool === 'backgrounds'
-                      ? 'bg-primary text-primary-foreground gap-2'
-                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted gap-0'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
                   }`}
                 >
-                  <ImageIcon className="w-4 h-4 flex-shrink-0" />
-                  <span className={`overflow-hidden whitespace-nowrap transition-all duration-200 ease-out ${
-                    selectedTool === 'backgrounds'
-                      ? 'max-w-[100px] opacity-100'
-                      : 'max-w-0 opacity-0'
-                  }`}>
-                    Backgrounds
-                  </span>
+                  <ImageIcon className="w-4 h-4" />
                 </button>
 
                 <button
                   onClick={() => setSelectedTool('model')}
-                  className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
+                  className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${
                     selectedTool === 'model'
-                      ? 'bg-primary text-primary-foreground gap-2'
-                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted gap-0'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
                   }`}
                 >
-                  <User className="w-4 h-4 flex-shrink-0" />
-                  <span className={`overflow-hidden whitespace-nowrap transition-all duration-200 ease-out ${
-                    selectedTool === 'model'
-                      ? 'max-w-[80px] opacity-100'
-                      : 'max-w-0 opacity-0'
-                  }`}>
-                    Model
-                  </span>
+                  <User className="w-4 h-4" />
                 </button>
 
                 <button
                   onClick={() => setSelectedTool('export')}
-                  className={`px-3 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium ${
+                  className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${
                     selectedTool === 'export'
-                      ? 'bg-primary text-primary-foreground gap-2'
-                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted gap-0'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
                   }`}
                 >
-                  <Expand className="w-4 h-4 flex-shrink-0" />
-                  <span className={`overflow-hidden whitespace-nowrap transition-all duration-200 ease-out ${
-                    selectedTool === 'export'
-                      ? 'max-w-[80px] opacity-100'
-                      : 'max-w-0 opacity-0'
-                  }`}>
-                    Resize
-                  </span>
+                  <Expand className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -4203,8 +4170,8 @@ function HomeContent() {
                 <div className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <h2 className="font-semibold">Versions</h2>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <h2 className="font-semibold text-base flex items-center gap-2"><Layers className="w-4.5 h-4.5 text-primary" />Versions</h2>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
@@ -4448,7 +4415,7 @@ function HomeContent() {
 
                 {/* Tool Content */}
                 <div className="p-4 flex-1 flex flex-col min-h-0">
-                  <h2 className="font-semibold mb-1">Edit</h2>
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><Wand2 className="w-4.5 h-4.5 text-primary" />Edit</h2>
                   <div className="text-xs text-muted-foreground/80 mb-3">
                     Apply preset effects for lighting, style, camera angles, and more.
                     {uploadedImage && (
@@ -4675,7 +4642,7 @@ function HomeContent() {
                         className="w-full px-3 py-3 md:py-2 flex items-center justify-between text-sm bg-muted/50 hover:bg-muted transition-colors touch-manipulation active:bg-muted"
                       >
                         <div className="flex items-center gap-2">
-                          <Sparkles className="w-4 h-4 text-muted-foreground" />
+                          <Heart className="w-4 h-4 text-muted-foreground" />
                           <span>Mood</span>
                           {selectedPresets.mood && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
@@ -5071,7 +5038,7 @@ function HomeContent() {
 
                 {/* Tool Content */}
                 <div className="p-4 flex-1 flex flex-col overflow-hidden">
-                  <h2 className="font-semibold mb-1">Resize</h2>
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><Expand className="w-4.5 h-4.5 text-primary" />Resize</h2>
                   <p className="text-xs text-muted-foreground/80 mb-3">
                     AI-powered resizing to fit any aspect ratio or platform.
                   </p>
@@ -5332,7 +5299,7 @@ function HomeContent() {
 
                 {/* Tool Content */}
                 <div className="p-4 flex flex-col flex-1 overflow-hidden">
-                  <h2 className="font-semibold mb-1">Backgrounds</h2>
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><ImageIcon className="w-4.5 h-4.5 text-primary" />Backgrounds</h2>
                   <div className="text-xs text-muted-foreground/80 mb-3">
                     Change the background while preserving the product and any models.
                     {uploadedImage && (
@@ -5412,6 +5379,7 @@ function HomeContent() {
                     )}
                     {backgroundSuggestions.map((suggestion) => {
                       const isActive = activeBackgroundId === suggestion.id;
+                      const useCount = backgroundUseCounts[suggestion.id] || 0;
                       return (
                         <button
                           key={suggestion.id}
@@ -5422,16 +5390,29 @@ function HomeContent() {
                             }
                             setActiveBackgroundId(suggestion.id);
                             setTimeout(() => setActiveBackgroundId(null), 1500);
+                            setBackgroundUseCounts(prev => ({
+                              ...prev,
+                              [suggestion.id]: (prev[suggestion.id] || 0) + 1
+                            }));
                             handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
                           }}
-                          className={`px-2.5 py-2 rounded-lg text-left text-xs flex items-center gap-1.5 transition-all ${
+                          className={`px-2.5 py-2 rounded-lg text-left text-xs flex items-center justify-between transition-all ${
                             isActive
                               ? 'bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400'
-                              : 'bg-primary/5 border border-primary/40 hover:bg-primary/10 hover:border-primary/60 text-foreground/80'
+                              : useCount > 0
+                                ? 'bg-green-500/5 border border-green-500/20 hover:bg-green-500/10 text-foreground/80'
+                                : 'bg-primary/5 border border-primary/40 hover:bg-primary/10 hover:border-primary/60 text-foreground/80'
                           }`}
                         >
-                          {isActive && <Check className="w-3 h-3 flex-shrink-0 animate-in fade-in duration-200" />}
                           <span>{suggestion.name}</span>
+                          {(isActive || useCount > 0) && (
+                            <span className="flex items-center gap-0.5 flex-shrink-0">
+                              {Array.from({ length: Math.min(useCount + (isActive && useCount === 0 ? 1 : 0), 5) }).map((_, i) => (
+                                <Check key={i} className={`w-3 h-3 text-green-500 ${isActive && i === useCount ? 'animate-in fade-in duration-200' : ''}`} />
+                              ))}
+                              {useCount > 5 && <span className="text-[10px] text-green-500 ml-0.5">+{useCount - 5}</span>}
+                            </span>
+                          )}
                         </button>
                       );
                     })}
@@ -5439,6 +5420,7 @@ function HomeContent() {
                     {/* Common Backgrounds */}
                     {BACKGROUND_SUGGESTIONS.map((suggestion) => {
                       const isActive = activeBackgroundId === suggestion.id;
+                      const useCount = backgroundUseCounts[suggestion.id] || 0;
                       return (
                         <button
                           key={suggestion.id}
@@ -5449,16 +5431,29 @@ function HomeContent() {
                             }
                             setActiveBackgroundId(suggestion.id);
                             setTimeout(() => setActiveBackgroundId(null), 1500);
+                            setBackgroundUseCounts(prev => ({
+                              ...prev,
+                              [suggestion.id]: (prev[suggestion.id] || 0) + 1
+                            }));
                             handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
                           }}
-                          className={`px-2.5 py-2 rounded-lg text-left text-xs flex items-center gap-1.5 transition-all ${
+                          className={`px-2.5 py-2 rounded-lg text-left text-xs flex items-center justify-between transition-all ${
                             isActive
                               ? 'bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400'
-                              : 'bg-muted/50 border border-border hover:bg-muted hover:border-border text-foreground/80'
+                              : useCount > 0
+                                ? 'bg-green-500/5 border border-green-500/20 hover:bg-green-500/10 text-foreground/80'
+                                : 'bg-muted/50 border border-border hover:bg-muted hover:border-border text-foreground/80'
                           }`}
                         >
-                          {isActive && <Check className="w-3 h-3 flex-shrink-0 animate-in fade-in duration-200" />}
                           <span>{suggestion.name}</span>
+                          {(isActive || useCount > 0) && (
+                            <span className="flex items-center gap-0.5 flex-shrink-0">
+                              {Array.from({ length: Math.min(useCount + (isActive && useCount === 0 ? 1 : 0), 5) }).map((_, i) => (
+                                <Check key={i} className={`w-3 h-3 text-green-500 ${isActive && i === useCount ? 'animate-in fade-in duration-200' : ''}`} />
+                              ))}
+                              {useCount > 5 && <span className="text-[10px] text-green-500 ml-0.5">+{useCount - 5}</span>}
+                            </span>
+                          )}
                         </button>
                       );
                     })}
@@ -5673,7 +5668,7 @@ function HomeContent() {
 
                 {/* Tool Content */}
                 <div className="p-4 flex flex-col flex-1 overflow-hidden">
-                  <h2 className="font-semibold mb-1">Model</h2>
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><User className="w-4.5 h-4.5 text-primary" />Model</h2>
                   <div className="text-xs text-muted-foreground/80 mb-3">
                     Change the model while preserving background, lighting & product.
                     {uploadedImage && (
