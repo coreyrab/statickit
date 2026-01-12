@@ -52,6 +52,7 @@ import {
   Menu,
   PanelLeft,
   SlidersHorizontal,
+  Settings,
   ZoomIn,
   ZoomOut,
   Minimize2,
@@ -73,6 +74,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
 import {
   Dialog,
@@ -331,9 +335,60 @@ function HomeContent() {
   type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-preview-05-20' | 'gpt-image-1';
   const [selectedAIModel, setSelectedAIModel] = useState<AIModel>('gemini-3-pro-image-preview');
 
+  // Image quality setting - affects output resolution and cost
+  type ImageQuality = 'low' | 'medium' | 'high';
+  const [imageQuality, setImageQuality] = useState<ImageQuality>('medium');
+  const [showQualitySettings, setShowQualitySettings] = useState(false);
+
   // Helper to determine which provider a model belongs to
   const isOpenAIModel = (model: AIModel) => model === 'gpt-image-1';
   const isGeminiModel = (model: AIModel) => model === 'gemini-3-pro-image-preview' || model === 'gemini-2.5-flash-preview-05-20';
+
+  // Get quality display label
+  const getQualityLabel = (quality: ImageQuality): string => {
+    switch (quality) {
+      case 'low': return 'Draft';
+      case 'medium': return 'Standard';
+      case 'high': return 'Best';
+    }
+  };
+
+  // Quality indicator icon (signal bars style)
+  const QualityIcon = ({ quality, className = '' }: { quality: ImageQuality; className?: string }) => (
+    <svg className={`w-3.5 h-3.5 ${className}`} viewBox="0 3 16 12" fill="currentColor">
+      <rect x="1" y="11" width="3" height="4" rx="0.5" opacity={quality === 'low' || quality === 'medium' || quality === 'high' ? 1 : 0.3} />
+      <rect x="6" y="7" width="3" height="8" rx="0.5" opacity={quality === 'medium' || quality === 'high' ? 1 : 0.3} />
+      <rect x="11" y="3" width="3" height="12" rx="0.5" opacity={quality === 'high' ? 1 : 0.3} />
+    </svg>
+  );
+
+  // Calculate output dimensions based on quality and aspect ratio
+  const getOutputDimensions = (quality: ImageQuality, aspectRatio: string) => {
+    // Base size for the longest edge
+    const baseSize = {
+      low: 512,
+      medium: 1024,
+      high: 1536,
+    }[quality];
+
+    // Parse aspect ratio
+    const ratioMap: Record<string, [number, number]> = {
+      '1:1': [1, 1],
+      '16:9': [16, 9],
+      '9:16': [9, 16],
+      '4:5': [4, 5],
+      '2:3': [2, 3],
+    };
+
+    const [w, h] = ratioMap[aspectRatio] || [1, 1];
+    const maxDim = Math.max(w, h);
+    const scale = baseSize / maxDim;
+
+    return {
+      width: Math.round(w * scale),
+      height: Math.round(h * scale),
+    };
+  };
 
   // File input refs for reference uploads
   const backgroundRefInputRef = useRef<HTMLInputElement>(null);
@@ -564,6 +619,12 @@ function HomeContent() {
       setWeirdnessLevel(parseInt(savedWeirdness));
     }
 
+    // Load saved image quality preference
+    const savedQuality = localStorage.getItem('imageQuality') as ImageQuality | null;
+    if (savedQuality && ['low', 'medium', 'high'].includes(savedQuality)) {
+      setImageQuality(savedQuality);
+    }
+
     // Check if first visit
     const hasVisited = localStorage.getItem('statickit_has_visited');
 
@@ -578,6 +639,11 @@ function HomeContent() {
       }
     }
   }, []);
+
+  // Persist image quality preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('imageQuality', imageQuality);
+  }, [imageQuality]);
 
   // Helper to update Gemini API key in both state and localStorage
   const handleSetApiKey = (key: string) => {
@@ -1224,6 +1290,7 @@ function HomeContent() {
           variationDescription: variation.description,
           aspectRatio: uploadedImage.aspectRatio,
           model: selectedAIModel,
+          quality: imageQuality,
         }),
       });
 
@@ -1406,6 +1473,7 @@ function HomeContent() {
           aspectRatio: uploadedImage.aspectRatio,
           isEdit: true,
           model: selectedAIModel,
+          quality: imageQuality,
         }),
       });
 
@@ -1538,6 +1606,7 @@ function HomeContent() {
           aspectRatio: aspectRatioToUse,
           isEdit: true,
           model: selectedAIModel,
+          quality: imageQuality,
           // Include edit reference if selected
           ...(selectedRef && {
             editRefImage: selectedRef.base64,
@@ -1691,6 +1760,7 @@ function HomeContent() {
           aspectRatio: uploadedImage.aspectRatio,
           isEdit: true,
           model: selectedAIModel,
+          quality: imageQuality,
         }),
       });
 
@@ -1816,6 +1886,7 @@ function HomeContent() {
           isEdit: true,
           isBackgroundOnly: true,
           model: selectedAIModel,
+          quality: imageQuality,
           // Include reference image if selected
           ...(selectedBgRef && {
             backgroundRefImage: selectedBgRef.base64,
@@ -2097,6 +2168,7 @@ function HomeContent() {
           isModelOnly: true,
           keepClothing: keepClothing,
           model: selectedAIModel,
+          quality: imageQuality,
           // Include reference image if selected
           ...(selectedModelReference && {
             modelRefImage: selectedModelReference.base64,
@@ -3898,33 +3970,31 @@ function HomeContent() {
                         <ChevronDown className="w-2.5 h-2.5" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-[240px]">
-                      <DropdownMenuLabel className="text-xs text-muted-foreground">Choose your model</DropdownMenuLabel>
-
+                    <DropdownMenuContent align="start" className="w-[250px]">
                       {/* Gemini Models Section */}
                       {apiKey && (
                         <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuLabel className="text-[10px] text-muted-foreground/60 font-normal">GOOGLE GEMINI</DropdownMenuLabel>
+                          <DropdownMenuLabel className="text-[10px] text-muted-foreground/60 font-normal flex items-center gap-1.5">
+                            <GeminiLogoGrey className="w-3 h-3" />
+                            GOOGLE GEMINI
+                          </DropdownMenuLabel>
+
+                          {/* Gemini 3 Pro */}
                           <DropdownMenuItem
                             onClick={() => setSelectedAIModel('gemini-3-pro-image-preview')}
-                            className="flex items-center justify-between cursor-pointer group"
+                            className="justify-between"
                           >
-                            <div>
-                              <div className="font-medium group-hover:text-white">Gemini 3 Pro</div>
-                              <div className="text-xs text-muted-foreground group-hover:text-white/70">Best quality</div>
-                            </div>
-                            {selectedAIModel === 'gemini-3-pro-image-preview' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
+                            <span className="font-medium text-sm">Gemini 3 Pro</span>
+                            {selectedAIModel === 'gemini-3-pro-image-preview' && <Check className="w-4 h-4 text-primary" />}
                           </DropdownMenuItem>
+
+                          {/* Gemini 2.5 Flash */}
                           <DropdownMenuItem
                             onClick={() => setSelectedAIModel('gemini-2.5-flash-preview-05-20')}
-                            className="flex items-center justify-between cursor-pointer group"
+                            className="justify-between"
                           >
-                            <div>
-                              <div className="font-medium group-hover:text-white">Gemini 2.5 Flash</div>
-                              <div className="text-xs text-muted-foreground group-hover:text-white/70">Faster & cheaper</div>
-                            </div>
-                            {selectedAIModel === 'gemini-2.5-flash-preview-05-20' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
+                            <span className="font-medium text-sm">Gemini 2.5 Flash</span>
+                            {selectedAIModel === 'gemini-2.5-flash-preview-05-20' && <Check className="w-4 h-4 text-primary" />}
                           </DropdownMenuItem>
                         </>
                       )}
@@ -3932,19 +4002,73 @@ function HomeContent() {
                       {/* OpenAI Models Section */}
                       {openaiApiKey && (
                         <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuLabel className="text-[10px] text-muted-foreground/60 font-normal">OPENAI</DropdownMenuLabel>
+                          {apiKey && <DropdownMenuSeparator />}
+                          <DropdownMenuLabel className="text-[10px] text-muted-foreground/60 font-normal flex items-center gap-1.5">
+                            <OpenAILogoGrey className="w-3 h-3 opacity-50" />
+                            OPENAI
+                          </DropdownMenuLabel>
+
+                          {/* GPT Image 1.5 */}
                           <DropdownMenuItem
                             onClick={() => setSelectedAIModel('gpt-image-1')}
-                            className="flex items-center justify-between cursor-pointer group"
+                            className="justify-between"
                           >
-                            <div>
-                              <div className="font-medium group-hover:text-white">GPT Image 1.5</div>
-                              <div className="text-xs text-muted-foreground group-hover:text-white/70">Best quality</div>
-                            </div>
-                            {selectedAIModel === 'gpt-image-1' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
+                            <span className="font-medium text-sm">GPT Image 1.5</span>
+                            {selectedAIModel === 'gpt-image-1' && <Check className="w-4 h-4 text-primary" />}
                           </DropdownMenuItem>
                         </>
+                      )}
+
+                      {/* Quality Settings */}
+                      <DropdownMenuSeparator />
+                      <div className="w-full px-2 py-1.5 flex items-center justify-between text-[10px] text-muted-foreground/60 font-normal">
+                        <div className="flex items-center gap-1">
+                          <span className="uppercase">Quality</span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                onClick={(e) => e.stopPropagation()}
+                                className="hover:text-muted-foreground transition-colors"
+                              >
+                                <Info className="w-2.5 h-2.5" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-[220px] text-xs">
+                              <p className="font-medium mb-1">Quality vs Cost Tradeoff</p>
+                              <ul className="space-y-1 text-muted-foreground">
+                                <li><span className="text-foreground">Draft:</span> Fast iterations, lowest cost</li>
+                                <li><span className="text-foreground">Standard:</span> Balanced quality & cost</li>
+                                <li><span className="text-foreground">Best:</span> Final assets, highest detail</li>
+                              </ul>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <button
+                          onClick={() => setShowQualitySettings(!showQualitySettings)}
+                          className="flex items-center gap-1.5 hover:text-muted-foreground transition-colors"
+                        >
+                          <QualityIcon quality={imageQuality} className="!w-4 !h-4" />
+                          <ChevronRight className={`w-2.5 h-2.5 transition-transform ${showQualitySettings ? 'rotate-90' : ''}`} />
+                        </button>
+                      </div>
+                      {showQualitySettings && (
+                        <div className="px-2 pb-2 flex flex-col gap-1">
+                          {(['low', 'medium', 'high'] as ImageQuality[]).map((q) => (
+                            <button
+                              key={q}
+                              onClick={() => setImageQuality(q)}
+                              className={`flex items-center gap-2 px-2 py-1.5 rounded-md text-xs transition-colors hover:bg-muted ${
+                                imageQuality === q
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'text-muted-foreground hover:text-foreground'
+                              }`}
+                            >
+                              <QualityIcon quality={q} />
+                              <span>{getQualityLabel(q)}</span>
+                            </button>
+                          ))}
+                        </div>
                       )}
 
                       {/* Add API Key prompt */}

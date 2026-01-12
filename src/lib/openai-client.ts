@@ -53,6 +53,7 @@ export async function editImageOpenAI(
     mask?: string;        // Base64 PNG with transparent areas = edit regions
     model: OpenAIImageModel;
     size?: '1024x1024' | '1792x1024' | '1024x1792';
+    quality?: 'low' | 'medium' | 'high';
   }
 ): Promise<string> {
   // Convert base64 to File objects for the API
@@ -68,15 +69,19 @@ export async function editImageOpenAI(
     return '1024x1024';
   };
 
+  // Map our quality setting to OpenAI's quality parameter
+  // OpenAI edit endpoint supports: 'low', 'medium', 'high', 'auto'
+  const openaiQuality = params.quality || 'high';
+
   const editParams: OpenAI.Images.ImageEditParams = {
     model: params.model,
     image: imageFile,
     prompt: params.prompt,
     n: 1,
     size: mapToEditSize(params.size),
-    quality: 'high',
+    quality: openaiQuality,
     // @ts-ignore - input_fidelity is supported but not in types yet
-    input_fidelity: 'high',
+    input_fidelity: openaiQuality === 'low' ? 'low' : 'high',
   };
 
   // Add mask if provided

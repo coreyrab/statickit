@@ -18,10 +18,25 @@ export async function POST(request: NextRequest) {
       editRefImage, editRefMimeType,
       // Model selection
       model,
+      // Quality setting (low/medium/high)
+      quality,
       // OpenAI-specific params
       openaiApiKey,
       mask, // Base64 PNG mask for OpenAI edit endpoint
     } = await request.json();
+
+    // Calculate output dimensions based on quality setting
+    const getOutputDimensions = (quality: string, aspectRatio: string) => {
+      const baseSize = { low: 512, medium: 1024, high: 1536 }[quality as 'low' | 'medium' | 'high'] || 1024;
+      const ratioMap: Record<string, [number, number]> = {
+        '1:1': [1, 1], '16:9': [16, 9], '9:16': [9, 16], '4:5': [4, 5], '2:3': [2, 3],
+      };
+      const [w, h] = ratioMap[aspectRatio] || [1, 1];
+      const scale = baseSize / Math.max(w, h);
+      return { width: Math.round(w * scale), height: Math.round(h * scale) };
+    };
+
+    const outputDimensions = getOutputDimensions(quality || 'medium', aspectRatio);
 
     // Determine which API key to use based on model
     const selectedModel = model || 'gemini-3-pro-image-preview';
@@ -51,6 +66,7 @@ export async function POST(request: NextRequest) {
         variationDescription,
         aspectRatio,
         model: selectedModel as OpenAIImageModel,
+        quality: quality || 'medium',
         isEdit,
         isBackgroundOnly,
         isModelOnly,
@@ -68,8 +84,15 @@ export async function POST(request: NextRequest) {
       model: selectedModel,
       generationConfig: {
         responseModalities: ['Text', 'Image'],
+        // Output dimensions based on quality setting
+        imageGenerationConfig: {
+          outputImageWidth: outputDimensions.width,
+          outputImageHeight: outputDimensions.height,
+        },
       } as any,
     });
+
+    console.log(`Generating with quality=${quality || 'medium'}, dimensions=${outputDimensions.width}x${outputDimensions.height}`);
 
     // Different prompts for new generation vs. edit/refinement
     let prompt: string;
@@ -518,6 +541,7 @@ async function handleOpenAIGeneration(params: {
   variationDescription: string;
   aspectRatio: string;
   model: OpenAIImageModel;
+  quality: 'low' | 'medium' | 'high';
   isEdit?: boolean;
   isBackgroundOnly?: boolean;
   isModelOnly?: boolean;
@@ -531,6 +555,7 @@ async function handleOpenAIGeneration(params: {
     variationDescription,
     aspectRatio,
     model,
+    quality,
     isEdit,
     isBackgroundOnly,
     isModelOnly,
@@ -607,7 +632,7 @@ CONSTRAINTS:
     }
 
     console.log('OpenAI generation with prompt:', prompt.substring(0, 200) + '...');
-    console.log('Using model:', model, 'with mask:', !!mask);
+    console.log('Using model:', model, 'quality:', quality, 'with mask:', !!mask);
 
     // Use the edit endpoint with mask if provided, otherwise without
     const resultBase64 = await editImageOpenAI(client, {
@@ -616,6 +641,7 @@ CONSTRAINTS:
       mask,
       model,
       size,
+      quality,
     });
 
     const imageUrl = `data:image/png;base64,${resultBase64}`;
