@@ -680,6 +680,16 @@ function HomeContent() {
             setOriginalVersionIndex(Math.max(0, originalVersionIndex - 1));
           }
         }
+      } else if (e.key === '1') {
+        setSelectedTool('iterations');
+      } else if (e.key === '2') {
+        setSelectedTool('edit');
+      } else if (e.key === '3') {
+        setSelectedTool('backgrounds');
+      } else if (e.key === '4') {
+        setSelectedTool('model');
+      } else if (e.key === '5') {
+        setSelectedTool('export');
       }
     };
 
@@ -2990,57 +3000,62 @@ function HomeContent() {
               <div className="flex items-center gap-1 p-1 bg-muted/30 border border-border rounded-xl">
                 <button
                   onClick={() => setSelectedTool('iterations')}
-                  className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                  className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
                     selectedTool === 'iterations'
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
                   }`}
                 >
                   <Layers className="w-4 h-4" />
+                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'iterations' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>1</span>
                 </button>
 
                 <button
                   onClick={() => setSelectedTool('edit')}
-                  className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                  className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
                     selectedTool === 'edit'
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
                   }`}
                 >
                   <Wand2 className="w-4 h-4" />
+                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'edit' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>2</span>
                 </button>
 
                 <button
                   onClick={() => setSelectedTool('backgrounds')}
-                  className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                  className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
                     selectedTool === 'backgrounds'
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
                   }`}
                 >
                   <ImageIcon className="w-4 h-4" />
+                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'backgrounds' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>3</span>
                 </button>
 
                 <button
                   onClick={() => setSelectedTool('model')}
-                  className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                  className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
                     selectedTool === 'model'
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
                   }`}
                 >
                   <User className="w-4 h-4" />
+                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'model' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>4</span>
                 </button>
 
                 <button
                   onClick={() => setSelectedTool('export')}
-                  className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                  className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
                     selectedTool === 'export'
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
                   }`}
                 >
                   <Expand className="w-4 h-4" />
+                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'export' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>5</span>
                 </button>
               </div>
             </div>
