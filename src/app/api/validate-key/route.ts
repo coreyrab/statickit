@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     // Test the key with a simple API call
     try {
       const testAI = new GoogleGenerativeAI(apiKey);
-      const model = testAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const model = testAI.getGenerativeModel({ model: 'gemini-2.5-flash-preview-05-20' });
 
       // Simple test prompt that uses minimal tokens
       await model.generateContent('Say "ok"');

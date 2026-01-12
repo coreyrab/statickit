@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     const { genAI } = createGeminiClient(apiKey);
 
     // Use selected model (already determined above, defaults to Gemini 3 Pro Image)
-    // Available models: gemini-3-pro-image-preview (default, best quality), gemini-2.0-flash-exp (faster & cheaper)
+    // Available models: gemini-3-pro-image-preview (default, best quality), gemini-2.5-flash-preview-05-20 (faster & cheaper)
     const generativeModel = genAI.getGenerativeModel({
       model: selectedModel,
       generationConfig: {

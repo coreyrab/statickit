@@ -8,7 +8,7 @@ export async function analyzeAd(
   mimeType: string,
   websiteUrl?: string
 ): Promise<AdAnalysis> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-preview-05-20' });
 
   const prompt = `You are an expert advertising analyst. Analyze this static ad image and provide detailed information about it.
 
@@ -52,7 +52,7 @@ export async function generateVariationSuggestions(
   analysis: AdAnalysis,
   aspectRatio: string
 ): Promise<Array<{ title: string; description: string; icon: string }>> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-preview-05-20' });
 
   const prompt = `You are an expert advertising creative director. Based on this ad analysis, suggest 5 creative variations that could improve ad performance through A/B testing.
 
@@ -104,7 +104,7 @@ export async function generateAdVariation(
 ): Promise<string> {
   // Use Gemini's image generation model (Imagen 3 via Gemini)
   const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash-exp-image-generation',
+    model: 'gemini-2.5-flash-preview-05-20-image-generation',
   });
 
   const prompt = `Generate a new advertising image based on this reference ad.

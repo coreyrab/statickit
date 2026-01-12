@@ -328,12 +328,12 @@ function HomeContent() {
   const [selectedEditRef, setSelectedEditRef] = useState<string | null>(null);
 
   // AI Model selection - supports both Gemini and OpenAI providers
-  type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.0-flash-exp' | 'gpt-image-1';
+  type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-preview-05-20' | 'gpt-image-1';
   const [selectedAIModel, setSelectedAIModel] = useState<AIModel>('gemini-3-pro-image-preview');
 
   // Helper to determine which provider a model belongs to
   const isOpenAIModel = (model: AIModel) => model === 'gpt-image-1';
-  const isGeminiModel = (model: AIModel) => model === 'gemini-3-pro-image-preview' || model === 'gemini-2.0-flash-exp';
+  const isGeminiModel = (model: AIModel) => model === 'gemini-3-pro-image-preview' || model === 'gemini-2.5-flash-preview-05-20';
 
   // File input refs for reference uploads
   const backgroundRefInputRef = useRef<HTMLInputElement>(null);
@@ -595,7 +595,7 @@ function HomeContent() {
   const getModelDisplayName = (model: AIModel): string => {
     switch (model) {
       case 'gemini-3-pro-image-preview': return 'Gemini 3 Pro';
-      case 'gemini-2.0-flash-exp': return 'Gemini 2.0 Flash';
+      case 'gemini-2.5-flash-preview-05-20': return 'Gemini 2.5 Flash';
       case 'gpt-image-1': return 'GPT Image 1.5';
       default: return model;
     }
@@ -3917,14 +3917,14 @@ function HomeContent() {
                             {selectedAIModel === 'gemini-3-pro-image-preview' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => setSelectedAIModel('gemini-2.0-flash-exp')}
+                            onClick={() => setSelectedAIModel('gemini-2.5-flash-preview-05-20')}
                             className="flex items-center justify-between cursor-pointer group"
                           >
                             <div>
-                              <div className="font-medium group-hover:text-white">Gemini 2.0 Flash</div>
+                              <div className="font-medium group-hover:text-white">Gemini 2.5 Flash</div>
                               <div className="text-xs text-muted-foreground group-hover:text-white/70">Faster & cheaper</div>
                             </div>
-                            {selectedAIModel === 'gemini-2.0-flash-exp' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
+                            {selectedAIModel === 'gemini-2.5-flash-preview-05-20' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
                           </DropdownMenuItem>
                         </>
                       )}
