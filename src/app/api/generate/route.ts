@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createGeminiClient } from '@/lib/user-api-key';
+import { createOpenAIClient, editImageOpenAI, mapAspectRatioToOpenAISize, type OpenAIImageModel } from '@/lib/openai-client';
+
+// Helper to determine if a model is from OpenAI
+const isOpenAIModel = (model: string): model is OpenAIImageModel => {
+  return model === 'gpt-image-1';
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,10 +18,21 @@ export async function POST(request: NextRequest) {
       editRefImage, editRefMimeType,
       // Model selection
       model,
+      // OpenAI-specific params
+      openaiApiKey,
+      mask, // Base64 PNG mask for OpenAI edit endpoint
     } = await request.json();
 
-    if (!apiKey) {
-      return NextResponse.json({ error: 'API key required' }, { status: 400 });
+    // Determine which API key to use based on model
+    const selectedModel = model || 'gemini-3-pro-image-preview';
+    const useOpenAI = isOpenAIModel(selectedModel);
+
+    // Validate API key for the selected provider
+    if (useOpenAI && !openaiApiKey) {
+      return NextResponse.json({ error: 'OpenAI API key required for this model' }, { status: 400 });
+    }
+    if (!useOpenAI && !apiKey) {
+      return NextResponse.json({ error: 'Gemini API key required for this model' }, { status: 400 });
     }
 
     if (!image || !mimeType || !analysis || !variationDescription) {
@@ -25,11 +42,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Route to OpenAI if using an OpenAI model
+    if (useOpenAI) {
+      return handleOpenAIGeneration({
+        openaiApiKey,
+        image,
+        mask,
+        variationDescription,
+        aspectRatio,
+        model: selectedModel as OpenAIImageModel,
+        isEdit,
+        isBackgroundOnly,
+        isModelOnly,
+        keepClothing,
+        analysis,
+      });
+    }
+
+    // Otherwise use Gemini
     const { genAI } = createGeminiClient(apiKey);
 
-    // Use selected model or default to Gemini 3 Pro Image
+    // Use selected model (already determined above, defaults to Gemini 3 Pro Image)
     // Available models: gemini-3-pro-image-preview (default, best quality), gemini-2.0-flash-exp (faster & cheaper)
-    const selectedModel = model || 'gemini-3-pro-image-preview';
     const generativeModel = genAI.getGenerativeModel({
       model: selectedModel,
       generationConfig: {
@@ -471,6 +505,150 @@ Generate the variation that implements the requested change while keeping the pr
     console.error('Full error:', JSON.stringify(error, null, 2));
     return NextResponse.json(
       { error: 'Failed to generate image', details: error?.message },
+      { status: 500 }
+    );
+  }
+}
+
+// OpenAI generation handler
+async function handleOpenAIGeneration(params: {
+  openaiApiKey: string;
+  image: string;
+  mask?: string;
+  variationDescription: string;
+  aspectRatio: string;
+  model: OpenAIImageModel;
+  isEdit?: boolean;
+  isBackgroundOnly?: boolean;
+  isModelOnly?: boolean;
+  keepClothing?: boolean;
+  analysis: any;
+}) {
+  const {
+    openaiApiKey,
+    image,
+    mask,
+    variationDescription,
+    aspectRatio,
+    model,
+    isEdit,
+    isBackgroundOnly,
+    isModelOnly,
+    keepClothing,
+    analysis,
+  } = params;
+
+  try {
+    const client = createOpenAIClient(openaiApiKey);
+    const size = mapAspectRatioToOpenAISize(aspectRatio);
+
+    // Build a descriptive prompt for OpenAI
+    let prompt: string;
+
+    if (isBackgroundOnly) {
+      prompt = `SUBJECT TO PRESERVE: ${analysis.product || 'The main subject/product'} - Do not change in any way. Preserve exact position, size, colors, textures, lighting on subject, and all fine details.
+${analysis.people_description ? `PERSON TO PRESERVE: ${analysis.people_description} - Do not change face, facial features, skin tone, body shape, pose, expression, hair, or identity in any way. Preserve exact likeness and proportions.` : ''}
+
+CHANGE ONLY THE BACKGROUND TO: ${variationDescription}
+
+CONSTRAINTS:
+- Replace only the background/environment behind the subject
+- Match new background lighting naturally with preserved subject lighting
+- Maintain original camera angle and framing
+- No watermarks, no logos, no text additions
+- Professional advertising photography quality`;
+    } else if (isModelOnly) {
+      const clothingInstruction = keepClothing
+        ? 'CLOTHING TO PRESERVE: Keep the exact same clothing, fit, and styling on the new model.'
+        : 'Dress the new model appropriately for the scene context.';
+
+      prompt = `BACKGROUND TO PRESERVE: Keep the exact background, environment, and setting unchanged. Do not alter any background elements.
+${analysis.product ? `PRODUCT TO PRESERVE: ${analysis.product} - Do not change in any way. Preserve exact position, appearance, and details.` : ''}
+
+REPLACE THE PERSON WITH: ${variationDescription}
+
+POSE REQUIREMENT: The new model must match the exact same pose, body position, and gesture as the original person.
+${clothingInstruction}
+
+CONSTRAINTS:
+- Match lighting, shadows, and color temperature to integrate photorealistically
+- Maintain original camera angle, framing, and composition
+- New model should look naturally placed, not composited
+- No watermarks, no logos, no text additions
+- Professional advertising photography quality`;
+    } else if (isEdit) {
+      prompt = `ELEMENTS TO PRESERVE: Keep all aspects of the image unchanged EXCEPT for the specific edit requested below. Preserve exact composition, lighting, colors, and details of unchanged elements.
+${analysis.product ? `PRODUCT: ${analysis.product} - Preserve unless edit specifically targets it.` : ''}
+${analysis.people_description ? `PERSON: ${analysis.people_description} - Preserve face, identity, pose unless edit specifically targets them.` : ''}
+
+SPECIFIC EDIT REQUESTED: ${variationDescription}
+
+CONSTRAINTS:
+- Change only what is explicitly requested above
+- If there are screens (phones, laptops, monitors), preserve their content exactly
+- Maintain original lighting style and color grading unless edit requests otherwise
+- No watermarks, no logos, no text additions unless requested
+- Professional advertising photography quality`;
+    } else {
+      // General variation - A/B test style changes
+      prompt = `ELEMENTS TO PRESERVE:
+${analysis.product ? `PRODUCT: ${analysis.product} - Do not change in any way. Preserve exact position, size, appearance, colors, textures, and all details.` : 'MAIN SUBJECT: Preserve the main subject exactly as shown.'}
+${analysis.people_description ? `PERSON: ${analysis.people_description} - Do not change face, facial features, skin tone, body shape, pose, expression, hair, or identity in any way. Preserve exact likeness and proportions.` : ''}
+${analysis.has_screen ? 'SCREEN CONTENT: Any screens (phone, laptop, monitor, tablet) must display exactly the same content. Do not modify UI, text, or graphics on screens.' : ''}
+
+VARIATION REQUESTED: ${variationDescription}
+
+CONSTRAINTS:
+- Apply the requested variation while preserving all elements listed above
+- Maintain original camera angle and composition
+- If changing environment/background, integrate lighting naturally
+- No watermarks, no logos, no text additions unless specifically requested
+- Professional advertising photography quality`;
+    }
+
+    console.log('OpenAI generation with prompt:', prompt.substring(0, 200) + '...');
+    console.log('Using model:', model, 'with mask:', !!mask);
+
+    // Use the edit endpoint with mask if provided, otherwise without
+    const resultBase64 = await editImageOpenAI(client, {
+      image,
+      prompt,
+      mask,
+      model,
+      size,
+    });
+
+    const imageUrl = `data:image/png;base64,${resultBase64}`;
+    console.log('OpenAI image generated successfully');
+
+    return NextResponse.json({ imageUrl });
+  } catch (error: any) {
+    console.error('OpenAI generation error:', error?.message || error);
+
+    // Handle specific OpenAI errors
+    if (error?.status === 400) {
+      return NextResponse.json(
+        { error: 'Invalid request', details: error?.message || 'OpenAI rejected the request. Try a different prompt or image.' },
+        { status: 400 }
+      );
+    }
+
+    if (error?.status === 401) {
+      return NextResponse.json(
+        { error: 'Invalid API key', details: 'Your OpenAI API key is invalid or expired.' },
+        { status: 401 }
+      );
+    }
+
+    if (error?.status === 429) {
+      return NextResponse.json(
+        { error: 'Rate limited', details: 'OpenAI rate limit exceeded. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: 'OpenAI generation failed', details: error?.message || 'Unknown error' },
       { status: 500 }
     );
   }

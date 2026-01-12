@@ -8,6 +8,8 @@ type AnalyticsEvents = {
   image_generated: { tool: 'iterate' | 'background' | 'model' | 'resize' | 'edit' };
   tool_used: { tool: 'background' | 'model' | 'resize' | 'compare' };
   image_downloaded: { type: 'single' | 'batch' | 'all_sizes' };
+  reference_image_uploaded: { tool: 'background' | 'model' | 'edit' };
+  reference_image_used: { tool: 'background' | 'model' | 'edit' };
 };
 
 declare global {

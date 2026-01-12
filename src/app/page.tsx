@@ -85,7 +85,7 @@ import { detectAspectRatio, AspectRatioKey } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import { Footer } from '@/components/landing/Footer';
 import { ApiKeySetupModal, WelcomeModal } from '@/components/onboarding';
-import { getStoredApiKey, setStoredApiKey, hasStoredApiKey } from '@/lib/api-key-storage';
+import { getStoredApiKey, setStoredApiKey, hasStoredApiKey, getStoredOpenAIKey, setStoredOpenAIKey, hasStoredOpenAIKey } from '@/lib/api-key-storage';
 import { useTheme } from 'next-themes';
 import { track } from '@/lib/analytics';
 import { removeImageBackground, type ProgressState as BgRemovalProgress } from '@/lib/background-removal';
@@ -215,11 +215,13 @@ function HomeContent() {
   const [customIterationDescription, setCustomIterationDescription] = useState('');
 
   // API key state - loaded from localStorage
-  const [apiKey, setApiKeyState] = useState<string | null>(null);
+  const [apiKey, setApiKeyState] = useState<string | null>(null);  // Gemini key (legacy name kept for compatibility)
+  const [openaiApiKey, setOpenaiApiKeyState] = useState<string | null>(null);
   const [isApiKeyLoaded, setIsApiKeyLoaded] = useState(false);
+  const [apiKeyModalTab, setApiKeyModalTab] = useState<'gemini' | 'openai'>('gemini');
 
-  // User can access editor if they have an API key
-  const canAccessEditor = !!apiKey;
+  // User can access editor if they have any API key
+  const canAccessEditor = !!apiKey || !!openaiApiKey;
   const [showArchived, setShowArchived] = useState(false);
   const [showCustomVariationInput, setShowCustomVariationInput] = useState(false);
 
@@ -306,8 +308,13 @@ function HomeContent() {
   const [selectedModelRef, setSelectedModelRef] = useState<string | null>(null);
   const [selectedEditRef, setSelectedEditRef] = useState<string | null>(null);
 
-  // AI Model selection
-  const [selectedAIModel, setSelectedAIModel] = useState<'gemini-3-pro-image-preview' | 'gemini-2.0-flash-exp'>('gemini-3-pro-image-preview');
+  // AI Model selection - supports both Gemini and OpenAI providers
+  type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.0-flash-exp' | 'gpt-image-1';
+  const [selectedAIModel, setSelectedAIModel] = useState<AIModel>('gemini-3-pro-image-preview');
+
+  // Helper to determine which provider a model belongs to
+  const isOpenAIModel = (model: AIModel) => model === 'gpt-image-1';
+  const isGeminiModel = (model: AIModel) => model === 'gemini-3-pro-image-preview' || model === 'gemini-2.0-flash-exp';
 
   // File input refs for reference uploads
   const backgroundRefInputRef = useRef<HTMLInputElement>(null);
@@ -521,10 +528,16 @@ function HomeContent() {
 
   const [viewingOriginalResizedSize, setViewingOriginalResizedSize] = useState<string | null>(null);
 
-  // Load API key and default weirdness from localStorage on mount
+  // Load API keys and default weirdness from localStorage on mount
   useEffect(() => {
-    const storedKey = getStoredApiKey();
-    setApiKeyState(storedKey);
+    // Load Gemini key
+    const storedGeminiKey = getStoredApiKey();
+    setApiKeyState(storedGeminiKey);
+
+    // Load OpenAI key
+    const storedOpenAIKey = getStoredOpenAIKey();
+    setOpenaiApiKeyState(storedOpenAIKey);
+
     setIsApiKeyLoaded(true);
 
     const savedWeirdness = localStorage.getItem('defaultWeirdness');
@@ -535,9 +548,10 @@ function HomeContent() {
     // Check if first visit
     const hasVisited = localStorage.getItem('statickit_has_visited');
 
-    // Show welcome modal on first visit without API key
-    // Show API key setup on return visits without API key
-    if (!storedKey) {
+    // Show welcome modal on first visit without any API key
+    // Show API key setup on return visits without any API key
+    const hasAnyKey = storedGeminiKey || storedOpenAIKey;
+    if (!hasAnyKey) {
       if (!hasVisited) {
         setShowWelcome(true);
       } else {
@@ -546,10 +560,26 @@ function HomeContent() {
     }
   }, []);
 
-  // Helper to update API key in both state and localStorage
+  // Helper to update Gemini API key in both state and localStorage
   const handleSetApiKey = (key: string) => {
     setStoredApiKey(key);
     setApiKeyState(key);
+  };
+
+  // Helper to update OpenAI API key in both state and localStorage
+  const handleSetOpenAIKey = (key: string) => {
+    setStoredOpenAIKey(key);
+    setOpenaiApiKeyState(key);
+  };
+
+  // Get display name for selected model
+  const getModelDisplayName = (model: AIModel): string => {
+    switch (model) {
+      case 'gemini-3-pro-image-preview': return 'Gemini 3 Pro';
+      case 'gemini-2.0-flash-exp': return 'Gemini 2.0 Flash';
+      case 'gpt-image-1': return 'GPT Image';
+      default: return model;
+    }
   };
 
   // Refs to hold current values for keyboard handler (avoids stale closures without dep array issues)
@@ -1158,6 +1188,7 @@ function HomeContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           apiKey,
+          openaiApiKey,
           image: base64,
           mimeType: uploadedImage.file.type,
           analysis,
@@ -1336,6 +1367,7 @@ function HomeContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           apiKey,
+          openaiApiKey,
           image: variation.imageUrl?.startsWith('data:')
             ? variation.imageUrl.split(',')[1]
             : base64,
@@ -1469,6 +1501,7 @@ function HomeContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           apiKey,
+          openaiApiKey,
           image: imageToEdit,
           mimeType: uploadedImage.file.type,
           analysis: analysisToUse,
@@ -1503,6 +1536,10 @@ function HomeContent() {
               ? { ...v, imageUrl: newImageUrl, status: 'completed' as const }
               : v
           ));
+        }
+        track('image_generated', { tool: 'edit' });
+        if (selectedRef) {
+          track('reference_image_used', { tool: 'edit' });
         }
       } else {
         // Mark version as error
@@ -1617,6 +1654,7 @@ function HomeContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           apiKey,
+          openaiApiKey,
           image: imageToEdit,
           mimeType: uploadedImage.file.type,
           analysis: analysisToUse,
@@ -1740,6 +1778,7 @@ function HomeContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           apiKey,
+          openaiApiKey,
           image: base64,
           mimeType: mimeType,
           analysis: analysisToUse,
@@ -1764,6 +1803,9 @@ function HomeContent() {
             : v
         ));
         track('image_generated', { tool: 'background' });
+        if (selectedBgRef) {
+          track('reference_image_used', { tool: 'background' });
+        }
       } else {
         setOriginalVersions(prev => prev.map((v, idx) =>
           idx === newVersionIndex
@@ -2016,6 +2058,7 @@ function HomeContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           apiKey,
+          openaiApiKey,
           image: base64,
           mimeType: mimeType,
           analysis: analysisToUse,
@@ -2041,6 +2084,9 @@ function HomeContent() {
             : v
         ));
         track('image_generated', { tool: 'model' });
+        if (selectedModelReference) {
+          track('reference_image_used', { tool: 'model' });
+        }
       } else {
         setOriginalVersions(prev => prev.map((v, idx) =>
           idx === newVersionIndex
@@ -2211,6 +2257,7 @@ function HomeContent() {
       setBackgroundReferences(prev => [...prev, newRef]);
       setSelectedBackgroundRef(newRef.id);
       setBackgroundCustomPrompt(`Use background from reference image`);
+      track('reference_image_uploaded', { tool: 'background' });
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -2238,6 +2285,7 @@ function HomeContent() {
       setModelReferences(prev => [...prev, newRef]);
       setSelectedModelRef(newRef.id);
       setModelCustomPrompt(`Use person from reference image`);
+      track('reference_image_uploaded', { tool: 'model' });
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -2264,6 +2312,7 @@ function HomeContent() {
 
       setEditReferences(prev => [...prev, newRef]);
       setSelectedEditRef(newRef.id);
+      track('reference_image_uploaded', { tool: 'edit' });
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -2533,7 +2582,7 @@ function HomeContent() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = filename;
+      a.download = `statickit-${filename}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -3846,33 +3895,74 @@ function HomeContent() {
                     <DropdownMenuTrigger asChild>
                       <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground rounded-lg transition-colors">
                         <Sparkles className="w-3.5 h-3.5" />
-                        {selectedAIModel === 'gemini-3-pro-image-preview' ? 'Gemini 3 Pro' : 'Gemini 2.0 Flash'}
+                        {getModelDisplayName(selectedAIModel)}
                         <ChevronDown className="w-3 h-3" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-[220px]">
+                    <DropdownMenuContent align="start" className="w-[240px]">
                       <DropdownMenuLabel className="text-xs text-muted-foreground">Choose your model</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => setSelectedAIModel('gemini-3-pro-image-preview')}
-                        className="flex items-center justify-between cursor-pointer group"
-                      >
-                        <div>
-                          <div className="font-medium group-hover:text-white">Gemini 3 Pro</div>
-                          <div className="text-xs text-muted-foreground group-hover:text-white/70">Best quality</div>
-                        </div>
-                        {selectedAIModel === 'gemini-3-pro-image-preview' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setSelectedAIModel('gemini-2.0-flash-exp')}
-                        className="flex items-center justify-between cursor-pointer group"
-                      >
-                        <div>
-                          <div className="font-medium group-hover:text-white">Gemini 2.0 Flash</div>
-                          <div className="text-xs text-muted-foreground group-hover:text-white/70">Faster & cheaper</div>
-                        </div>
-                        {selectedAIModel === 'gemini-2.0-flash-exp' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
-                      </DropdownMenuItem>
+
+                      {/* Gemini Models Section */}
+                      {apiKey && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel className="text-[10px] text-muted-foreground/60 font-normal">GOOGLE GEMINI</DropdownMenuLabel>
+                          <DropdownMenuItem
+                            onClick={() => setSelectedAIModel('gemini-3-pro-image-preview')}
+                            className="flex items-center justify-between cursor-pointer group"
+                          >
+                            <div>
+                              <div className="font-medium group-hover:text-white">Gemini 3 Pro</div>
+                              <div className="text-xs text-muted-foreground group-hover:text-white/70">Best quality</div>
+                            </div>
+                            {selectedAIModel === 'gemini-3-pro-image-preview' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setSelectedAIModel('gemini-2.0-flash-exp')}
+                            className="flex items-center justify-between cursor-pointer group"
+                          >
+                            <div>
+                              <div className="font-medium group-hover:text-white">Gemini 2.0 Flash</div>
+                              <div className="text-xs text-muted-foreground group-hover:text-white/70">Faster & cheaper</div>
+                            </div>
+                            {selectedAIModel === 'gemini-2.0-flash-exp' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
+                          </DropdownMenuItem>
+                        </>
+                      )}
+
+                      {/* OpenAI Models Section */}
+                      {openaiApiKey && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel className="text-[10px] text-muted-foreground/60 font-normal">OPENAI</DropdownMenuLabel>
+                          <DropdownMenuItem
+                            onClick={() => setSelectedAIModel('gpt-image-1')}
+                            className="flex items-center justify-between cursor-pointer group"
+                          >
+                            <div>
+                              <div className="font-medium group-hover:text-white">GPT Image</div>
+                              <div className="text-xs text-muted-foreground group-hover:text-white/70">Best quality</div>
+                            </div>
+                            {selectedAIModel === 'gpt-image-1' && <Check className="w-4 h-4 text-primary group-hover:text-white" />}
+                          </DropdownMenuItem>
+                        </>
+                      )}
+
+                      {/* Add API Key prompt */}
+                      {(!apiKey || !openaiApiKey) && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setApiKeyModalTab(!apiKey ? 'gemini' : 'openai');
+                              setShowApiKeySetup(true);
+                            }}
+                            className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                          >
+                            + Add {!apiKey && !openaiApiKey ? 'API Key' : !apiKey ? 'Gemini Key' : 'OpenAI Key'}
+                          </DropdownMenuItem>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -6558,8 +6648,11 @@ function HomeContent() {
       <ApiKeySetupModal
         open={showApiKeySetup}
         onOpenChange={setShowApiKeySetup}
-        onApiKeySet={handleSetApiKey}
-        currentApiKey={apiKey}
+        onGeminiKeySet={handleSetApiKey}
+        onOpenAIKeySet={handleSetOpenAIKey}
+        currentGeminiKey={apiKey}
+        currentOpenAIKey={openaiApiKey}
+        initialTab={apiKeyModalTab}
       />
 
       {/* Welcome Modal (first visit only) */}
@@ -6572,6 +6665,7 @@ function HomeContent() {
           }
         }}
         onApiKeySet={handleSetApiKey}
+        onOpenAIKeySet={handleSetOpenAIKey}
       />
 
       {!uploadedImage && <Footer />}

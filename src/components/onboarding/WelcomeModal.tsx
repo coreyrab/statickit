@@ -14,6 +14,7 @@ interface WelcomeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onApiKeySet?: (apiKey: string) => void;
+  onOpenAIKeySet?: (apiKey: string) => void;
 }
 
 // Official Google Gemini logo SVG component
@@ -53,62 +54,114 @@ const GeminiLogo = ({ className }: { className?: string }) => (
   </svg>
 );
 
+// OpenAI logo SVG component
+const OpenAILogo = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855l-5.833-3.387L15.119 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/>
+  </svg>
+);
+
 export function WelcomeModal({
   open,
   onOpenChange,
   onApiKeySet,
+  onOpenAIKeySet,
 }: WelcomeModalProps) {
-  const [apiKeyInput, setApiKeyInput] = useState("");
-  const [isValidating, setIsValidating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [geminiKeyInput, setGeminiKeyInput] = useState("");
+  const [openaiKeyInput, setOpenaiKeyInput] = useState("");
+  const [geminiValidating, setGeminiValidating] = useState(false);
+  const [openaiValidating, setOpenaiValidating] = useState(false);
+  const [geminiError, setGeminiError] = useState<string | null>(null);
+  const [openaiError, setOpenaiError] = useState<string | null>(null);
+  const [geminiSuccess, setGeminiSuccess] = useState(false);
+  const [openaiSuccess, setOpenaiSuccess] = useState(false);
 
-  const handleSave = async () => {
-    if (!apiKeyInput.trim()) return;
+  const handleSaveGemini = async () => {
+    if (!geminiKeyInput.trim()) return;
 
-    setIsValidating(true);
-    setError(null);
+    setGeminiValidating(true);
+    setGeminiError(null);
 
     try {
       const response = await fetch("/api/validate-key", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ apiKey: apiKeyInput.trim() }),
+        body: JSON.stringify({ apiKey: geminiKeyInput.trim() }),
       });
 
       const data = await response.json();
 
       if (!data.valid) {
-        setError(data.error || "Invalid API key");
+        setGeminiError(data.error || "Invalid API key");
         track('api_key_validated', { success: false });
         return;
       }
 
       if (onApiKeySet) {
-        onApiKeySet(apiKeyInput.trim());
+        onApiKeySet(geminiKeyInput.trim());
       }
 
       track('api_key_validated', { success: true });
-      setSuccess(true);
-      setApiKeyInput("");
+      setGeminiSuccess(true);
+      setGeminiKeyInput("");
 
       setTimeout(() => {
-        onOpenChange(false);
-        setSuccess(false);
+        setGeminiSuccess(false);
       }, 1500);
     } catch (err) {
-      console.error("API key validation error:", err);
-      setError("Failed to validate API key. Please try again.");
+      console.error("Gemini API key validation error:", err);
+      setGeminiError("Failed to validate API key. Please try again.");
     } finally {
-      setIsValidating(false);
+      setGeminiValidating(false);
+    }
+  };
+
+  const handleSaveOpenAI = async () => {
+    if (!openaiKeyInput.trim()) return;
+
+    setOpenaiValidating(true);
+    setOpenaiError(null);
+
+    try {
+      const response = await fetch("/api/validate-openai-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey: openaiKeyInput.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (!data.valid) {
+        setOpenaiError(data.error || "Invalid API key");
+        return;
+      }
+
+      if (onOpenAIKeySet) {
+        onOpenAIKeySet(openaiKeyInput.trim());
+      }
+
+      setOpenaiSuccess(true);
+      setOpenaiKeyInput("");
+
+      setTimeout(() => {
+        setOpenaiSuccess(false);
+      }, 1500);
+    } catch (err) {
+      console.error("OpenAI API key validation error:", err);
+      setOpenaiError("Failed to validate API key. Please try again.");
+    } finally {
+      setOpenaiValidating(false);
     }
   };
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      setApiKeyInput("");
-      setError(null);
-      setSuccess(false);
+      setGeminiKeyInput("");
+      setOpenaiKeyInput("");
+      setGeminiError(null);
+      setOpenaiError(null);
+      setGeminiSuccess(false);
+      setOpenaiSuccess(false);
     }
     onOpenChange(newOpen);
   };
@@ -123,24 +176,21 @@ export function WelcomeModal({
           }
         }}
       >
-        <div className="space-y-6 py-2">
+        <div className="space-y-6 py-4">
           {/* Welcome Header */}
           <div className="text-center">
             <h2 className="text-2xl font-semibold text-foreground">
-              Welcome to StaticKit 👋
+              Welcome to StaticKit
             </h2>
           </div>
 
           {/* What is StaticKit */}
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              StaticKit is a free AI image editor. Adjust images, swap backgrounds, change models, resize to any aspect ratio, and more. Version control keeps track of every change so you can experiment without losing work.{" "}
+              StaticKit is a free AI image editor. Adjust images, swap backgrounds, change models, resize to any aspect ratio, and more.{" "}
               <Link href="/blog/how-statickit-works" className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300">
-                More about how it works here.
+                Learn more
               </Link>
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              It&apos;s faster than a chat interface because common edits are one click, with optimized prompts built in.
             </p>
           </div>
 
@@ -151,75 +201,140 @@ export function WelcomeModal({
               <span className="text-sm font-medium text-foreground">Bring Your Own Key</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              StaticKit uses your own API key to connect directly to AI models. Your key stays in your browser and is never sent to our servers. You only pay for what you use, with no subscriptions or hidden fees.
+              Your API key stays in your browser and is never sent to our servers. You only pay for what you use.
             </p>
           </div>
 
-          {/* API Key Input */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <GeminiLogo className="w-4 h-4" />
-              <span className="text-sm font-medium text-foreground">Add your Gemini API Key</span>
-            </div>
-            <div className="flex items-stretch gap-2">
-              <div className="flex-1 flex items-center gap-3 px-4 bg-muted/50 border border-border rounded-lg focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50">
-                <input
-                  type="password"
-                  placeholder="Paste your API key here..."
-                  value={apiKeyInput}
-                  onChange={(e) => {
-                    setApiKeyInput(e.target.value);
-                    setError(null);
-                    setSuccess(false);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && apiKeyInput.trim()) {
-                      handleSave();
-                    }
-                  }}
-                  className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 focus:outline-none text-sm py-3"
-                />
+          {/* API Key Inputs - Stacked */}
+          <div className="space-y-5">
+            {/* Gemini Section */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <GeminiLogo className="w-4 h-4" />
+                <span className="text-sm font-medium text-foreground">Google Gemini</span>
               </div>
-              <Button
-                onClick={handleSave}
-                disabled={isValidating || !apiKeyInput.trim() || success}
-                className={`px-5 h-auto ${
-                  success
-                    ? "bg-emerald-600 hover:bg-emerald-600"
-                    : "bg-blue-600 hover:bg-blue-500"
-                } text-white`}
+              <div className="flex items-stretch gap-2">
+                <div className="flex-1 flex items-center px-3 bg-muted/30 border border-border rounded-lg focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50">
+                  <input
+                    type="password"
+                    placeholder="AIza..."
+                    value={geminiKeyInput}
+                    onChange={(e) => {
+                      setGeminiKeyInput(e.target.value);
+                      setGeminiError(null);
+                      setGeminiSuccess(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && geminiKeyInput.trim()) {
+                        handleSaveGemini();
+                      }
+                    }}
+                    className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 focus:outline-none text-sm py-2.5"
+                  />
+                </div>
+                <Button
+                  onClick={handleSaveGemini}
+                  disabled={geminiValidating || !geminiKeyInput.trim() || geminiSuccess}
+                  size="sm"
+                  className={`px-4 h-auto ${
+                    geminiSuccess
+                      ? "bg-emerald-600 hover:bg-emerald-600"
+                      : "bg-blue-600 hover:bg-blue-500"
+                  } text-white`}
+                >
+                  {geminiValidating ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : geminiSuccess ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+              </div>
+              {geminiError && (
+                <div className="flex items-center gap-2 text-red-400 text-xs">
+                  <X className="w-3 h-3" />
+                  {geminiError}
+                </div>
+              )}
+              <a
+                href="https://aistudio.google.com/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 inline-flex items-center gap-1"
               >
-                {isValidating ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : success ? (
-                  <>
-                    <Check className="w-4 h-4 mr-1.5" />
-                    Saved
-                  </>
-                ) : (
-                  "Save"
-                )}
-              </Button>
+                Get a free API key from Google
+                <ExternalLink className="w-3 h-3" />
+              </a>
             </div>
-            {error && (
-              <div className="flex items-center gap-2 text-red-400 text-sm">
-                <X className="w-4 h-4" />
-                {error}
+
+            {/* Divider */}
+            <div className="border-t border-border/60" />
+
+            {/* OpenAI Section */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <OpenAILogo className="w-4 h-4" />
+                <span className="text-sm font-medium text-foreground">OpenAI</span>
               </div>
-            )}
-            <a
-              href="https://aistudio.google.com/apikey"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 inline-flex items-center gap-1.5"
-            >
-              Get a free API key from Google
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+              <div className="flex items-stretch gap-2">
+                <div className="flex-1 flex items-center px-3 bg-muted/30 border border-border rounded-lg focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50">
+                  <input
+                    type="password"
+                    placeholder="sk-..."
+                    value={openaiKeyInput}
+                    onChange={(e) => {
+                      setOpenaiKeyInput(e.target.value);
+                      setOpenaiError(null);
+                      setOpenaiSuccess(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && openaiKeyInput.trim()) {
+                        handleSaveOpenAI();
+                      }
+                    }}
+                    className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 focus:outline-none text-sm py-2.5"
+                  />
+                </div>
+                <Button
+                  onClick={handleSaveOpenAI}
+                  disabled={openaiValidating || !openaiKeyInput.trim() || openaiSuccess}
+                  size="sm"
+                  className={`px-4 h-auto ${
+                    openaiSuccess
+                      ? "bg-emerald-600 hover:bg-emerald-600"
+                      : "bg-blue-600 hover:bg-blue-500"
+                  } text-white`}
+                >
+                  {openaiValidating ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : openaiSuccess ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+              </div>
+              {openaiError && (
+                <div className="flex items-center gap-2 text-red-400 text-xs">
+                  <X className="w-3 h-3" />
+                  {openaiError}
+                </div>
+              )}
+              <a
+                href="https://platform.openai.com/api-keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 inline-flex items-center gap-1"
+              >
+                Get an API key from OpenAI
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
           </div>
 
           {/* Skip option */}
-          <div className="pt-2 border-t border-border text-center">
+          <div className="pt-4 border-t border-border/60 text-center">
             <button
               onClick={() => onOpenChange(false)}
               className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors"
