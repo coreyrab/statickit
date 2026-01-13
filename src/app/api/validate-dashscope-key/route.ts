@@ -12,11 +12,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Basic format validation for DashScope API keys
-    // DashScope keys typically start with "sk-" but we'll be lenient
+    // Basic format validation for Alibaba API keys
+    // Keys typically start with "sk-" but we'll be lenient
     if (apiKey.length < 20) {
       return NextResponse.json(
-        { error: 'Invalid API key format. Please check your DashScope API key.', valid: false },
+        { error: 'Invalid API key format. Please check your Alibaba Cloud API key.', valid: false },
         { status: 400 }
       );
     }
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     if (!isValid) {
       return NextResponse.json(
-        { error: 'Invalid API key. Please check your DashScope API key and try again.', valid: false },
+        { error: 'Invalid API key. Please check your Alibaba Cloud API key and try again.', valid: false },
         { status: 400 }
       );
     }
@@ -34,9 +34,9 @@ export async function POST(request: NextRequest) {
     // Key is valid
     return NextResponse.json({ valid: true });
   } catch (error: any) {
-    console.error('DashScope key validation error:', error);
+    console.error('Alibaba Cloud key validation error:', error);
     return NextResponse.json(
-      { error: 'Failed to process API key', valid: false },
+      { error: 'Failed to validate API key. Please try again.', valid: false },
       { status: 500 }
     );
   }

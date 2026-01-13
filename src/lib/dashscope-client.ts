@@ -12,8 +12,16 @@ export type QwenImageModel =
 // DashScope API endpoints by region
 const DASHSCOPE_ENDPOINTS = {
   international: 'https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation',
+  us: 'https://dashscope-us.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation',
   beijing: 'https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation',
 } as const;
+
+// Base URLs for validation (without specific service path)
+const DASHSCOPE_BASE_URLS = [
+  'https://dashscope-intl.aliyuncs.com',
+  'https://dashscope-us.aliyuncs.com',
+  'https://dashscope.aliyuncs.com',
+];
 
 interface DashScopeImageContent {
   image: string; // URL or base64 data URL
@@ -141,14 +149,35 @@ export async function editImageDashScope(params: {
 
   console.log(`DashScope request: model=${model}, prompt="${prompt.substring(0, 100)}..."`);
 
-  const response = await fetch(DASHSCOPE_ENDPOINTS.international, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(requestBody),
-  });
+  // Try US endpoint first (for keys from us-east-1), then international
+  const endpoints = [DASHSCOPE_ENDPOINTS.us, DASHSCOPE_ENDPOINTS.international];
+  let response: Response | null = null;
+  let lastError: Error | null = null;
+
+  for (const endpoint of endpoints) {
+    try {
+      response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      // If we get a response (even an error), use it
+      // Only retry on network/connection errors
+      if (response) break;
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`DashScope endpoint ${endpoint} failed:`, error);
+      // Try next endpoint
+    }
+  }
+
+  if (!response) {
+    throw lastError || new Error('All DashScope endpoints failed');
+  }
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({})) as DashScopeErrorResponse;
@@ -197,27 +226,39 @@ export async function editImageDashScope(params: {
 }
 
 /**
- * Validate a DashScope API key by making a minimal test request
+ * Validate an Alibaba Cloud API key by making minimal test requests
+ * Tries multiple regional endpoints since keys may be region-specific
  */
 export async function validateDashScopeKey(apiKey: string): Promise<boolean> {
-  try {
-    // Use the models list endpoint to validate the key
-    // This is a lightweight call that doesn't incur image generation costs
-    const response = await fetch(
-      'https://dashscope-intl.aliyuncs.com/api/v1/models',
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-        },
-      }
-    );
+  // Try each regional endpoint - key may only work in specific region
+  for (const baseUrl of DASHSCOPE_BASE_URLS) {
+    try {
+      // Use the models list endpoint to validate the key
+      // This is a lightweight call that doesn't incur image generation costs
+      const response = await fetch(
+        `${baseUrl}/api/v1/models`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+          },
+        }
+      );
 
-    return response.ok;
-  } catch (error) {
-    console.error('DashScope key validation error:', error);
-    return false;
+      if (response.ok) {
+        console.log(`Alibaba Cloud key validated successfully with ${baseUrl}`);
+        return true;
+      }
+
+      // 401/403 means auth failed - try next endpoint
+      // Other errors might be temporary, but we'll still try next endpoint
+    } catch (error) {
+      console.error(`Alibaba Cloud key validation error for ${baseUrl}:`, error);
+      // Continue to next endpoint
+    }
   }
+
+  return false;
 }
 
 /**
