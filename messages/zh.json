@@ -13,7 +13,15 @@
     "success": "成功",
     "copied": "已复制",
     "uploadFirst": "请先上传图片",
-    "or": "或"
+    "or": "或",
+    "custom": "自定义",
+    "customVersion": "自定义版本",
+    "generate": "生成",
+    "archive": "归档",
+    "restore": "恢复",
+    "suggested": "推荐",
+    "reference": "参考",
+    "clearAllSelections": "清除所有选择"
   },
   "nav": {
     "apiKeys": "API密钥",
@@ -31,7 +39,35 @@
     "edit": "编辑",
     "backgrounds": "背景",
     "model": "模型",
-    "export": "导出"
+    "export": "导出",
+    "title": "工具"
+  },
+  "sidebar": {
+    "image": "图片",
+    "versions": "版本",
+    "savedEditsDescription": "已保存的编辑，您可以继续在此基础上构建。",
+    "generateSuggestions": "生成建议",
+    "snapshotsDescription": "您可以从这些快照分支出来测试不同的方法。"
+  },
+  "sizes": {
+    "square": "正方形",
+    "story": "故事",
+    "landscape": "横向",
+    "portrait": "纵向",
+    "pinterest": "Pinterest"
+  },
+  "quality": {
+    "title": "质量与成本权衡",
+    "draft": "草稿",
+    "draftDescription": "快速迭代，最低成本",
+    "standard": "标准",
+    "standardDescription": "平衡质量与成本",
+    "best": "最佳",
+    "bestDescription": "最终资源，最高细节"
+  },
+  "dialogs": {
+    "clearWorkspace": "清除工作区？",
+    "clearWorkspaceDescription": "这将删除您上传的图片和所有编辑。此操作无法撤销。"
   },
   "upload": {
     "title": "AI图片编辑器",
@@ -74,7 +110,194 @@
     "object": "对象",
     "customEdit": "自定义编辑",
     "customPlaceholder": "描述任意编辑...",
-    "applyPresets": "应用预设"
+    "applyPresets": "应用预设",
+    "era": "年代",
+    "camera": "相机",
+    "framing": "取景",
+    "rotation": "旋转",
+    "referenceImage": "参考图片"
+  },
+  "presets": {
+    "lighting": {
+      "goldenHour": "黄金时刻",
+      "studio": "工作室",
+      "natural": "自然",
+      "dramatic": "戏剧性",
+      "backlit": "逆光",
+      "softBox": "柔光箱"
+    },
+    "style": {
+      "photorealistic": "照片写实",
+      "cinematic": "电影感",
+      "editorial": "时尚大片",
+      "filmGrain": "胶片颗粒",
+      "minimalist": "极简主义",
+      "hdr": "HDR"
+    },
+    "mood": {
+      "cinematicMoody": "电影氛围",
+      "hyperRealistic": "超现实",
+      "lightDreamy": "轻盈梦幻",
+      "highContrast": "高对比",
+      "softNatural": "柔和自然",
+      "darkDramatic": "暗黑戏剧"
+    },
+    "color": {
+      "warmCozy": "温暖舒适",
+      "coolModern": "冷酷现代",
+      "vibrantBold": "鲜艳大胆",
+      "mutedSoft": "柔和淡雅",
+      "darkLuxurious": "暗黑奢华",
+      "brightAiry": "明亮通透"
+    },
+    "era": {
+      "filmAnalog": "胶片模拟",
+      "70sRetro": "70年代复古",
+      "90sFaded": "90年代褪色",
+      "y2kGlossy": "Y2K光泽",
+      "vintageSepia": "复古棕褐",
+      "modernClean": "现代简洁"
+    },
+    "camera": {
+      "hasselblad": "Hasselblad X2D",
+      "canonR5": "Canon EOS R5",
+      "sonyA7rv": "Sony a7R V",
+      "nikonZ8": "Nikon Z8",
+      "film35mm": "35mm胶片相机",
+      "polaroid": "宝丽来即拍",
+      "ringCamera": "Ring Camera"
+    },
+    "framing": {
+      "closeup": "特写",
+      "mediumShot": "中景",
+      "wideShot": "远景",
+      "highAngle": "俯角",
+      "lowAngle": "仰角",
+      "birdsEyeView": "鸟瞰"
+    },
+    "rotation": {
+      "orbitFront": "正面环绕",
+      "orbitRight": "右侧环绕",
+      "orbitLeft": "左侧环绕",
+      "orbitBehind": "背面环绕",
+      "orbit45Right": "右侧45度环绕",
+      "orbit45Left": "左侧45度环绕"
+    },
+    "enhance": {
+      "upscale2x": "2倍放大",
+      "upscale4x": "4倍放大",
+      "autoEnhance": "自动增强",
+      "faceEnhance": "面部增强",
+      "restoreOldPhoto": "修复老照片",
+      "hdrEffect": "HDR效果",
+      "boostVibrance": "提升鲜艳度",
+      "smoothSkin": "平滑肌肤",
+      "brightenEyes": "提亮眼睛",
+      "whitenTeeth": "美白牙齿",
+      "reduceWrinkles": "减少皱纹",
+      "fixFlyaways": "修复碎发",
+      "reduceShine": "减少油光",
+      "sharpenDetails": "锐化细节",
+      "reduceNoise": "降低噪点",
+      "fixColors": "修正颜色",
+      "removeSpots": "去除斑点",
+      "enhanceTextures": "增强纹理",
+      "liftShadows": "提升阴影"
+    }
+  },
+  "backgroundPresets": {
+    "blurBg": "模糊背景",
+    "whiteStudio": "白色工作室",
+    "outdoorNature": "户外自然",
+    "urbanStreet": "城市街道",
+    "minimalistGradient": "极简渐变",
+    "officeWorkspace": "办公室/工作空间",
+    "beachCoastal": "海滩/海岸",
+    "coffeeShop": "咖啡店",
+    "urbanStudio": "城市摄影棚",
+    "darkenBg": "加深背景",
+    "simplifyScene": "简化场景",
+    "goldenHour": "黄金时刻",
+    "sunriseGlow": "日出光辉",
+    "blueHour": "蓝色时刻",
+    "moonlitNight": "月光之夜",
+    "brightMidday": "明亮正午",
+    "winterLight": "冬日光线",
+    "overcastSky": "阴天",
+    "foggyMisty": "雾霭朦胧",
+    "rainyDay": "雨天"
+  },
+  "modelBuilder": {
+    "gender": {
+      "title": "性别",
+      "female": "女性",
+      "male": "男性",
+      "any": "任意"
+    },
+    "ageRange": {
+      "title": "年龄段",
+      "youngAdult": "年轻成人（18-25）",
+      "adult": "成人（26-35）",
+      "middleAged": "中年（36-50）",
+      "mature": "成熟（50+）"
+    },
+    "ethnicity": {
+      "title": "种族",
+      "eastAsian": "东亚",
+      "southAsian": "南亚",
+      "black": "黑人/非洲裔",
+      "hispanic": "西班牙裔/拉丁裔",
+      "middleEastern": "中东",
+      "white": "白人/高加索人",
+      "mixed": "混血/多种族"
+    },
+    "hairColor": {
+      "title": "发色",
+      "black": "黑色",
+      "brown": "棕色",
+      "blonde": "金色",
+      "red": "红色",
+      "gray": "灰色/银色"
+    },
+    "hairType": {
+      "title": "发型",
+      "straight": "直发",
+      "wavy": "波浪",
+      "curly": "卷发",
+      "coily": "小卷",
+      "short": "短发",
+      "long": "长发",
+      "bald": "光头"
+    },
+    "bodyType": {
+      "title": "体型",
+      "slim": "纤细",
+      "athletic": "健美",
+      "average": "普通",
+      "curvy": "曲线美",
+      "plusSize": "大码"
+    },
+    "expression": {
+      "title": "表情",
+      "warmFriendly": "温暖友好",
+      "confident": "自信",
+      "playful": "俏皮",
+      "serious": "严肃/专注",
+      "mysterious": "神秘",
+      "approachable": "亲和力"
+    },
+    "vibe": {
+      "title": "气质",
+      "classic": "经典/永恒",
+      "modernEdgy": "现代/前卫",
+      "outdoorsy": "户外型",
+      "urban": "都市",
+      "glamorous": "魅力四射",
+      "nextDoor": "邻家女孩/男孩"
+    },
+    "useBackgroundFromReference": "使用参考图片的背景",
+    "usePersonFromReference": "使用参考图片中的人物",
+    "customBackground": "自定义背景"
   },
   "backgrounds": {
     "title": "更换背景",

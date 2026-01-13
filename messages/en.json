@@ -13,7 +13,15 @@
     "success": "Success",
     "copied": "Copied",
     "uploadFirst": "Upload an image first",
-    "or": "or"
+    "or": "or",
+    "custom": "Custom",
+    "customVersion": "Custom version",
+    "generate": "Generate",
+    "archive": "Archive",
+    "restore": "Restore",
+    "suggested": "Suggested",
+    "reference": "Reference",
+    "clearAllSelections": "Clear all selections"
   },
   "nav": {
     "apiKeys": "API Keys",
@@ -31,7 +39,35 @@
     "edit": "Edit",
     "backgrounds": "Backgrounds",
     "model": "Model",
-    "export": "Export"
+    "export": "Export",
+    "title": "Tools"
+  },
+  "sidebar": {
+    "image": "Image",
+    "versions": "Versions",
+    "savedEditsDescription": "Saved edits you can continue to build on.",
+    "generateSuggestions": "Generate suggestions",
+    "snapshotsDescription": "Snapshots you can branch from to test different approaches."
+  },
+  "sizes": {
+    "square": "Square",
+    "story": "Story",
+    "landscape": "Landscape",
+    "portrait": "Portrait",
+    "pinterest": "Pinterest"
+  },
+  "quality": {
+    "title": "Quality vs Cost Tradeoff",
+    "draft": "Draft",
+    "draftDescription": "Fast iterations, lowest cost",
+    "standard": "Standard",
+    "standardDescription": "Balanced quality & cost",
+    "best": "Best",
+    "bestDescription": "Final assets, highest detail"
+  },
+  "dialogs": {
+    "clearWorkspace": "Clear Workspace?",
+    "clearWorkspaceDescription": "This will delete your uploaded image and all edits. This action cannot be undone."
   },
   "upload": {
     "title": "AI Image Editor",
@@ -74,7 +110,194 @@
     "object": "Object",
     "customEdit": "Custom Edit",
     "customPlaceholder": "Describe any edit...",
-    "applyPresets": "Apply Presets"
+    "applyPresets": "Apply Presets",
+    "era": "Era",
+    "camera": "Camera",
+    "framing": "Framing",
+    "rotation": "Rotation",
+    "referenceImage": "Reference Image"
+  },
+  "presets": {
+    "lighting": {
+      "goldenHour": "Golden Hour",
+      "studio": "Studio",
+      "natural": "Natural",
+      "dramatic": "Dramatic",
+      "backlit": "Backlit",
+      "softBox": "Soft Box"
+    },
+    "style": {
+      "photorealistic": "Photorealistic",
+      "cinematic": "Cinematic",
+      "editorial": "Editorial",
+      "filmGrain": "Film Grain",
+      "minimalist": "Minimalist",
+      "hdr": "HDR"
+    },
+    "mood": {
+      "cinematicMoody": "Cinematic Moody",
+      "hyperRealistic": "Hyper-Realistic",
+      "lightDreamy": "Light & Dreamy",
+      "highContrast": "High Contrast",
+      "softNatural": "Soft & Natural",
+      "darkDramatic": "Dark & Dramatic"
+    },
+    "color": {
+      "warmCozy": "Warm & Cozy",
+      "coolModern": "Cool & Modern",
+      "vibrantBold": "Vibrant & Bold",
+      "mutedSoft": "Muted & Soft",
+      "darkLuxurious": "Dark & Luxurious",
+      "brightAiry": "Bright & Airy"
+    },
+    "era": {
+      "filmAnalog": "Film Analog",
+      "70sRetro": "70s Retro",
+      "90sFaded": "90s Faded",
+      "y2kGlossy": "Y2K Glossy",
+      "vintageSepia": "Vintage Sepia",
+      "modernClean": "Modern Clean"
+    },
+    "camera": {
+      "hasselblad": "Hasselblad X2D",
+      "canonR5": "Canon EOS R5",
+      "sonyA7rv": "Sony a7R V",
+      "nikonZ8": "Nikon Z8",
+      "film35mm": "35mm Film Camera",
+      "polaroid": "Polaroid Instant",
+      "ringCamera": "Ring Camera"
+    },
+    "framing": {
+      "closeup": "Close-Up",
+      "mediumShot": "Medium Shot",
+      "wideShot": "Wide Shot",
+      "highAngle": "High Angle",
+      "lowAngle": "Low Angle",
+      "birdsEyeView": "Bird's-Eye View"
+    },
+    "rotation": {
+      "orbitFront": "Orbit Front",
+      "orbitRight": "Orbit Right",
+      "orbitLeft": "Orbit Left",
+      "orbitBehind": "Orbit Behind",
+      "orbit45Right": "Orbit 45° Right",
+      "orbit45Left": "Orbit 45° Left"
+    },
+    "enhance": {
+      "upscale2x": "Upscale 2x",
+      "upscale4x": "Upscale 4x",
+      "autoEnhance": "Auto Enhance",
+      "faceEnhance": "Face Enhance",
+      "restoreOldPhoto": "Restore Old Photo",
+      "hdrEffect": "HDR Effect",
+      "boostVibrance": "Boost Vibrance",
+      "smoothSkin": "Smooth Skin",
+      "brightenEyes": "Brighten Eyes",
+      "whitenTeeth": "Whiten Teeth",
+      "reduceWrinkles": "Reduce Wrinkles",
+      "fixFlyaways": "Fix Flyaways",
+      "reduceShine": "Reduce Shine",
+      "sharpenDetails": "Sharpen Details",
+      "reduceNoise": "Reduce Noise",
+      "fixColors": "Fix Colors",
+      "removeSpots": "Remove Spots",
+      "enhanceTextures": "Enhance Textures",
+      "liftShadows": "Lift Shadows"
+    }
+  },
+  "backgroundPresets": {
+    "blurBg": "Blur Background",
+    "whiteStudio": "White Studio",
+    "outdoorNature": "Outdoor Nature",
+    "urbanStreet": "Urban Street",
+    "minimalistGradient": "Minimalist Gradient",
+    "officeWorkspace": "Office/Workspace",
+    "beachCoastal": "Beach/Coastal",
+    "coffeeShop": "Coffee Shop",
+    "urbanStudio": "Urban Photo Studio",
+    "darkenBg": "Darken Background",
+    "simplifyScene": "Simplify Scene",
+    "goldenHour": "Golden Hour",
+    "sunriseGlow": "Sunrise Glow",
+    "blueHour": "Blue Hour",
+    "moonlitNight": "Moonlit Night",
+    "brightMidday": "Bright Midday",
+    "winterLight": "Winter Light",
+    "overcastSky": "Overcast Sky",
+    "foggyMisty": "Foggy/Misty",
+    "rainyDay": "Rainy Day"
+  },
+  "modelBuilder": {
+    "gender": {
+      "title": "Gender",
+      "female": "Female",
+      "male": "Male",
+      "any": "Any"
+    },
+    "ageRange": {
+      "title": "Age Range",
+      "youngAdult": "Young Adult (18-25)",
+      "adult": "Adult (26-35)",
+      "middleAged": "Middle-Aged (36-50)",
+      "mature": "Mature (50+)"
+    },
+    "ethnicity": {
+      "title": "Ethnicity",
+      "eastAsian": "East Asian",
+      "southAsian": "South Asian",
+      "black": "Black/African",
+      "hispanic": "Hispanic/Latino",
+      "middleEastern": "Middle Eastern",
+      "white": "White/Caucasian",
+      "mixed": "Mixed/Multiracial"
+    },
+    "hairColor": {
+      "title": "Hair Color",
+      "black": "Black",
+      "brown": "Brown",
+      "blonde": "Blonde",
+      "red": "Red",
+      "gray": "Gray/Silver"
+    },
+    "hairType": {
+      "title": "Hair Type",
+      "straight": "Straight",
+      "wavy": "Wavy",
+      "curly": "Curly",
+      "coily": "Coily",
+      "short": "Short",
+      "long": "Long",
+      "bald": "Bald"
+    },
+    "bodyType": {
+      "title": "Body Type",
+      "slim": "Slim",
+      "athletic": "Athletic",
+      "average": "Average",
+      "curvy": "Curvy",
+      "plusSize": "Plus-size"
+    },
+    "expression": {
+      "title": "Expression",
+      "warmFriendly": "Warm & Friendly",
+      "confident": "Confident",
+      "playful": "Playful",
+      "serious": "Serious/Intense",
+      "mysterious": "Mysterious",
+      "approachable": "Approachable"
+    },
+    "vibe": {
+      "title": "Vibe",
+      "classic": "Classic/Timeless",
+      "modernEdgy": "Modern/Edgy",
+      "outdoorsy": "Outdoorsy",
+      "urban": "Urban",
+      "glamorous": "Glamorous",
+      "nextDoor": "Girl/Guy Next Door"
+    },
+    "useBackgroundFromReference": "Use background from reference image",
+    "usePersonFromReference": "Use person from reference image",
+    "customBackground": "Custom background"
   },
   "backgrounds": {
     "title": "Change Background",

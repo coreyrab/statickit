@@ -13,7 +13,15 @@
     "success": "성공",
     "copied": "복사됨",
     "uploadFirst": "먼저 이미지를 업로드하세요",
-    "or": "또는"
+    "or": "또는",
+    "custom": "사용자 정의",
+    "customVersion": "사용자 정의 버전",
+    "generate": "생성",
+    "archive": "보관",
+    "restore": "복원",
+    "suggested": "추천",
+    "reference": "참조",
+    "clearAllSelections": "모든 선택 지우기"
   },
   "nav": {
     "apiKeys": "API 키",
@@ -31,7 +39,35 @@
     "edit": "편집",
     "backgrounds": "배경",
     "model": "모델",
-    "export": "내보내기"
+    "export": "내보내기",
+    "title": "도구"
+  },
+  "sidebar": {
+    "image": "이미지",
+    "versions": "버전",
+    "savedEditsDescription": "저장된 편집을 계속 구축할 수 있습니다.",
+    "generateSuggestions": "제안 생성",
+    "snapshotsDescription": "다양한 접근 방식을 테스트하기 위해 분기할 수 있는 스냅샷입니다."
+  },
+  "sizes": {
+    "square": "정사각형",
+    "story": "스토리",
+    "landscape": "가로",
+    "portrait": "세로",
+    "pinterest": "Pinterest"
+  },
+  "quality": {
+    "title": "품질 대 비용 트레이드오프",
+    "draft": "초안",
+    "draftDescription": "빠른 반복, 최저 비용",
+    "standard": "표준",
+    "standardDescription": "균형 잡힌 품질과 비용",
+    "best": "최고",
+    "bestDescription": "최종 에셋, 최고 디테일"
+  },
+  "dialogs": {
+    "clearWorkspace": "작업 공간을 지우시겠습니까?",
+    "clearWorkspaceDescription": "업로드한 이미지와 모든 편집 내용이 삭제됩니다. 이 작업은 취소할 수 없습니다."
   },
   "upload": {
     "title": "AI 이미지 편집기",
@@ -74,7 +110,194 @@
     "object": "객체",
     "customEdit": "사용자 정의 편집",
     "customPlaceholder": "편집 내용을 설명...",
-    "applyPresets": "프리셋 적용"
+    "applyPresets": "프리셋 적용",
+    "era": "시대",
+    "camera": "카메라",
+    "framing": "프레이밍",
+    "rotation": "회전",
+    "referenceImage": "참조 이미지"
+  },
+  "presets": {
+    "lighting": {
+      "goldenHour": "골든 아워",
+      "studio": "스튜디오",
+      "natural": "자연광",
+      "dramatic": "드라마틱",
+      "backlit": "역광",
+      "softBox": "소프트박스"
+    },
+    "style": {
+      "photorealistic": "포토리얼리스틱",
+      "cinematic": "시네마틱",
+      "editorial": "에디토리얼",
+      "filmGrain": "필름 그레인",
+      "minimalist": "미니멀리스트",
+      "hdr": "HDR"
+    },
+    "mood": {
+      "cinematicMoody": "시네마틱 무디",
+      "hyperRealistic": "하이퍼 리얼리스틱",
+      "lightDreamy": "라이트 앤 드리미",
+      "highContrast": "하이 콘트라스트",
+      "softNatural": "소프트 앤 내추럴",
+      "darkDramatic": "다크 앤 드라마틱"
+    },
+    "color": {
+      "warmCozy": "웜 앤 코지",
+      "coolModern": "쿨 앤 모던",
+      "vibrantBold": "비비드 앤 볼드",
+      "mutedSoft": "뮤트 앤 소프트",
+      "darkLuxurious": "다크 앤 럭셔리",
+      "brightAiry": "브라이트 앤 에어리"
+    },
+    "era": {
+      "filmAnalog": "필름 아날로그",
+      "70sRetro": "70년대 레트로",
+      "90sFaded": "90년대 페이드",
+      "y2kGlossy": "Y2K 글로시",
+      "vintageSepia": "빈티지 세피아",
+      "modernClean": "모던 클린"
+    },
+    "camera": {
+      "hasselblad": "Hasselblad X2D",
+      "canonR5": "Canon EOS R5",
+      "sonyA7rv": "Sony a7R V",
+      "nikonZ8": "Nikon Z8",
+      "film35mm": "35mm 필름 카메라",
+      "polaroid": "폴라로이드 인스턴트",
+      "ringCamera": "Ring Camera"
+    },
+    "framing": {
+      "closeup": "클로즈업",
+      "mediumShot": "미디엄 샷",
+      "wideShot": "와이드 샷",
+      "highAngle": "하이 앵글",
+      "lowAngle": "로우 앵글",
+      "birdsEyeView": "버즈아이 뷰"
+    },
+    "rotation": {
+      "orbitFront": "오빗 정면",
+      "orbitRight": "오빗 오른쪽",
+      "orbitLeft": "오빗 왼쪽",
+      "orbitBehind": "오빗 뒤",
+      "orbit45Right": "오빗 45도 오른쪽",
+      "orbit45Left": "오빗 45도 왼쪽"
+    },
+    "enhance": {
+      "upscale2x": "2배 업스케일",
+      "upscale4x": "4배 업스케일",
+      "autoEnhance": "자동 향상",
+      "faceEnhance": "얼굴 향상",
+      "restoreOldPhoto": "오래된 사진 복원",
+      "hdrEffect": "HDR 효과",
+      "boostVibrance": "생동감 강화",
+      "smoothSkin": "피부 매끄럽게",
+      "brightenEyes": "눈 밝게",
+      "whitenTeeth": "치아 미백",
+      "reduceWrinkles": "주름 감소",
+      "fixFlyaways": "흩날리는 머리카락 정리",
+      "reduceShine": "번들거림 감소",
+      "sharpenDetails": "디테일 선명하게",
+      "reduceNoise": "노이즈 감소",
+      "fixColors": "색상 보정",
+      "removeSpots": "잡티 제거",
+      "enhanceTextures": "텍스처 향상",
+      "liftShadows": "그림자 밝게"
+    }
+  },
+  "backgroundPresets": {
+    "blurBg": "배경 흐리게",
+    "whiteStudio": "화이트 스튜디오",
+    "outdoorNature": "야외 자연",
+    "urbanStreet": "도시 거리",
+    "minimalistGradient": "미니멀리스트 그라데이션",
+    "officeWorkspace": "사무실/작업 공간",
+    "beachCoastal": "해변/해안",
+    "coffeeShop": "커피숍",
+    "urbanStudio": "어반 포토 스튜디오",
+    "darkenBg": "배경 어둡게",
+    "simplifyScene": "장면 단순화",
+    "goldenHour": "골든 아워",
+    "sunriseGlow": "일출 빛",
+    "blueHour": "블루 아워",
+    "moonlitNight": "달빛 밤",
+    "brightMidday": "밝은 정오",
+    "winterLight": "겨울 빛",
+    "overcastSky": "흐린 하늘",
+    "foggyMisty": "안개/미스트",
+    "rainyDay": "비 오는 날"
+  },
+  "modelBuilder": {
+    "gender": {
+      "title": "성별",
+      "female": "여성",
+      "male": "남성",
+      "any": "무관"
+    },
+    "ageRange": {
+      "title": "연령대",
+      "youngAdult": "젊은 성인 (18-25)",
+      "adult": "성인 (26-35)",
+      "middleAged": "중년 (36-50)",
+      "mature": "장년 (50+)"
+    },
+    "ethnicity": {
+      "title": "인종",
+      "eastAsian": "동아시아",
+      "southAsian": "남아시아",
+      "black": "흑인/아프리카계",
+      "hispanic": "히스패닉/라틴계",
+      "middleEastern": "중동",
+      "white": "백인/코카서스",
+      "mixed": "혼혈/다인종"
+    },
+    "hairColor": {
+      "title": "머리 색",
+      "black": "검정",
+      "brown": "갈색",
+      "blonde": "금발",
+      "red": "빨간색",
+      "gray": "회색/은색"
+    },
+    "hairType": {
+      "title": "머리 유형",
+      "straight": "직모",
+      "wavy": "웨이브",
+      "curly": "곱슬",
+      "coily": "코일리",
+      "short": "짧은",
+      "long": "긴",
+      "bald": "대머리"
+    },
+    "bodyType": {
+      "title": "체형",
+      "slim": "슬림",
+      "athletic": "운동형",
+      "average": "보통",
+      "curvy": "글래머러스",
+      "plusSize": "플러스 사이즈"
+    },
+    "expression": {
+      "title": "표정",
+      "warmFriendly": "따뜻하고 친근한",
+      "confident": "자신감 있는",
+      "playful": "장난스러운",
+      "serious": "진지한/강렬한",
+      "mysterious": "신비로운",
+      "approachable": "친근한"
+    },
+    "vibe": {
+      "title": "분위기",
+      "classic": "클래식/타임리스",
+      "modernEdgy": "모던/엣지",
+      "outdoorsy": "아웃도어",
+      "urban": "어반",
+      "glamorous": "글래머러스",
+      "nextDoor": "옆집 소녀/소년"
+    },
+    "useBackgroundFromReference": "참조 이미지의 배경 사용",
+    "usePersonFromReference": "참조 이미지의 인물 사용",
+    "customBackground": "사용자 정의 배경"
   },
   "backgrounds": {
     "title": "배경 변경",

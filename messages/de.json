@@ -13,7 +13,15 @@
     "success": "Erfolg",
     "copied": "Kopiert",
     "uploadFirst": "Laden Sie zuerst ein Bild hoch",
-    "or": "oder"
+    "or": "oder",
+    "custom": "Benutzerdefiniert",
+    "customVersion": "Benutzerdefinierte Version",
+    "generate": "Generieren",
+    "archive": "Archivieren",
+    "restore": "Wiederherstellen",
+    "suggested": "Vorgeschlagen",
+    "reference": "Referenz",
+    "clearAllSelections": "Alle Auswahlen löschen"
   },
   "nav": {
     "apiKeys": "API-Schlüssel",
@@ -31,7 +39,35 @@
     "edit": "Bearbeiten",
     "backgrounds": "Hintergründe",
     "model": "Modell",
-    "export": "Exportieren"
+    "export": "Exportieren",
+    "title": "Werkzeuge"
+  },
+  "sidebar": {
+    "image": "Bild",
+    "versions": "Versionen",
+    "savedEditsDescription": "Gespeicherte Bearbeitungen, auf denen Sie weiter aufbauen können.",
+    "generateSuggestions": "Vorschläge generieren",
+    "snapshotsDescription": "Schnappschüsse, von denen Sie abzweigen können, um verschiedene Ansätze zu testen."
+  },
+  "sizes": {
+    "square": "Quadrat",
+    "story": "Story",
+    "landscape": "Querformat",
+    "portrait": "Hochformat",
+    "pinterest": "Pinterest"
+  },
+  "quality": {
+    "title": "Qualität vs. Kosten",
+    "draft": "Entwurf",
+    "draftDescription": "Schnelle Iterationen, niedrigste Kosten",
+    "standard": "Standard",
+    "standardDescription": "Ausgewogene Qualität und Kosten",
+    "best": "Beste",
+    "bestDescription": "Finale Assets, höchste Detailstufe"
+  },
+  "dialogs": {
+    "clearWorkspace": "Arbeitsbereich löschen?",
+    "clearWorkspaceDescription": "Dies löscht Ihr hochgeladenes Bild und alle Bearbeitungen. Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "upload": {
     "title": "KI-Bildbearbeitung",
@@ -74,7 +110,194 @@
     "object": "Objekt",
     "customEdit": "Eigene Bearbeitung",
     "customPlaceholder": "Beschreiben Sie eine Bearbeitung...",
-    "applyPresets": "Voreinstellungen anwenden"
+    "applyPresets": "Voreinstellungen anwenden",
+    "era": "Epoche",
+    "camera": "Kamera",
+    "framing": "Bildausschnitt",
+    "rotation": "Rotation",
+    "referenceImage": "Referenzbild"
+  },
+  "presets": {
+    "lighting": {
+      "goldenHour": "Goldene Stunde",
+      "studio": "Studio",
+      "natural": "Natürlich",
+      "dramatic": "Dramatisch",
+      "backlit": "Gegenlicht",
+      "softBox": "Softbox"
+    },
+    "style": {
+      "photorealistic": "Fotorealistisch",
+      "cinematic": "Filmisch",
+      "editorial": "Editorial",
+      "filmGrain": "Filmkörnung",
+      "minimalist": "Minimalistisch",
+      "hdr": "HDR"
+    },
+    "mood": {
+      "cinematicMoody": "Filmisch stimmungsvoll",
+      "hyperRealistic": "Hyperrealistisch",
+      "lightDreamy": "Leicht & verträumt",
+      "highContrast": "Hoher Kontrast",
+      "softNatural": "Sanft & natürlich",
+      "darkDramatic": "Dunkel & dramatisch"
+    },
+    "color": {
+      "warmCozy": "Warm & gemütlich",
+      "coolModern": "Kühl & modern",
+      "vibrantBold": "Lebendig & kräftig",
+      "mutedSoft": "Gedämpft & sanft",
+      "darkLuxurious": "Dunkel & luxuriös",
+      "brightAiry": "Hell & luftig"
+    },
+    "era": {
+      "filmAnalog": "Film analog",
+      "70sRetro": "70er Retro",
+      "90sFaded": "90er verblasst",
+      "y2kGlossy": "Y2K glänzend",
+      "vintageSepia": "Vintage Sepia",
+      "modernClean": "Modern sauber"
+    },
+    "camera": {
+      "hasselblad": "Hasselblad X2D",
+      "canonR5": "Canon EOS R5",
+      "sonyA7rv": "Sony a7R V",
+      "nikonZ8": "Nikon Z8",
+      "film35mm": "35mm Filmkamera",
+      "polaroid": "Polaroid Sofortbild",
+      "ringCamera": "Ring Camera"
+    },
+    "framing": {
+      "closeup": "Nahaufnahme",
+      "mediumShot": "Mittlere Einstellung",
+      "wideShot": "Weitwinkel",
+      "highAngle": "Hoher Winkel",
+      "lowAngle": "Niedriger Winkel",
+      "birdsEyeView": "Vogelperspektive"
+    },
+    "rotation": {
+      "orbitFront": "Orbit vorne",
+      "orbitRight": "Orbit rechts",
+      "orbitLeft": "Orbit links",
+      "orbitBehind": "Orbit hinten",
+      "orbit45Right": "Orbit 45° rechts",
+      "orbit45Left": "Orbit 45° links"
+    },
+    "enhance": {
+      "upscale2x": "2x hochskalieren",
+      "upscale4x": "4x hochskalieren",
+      "autoEnhance": "Auto-Verbesserung",
+      "faceEnhance": "Gesicht verbessern",
+      "restoreOldPhoto": "Altes Foto restaurieren",
+      "hdrEffect": "HDR-Effekt",
+      "boostVibrance": "Lebendigkeit verstärken",
+      "smoothSkin": "Haut glätten",
+      "brightenEyes": "Augen aufhellen",
+      "whitenTeeth": "Zähne aufhellen",
+      "reduceWrinkles": "Falten reduzieren",
+      "fixFlyaways": "Fliegende Haare korrigieren",
+      "reduceShine": "Glanz reduzieren",
+      "sharpenDetails": "Details schärfen",
+      "reduceNoise": "Rauschen reduzieren",
+      "fixColors": "Farben korrigieren",
+      "removeSpots": "Flecken entfernen",
+      "enhanceTextures": "Texturen verbessern",
+      "liftShadows": "Schatten aufhellen"
+    }
+  },
+  "backgroundPresets": {
+    "blurBg": "Hintergrund weichzeichnen",
+    "whiteStudio": "Weißes Studio",
+    "outdoorNature": "Natur im Freien",
+    "urbanStreet": "Urbane Straße",
+    "minimalistGradient": "Minimalistischer Verlauf",
+    "officeWorkspace": "Büro/Arbeitsplatz",
+    "beachCoastal": "Strand/Küste",
+    "coffeeShop": "Café",
+    "urbanStudio": "Urbanes Fotostudio",
+    "darkenBg": "Hintergrund abdunkeln",
+    "simplifyScene": "Szene vereinfachen",
+    "goldenHour": "Goldene Stunde",
+    "sunriseGlow": "Sonnenaufgangsglühen",
+    "blueHour": "Blaue Stunde",
+    "moonlitNight": "Mondschein-Nacht",
+    "brightMidday": "Heller Mittag",
+    "winterLight": "Winterlicht",
+    "overcastSky": "Bedeckter Himmel",
+    "foggyMisty": "Neblig/Dunstig",
+    "rainyDay": "Regentag"
+  },
+  "modelBuilder": {
+    "gender": {
+      "title": "Geschlecht",
+      "female": "Weiblich",
+      "male": "Männlich",
+      "any": "Beliebig"
+    },
+    "ageRange": {
+      "title": "Altersgruppe",
+      "youngAdult": "Junge Erwachsene (18-25)",
+      "adult": "Erwachsene (26-35)",
+      "middleAged": "Mittleres Alter (36-50)",
+      "mature": "Reif (50+)"
+    },
+    "ethnicity": {
+      "title": "Ethnizität",
+      "eastAsian": "Ostasiatisch",
+      "southAsian": "Südasiatisch",
+      "black": "Schwarz/Afrikanisch",
+      "hispanic": "Hispanisch/Latino",
+      "middleEastern": "Nahöstlich",
+      "white": "Weiß/Kaukasisch",
+      "mixed": "Gemischt/Multikulturell"
+    },
+    "hairColor": {
+      "title": "Haarfarbe",
+      "black": "Schwarz",
+      "brown": "Braun",
+      "blonde": "Blond",
+      "red": "Rot",
+      "gray": "Grau/Silber"
+    },
+    "hairType": {
+      "title": "Haartyp",
+      "straight": "Glatt",
+      "wavy": "Wellig",
+      "curly": "Lockig",
+      "coily": "Spiralförmig",
+      "short": "Kurz",
+      "long": "Lang",
+      "bald": "Glatze"
+    },
+    "bodyType": {
+      "title": "Körpertyp",
+      "slim": "Schlank",
+      "athletic": "Athletisch",
+      "average": "Durchschnittlich",
+      "curvy": "Kurvig",
+      "plusSize": "Plus-Size"
+    },
+    "expression": {
+      "title": "Ausdruck",
+      "warmFriendly": "Warm & freundlich",
+      "confident": "Selbstbewusst",
+      "playful": "Verspielt",
+      "serious": "Ernst/Intensiv",
+      "mysterious": "Geheimnisvoll",
+      "approachable": "Zugänglich"
+    },
+    "vibe": {
+      "title": "Ausstrahlung",
+      "classic": "Klassisch/Zeitlos",
+      "modernEdgy": "Modern/Kantig",
+      "outdoorsy": "Naturverbunden",
+      "urban": "Urban",
+      "glamorous": "Glamourös",
+      "nextDoor": "Der/Die von nebenan"
+    },
+    "useBackgroundFromReference": "Hintergrund aus Referenzbild verwenden",
+    "usePersonFromReference": "Person aus Referenzbild verwenden",
+    "customBackground": "Benutzerdefinierter Hintergrund"
   },
   "backgrounds": {
     "title": "Hintergrund ändern",

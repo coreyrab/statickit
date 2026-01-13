@@ -13,7 +13,15 @@
     "success": "成功",
     "copied": "コピーしました",
     "uploadFirst": "まず画像をアップロードしてください",
-    "or": "または"
+    "or": "または",
+    "custom": "カスタム",
+    "customVersion": "カスタムバージョン",
+    "generate": "生成",
+    "archive": "アーカイブ",
+    "restore": "復元",
+    "suggested": "おすすめ",
+    "reference": "参照",
+    "clearAllSelections": "すべての選択をクリア"
   },
   "nav": {
     "apiKeys": "APIキー",
@@ -31,7 +39,35 @@
     "edit": "編集",
     "backgrounds": "背景",
     "model": "モデル",
-    "export": "エクスポート"
+    "export": "エクスポート",
+    "title": "ツール"
+  },
+  "sidebar": {
+    "image": "画像",
+    "versions": "バージョン",
+    "savedEditsDescription": "保存された編集を元に、さらに作業を続けられます。",
+    "generateSuggestions": "提案を生成",
+    "snapshotsDescription": "異なるアプローチをテストするために分岐できるスナップショット。"
+  },
+  "sizes": {
+    "square": "正方形",
+    "story": "ストーリー",
+    "landscape": "横向き",
+    "portrait": "縦向き",
+    "pinterest": "Pinterest"
+  },
+  "quality": {
+    "title": "品質とコストのトレードオフ",
+    "draft": "下書き",
+    "draftDescription": "高速な反復、最低コスト",
+    "standard": "標準",
+    "standardDescription": "品質とコストのバランス",
+    "best": "最高",
+    "bestDescription": "最終アセット、最高の詳細度"
+  },
+  "dialogs": {
+    "clearWorkspace": "ワークスペースをクリアしますか？",
+    "clearWorkspaceDescription": "アップロードした画像とすべての編集が削除されます。この操作は元に戻せません。"
   },
   "upload": {
     "title": "AI画像エディター",
@@ -74,7 +110,194 @@
     "object": "オブジェクト",
     "customEdit": "カスタム編集",
     "customPlaceholder": "編集内容を説明...",
-    "applyPresets": "プリセットを適用"
+    "applyPresets": "プリセットを適用",
+    "era": "時代",
+    "camera": "カメラ",
+    "framing": "フレーミング",
+    "rotation": "回転",
+    "referenceImage": "参照画像"
+  },
+  "presets": {
+    "lighting": {
+      "goldenHour": "ゴールデンアワー",
+      "studio": "スタジオ",
+      "natural": "ナチュラル",
+      "dramatic": "ドラマチック",
+      "backlit": "逆光",
+      "softBox": "ソフトボックス"
+    },
+    "style": {
+      "photorealistic": "フォトリアリスティック",
+      "cinematic": "シネマティック",
+      "editorial": "エディトリアル",
+      "filmGrain": "フィルムグレイン",
+      "minimalist": "ミニマリスト",
+      "hdr": "HDR"
+    },
+    "mood": {
+      "cinematicMoody": "シネマティックムーディー",
+      "hyperRealistic": "ハイパーリアリスティック",
+      "lightDreamy": "ライト＆ドリーミー",
+      "highContrast": "ハイコントラスト",
+      "softNatural": "ソフト＆ナチュラル",
+      "darkDramatic": "ダーク＆ドラマチック"
+    },
+    "color": {
+      "warmCozy": "ウォーム＆コージー",
+      "coolModern": "クール＆モダン",
+      "vibrantBold": "ビビッド＆ボールド",
+      "mutedSoft": "ミュート＆ソフト",
+      "darkLuxurious": "ダーク＆ラグジュアリー",
+      "brightAiry": "ブライト＆エアリー"
+    },
+    "era": {
+      "filmAnalog": "フィルムアナログ",
+      "70sRetro": "70年代レトロ",
+      "90sFaded": "90年代フェード",
+      "y2kGlossy": "Y2Kグロッシー",
+      "vintageSepia": "ヴィンテージセピア",
+      "modernClean": "モダンクリーン"
+    },
+    "camera": {
+      "hasselblad": "Hasselblad X2D",
+      "canonR5": "Canon EOS R5",
+      "sonyA7rv": "Sony a7R V",
+      "nikonZ8": "Nikon Z8",
+      "film35mm": "35mmフィルムカメラ",
+      "polaroid": "ポラロイドインスタント",
+      "ringCamera": "Ring Camera"
+    },
+    "framing": {
+      "closeup": "クローズアップ",
+      "mediumShot": "ミディアムショット",
+      "wideShot": "ワイドショット",
+      "highAngle": "ハイアングル",
+      "lowAngle": "ローアングル",
+      "birdsEyeView": "俯瞰"
+    },
+    "rotation": {
+      "orbitFront": "オービット正面",
+      "orbitRight": "オービット右",
+      "orbitLeft": "オービット左",
+      "orbitBehind": "オービット背面",
+      "orbit45Right": "オービット45度右",
+      "orbit45Left": "オービット45度左"
+    },
+    "enhance": {
+      "upscale2x": "2倍アップスケール",
+      "upscale4x": "4倍アップスケール",
+      "autoEnhance": "自動強化",
+      "faceEnhance": "顔を強化",
+      "restoreOldPhoto": "古い写真を復元",
+      "hdrEffect": "HDR効果",
+      "boostVibrance": "鮮やかさを強調",
+      "smoothSkin": "肌を滑らかに",
+      "brightenEyes": "目を明るく",
+      "whitenTeeth": "歯を白く",
+      "reduceWrinkles": "しわを軽減",
+      "fixFlyaways": "飛び出した髪を修正",
+      "reduceShine": "テカリを軽減",
+      "sharpenDetails": "ディテールをシャープに",
+      "reduceNoise": "ノイズを軽減",
+      "fixColors": "色を修正",
+      "removeSpots": "シミを除去",
+      "enhanceTextures": "テクスチャを強化",
+      "liftShadows": "シャドウを持ち上げる"
+    }
+  },
+  "backgroundPresets": {
+    "blurBg": "背景をぼかす",
+    "whiteStudio": "ホワイトスタジオ",
+    "outdoorNature": "アウトドア自然",
+    "urbanStreet": "都市の街路",
+    "minimalistGradient": "ミニマリストグラデーション",
+    "officeWorkspace": "オフィス/ワークスペース",
+    "beachCoastal": "ビーチ/海岸",
+    "coffeeShop": "カフェ",
+    "urbanStudio": "アーバンフォトスタジオ",
+    "darkenBg": "背景を暗くする",
+    "simplifyScene": "シーンを簡素化",
+    "goldenHour": "ゴールデンアワー",
+    "sunriseGlow": "日の出の輝き",
+    "blueHour": "ブルーアワー",
+    "moonlitNight": "月明かりの夜",
+    "brightMidday": "明るい正午",
+    "winterLight": "冬の光",
+    "overcastSky": "曇り空",
+    "foggyMisty": "霧/もや",
+    "rainyDay": "雨の日"
+  },
+  "modelBuilder": {
+    "gender": {
+      "title": "性別",
+      "female": "女性",
+      "male": "男性",
+      "any": "指定なし"
+    },
+    "ageRange": {
+      "title": "年齢層",
+      "youngAdult": "若年成人（18-25）",
+      "adult": "成人（26-35）",
+      "middleAged": "中年（36-50）",
+      "mature": "シニア（50+）"
+    },
+    "ethnicity": {
+      "title": "民族",
+      "eastAsian": "東アジア",
+      "southAsian": "南アジア",
+      "black": "黒人/アフリカ系",
+      "hispanic": "ヒスパニック/ラテン系",
+      "middleEastern": "中東",
+      "white": "白人/コーカサス系",
+      "mixed": "混血/多民族"
+    },
+    "hairColor": {
+      "title": "髪の色",
+      "black": "黒",
+      "brown": "茶色",
+      "blonde": "金髪",
+      "red": "赤毛",
+      "gray": "グレー/シルバー"
+    },
+    "hairType": {
+      "title": "髪のタイプ",
+      "straight": "ストレート",
+      "wavy": "ウェーブ",
+      "curly": "カーリー",
+      "coily": "コイリー",
+      "short": "ショート",
+      "long": "ロング",
+      "bald": "スキンヘッド"
+    },
+    "bodyType": {
+      "title": "体型",
+      "slim": "スリム",
+      "athletic": "アスレチック",
+      "average": "平均",
+      "curvy": "カーヴィー",
+      "plusSize": "プラスサイズ"
+    },
+    "expression": {
+      "title": "表情",
+      "warmFriendly": "温かみ＆フレンドリー",
+      "confident": "自信",
+      "playful": "遊び心",
+      "serious": "真剣/インテンス",
+      "mysterious": "ミステリアス",
+      "approachable": "親しみやすい"
+    },
+    "vibe": {
+      "title": "雰囲気",
+      "classic": "クラシック/タイムレス",
+      "modernEdgy": "モダン/エッジー",
+      "outdoorsy": "アウトドア派",
+      "urban": "アーバン",
+      "glamorous": "グラマラス",
+      "nextDoor": "隣の子"
+    },
+    "useBackgroundFromReference": "参照画像の背景を使用",
+    "usePersonFromReference": "参照画像の人物を使用",
+    "customBackground": "カスタム背景"
   },
   "backgrounds": {
     "title": "背景を変更",

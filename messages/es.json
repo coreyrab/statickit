@@ -10,10 +10,18 @@
     "loading": "Cargando...",
     "processing": "Procesando...",
     "error": "Error",
-    "success": "Éxito",
+    "success": "Exito",
     "copied": "Copiado",
     "uploadFirst": "Sube una imagen primero",
-    "or": "o"
+    "or": "o",
+    "custom": "Personalizado",
+    "customVersion": "Version personalizada",
+    "generate": "Generar",
+    "archive": "Archivar",
+    "restore": "Restaurar",
+    "suggested": "Sugerido",
+    "reference": "Referencia",
+    "clearAllSelections": "Borrar todas las selecciones"
   },
   "nav": {
     "apiKeys": "Claves API",
@@ -21,7 +29,7 @@
     "shortcuts": "ATAJOS",
     "selectTool": "Seleccionar herramienta",
     "navigateVersions": "Navegar versiones",
-    "deleteVersion": "Eliminar versión",
+    "deleteVersion": "Eliminar version",
     "github": "GitHub",
     "theme": "Tema",
     "language": "Idioma"
@@ -31,10 +39,38 @@
     "edit": "Editar",
     "backgrounds": "Fondos",
     "model": "Modelo",
-    "export": "Exportar"
+    "export": "Exportar",
+    "title": "Herramientas"
+  },
+  "sidebar": {
+    "image": "Imagen",
+    "versions": "Versiones",
+    "savedEditsDescription": "Ediciones guardadas sobre las que puedes seguir construyendo.",
+    "generateSuggestions": "Generar sugerencias",
+    "snapshotsDescription": "Instantaneas desde las que puedes ramificar para probar diferentes enfoques."
+  },
+  "sizes": {
+    "square": "Cuadrado",
+    "story": "Historia",
+    "landscape": "Horizontal",
+    "portrait": "Vertical",
+    "pinterest": "Pinterest"
+  },
+  "quality": {
+    "title": "Calidad vs Costo",
+    "draft": "Borrador",
+    "draftDescription": "Iteraciones rapidas, menor costo",
+    "standard": "Estandar",
+    "standardDescription": "Calidad y costo equilibrados",
+    "best": "Mejor",
+    "bestDescription": "Assets finales, maximo detalle"
+  },
+  "dialogs": {
+    "clearWorkspace": "Limpiar espacio de trabajo?",
+    "clearWorkspaceDescription": "Esto eliminara tu imagen subida y todas las ediciones. Esta accion no se puede deshacer."
   },
   "upload": {
-    "title": "Editor de Imágenes IA",
+    "title": "Editor de Imagenes IA",
     "subtitle": "Sube una imagen para comenzar",
     "dragDrop": "Arrastra y suelta o haz clic para subir",
     "supportedFormats": "Soporta PNG, JPG, WEBP hasta 20MB",
@@ -49,32 +85,219 @@
     "generating": "Generando...",
     "presets": "Preajustes",
     "style": "Estilo",
-    "mood": "Estado de ánimo",
+    "mood": "Estado de animo",
     "color": "Color"
   },
   "edit": {
     "title": "Editar Imagen",
-    "description": "Aplica efectos preestablecidos de iluminación, estilo, ángulos de cámara y más.",
+    "description": "Aplica efectos preestablecidos de iluminacion, estilo, angulos de camara y mas.",
     "prompt": "Describe los cambios que deseas...",
-    "apply": "Aplicar Edición",
+    "apply": "Aplicar Edicion",
     "applying": "Aplicando...",
     "presets": "Preajustes",
     "imageDetails": "Detalles de Imagen",
     "stillAnalyzing": "Analizando...",
-    "copyDescription": "Copiar descripción",
-    "descriptionCopied": "Descripción copiada",
+    "copyDescription": "Copiar descripcion",
+    "descriptionCopied": "Descripcion copiada",
     "enhance": "Mejorar",
-    "lighting": "Iluminación",
+    "lighting": "Iluminacion",
     "style": "Estilo",
-    "cameraAngle": "Ángulo de Cámara",
+    "cameraAngle": "Angulo de Camara",
     "mood": "Ambiente",
     "color": "Color",
-    "composition": "Composición",
+    "composition": "Composicion",
     "perspective": "Perspectiva",
     "object": "Objeto",
-    "customEdit": "Edición Personalizada",
-    "customPlaceholder": "Describe cualquier edición...",
-    "applyPresets": "Aplicar Preajustes"
+    "customEdit": "Edicion Personalizada",
+    "customPlaceholder": "Describe cualquier edicion...",
+    "applyPresets": "Aplicar Preajustes",
+    "era": "Epoca",
+    "camera": "Camara",
+    "framing": "Encuadre",
+    "rotation": "Rotacion",
+    "referenceImage": "Imagen de referencia"
+  },
+  "presets": {
+    "lighting": {
+      "goldenHour": "Hora dorada",
+      "studio": "Estudio",
+      "natural": "Natural",
+      "dramatic": "Dramatico",
+      "backlit": "Contraluz",
+      "softBox": "Caja de luz"
+    },
+    "style": {
+      "photorealistic": "Fotorrealista",
+      "cinematic": "Cinematografico",
+      "editorial": "Editorial",
+      "filmGrain": "Grano de pelicula",
+      "minimalist": "Minimalista",
+      "hdr": "HDR"
+    },
+    "mood": {
+      "cinematicMoody": "Cinematografico atmosferico",
+      "hyperRealistic": "Hiperrealista",
+      "lightDreamy": "Ligero y sonador",
+      "highContrast": "Alto contraste",
+      "softNatural": "Suave y natural",
+      "darkDramatic": "Oscuro y dramatico"
+    },
+    "color": {
+      "warmCozy": "Calido y acogedor",
+      "coolModern": "Frio y moderno",
+      "vibrantBold": "Vibrante y audaz",
+      "mutedSoft": "Apagado y suave",
+      "darkLuxurious": "Oscuro y lujoso",
+      "brightAiry": "Brillante y aireado"
+    },
+    "era": {
+      "filmAnalog": "Pelicula analogica",
+      "70sRetro": "Retro anos 70",
+      "90sFaded": "Anos 90 desvanecido",
+      "y2kGlossy": "Y2K brillante",
+      "vintageSepia": "Sepia vintage",
+      "modernClean": "Moderno limpio"
+    },
+    "camera": {
+      "hasselblad": "Hasselblad X2D",
+      "canonR5": "Canon EOS R5",
+      "sonyA7rv": "Sony a7R V",
+      "nikonZ8": "Nikon Z8",
+      "film35mm": "Camara de pelicula 35mm",
+      "polaroid": "Polaroid instantanea",
+      "ringCamera": "Ring Camera"
+    },
+    "framing": {
+      "closeup": "Primer plano",
+      "mediumShot": "Plano medio",
+      "wideShot": "Plano general",
+      "highAngle": "Angulo alto",
+      "lowAngle": "Angulo bajo",
+      "birdsEyeView": "Vista de pajaro"
+    },
+    "rotation": {
+      "orbitFront": "Orbita frontal",
+      "orbitRight": "Orbita derecha",
+      "orbitLeft": "Orbita izquierda",
+      "orbitBehind": "Orbita trasera",
+      "orbit45Right": "Orbita 45 derecha",
+      "orbit45Left": "Orbita 45 izquierda"
+    },
+    "enhance": {
+      "upscale2x": "Escalar 2x",
+      "upscale4x": "Escalar 4x",
+      "autoEnhance": "Mejora automatica",
+      "faceEnhance": "Mejorar rostro",
+      "restoreOldPhoto": "Restaurar foto antigua",
+      "hdrEffect": "Efecto HDR",
+      "boostVibrance": "Aumentar vivacidad",
+      "smoothSkin": "Suavizar piel",
+      "brightenEyes": "Iluminar ojos",
+      "whitenTeeth": "Blanquear dientes",
+      "reduceWrinkles": "Reducir arrugas",
+      "fixFlyaways": "Corregir cabellos sueltos",
+      "reduceShine": "Reducir brillo",
+      "sharpenDetails": "Enfocar detalles",
+      "reduceNoise": "Reducir ruido",
+      "fixColors": "Corregir colores",
+      "removeSpots": "Eliminar manchas",
+      "enhanceTextures": "Mejorar texturas",
+      "liftShadows": "Levantar sombras"
+    }
+  },
+  "backgroundPresets": {
+    "blurBg": "Desenfocar fondo",
+    "whiteStudio": "Estudio blanco",
+    "outdoorNature": "Naturaleza exterior",
+    "urbanStreet": "Calle urbana",
+    "minimalistGradient": "Degradado minimalista",
+    "officeWorkspace": "Oficina/Espacio de trabajo",
+    "beachCoastal": "Playa/Costa",
+    "coffeeShop": "Cafeteria",
+    "urbanStudio": "Estudio fotografico urbano",
+    "darkenBg": "Oscurecer fondo",
+    "simplifyScene": "Simplificar escena",
+    "goldenHour": "Hora dorada",
+    "sunriseGlow": "Resplandor del amanecer",
+    "blueHour": "Hora azul",
+    "moonlitNight": "Noche de luna",
+    "brightMidday": "Mediodia brillante",
+    "winterLight": "Luz invernal",
+    "overcastSky": "Cielo nublado",
+    "foggyMisty": "Niebla/Bruma",
+    "rainyDay": "Dia lluvioso"
+  },
+  "modelBuilder": {
+    "gender": {
+      "title": "Genero",
+      "female": "Femenino",
+      "male": "Masculino",
+      "any": "Cualquiera"
+    },
+    "ageRange": {
+      "title": "Rango de edad",
+      "youngAdult": "Adulto joven (18-25)",
+      "adult": "Adulto (26-35)",
+      "middleAged": "Mediana edad (36-50)",
+      "mature": "Maduro (50+)"
+    },
+    "ethnicity": {
+      "title": "Etnia",
+      "eastAsian": "Este asiatico",
+      "southAsian": "Sur asiatico",
+      "black": "Negro/Africano",
+      "hispanic": "Hispano/Latino",
+      "middleEastern": "Medio Oriente",
+      "white": "Blanco/Caucasico",
+      "mixed": "Mixto/Multirracial"
+    },
+    "hairColor": {
+      "title": "Color de cabello",
+      "black": "Negro",
+      "brown": "Castano",
+      "blonde": "Rubio",
+      "red": "Pelirrojo",
+      "gray": "Gris/Plateado"
+    },
+    "hairType": {
+      "title": "Tipo de cabello",
+      "straight": "Liso",
+      "wavy": "Ondulado",
+      "curly": "Rizado",
+      "coily": "Afro",
+      "short": "Corto",
+      "long": "Largo",
+      "bald": "Calvo"
+    },
+    "bodyType": {
+      "title": "Tipo de cuerpo",
+      "slim": "Delgado",
+      "athletic": "Atletico",
+      "average": "Promedio",
+      "curvy": "Curvilinea",
+      "plusSize": "Talla grande"
+    },
+    "expression": {
+      "title": "Expresion",
+      "warmFriendly": "Calido y amigable",
+      "confident": "Seguro",
+      "playful": "Jugueton",
+      "serious": "Serio/Intenso",
+      "mysterious": "Misterioso",
+      "approachable": "Accesible"
+    },
+    "vibe": {
+      "title": "Vibra",
+      "classic": "Clasico/Atemporal",
+      "modernEdgy": "Moderno/Vanguardista",
+      "outdoorsy": "Aventurero",
+      "urban": "Urbano",
+      "glamorous": "Glamoroso",
+      "nextDoor": "Chica/Chico de al lado"
+    },
+    "useBackgroundFromReference": "Usar fondo de imagen de referencia",
+    "usePersonFromReference": "Usar persona de imagen de referencia",
+    "customBackground": "Fondo personalizado"
   },
   "backgrounds": {
     "title": "Cambiar Fondo",
@@ -98,7 +321,7 @@
   },
   "model": {
     "title": "Modelo",
-    "description": "Cambia el modelo preservando el fondo, iluminación y producto.",
+    "description": "Cambia el modelo preservando el fondo, iluminacion y producto.",
     "currentModel": "Modelo Actual",
     "changeModel": "Cambiar Modelo",
     "suggestModels": "Sugerir Modelos",
@@ -112,38 +335,38 @@
     "modelBuilder": "Constructor de Modelos",
     "customModel": "Modelo Personalizado",
     "customPlaceholder": "Describe el modelo...",
-    "prompt": "Describe cómo colocar en el modelo...",
+    "prompt": "Describe como colocar en el modelo...",
     "applyModel": "Aplicar Modelo"
   },
   "export": {
     "title": "Exportar",
-    "description": "Redimensionamiento con IA para ajustarse a cualquier relación de aspecto o plataforma.",
+    "description": "Redimensionamiento con IA para ajustarse a cualquier relacion de aspecto o plataforma.",
     "resize": "Redimensionar",
     "resizing": "Redimensionando...",
     "format": "Formato",
     "quality": "Calidad",
     "original": "Original",
-    "generateAllSizes": "Generar todos los {count} tamaños",
+    "generateAllSizes": "Generar todos los {count} tamanos",
     "resizingMayTakeMinute": "Redimensionando (puede tardar un minuto)...",
     "downloadSection": "Descargar",
-    "noImagesToDownload": "No hay imágenes para descargar",
+    "noImagesToDownload": "No hay imagenes para descargar",
     "currentView": "Vista Actual",
-    "downloadAllSizes": "Descargar Todos los Tamaños",
+    "downloadAllSizes": "Descargar Todos los Tamanos",
     "downloadAllVersions": "Descargar Todas las Versiones",
-    "generatedImages": "{count} imágenes generadas",
-    "sizes": "{count} tamaños",
+    "generatedImages": "{count} imagenes generadas",
+    "sizes": "{count} tamanos",
     "downloadAll": "Descargar Todo",
     "downloadCurrent": "Descargar Actual",
-    "selectSizes": "Selecciona tamaños para redimensionar",
-    "downloadReady": "Descargar imágenes listas"
+    "selectSizes": "Selecciona tamanos para redimensionar",
+    "downloadReady": "Descargar imagenes listas"
   },
   "viewer": {
     "download": "Descargar imagen",
     "uploadNew": "Subir nueva imagen",
-    "newVersion": "Crear nueva versión desde esta imagen",
+    "newVersion": "Crear nueva version desde esta imagen",
     "compare": "Comparar versiones",
-    "exitCompare": "Salir del modo de comparación",
-    "makeEditToCompare": "Realiza una edición para comparar versiones",
+    "exitCompare": "Salir del modo de comparacion",
+    "makeEditToCompare": "Realiza una edicion para comparar versiones",
     "hideUI": "Ocultar UI",
     "showUI": "Mostrar UI",
     "zoomIn": "Acercar",
@@ -151,8 +374,8 @@
     "fitToScreen": "Ajustar a pantalla",
     "original": "Original",
     "edited": "Editado",
-    "deleteVersion": "Eliminar esta versión",
-    "deleteEdit": "Eliminar esta edición",
+    "deleteVersion": "Eliminar esta version",
+    "deleteEdit": "Eliminar esta edicion",
     "deleteImageStartOver": "Eliminar imagen y comenzar de nuevo",
     "cantDeleteOriginal": "No se puede eliminar el original (tiene ediciones o variaciones)",
     "duplicate": "Duplicar"
@@ -169,7 +392,7 @@
     "qualityTooltip": "Mayor calidad = mejores resultados pero mayor costo de API"
   },
   "apiKey": {
-    "title": "Configuración de Clave API",
+    "title": "Configuracion de Clave API",
     "description": "Ingresa tu clave API para comenzar a editar",
     "geminiKey": "Clave API de Gemini",
     "openaiKey": "Clave API de OpenAI",
@@ -180,14 +403,14 @@
   },
   "versions": {
     "original": "Original",
-    "version": "Versión {number}",
+    "version": "Version {number}",
     "current": "Actual"
   },
   "errors": {
     "uploadFailed": "Error al subir la imagen",
     "processingFailed": "Error al procesar la imagen",
-    "invalidApiKey": "Clave API inválida",
-    "rateLimited": "Límite de solicitudes alcanzado. Intenta más tarde.",
-    "networkError": "Error de red. Verifica tu conexión."
+    "invalidApiKey": "Clave API invalida",
+    "rateLimited": "Limite de solicitudes alcanzado. Intenta mas tarde.",
+    "networkError": "Error de red. Verifica tu conexion."
   }
 }

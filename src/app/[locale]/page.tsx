@@ -368,9 +368,9 @@ function HomeContent() {
   // Get quality display label
   const getQualityLabel = (quality: ImageQuality): string => {
     switch (quality) {
-      case 'low': return 'Draft';
-      case 'medium': return 'Standard';
-      case 'high': return 'Best';
+      case 'low': return t('quality.draft');
+      case 'medium': return t('quality.standard');
+      case 'high': return t('quality.best');
     }
   };
 
@@ -539,6 +539,186 @@ function HomeContent() {
       { id: 'enhance-textures', name: 'Enhance Textures', prompt: 'Enhance material textures: make fabric weaves more visible, bring out leather grain, enhance product surface details, boost texture definition for materials and surfaces, professional product photography enhancement, maintain all other elements exactly as they are' },
       { id: 'lift-shadows', name: 'Lift Shadows', prompt: 'Brighten shadow areas: recover detail in dark regions, lift underexposed shadows without washing out, fill light effect, reveal hidden detail in dark areas while maintaining overall contrast and mood, maintain all other elements exactly as they are' },
     ],
+  };
+
+  // Helper to get translated size labels
+  const getSizeLabel = (label: string): string => {
+    const sizeLabels: Record<string, string> = {
+      'Square': t('sizes.square'),
+      'Story': t('sizes.story'),
+      'Landscape': t('sizes.landscape'),
+      'Portrait': t('sizes.portrait'),
+      'Pinterest': t('sizes.pinterest'),
+    };
+    return sizeLabels[label] || label;
+  };
+
+  // Translation key mappings for presets (kebab-case ID to camelCase translation key)
+  const PRESET_KEYS: Record<string, string> = {
+    // Lighting
+    'golden-hour': 'presets.lighting.goldenHour',
+    'studio': 'presets.lighting.studio',
+    'natural': 'presets.lighting.natural',
+    'dramatic': 'presets.lighting.dramatic',
+    'backlit': 'presets.lighting.backlit',
+    'soft-box': 'presets.lighting.softBox',
+    // Style
+    'photorealistic': 'presets.style.photorealistic',
+    'cinematic': 'presets.style.cinematic',
+    'editorial': 'presets.style.editorial',
+    'film-grain': 'presets.style.filmGrain',
+    'minimalist': 'presets.style.minimalist',
+    'hdr': 'presets.style.hdr',
+    // Mood
+    'cinematic-moody': 'presets.mood.cinematicMoody',
+    'hyper-realistic': 'presets.mood.hyperRealistic',
+    'light-dreamy': 'presets.mood.lightDreamy',
+    'high-contrast': 'presets.mood.highContrast',
+    'soft-natural': 'presets.mood.softNatural',
+    'dark-dramatic': 'presets.mood.darkDramatic',
+    // Color
+    'warm-cozy': 'presets.color.warmCozy',
+    'cool-modern': 'presets.color.coolModern',
+    'vibrant-bold': 'presets.color.vibrantBold',
+    'muted-soft': 'presets.color.mutedSoft',
+    'dark-luxurious': 'presets.color.darkLuxurious',
+    'bright-airy': 'presets.color.brightAiry',
+    // Era
+    'film-analog': 'presets.era.filmAnalog',
+    '70s-retro': 'presets.era.70sRetro',
+    '90s-faded': 'presets.era.90sFaded',
+    'y2k-glossy': 'presets.era.y2kGlossy',
+    'vintage-sepia': 'presets.era.vintageSepia',
+    'modern-clean': 'presets.era.modernClean',
+    // Camera
+    'hasselblad': 'presets.camera.hasselblad',
+    'canon-r5': 'presets.camera.canonR5',
+    'sony-a7rv': 'presets.camera.sonyA7rv',
+    'nikon-z8': 'presets.camera.nikonZ8',
+    'film-35mm': 'presets.camera.film35mm',
+    'polaroid': 'presets.camera.polaroid',
+    'ring-camera': 'presets.camera.ringCamera',
+    // Framing
+    'closeup': 'presets.framing.closeup',
+    'medium-shot': 'presets.framing.mediumShot',
+    'wide-shot': 'presets.framing.wideShot',
+    'high-angle': 'presets.framing.highAngle',
+    'low-angle': 'presets.framing.lowAngle',
+    'birds-eye-view': 'presets.framing.birdsEyeView',
+    // Rotation
+    'orbit-front': 'presets.rotation.orbitFront',
+    'orbit-right': 'presets.rotation.orbitRight',
+    'orbit-left': 'presets.rotation.orbitLeft',
+    'orbit-behind': 'presets.rotation.orbitBehind',
+    'orbit-45-right': 'presets.rotation.orbit45Right',
+    'orbit-45-left': 'presets.rotation.orbit45Left',
+    // Enhance
+    'upscale-2x': 'presets.enhance.upscale2x',
+    'upscale-4x': 'presets.enhance.upscale4x',
+    'auto-enhance': 'presets.enhance.autoEnhance',
+    'face-enhance': 'presets.enhance.faceEnhance',
+    'restore-old-photo': 'presets.enhance.restoreOldPhoto',
+    'hdr-effect': 'presets.enhance.hdrEffect',
+    'boost-vibrance': 'presets.enhance.boostVibrance',
+    'smooth-skin': 'presets.enhance.smoothSkin',
+    'brighten-eyes': 'presets.enhance.brightenEyes',
+    'whiten-teeth': 'presets.enhance.whitenTeeth',
+    'reduce-wrinkles': 'presets.enhance.reduceWrinkles',
+    'fix-flyaways': 'presets.enhance.fixFlyaways',
+    'reduce-shine': 'presets.enhance.reduceShine',
+    'sharpen-details': 'presets.enhance.sharpenDetails',
+    'reduce-noise': 'presets.enhance.reduceNoise',
+    'fix-colors': 'presets.enhance.fixColors',
+    'remove-spots': 'presets.enhance.removeSpots',
+    'enhance-textures': 'presets.enhance.enhanceTextures',
+    'lift-shadows': 'presets.enhance.liftShadows',
+  };
+
+  // Translation key mappings for background presets
+  const BACKGROUND_PRESET_KEYS: Record<string, string> = {
+    'blur-bg': 'backgroundPresets.blurBg',
+    'white-studio': 'backgroundPresets.whiteStudio',
+    'outdoor-nature': 'backgroundPresets.outdoorNature',
+    'urban-street': 'backgroundPresets.urbanStreet',
+    'minimalist-gradient': 'backgroundPresets.minimalistGradient',
+    'office-workspace': 'backgroundPresets.officeWorkspace',
+    'beach-coastal': 'backgroundPresets.beachCoastal',
+    'coffee-shop': 'backgroundPresets.coffeeShop',
+    'urban-studio': 'backgroundPresets.urbanStudio',
+    'darken-bg': 'backgroundPresets.darkenBg',
+    'simplify-scene': 'backgroundPresets.simplifyScene',
+    'golden-hour': 'backgroundPresets.goldenHour',
+    'sunrise-glow': 'backgroundPresets.sunriseGlow',
+    'blue-hour': 'backgroundPresets.blueHour',
+    'moonlit-night': 'backgroundPresets.moonlitNight',
+    'bright-midday': 'backgroundPresets.brightMidday',
+    'winter-light': 'backgroundPresets.winterLight',
+    'overcast-sky': 'backgroundPresets.overcastSky',
+    'foggy-misty': 'backgroundPresets.foggyMisty',
+    'rainy-day': 'backgroundPresets.rainyDay',
+  };
+
+  // Translation key mappings for model builder options
+  const MODEL_OPTION_KEYS: Record<string, Record<string, string>> = {
+    gender: {
+      'female': 'modelBuilder.gender.female',
+      'male': 'modelBuilder.gender.male',
+      'any': 'modelBuilder.gender.any',
+    },
+    ageRange: {
+      '18-25': 'modelBuilder.ageRange.youngAdult',
+      '26-35': 'modelBuilder.ageRange.adult',
+      '36-50': 'modelBuilder.ageRange.middleAged',
+      '50+': 'modelBuilder.ageRange.mature',
+    },
+    ethnicity: {
+      'east-asian': 'modelBuilder.ethnicity.eastAsian',
+      'south-asian': 'modelBuilder.ethnicity.southAsian',
+      'black': 'modelBuilder.ethnicity.black',
+      'hispanic': 'modelBuilder.ethnicity.hispanic',
+      'middle-eastern': 'modelBuilder.ethnicity.middleEastern',
+      'white': 'modelBuilder.ethnicity.white',
+      'mixed': 'modelBuilder.ethnicity.mixed',
+    },
+    hairColor: {
+      'black': 'modelBuilder.hairColor.black',
+      'brown': 'modelBuilder.hairColor.brown',
+      'blonde': 'modelBuilder.hairColor.blonde',
+      'red': 'modelBuilder.hairColor.red',
+      'gray': 'modelBuilder.hairColor.gray',
+    },
+    hairType: {
+      'straight': 'modelBuilder.hairType.straight',
+      'wavy': 'modelBuilder.hairType.wavy',
+      'curly': 'modelBuilder.hairType.curly',
+      'coily': 'modelBuilder.hairType.coily',
+      'short': 'modelBuilder.hairType.short',
+      'long': 'modelBuilder.hairType.long',
+      'bald': 'modelBuilder.hairType.bald',
+    },
+    bodyType: {
+      'slim': 'modelBuilder.bodyType.slim',
+      'athletic': 'modelBuilder.bodyType.athletic',
+      'average': 'modelBuilder.bodyType.average',
+      'curvy': 'modelBuilder.bodyType.curvy',
+      'plus-size': 'modelBuilder.bodyType.plusSize',
+    },
+    expression: {
+      'warm-friendly': 'modelBuilder.expression.warmFriendly',
+      'confident': 'modelBuilder.expression.confident',
+      'playful': 'modelBuilder.expression.playful',
+      'serious': 'modelBuilder.expression.serious',
+      'mysterious': 'modelBuilder.expression.mysterious',
+      'approachable': 'modelBuilder.expression.approachable',
+    },
+    vibe: {
+      'classic': 'modelBuilder.vibe.classic',
+      'modern-edgy': 'modelBuilder.vibe.modernEdgy',
+      'outdoorsy': 'modelBuilder.vibe.outdoorsy',
+      'urban': 'modelBuilder.vibe.urban',
+      'glamorous': 'modelBuilder.vibe.glamorous',
+      'next-door': 'modelBuilder.vibe.nextDoor',
+    },
   };
 
   // Background suggestions for the Backgrounds tool
@@ -1161,7 +1341,7 @@ function HomeContent() {
   // Generate iterations on-demand (called from the Iterations tool)
   const handleGenerateIterations = async () => {
     if (!uploadedImage) {
-      toast.info('Upload an image first to generate variations');
+      toast.info(t('common.uploadFirst'));
       return;
     }
     if (!apiKey) {
@@ -1696,7 +1876,7 @@ function HomeContent() {
   // Apply presets to the current image
   const handleApplyPresets = async () => {
     if (!uploadedImage) {
-      toast.info('Upload an image first to apply presets');
+      toast.info(t('common.uploadFirst'));
       return;
     }
     if (!apiKey) {
@@ -1830,7 +2010,7 @@ function HomeContent() {
   // Apply a background change with background-scoped prompt
   const handleApplyBackgroundChange = async (prompt: string, label: string) => {
     if (!uploadedImage) {
-      toast.info('Upload an image first to change its background');
+      toast.info(t('common.uploadFirst'));
       return;
     }
     if (!apiKey) {
@@ -1966,7 +2146,7 @@ function HomeContent() {
   // Remove background using client-side AI (rembg-webgpu)
   const handleRemoveBackground = async () => {
     if (!uploadedImage) {
-      toast.info('Upload an image first to remove its background');
+      toast.info(t('common.uploadFirst'));
       return;
     }
 
@@ -2032,7 +2212,7 @@ function HomeContent() {
   // Generate AI background suggestions based on current image
   const handleGenerateBackgroundSuggestions = async () => {
     if (!uploadedImage) {
-      toast.info('Upload an image first to get background suggestions');
+      toast.info(t('common.uploadFirst'));
       return;
     }
     if (!apiKey) {
@@ -2113,7 +2293,7 @@ function HomeContent() {
   // Apply model change - similar to background change but for model only
   const handleApplyModelChange = async (prompt: string, label: string) => {
     if (!uploadedImage) {
-      toast.info('Upload an image first to change its model');
+      toast.info(t('common.uploadFirst'));
       return;
     }
     if (!apiKey) {
@@ -2248,7 +2428,7 @@ function HomeContent() {
   // Generate AI model suggestions based on current image
   const handleGenerateModelSuggestions = async () => {
     if (!uploadedImage) {
-      toast.info('Upload an image first to get model suggestions');
+      toast.info(t('common.uploadFirst'));
       return;
     }
     if (!apiKey) {
@@ -2397,7 +2577,7 @@ function HomeContent() {
 
       setBackgroundReferences(prev => [...prev, newRef]);
       setSelectedBackgroundRef(newRef.id);
-      setBackgroundCustomPrompt(`Use background from reference image`);
+      setBackgroundCustomPrompt(t('modelBuilder.useBackgroundFromReference'));
       track('reference_image_uploaded', { tool: 'background' });
     };
     reader.readAsDataURL(file);
@@ -2425,7 +2605,7 @@ function HomeContent() {
 
       setModelReferences(prev => [...prev, newRef]);
       setSelectedModelRef(newRef.id);
-      setModelCustomPrompt(`Use person from reference image`);
+      setModelCustomPrompt(t('modelBuilder.usePersonFromReference'));
       track('reference_image_uploaded', { tool: 'model' });
     };
     reader.readAsDataURL(file);
@@ -2611,7 +2791,7 @@ function HomeContent() {
   // Resize original image
   const handleResizeOriginal = async (size: typeof AD_SIZES[number]) => {
     if (!uploadedImage) {
-      toast.info('Upload an image first to resize it');
+      toast.info(t('common.uploadFirst'));
       return;
     }
 
@@ -3128,7 +3308,7 @@ function HomeContent() {
                 {/* Language Selector */}
                 <div className="px-2 py-2">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-muted-foreground">Language</span>
+                    <span className="text-xs text-muted-foreground">{t('nav.language')}</span>
                     <span className="text-xs text-muted-foreground/60">{LANGUAGES[locale].flag}</span>
                   </div>
                   <div className="grid grid-cols-4 gap-1">
@@ -3854,7 +4034,7 @@ function HomeContent() {
                                 <Paperclip className="w-2.5 h-2.5 text-primary-foreground" />
                               </div>
                             </div>
-                            <span className="text-xs text-primary font-medium">Reference</span>
+                            <span className="text-xs text-primary font-medium">{t('common.reference')}</span>
                             <button
                               onClick={() => setSelectedEditRef(null)}
                               className="p-0.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
@@ -3919,7 +4099,7 @@ function HomeContent() {
                                 <Paperclip className="w-2.5 h-2.5 text-primary-foreground" />
                               </div>
                             </div>
-                            <span className="text-xs text-primary font-medium">Reference</span>
+                            <span className="text-xs text-primary font-medium">{t('common.reference')}</span>
                             <button
                               onClick={() => {
                                 setSelectedBackgroundRef(null);
@@ -3991,7 +4171,7 @@ function HomeContent() {
                                 <Paperclip className="w-2.5 h-2.5 text-primary-foreground" />
                               </div>
                             </div>
-                            <span className="text-xs text-primary font-medium">Reference</span>
+                            <span className="text-xs text-primary font-medium">{t('common.reference')}</span>
                             <button
                               onClick={() => {
                                 setSelectedModelRef(null);
@@ -4103,7 +4283,7 @@ function HomeContent() {
                       <DropdownMenuSeparator />
                       <div className="w-full px-2 py-1.5 flex items-center justify-between text-[10px] text-muted-foreground/60 font-normal">
                         <div className="flex items-center gap-1">
-                          <span className="uppercase">Quality</span>
+                          <span className="uppercase">{t('models.quality')}</span>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <button
@@ -4115,11 +4295,11 @@ function HomeContent() {
                               </button>
                             </TooltipTrigger>
                             <TooltipContent side="top" className="max-w-[220px] text-xs">
-                              <p className="font-medium mb-1">Quality vs Cost Tradeoff</p>
+                              <p className="font-medium mb-1">{t('quality.title')}</p>
                               <ul className="space-y-1 text-muted-foreground">
-                                <li><span className="text-foreground">Draft:</span> Fast iterations, lowest cost</li>
-                                <li><span className="text-foreground">Standard:</span> Balanced quality & cost</li>
-                                <li><span className="text-foreground">Best:</span> Final assets, highest detail</li>
+                                <li><span className="text-foreground">{t('quality.draft')}:</span> {t('quality.draftDescription')}</li>
+                                <li><span className="text-foreground">{t('quality.standard')}:</span> {t('quality.standardDescription')}</li>
+                                <li><span className="text-foreground">{t('quality.best')}:</span> {t('quality.bestDescription')}</li>
                               </ul>
                             </TooltipContent>
                           </Tooltip>
@@ -4310,7 +4490,7 @@ function HomeContent() {
           `}>
             {/* Mobile Sidebar Header */}
             <div className="flex items-center justify-between p-4 border-b border-border md:hidden">
-              <span className="font-semibold">Tools</span>
+              <span className="font-semibold">{t('tools.title')}</span>
               <button
                 onClick={() => setIsMobileSidebarOpen(false)}
                 className="p-2 -mr-2 rounded-lg hover:bg-muted transition-colors"
@@ -4324,7 +4504,7 @@ function HomeContent() {
                 {/* Image Section */}
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-foreground/70">Image</h3>
+                    <h3 className="text-sm font-medium text-foreground/70">{t('sidebar.image')}</h3>
                     <div className="flex items-center gap-2">
                       {uploadedImage && (
                         <button
@@ -4407,7 +4587,7 @@ function HomeContent() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-1.5 mb-2">
-                        <h2 className="font-semibold text-base flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Layers className="w-3.5 h-3.5 text-primary-foreground" /></span>Versions</h2>
+                        <h2 className="font-semibold text-base flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Layers className="w-3.5 h-3.5 text-primary-foreground" /></span>{t('sidebar.versions')}</h2>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
@@ -4415,11 +4595,11 @@ function HomeContent() {
                             </button>
                           </TooltipTrigger>
                           <TooltipContent side="right" className="max-w-[140px]">
-                            <p className="text-xs">Snapshots you can branch from to test different approaches.</p>
+                            <p className="text-xs">{t('sidebar.snapshotsDescription')}</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                      <p className="text-xs text-muted-foreground/80">Saved edits you can continue to build on.</p>
+                      <p className="text-xs text-muted-foreground/80">{t('sidebar.savedEditsDescription')}</p>
                     </div>
                     {variations.length > 0 && (
                       <div className="flex items-center gap-3">
@@ -4458,7 +4638,7 @@ function HomeContent() {
                     <div className="mt-4">
                       {/* Number of generations */}
                       <div className="mb-3">
-                        <label className="text-xs text-muted-foreground/70 mb-1.5 block">Generate suggestions</label>
+                        <label className="text-xs text-muted-foreground/70 mb-1.5 block">{t('sidebar.generateSuggestions')}</label>
                         <div className="flex items-center gap-2">
                           {[3, 5, 8, 10].map((num) => (
                             <button
@@ -4492,7 +4672,7 @@ function HomeContent() {
                         className="w-full bg-primary hover:bg-primary/90"
                       >
                         <Sparkles className="w-4 h-4 mr-1.5" />
-                        Generate suggestions
+                        {t('sidebar.generateSuggestions')}
                       </Button>
 
                       {/* Custom iteration section */}
@@ -4503,7 +4683,7 @@ function HomeContent() {
                             className="w-full px-3 py-2.5 rounded-lg border border-dashed border-border text-muted-foreground/80 hover:text-foreground/70 hover:border-border transition-all flex items-center justify-center gap-2 text-sm"
                           >
                             <Plus className="w-4 h-4" />
-                            Custom version
+                            {t('common.customVersion')}
                           </button>
                         ) : (
                           <div className="space-y-3">
@@ -4570,7 +4750,7 @@ function HomeContent() {
                 {/* Image Section */}
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-foreground/70">Image</h3>
+                    <h3 className="text-sm font-medium text-foreground/70">{t('sidebar.image')}</h3>
                     <div className="flex items-center gap-2">
                       {uploadedImage && (
                         <button
@@ -4727,7 +4907,7 @@ function HomeContent() {
                               key={preset.id}
                               onClick={() => {
                                 if (!uploadedImage) {
-                                  toast.info('Upload an image first');
+                                  toast.info(t('common.uploadFirst'));
                                   return;
                                 }
                                 setSelectedPresets(prev => ({
@@ -4741,7 +4921,7 @@ function HomeContent() {
                                   : 'hover:bg-muted'
                               }`}
                             >
-                              {preset.name}
+                              {t(PRESET_KEYS[preset.id])}
                             </button>
                           ))}
                         </div>
@@ -4768,7 +4948,7 @@ function HomeContent() {
                               key={preset.id}
                               onClick={() => {
                                 if (!uploadedImage) {
-                                  toast.info('Upload an image first');
+                                  toast.info(t('common.uploadFirst'));
                                   return;
                                 }
                                 setSelectedPresets(prev => ({
@@ -4782,7 +4962,7 @@ function HomeContent() {
                                   : 'hover:bg-muted'
                               }`}
                             >
-                              {preset.name}
+                              {t(PRESET_KEYS[preset.id])}
                             </button>
                           ))}
                         </div>
@@ -4809,7 +4989,7 @@ function HomeContent() {
                               key={preset.id}
                               onClick={() => {
                                 if (!uploadedImage) {
-                                  toast.info('Upload an image first');
+                                  toast.info(t('common.uploadFirst'));
                                   return;
                                 }
                                 setSelectedPresets(prev => ({
@@ -4823,7 +5003,7 @@ function HomeContent() {
                                   : 'hover:bg-muted'
                               }`}
                             >
-                              {preset.name}
+                              {t(PRESET_KEYS[preset.id])}
                             </button>
                           ))}
                         </div>
@@ -4850,7 +5030,7 @@ function HomeContent() {
                               key={preset.id}
                               onClick={() => {
                                 if (!uploadedImage) {
-                                  toast.info('Upload an image first');
+                                  toast.info(t('common.uploadFirst'));
                                   return;
                                 }
                                 setSelectedPresets(prev => ({
@@ -4864,7 +5044,7 @@ function HomeContent() {
                                   : 'hover:bg-muted'
                               }`}
                             >
-                              {preset.name}
+                              {t(PRESET_KEYS[preset.id])}
                             </button>
                           ))}
                         </div>
@@ -4891,7 +5071,7 @@ function HomeContent() {
                               key={preset.id}
                               onClick={() => {
                                 if (!uploadedImage) {
-                                  toast.info('Upload an image first');
+                                  toast.info(t('common.uploadFirst'));
                                   return;
                                 }
                                 setSelectedPresets(prev => ({
@@ -4905,7 +5085,7 @@ function HomeContent() {
                                   : 'hover:bg-muted'
                               }`}
                             >
-                              {preset.name}
+                              {t(PRESET_KEYS[preset.id])}
                             </button>
                           ))}
                         </div>
@@ -4932,7 +5112,7 @@ function HomeContent() {
                               key={preset.id}
                               onClick={() => {
                                 if (!uploadedImage) {
-                                  toast.info('Upload an image first');
+                                  toast.info(t('common.uploadFirst'));
                                   return;
                                 }
                                 setSelectedPresets(prev => ({
@@ -4946,7 +5126,7 @@ function HomeContent() {
                                   : 'hover:bg-muted'
                               }`}
                             >
-                              {preset.name}
+                              {t(PRESET_KEYS[preset.id])}
                             </button>
                           ))}
                         </div>
@@ -4961,7 +5141,7 @@ function HomeContent() {
                       >
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-muted-foreground/50" />
-                          <span>Era</span>
+                          <span>{t('edit.era')}</span>
                           {selectedPresets.era && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'era' ? 'rotate-180' : ''}`} />
@@ -4973,7 +5153,7 @@ function HomeContent() {
                               key={preset.id}
                               onClick={() => {
                                 if (!uploadedImage) {
-                                  toast.info('Upload an image first');
+                                  toast.info(t('common.uploadFirst'));
                                   return;
                                 }
                                 setSelectedPresets(prev => ({
@@ -4987,7 +5167,7 @@ function HomeContent() {
                                   : 'hover:bg-muted'
                               }`}
                             >
-                              {preset.name}
+                              {t(PRESET_KEYS[preset.id])}
                             </button>
                           ))}
                         </div>
@@ -5002,7 +5182,7 @@ function HomeContent() {
                       >
                         <div className="flex items-center gap-2">
                           <Scan className="w-4 h-4 text-muted-foreground/50" />
-                          <span>Framing</span>
+                          <span>{t('edit.framing')}</span>
                           {selectedPresets.framing && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'framing' ? 'rotate-180' : ''}`} />
@@ -5014,7 +5194,7 @@ function HomeContent() {
                               key={preset.id}
                               onClick={() => {
                                 if (!uploadedImage) {
-                                  toast.info('Upload an image first');
+                                  toast.info(t('common.uploadFirst'));
                                   return;
                                 }
                                 setSelectedPresets(prev => ({
@@ -5028,7 +5208,7 @@ function HomeContent() {
                                   : 'hover:bg-muted'
                               }`}
                             >
-                              {preset.name}
+                              {t(PRESET_KEYS[preset.id])}
                             </button>
                           ))}
                         </div>
@@ -5043,7 +5223,7 @@ function HomeContent() {
                       >
                         <div className="flex items-center gap-2">
                           <RotateCw className="w-4 h-4 text-muted-foreground/50" />
-                          <span>Rotation</span>
+                          <span>{t('edit.rotation')}</span>
                           {selectedPresets.rotation && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'rotation' ? 'rotate-180' : ''}`} />
@@ -5055,7 +5235,7 @@ function HomeContent() {
                               key={preset.id}
                               onClick={() => {
                                 if (!uploadedImage) {
-                                  toast.info('Upload an image first');
+                                  toast.info(t('common.uploadFirst'));
                                   return;
                                 }
                                 setSelectedPresets(prev => ({
@@ -5069,7 +5249,7 @@ function HomeContent() {
                                   : 'hover:bg-muted'
                               }`}
                             >
-                              {preset.name}
+                              {t(PRESET_KEYS[preset.id])}
                             </button>
                           ))}
                         </div>
@@ -5080,7 +5260,7 @@ function HomeContent() {
                     <div className="border-t border-border/50 pt-3 mt-3">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-muted-foreground">Reference Image</span>
+                          <span className="text-xs text-muted-foreground">{t('edit.referenceImage')}</span>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <button className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
@@ -5100,7 +5280,7 @@ function HomeContent() {
                             }}
                             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            Clear all
+                            {t('backgrounds.clearAll')}
                           </button>
                         )}
                       </div>
@@ -5193,7 +5373,7 @@ function HomeContent() {
                 {/* Image Section */}
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-foreground/70">Image</h3>
+                    <h3 className="text-sm font-medium text-foreground/70">{t('sidebar.image')}</h3>
                     <div className="flex items-center gap-2">
                       {uploadedImage && (
                         <button
@@ -5310,7 +5490,7 @@ function HomeContent() {
                             key={size.name}
                             onClick={() => {
                               if (!uploadedImage) {
-                                toast.info('Upload an image first');
+                                toast.info(t('common.uploadFirst'));
                                 return;
                               }
                               if (isCompleted) {
@@ -5344,7 +5524,7 @@ function HomeContent() {
                                   />
                                 )}
                               </div>
-                              <span className={isViewing ? 'text-emerald-700 dark:text-emerald-400' : isCompleted ? 'text-primary' : ''}>{size.label}</span>
+                              <span className={isViewing ? 'text-emerald-700 dark:text-emerald-400' : isCompleted ? 'text-primary' : ''}>{getSizeLabel(size.label)}</span>
                             </div>
                             <span className="text-muted-foreground/70 text-xs">{size.name}</span>
                           </button>
@@ -5456,7 +5636,7 @@ function HomeContent() {
                 {/* Image Section */}
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-foreground/70">Image</h3>
+                    <h3 className="text-sm font-medium text-foreground/70">{t('sidebar.image')}</h3>
                     <div className="flex items-center gap-2">
                       {uploadedImage && (
                         <button
@@ -5574,7 +5754,7 @@ function HomeContent() {
                 <button
                   onClick={() => {
                     if (!uploadedImage) {
-                      toast.info('Upload an image first');
+                      toast.info(t('common.uploadFirst'));
                       return;
                     }
                     handleGenerateBackgroundSuggestions();
@@ -5623,7 +5803,7 @@ function HomeContent() {
                           key={suggestion.id}
                           onClick={() => {
                             if (!uploadedImage) {
-                              toast.info('Upload an image first');
+                              toast.info(t('common.uploadFirst'));
                               return;
                             }
                             setActiveBackgroundId(suggestion.id);
@@ -5664,7 +5844,7 @@ function HomeContent() {
                           key={suggestion.id}
                           onClick={() => {
                             if (!uploadedImage) {
-                              toast.info('Upload an image first');
+                              toast.info(t('common.uploadFirst'));
                               return;
                             }
                             setActiveBackgroundId(suggestion.id);
@@ -5673,7 +5853,7 @@ function HomeContent() {
                               ...prev,
                               [suggestion.id]: (prev[suggestion.id] || 0) + 1
                             }));
-                            handleApplyBackgroundChange(suggestion.prompt, suggestion.name);
+                            handleApplyBackgroundChange(suggestion.prompt, t(BACKGROUND_PRESET_KEYS[suggestion.id]));
                           }}
                           className={`px-2.5 py-2 rounded-lg text-left text-xs flex items-center justify-between transition-all ${
                             isActive
@@ -5683,7 +5863,7 @@ function HomeContent() {
                                 : 'bg-muted/50 border border-border hover:bg-muted hover:border-border text-foreground/80'
                           }`}
                         >
-                          <span>{suggestion.name}</span>
+                          <span>{t(BACKGROUND_PRESET_KEYS[suggestion.id])}</span>
                           {(isActive || useCount > 0) && (
                             <span className="flex items-center gap-0.5 flex-shrink-0">
                               {Array.from({ length: Math.min(useCount + (isActive && useCount === 0 ? 1 : 0), 5) }).map((_, i) => (
@@ -5701,7 +5881,7 @@ function HomeContent() {
                   <div className="border-t border-border/50 pt-3 mt-3">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1">
-                        <span className="text-xs text-muted-foreground">Reference Backgrounds</span>
+                        <span className="text-xs text-muted-foreground">{t('backgrounds.referenceBackgrounds')}</span>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
@@ -5737,12 +5917,12 @@ function HomeContent() {
                             tabIndex={0}
                             onClick={() => {
                               setSelectedBackgroundRef(ref.id);
-                              setBackgroundCustomPrompt(`Use background from reference image`);
+                              setBackgroundCustomPrompt(t('modelBuilder.useBackgroundFromReference'));
                             }}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 setSelectedBackgroundRef(ref.id);
-                                setBackgroundCustomPrompt(`Use background from reference image`);
+                                setBackgroundCustomPrompt(t('modelBuilder.useBackgroundFromReference'));
                               }
                             }}
                             className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
@@ -5825,7 +6005,7 @@ function HomeContent() {
                 {/* Image Section */}
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-foreground/70">Image</h3>
+                    <h3 className="text-sm font-medium text-foreground/70">{t('sidebar.image')}</h3>
                     <div className="flex items-center gap-2">
                       {uploadedImage && (
                         <button
@@ -5962,7 +6142,7 @@ function HomeContent() {
                   <button
                     onClick={() => {
                       if (!uploadedImage) {
-                        toast.info('Upload an image first');
+                        toast.info(t('common.uploadFirst'));
                         return;
                       }
                       handleGenerateModelSuggestions();
@@ -6023,12 +6203,12 @@ function HomeContent() {
                           tabIndex={0}
                           onClick={() => {
                             setSelectedModelRef(ref.id);
-                            setModelCustomPrompt(`Use person from reference image`);
+                            setModelCustomPrompt(t('modelBuilder.usePersonFromReference'));
                           }}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                               setSelectedModelRef(ref.id);
-                              setModelCustomPrompt(`Use person from reference image`);
+                              setModelCustomPrompt(t('modelBuilder.usePersonFromReference'));
                             }
                           }}
                           className={`relative aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
@@ -6098,7 +6278,7 @@ function HomeContent() {
                               key={suggestion.id}
                               onClick={() => {
                                 if (!uploadedImage) {
-                                  toast.info('Upload an image first');
+                                  toast.info(t('common.uploadFirst'));
                                   return;
                                 }
                                 setUsedModelSuggestions(prev => new Set([...prev, suggestion.id]));
@@ -6136,7 +6316,7 @@ function HomeContent() {
                   <div className="space-y-3">
                   {/* Gender */}
                   <div>
-                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Gender</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">{t('modelBuilder.gender.title')}</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.gender.map((option) => (
                         <button
@@ -6148,7 +6328,7 @@ function HomeContent() {
                               : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
-                          {option.label}
+                          {t(MODEL_OPTION_KEYS.gender[option.id])}
                         </button>
                       ))}
                     </div>
@@ -6156,7 +6336,7 @@ function HomeContent() {
 
                   {/* Age Range */}
                   <div>
-                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Age Range</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">{t('modelBuilder.ageRange.title')}</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.ageRange.map((option) => (
                         <button
@@ -6168,7 +6348,7 @@ function HomeContent() {
                               : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
-                          {option.label}
+                          {t(MODEL_OPTION_KEYS.ageRange[option.id])}
                         </button>
                       ))}
                     </div>
@@ -6176,7 +6356,7 @@ function HomeContent() {
 
                   {/* Ethnicity */}
                   <div>
-                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Ethnicity</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">{t('modelBuilder.ethnicity.title')}</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.ethnicity.map((option) => (
                         <button
@@ -6188,7 +6368,7 @@ function HomeContent() {
                               : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
-                          {option.label}
+                          {t(MODEL_OPTION_KEYS.ethnicity[option.id])}
                         </button>
                       ))}
                     </div>
@@ -6196,7 +6376,7 @@ function HomeContent() {
 
                   {/* Hair Color */}
                   <div>
-                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Hair Color</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">{t('modelBuilder.hairColor.title')}</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.hairColor.map((option) => (
                         <button
@@ -6208,7 +6388,7 @@ function HomeContent() {
                               : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
-                          {option.label}
+                          {t(MODEL_OPTION_KEYS.hairColor[option.id])}
                         </button>
                       ))}
                     </div>
@@ -6216,7 +6396,7 @@ function HomeContent() {
 
                   {/* Hair Type */}
                   <div>
-                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Hair Type</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">{t('modelBuilder.hairType.title')}</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.hairType.map((option) => (
                         <button
@@ -6228,7 +6408,7 @@ function HomeContent() {
                               : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
-                          {option.label}
+                          {t(MODEL_OPTION_KEYS.hairType[option.id])}
                         </button>
                       ))}
                     </div>
@@ -6236,7 +6416,7 @@ function HomeContent() {
 
                   {/* Body Type */}
                   <div>
-                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Body Type</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">{t('modelBuilder.bodyType.title')}</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.bodyType.map((option) => (
                         <button
@@ -6248,7 +6428,7 @@ function HomeContent() {
                               : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
-                          {option.label}
+                          {t(MODEL_OPTION_KEYS.bodyType[option.id])}
                         </button>
                       ))}
                     </div>
@@ -6256,7 +6436,7 @@ function HomeContent() {
 
                   {/* Expression/Mood */}
                   <div>
-                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Expression</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">{t('modelBuilder.expression.title')}</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.expression.map((option) => (
                         <button
@@ -6268,7 +6448,7 @@ function HomeContent() {
                               : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
-                          {option.label}
+                          {t(MODEL_OPTION_KEYS.expression[option.id])}
                         </button>
                       ))}
                     </div>
@@ -6276,7 +6456,7 @@ function HomeContent() {
 
                   {/* Vibe/Energy */}
                   <div>
-                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">Vibe</label>
+                    <label className="text-xs text-muted-foreground/80 mb-1.5 block">{t('modelBuilder.vibe.title')}</label>
                     <div className="flex flex-wrap gap-1.5">
                       {MODEL_OPTIONS.vibe.map((option) => (
                         <button
@@ -6288,7 +6468,7 @@ function HomeContent() {
                               : 'bg-muted/50 text-foreground/70 border border-border hover:bg-muted'
                           }`}
                         >
-                          {option.label}
+                          {t(MODEL_OPTION_KEYS.vibe[option.id])}
                         </button>
                       ))}
                     </div>
@@ -6435,7 +6615,7 @@ function HomeContent() {
               {variations.length > 0 && (
                 <div className="flex items-center gap-2 py-1">
                   <div className="flex-1 border-t border-border"></div>
-                  <span className="text-xs text-muted-foreground/50 uppercase tracking-wide">Suggested</span>
+                  <span className="text-xs text-muted-foreground/50 uppercase tracking-wide">{t('common.suggested')}</span>
                   <div className="flex-1 border-t border-border"></div>
                 </div>
               )}
@@ -6537,7 +6717,7 @@ function HomeContent() {
                                       <Sparkles className="w-3.5 h-3.5" />
                                     </button>
                                   </TooltipTrigger>
-                                  <TooltipContent>Generate</TooltipContent>
+                                  <TooltipContent>{t('common.generate')}</TooltipContent>
                                 </Tooltip>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
@@ -6569,7 +6749,7 @@ function HomeContent() {
                                       <Archive className="w-3.5 h-3.5" />
                                     </button>
                                   </TooltipTrigger>
-                                  <TooltipContent>Archive</TooltipContent>
+                                  <TooltipContent>{t('common.archive')}</TooltipContent>
                                 </Tooltip>
                                 <span className="text-green-700 dark:text-green-400">
                                   <Check className="w-4 h-4" />
@@ -6707,7 +6887,7 @@ function HomeContent() {
                                       <ArchiveRestore className="w-3.5 h-3.5" />
                                     </button>
                                   </TooltipTrigger>
-                                  <TooltipContent>Restore</TooltipContent>
+                                  <TooltipContent>{t('common.restore')}</TooltipContent>
                                 </Tooltip>
                               </div>
                               <p className="text-xs text-muted-foreground/50 line-clamp-2 mt-0.5">{variation.description}</p>
@@ -6850,9 +7030,9 @@ function HomeContent() {
       <Dialog open={showClearConfirmModal} onOpenChange={setShowClearConfirmModal}>
         <DialogContent className="sm:max-w-md !bg-card border-border text-foreground">
           <DialogHeader>
-            <DialogTitle className="text-xl">Clear Workspace?</DialogTitle>
+            <DialogTitle className="text-xl">{t('dialogs.clearWorkspace')}</DialogTitle>
             <DialogDescription className="text-foreground/70 mt-2">
-              This will delete your uploaded image and all edits. This action cannot be undone.
+              {t('dialogs.clearWorkspaceDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-3 mt-6">

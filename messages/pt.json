@@ -13,7 +13,15 @@
     "success": "Sucesso",
     "copied": "Copiado",
     "uploadFirst": "Envie uma imagem primeiro",
-    "or": "ou"
+    "or": "ou",
+    "custom": "Personalizado",
+    "customVersion": "Versao personalizada",
+    "generate": "Gerar",
+    "archive": "Arquivar",
+    "restore": "Restaurar",
+    "suggested": "Sugerido",
+    "reference": "Referencia",
+    "clearAllSelections": "Limpar todas as selecoes"
   },
   "nav": {
     "apiKeys": "Chaves API",
@@ -31,7 +39,35 @@
     "edit": "Editar",
     "backgrounds": "Fundos",
     "model": "Modelo",
-    "export": "Exportar"
+    "export": "Exportar",
+    "title": "Ferramentas"
+  },
+  "sidebar": {
+    "image": "Imagem",
+    "versions": "Versoes",
+    "savedEditsDescription": "Edicoes salvas que voce pode continuar a desenvolver.",
+    "generateSuggestions": "Gerar sugestoes",
+    "snapshotsDescription": "Instantaneos dos quais voce pode ramificar para testar diferentes abordagens."
+  },
+  "sizes": {
+    "square": "Quadrado",
+    "story": "Story",
+    "landscape": "Paisagem",
+    "portrait": "Retrato",
+    "pinterest": "Pinterest"
+  },
+  "quality": {
+    "title": "Qualidade vs Custo",
+    "draft": "Rascunho",
+    "draftDescription": "Iteracoes rapidas, menor custo",
+    "standard": "Padrao",
+    "standardDescription": "Qualidade e custo equilibrados",
+    "best": "Melhor",
+    "bestDescription": "Assets finais, maior detalhe"
+  },
+  "dialogs": {
+    "clearWorkspace": "Limpar area de trabalho?",
+    "clearWorkspaceDescription": "Isso excluira sua imagem enviada e todas as edicoes. Esta acao nao pode ser desfeita."
   },
   "upload": {
     "title": "Editor de Imagens IA",
@@ -74,7 +110,194 @@
     "object": "Objeto",
     "customEdit": "Edicao Personalizada",
     "customPlaceholder": "Descreva qualquer edicao...",
-    "applyPresets": "Aplicar Predefinicoes"
+    "applyPresets": "Aplicar Predefinicoes",
+    "era": "Epoca",
+    "camera": "Camera",
+    "framing": "Enquadramento",
+    "rotation": "Rotacao",
+    "referenceImage": "Imagem de referencia"
+  },
+  "presets": {
+    "lighting": {
+      "goldenHour": "Hora dourada",
+      "studio": "Estudio",
+      "natural": "Natural",
+      "dramatic": "Dramatico",
+      "backlit": "Contraluz",
+      "softBox": "Caixa de luz"
+    },
+    "style": {
+      "photorealistic": "Fotorrealista",
+      "cinematic": "Cinematografico",
+      "editorial": "Editorial",
+      "filmGrain": "Grao de filme",
+      "minimalist": "Minimalista",
+      "hdr": "HDR"
+    },
+    "mood": {
+      "cinematicMoody": "Cinematografico atmosferico",
+      "hyperRealistic": "Hiperrealista",
+      "lightDreamy": "Leve e sonhador",
+      "highContrast": "Alto contraste",
+      "softNatural": "Suave e natural",
+      "darkDramatic": "Escuro e dramatico"
+    },
+    "color": {
+      "warmCozy": "Quente e aconchegante",
+      "coolModern": "Frio e moderno",
+      "vibrantBold": "Vibrante e ousado",
+      "mutedSoft": "Suave e discreto",
+      "darkLuxurious": "Escuro e luxuoso",
+      "brightAiry": "Claro e arejado"
+    },
+    "era": {
+      "filmAnalog": "Filme analogico",
+      "70sRetro": "Retro anos 70",
+      "90sFaded": "Anos 90 desbotado",
+      "y2kGlossy": "Y2K brilhante",
+      "vintageSepia": "Sepia vintage",
+      "modernClean": "Moderno limpo"
+    },
+    "camera": {
+      "hasselblad": "Hasselblad X2D",
+      "canonR5": "Canon EOS R5",
+      "sonyA7rv": "Sony a7R V",
+      "nikonZ8": "Nikon Z8",
+      "film35mm": "Camera de filme 35mm",
+      "polaroid": "Polaroid instantanea",
+      "ringCamera": "Ring Camera"
+    },
+    "framing": {
+      "closeup": "Close-up",
+      "mediumShot": "Plano medio",
+      "wideShot": "Plano geral",
+      "highAngle": "Angulo alto",
+      "lowAngle": "Angulo baixo",
+      "birdsEyeView": "Vista aerea"
+    },
+    "rotation": {
+      "orbitFront": "Orbita frontal",
+      "orbitRight": "Orbita direita",
+      "orbitLeft": "Orbita esquerda",
+      "orbitBehind": "Orbita traseira",
+      "orbit45Right": "Orbita 45 direita",
+      "orbit45Left": "Orbita 45 esquerda"
+    },
+    "enhance": {
+      "upscale2x": "Ampliar 2x",
+      "upscale4x": "Ampliar 4x",
+      "autoEnhance": "Aprimoramento auto",
+      "faceEnhance": "Aprimorar rosto",
+      "restoreOldPhoto": "Restaurar foto antiga",
+      "hdrEffect": "Efeito HDR",
+      "boostVibrance": "Aumentar vibrancia",
+      "smoothSkin": "Suavizar pele",
+      "brightenEyes": "Iluminar olhos",
+      "whitenTeeth": "Clarear dentes",
+      "reduceWrinkles": "Reduzir rugas",
+      "fixFlyaways": "Corrigir fios soltos",
+      "reduceShine": "Reduzir brilho",
+      "sharpenDetails": "Nitidez nos detalhes",
+      "reduceNoise": "Reduzir ruido",
+      "fixColors": "Corrigir cores",
+      "removeSpots": "Remover manchas",
+      "enhanceTextures": "Aprimorar texturas",
+      "liftShadows": "Levantar sombras"
+    }
+  },
+  "backgroundPresets": {
+    "blurBg": "Desfocar fundo",
+    "whiteStudio": "Estudio branco",
+    "outdoorNature": "Natureza ao ar livre",
+    "urbanStreet": "Rua urbana",
+    "minimalistGradient": "Gradiente minimalista",
+    "officeWorkspace": "Escritorio/Espaco de trabalho",
+    "beachCoastal": "Praia/Litoral",
+    "coffeeShop": "Cafeteria",
+    "urbanStudio": "Estudio fotografico urbano",
+    "darkenBg": "Escurecer fundo",
+    "simplifyScene": "Simplificar cena",
+    "goldenHour": "Hora dourada",
+    "sunriseGlow": "Brilho do nascer do sol",
+    "blueHour": "Hora azul",
+    "moonlitNight": "Noite de luar",
+    "brightMidday": "Meio-dia brilhante",
+    "winterLight": "Luz de inverno",
+    "overcastSky": "Ceu nublado",
+    "foggyMisty": "Neblina/Nevoa",
+    "rainyDay": "Dia chuvoso"
+  },
+  "modelBuilder": {
+    "gender": {
+      "title": "Genero",
+      "female": "Feminino",
+      "male": "Masculino",
+      "any": "Qualquer"
+    },
+    "ageRange": {
+      "title": "Faixa etaria",
+      "youngAdult": "Jovem adulto (18-25)",
+      "adult": "Adulto (26-35)",
+      "middleAged": "Meia-idade (36-50)",
+      "mature": "Maduro (50+)"
+    },
+    "ethnicity": {
+      "title": "Etnia",
+      "eastAsian": "Leste asiatico",
+      "southAsian": "Sul asiatico",
+      "black": "Negro/Africano",
+      "hispanic": "Hispano/Latino",
+      "middleEastern": "Oriente Medio",
+      "white": "Branco/Caucasiano",
+      "mixed": "Misto/Multirracial"
+    },
+    "hairColor": {
+      "title": "Cor do cabelo",
+      "black": "Preto",
+      "brown": "Castanho",
+      "blonde": "Loiro",
+      "red": "Ruivo",
+      "gray": "Grisalho/Prateado"
+    },
+    "hairType": {
+      "title": "Tipo de cabelo",
+      "straight": "Liso",
+      "wavy": "Ondulado",
+      "curly": "Cacheado",
+      "coily": "Crespo",
+      "short": "Curto",
+      "long": "Longo",
+      "bald": "Careca"
+    },
+    "bodyType": {
+      "title": "Tipo de corpo",
+      "slim": "Magro",
+      "athletic": "Atletico",
+      "average": "Medio",
+      "curvy": "Curvilinea",
+      "plusSize": "Plus size"
+    },
+    "expression": {
+      "title": "Expressao",
+      "warmFriendly": "Caloroso e amigavel",
+      "confident": "Confiante",
+      "playful": "Brincalhao",
+      "serious": "Serio/Intenso",
+      "mysterious": "Misterioso",
+      "approachable": "Acessivel"
+    },
+    "vibe": {
+      "title": "Estilo",
+      "classic": "Classico/Atemporal",
+      "modernEdgy": "Moderno/Ousado",
+      "outdoorsy": "Aventureiro",
+      "urban": "Urbano",
+      "glamorous": "Glamoroso",
+      "nextDoor": "Garota/Garoto da vizinhanca"
+    },
+    "useBackgroundFromReference": "Usar fundo da imagem de referencia",
+    "usePersonFromReference": "Usar pessoa da imagem de referencia",
+    "customBackground": "Fundo personalizado"
   },
   "backgrounds": {
     "title": "Alterar Fundo",
