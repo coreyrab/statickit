@@ -42,7 +42,29 @@ export function hasStoredOpenAIKey(): boolean {
   return !!getStoredOpenAIKey();
 }
 
+// DashScope (Qwen) API Key Storage
+const DASHSCOPE_STORAGE_KEY = 'statickit_dashscope_api_key';
+
+export function getStoredDashScopeKey(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(DASHSCOPE_STORAGE_KEY);
+}
+
+export function setStoredDashScopeKey(key: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(DASHSCOPE_STORAGE_KEY, key);
+}
+
+export function removeStoredDashScopeKey(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(DASHSCOPE_STORAGE_KEY);
+}
+
+export function hasStoredDashScopeKey(): boolean {
+  return !!getStoredDashScopeKey();
+}
+
 // Helper to check if any API key is available
 export function hasAnyApiKey(): boolean {
-  return hasStoredApiKey() || hasStoredOpenAIKey();
+  return hasStoredApiKey() || hasStoredOpenAIKey() || hasStoredDashScopeKey();
 }
