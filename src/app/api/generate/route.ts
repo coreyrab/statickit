@@ -120,11 +120,6 @@ export async function POST(request: NextRequest) {
       model: selectedModel,
       generationConfig: {
         responseModalities: ['Text', 'Image'],
-        // Output dimensions based on quality setting
-        imageGenerationConfig: {
-          outputImageWidth: outputDimensions.width,
-          outputImageHeight: outputDimensions.height,
-        },
       } as any,
     });
 

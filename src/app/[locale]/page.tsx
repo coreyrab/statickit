@@ -2013,26 +2013,11 @@ function HomeContent() {
 
       // Convert image URL to base64 if it's a data URL, otherwise fetch and convert
       let imageToEdit: string;
-      let mimeTypeToUse: string;
       if (currentImageUrl.startsWith('data:')) {
-        // Extract mime type and base64 from data URL
-        // Format: data:[<mediatype>][;base64],<data>
-        const commaIndex = currentImageUrl.indexOf(',');
-        if (commaIndex > 0) {
-          const header = currentImageUrl.substring(5, commaIndex); // skip "data:"
-          const mimeMatch = header.match(/^([^;,]+)/);
-          mimeTypeToUse = mimeMatch ? mimeMatch[1] : uploadedImage.file.type;
-          imageToEdit = currentImageUrl.substring(commaIndex + 1);
-        } else {
-          // Fallback: try to split by comma
-          const parts = currentImageUrl.split(',');
-          imageToEdit = parts.length > 1 ? parts[1] : parts[0];
-          mimeTypeToUse = uploadedImage.file.type;
-        }
+        imageToEdit = currentImageUrl.split(',')[1];
       } else {
         const base64 = await fileToBase64(uploadedImage.file);
         imageToEdit = base64;
-        mimeTypeToUse = uploadedImage.file.type;
       }
 
       // Use analysis if available, otherwise provide minimal context
@@ -2083,7 +2068,7 @@ function HomeContent() {
           body: JSON.stringify({
             ...apiKeys,
             image: imageToEdit,
-            mimeType: mimeTypeToUse,
+            mimeType: uploadedImage.file.type,
             analysis: analysisToUse,
             variationDescription: `EDIT REQUEST: ${editPromptUsed}`,
             aspectRatio: aspectRatioToUse,
