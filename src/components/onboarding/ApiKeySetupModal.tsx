@@ -325,6 +325,9 @@ export function ApiKeySetupModal({
                           handleSaveGemini();
                         }
                       }}
+                      autoComplete="off"
+                      data-1p-ignore
+                      data-lpignore="true"
                       className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 focus:outline-none text-sm py-2.5"
                     />
                   </div>
@@ -413,6 +416,9 @@ export function ApiKeySetupModal({
                           handleSaveOpenAI();
                         }
                       }}
+                      autoComplete="off"
+                      data-1p-ignore
+                      data-lpignore="true"
                       className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 focus:outline-none text-sm py-2.5"
                     />
                   </div>
@@ -504,6 +510,9 @@ export function ApiKeySetupModal({
                           handleSaveDashScope();
                         }
                       }}
+                      autoComplete="off"
+                      data-1p-ignore
+                      data-lpignore="true"
                       className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 focus:outline-none text-sm py-2.5"
                     />
                   </div>
