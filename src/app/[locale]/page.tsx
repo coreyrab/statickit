@@ -2013,11 +2013,21 @@ function HomeContent() {
 
       // Convert image URL to base64 if it's a data URL, otherwise fetch and convert
       let imageToEdit: string;
+      let mimeTypeToUse: string;
       if (currentImageUrl.startsWith('data:')) {
-        imageToEdit = currentImageUrl.split(',')[1];
+        // Extract mime type and base64 from data URL
+        const matches = currentImageUrl.match(/^data:([^;]+);base64,(.+)$/);
+        if (matches) {
+          mimeTypeToUse = matches[1];
+          imageToEdit = matches[2];
+        } else {
+          imageToEdit = currentImageUrl.split(',')[1];
+          mimeTypeToUse = uploadedImage.file.type;
+        }
       } else {
         const base64 = await fileToBase64(uploadedImage.file);
         imageToEdit = base64;
+        mimeTypeToUse = uploadedImage.file.type;
       }
 
       // Use analysis if available, otherwise provide minimal context
@@ -2068,7 +2078,7 @@ function HomeContent() {
           body: JSON.stringify({
             ...apiKeys,
             image: imageToEdit,
-            mimeType: uploadedImage.file.type,
+            mimeType: mimeTypeToUse,
             analysis: analysisToUse,
             variationDescription: `EDIT REQUEST: ${editPromptUsed}`,
             aspectRatio: aspectRatioToUse,
