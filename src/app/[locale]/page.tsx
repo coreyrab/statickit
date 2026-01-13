@@ -376,6 +376,10 @@ function HomeContent() {
   type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-preview-05-20' | 'gpt-image-1' | 'qwen-image-edit-plus';
   const [selectedAIModel, setSelectedAIModel] = useState<AIModel>('gemini-3-pro-image-preview');
 
+  // Compare Models mode - run same edit on multiple models simultaneously
+  const [isCompareModelsEnabled, setIsCompareModelsEnabled] = useState(false);
+  const [selectedModelsForCompare, setSelectedModelsForCompare] = useState<AIModel[]>([]);
+
   // Image quality setting - affects output resolution and cost
   type ImageQuality = 'low' | 'medium' | 'high';
   const [imageQuality, setImageQuality] = useState<ImageQuality>('medium');
@@ -385,6 +389,35 @@ function HomeContent() {
   const isOpenAIModel = (model: AIModel) => model === 'gpt-image-1';
   const isGeminiModel = (model: AIModel) => model === 'gemini-3-pro-image-preview' || model === 'gemini-2.5-flash-preview-05-20';
   const isQwenModel = (model: AIModel) => model === 'qwen-image-edit-plus';
+
+  // Compare mode helpers
+  const toggleModelForCompare = (model: AIModel) => {
+    setSelectedModelsForCompare(prev =>
+      prev.includes(model)
+        ? prev.filter(m => m !== model)
+        : [...prev, model]
+    );
+  };
+
+  const hasApiKeyForModel = (model: AIModel): boolean => {
+    if (isGeminiModel(model)) return !!apiKey;
+    if (isOpenAIModel(model)) return !!openaiApiKey;
+    if (isQwenModel(model)) return !!dashscopeApiKey;
+    return false;
+  };
+
+  const getApiKeysForModel = (model: AIModel) => ({
+    apiKey: isGeminiModel(model) ? apiKey : undefined,
+    openaiApiKey: isOpenAIModel(model) ? openaiApiKey : undefined,
+    dashscopeApiKey: isQwenModel(model) ? dashscopeApiKey : undefined,
+  });
+
+  // Remove models from compare selection if their API key is removed
+  useEffect(() => {
+    setSelectedModelsForCompare(prev =>
+      prev.filter(model => hasApiKeyForModel(model))
+    );
+  }, [apiKey, openaiApiKey, dashscopeApiKey]);
 
   // Get quality display label
   const getQualityLabel = (quality: ImageQuality): string => {
@@ -1987,25 +2020,6 @@ function HomeContent() {
         imageToEdit = base64;
       }
 
-      // For non-resized edits, immediately add a processing version
-      let newVersionIndex: number | null = null;
-      if (!viewingOriginalResizedSize) {
-        const currentVersions: ImageVersion[] = originalVersions.length === 0
-          ? [{ imageUrl: uploadedImage.url, prompt: null, parentIndex: -1, status: 'completed' as const }]
-          : originalVersions;
-
-        const processingVersion: ImageVersion = {
-          imageUrl: null,
-          prompt: editPromptUsed,
-          parentIndex: originalVersionIndex,
-          status: 'processing'
-        };
-        const newVersions = [...currentVersions, processingVersion];
-        newVersionIndex = newVersions.length - 1;
-        setOriginalVersions(newVersions);
-        // Don't auto-switch to the processing version - user can continue working
-      }
-
       // Use analysis if available, otherwise provide minimal context
       const analysisToUse = analysis || {
         product: 'Image',
@@ -2020,63 +2034,97 @@ function HomeContent() {
       // Find selected edit reference (if any)
       const selectedRef = editReferences.find(r => r.id === selectedEditRef);
 
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey,
-          openaiApiKey,
-          dashscopeApiKey,
-          image: imageToEdit,
-          mimeType: uploadedImage.file.type,
-          analysis: analysisToUse,
-          variationDescription: `EDIT REQUEST: ${editPromptUsed}`,
-          aspectRatio: aspectRatioToUse,
-          isEdit: true,
-          model: selectedAIModel,
-          quality: imageQuality,
-          // Include edit reference if selected
-          ...(selectedRef && {
-            editRefImage: selectedRef.base64,
-            editRefMimeType: selectedRef.mimeType,
-          }),
-        }),
-      });
+      // Determine which models to use
+      const modelsToUse = isCompareModelsEnabled && selectedModelsForCompare.length > 1
+        ? selectedModelsForCompare
+        : [selectedAIModel];
 
-      if (response.ok) {
-        const data = await response.json();
-        const newImageUrl = data.imageUrl;
+      // For non-resized edits, immediately add processing versions for all models
+      let newVersionIndices: number[] = [];
+      if (!viewingOriginalResizedSize) {
+        const currentVersions: ImageVersion[] = originalVersions.length === 0
+          ? [{ imageUrl: uploadedImage.url, prompt: null, parentIndex: -1, status: 'completed' as const }]
+          : originalVersions;
 
-        if (viewingOriginalResizedSize) {
-          // Update the resized version with the edited image
-          setOriginalResizedVersions(prev =>
-            prev.map(r => r.size === viewingOriginalResizedSize
-              ? { ...r, imageUrl: newImageUrl }
-              : r
-            )
-          );
-        } else if (newVersionIndex !== null) {
-          // Update the processing version with the completed image
-          setOriginalVersions(prev => prev.map((v, idx) =>
-            idx === newVersionIndex
-              ? { ...v, imageUrl: newImageUrl, status: 'completed' as const }
-              : v
-          ));
-        }
-        track('image_generated', { tool: 'edit' });
-        if (selectedRef) {
-          track('reference_image_used', { tool: 'edit' });
-        }
-      } else {
-        // Mark version as error
-        if (newVersionIndex !== null) {
-          setOriginalVersions(prev => prev.map((v, idx) =>
-            idx === newVersionIndex
-              ? { ...v, status: 'error' as const }
-              : v
-          ));
-        }
+        const processingVersions: ImageVersion[] = modelsToUse.map(model => ({
+          imageUrl: null,
+          prompt: modelsToUse.length > 1 ? `${editPromptUsed} [${getModelDisplayName(model)}]` : editPromptUsed,
+          parentIndex: originalVersionIndex,
+          status: 'processing' as const
+        }));
+
+        const newVersions = [...currentVersions, ...processingVersions];
+        newVersionIndices = processingVersions.map((_, idx) => currentVersions.length + idx);
+        setOriginalVersions(newVersions);
+        // Don't auto-switch to the processing version - user can continue working
       }
+
+      // Run generation(s) - parallel if multiple models
+      const generateForModel = async (model: AIModel, versionIndex: number | null) => {
+        const apiKeys = getApiKeysForModel(model);
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...apiKeys,
+            image: imageToEdit,
+            mimeType: uploadedImage.file.type,
+            analysis: analysisToUse,
+            variationDescription: `EDIT REQUEST: ${editPromptUsed}`,
+            aspectRatio: aspectRatioToUse,
+            isEdit: true,
+            model,
+            quality: imageQuality,
+            // Include edit reference if selected
+            ...(selectedRef && {
+              editRefImage: selectedRef.base64,
+              editRefMimeType: selectedRef.mimeType,
+            }),
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const newImageUrl = data.imageUrl;
+
+          if (viewingOriginalResizedSize) {
+            // Update the resized version with the edited image
+            setOriginalResizedVersions(prev =>
+              prev.map(r => r.size === viewingOriginalResizedSize
+                ? { ...r, imageUrl: newImageUrl }
+                : r
+              )
+            );
+          } else if (versionIndex !== null) {
+            // Update the processing version with the completed image
+            setOriginalVersions(prev => prev.map((v, idx) =>
+              idx === versionIndex
+                ? { ...v, imageUrl: newImageUrl, status: 'completed' as const }
+                : v
+            ));
+          }
+          track('image_generated', { tool: 'edit' });
+          if (selectedRef) {
+            track('reference_image_used', { tool: 'edit' });
+          }
+        } else {
+          // Mark version as error
+          if (versionIndex !== null) {
+            setOriginalVersions(prev => prev.map((v, idx) =>
+              idx === versionIndex
+                ? { ...v, status: 'error' as const }
+                : v
+            ));
+          }
+        }
+      };
+
+      // Execute generations
+      await Promise.allSettled(
+        modelsToUse.map((model, idx) =>
+          generateForModel(model, newVersionIndices[idx] ?? null)
+        )
+      );
     } catch (err) {
       console.error('Original edit error:', err);
     }
@@ -2096,7 +2144,7 @@ function HomeContent() {
       toast.info(t('common.uploadFirst'));
       return;
     }
-    if (!apiKey) {
+    if (!apiKey && !openaiApiKey && !dashscopeApiKey) {
       setShowApiKeySetup(true);
       return;
     }
@@ -2157,20 +2205,25 @@ function HomeContent() {
         imageToEdit = base64;
       }
 
-      // Immediately add a processing version
+      // Determine which models to use
+      const modelsToUse = isCompareModelsEnabled && selectedModelsForCompare.length > 1
+        ? selectedModelsForCompare
+        : [selectedAIModel];
+
+      // Immediately add processing versions for all models
       const currentVersions: ImageVersion[] = originalVersions.length === 0
         ? [{ imageUrl: uploadedImage.url, prompt: null, parentIndex: -1, status: 'completed' as const }]
         : originalVersions;
 
-      const processingVersion: ImageVersion = {
+      const processingVersions: ImageVersion[] = modelsToUse.map(model => ({
         imageUrl: null,
-        prompt: presetLabel,
+        prompt: modelsToUse.length > 1 ? `${presetLabel} [${getModelDisplayName(model)}]` : presetLabel,
         parentIndex: originalVersionIndex,
-        status: 'processing'
-      };
-      const newVersions = [...currentVersions, processingVersion];
-      const newVersionIndex = newVersions.length - 1;
-      setOriginalVersions(newVersions);
+        status: 'processing' as const
+      }));
+
+      const newVersionIndices = processingVersions.map((_, idx) => currentVersions.length + idx);
+      setOriginalVersions([...currentVersions, ...processingVersions]);
 
       const combinedPrompt = prompts.join('. ');
 
@@ -2184,42 +2237,50 @@ function HomeContent() {
         mood: 'Not specified',
       };
 
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey,
-          openaiApiKey,
-          dashscopeApiKey,
-          image: imageToEdit,
-          mimeType: uploadedImage.file.type,
-          analysis: analysisToUse,
-          variationDescription: `PRESET APPLICATION: ${combinedPrompt}`,
-          aspectRatio: uploadedImage.aspectRatio,
-          isEdit: true,
-          model: selectedAIModel,
-          quality: imageQuality,
-        }),
-      });
+      // Run generation for each model
+      const generateForModel = async (model: AIModel, versionIndex: number) => {
+        const apiKeys = getApiKeysForModel(model);
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...apiKeys,
+            image: imageToEdit,
+            mimeType: uploadedImage.file.type,
+            analysis: analysisToUse,
+            variationDescription: `PRESET APPLICATION: ${combinedPrompt}`,
+            aspectRatio: uploadedImage.aspectRatio,
+            isEdit: true,
+            model,
+            quality: imageQuality,
+          }),
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        const newImageUrl = data.imageUrl;
+        if (response.ok) {
+          const data = await response.json();
+          const newImageUrl = data.imageUrl;
 
-        // Update the processing version with the completed image
-        setOriginalVersions(prev => prev.map((v, idx) =>
-          idx === newVersionIndex
-            ? { ...v, imageUrl: newImageUrl, status: 'completed' as const }
-            : v
-        ));
-      } else {
-        // Mark version as error
-        setOriginalVersions(prev => prev.map((v, idx) =>
-          idx === newVersionIndex
-            ? { ...v, status: 'error' as const }
-            : v
-        ));
-      }
+          // Update the processing version with the completed image
+          setOriginalVersions(prev => prev.map((v, idx) =>
+            idx === versionIndex
+              ? { ...v, imageUrl: newImageUrl, status: 'completed' as const }
+              : v
+          ));
+          track('image_generated', { tool: 'edit' });
+        } else {
+          // Mark version as error
+          setOriginalVersions(prev => prev.map((v, idx) =>
+            idx === versionIndex
+              ? { ...v, status: 'error' as const }
+              : v
+          ));
+        }
+      };
+
+      // Execute generations in parallel
+      await Promise.allSettled(
+        modelsToUse.map((model, idx) => generateForModel(model, newVersionIndices[idx]))
+      );
     } catch (err) {
       console.error('Preset apply error:', err);
     }
@@ -2231,7 +2292,7 @@ function HomeContent() {
       toast.info(t('common.uploadFirst'));
       return;
     }
-    if (!apiKey) {
+    if (!apiKey && !openaiApiKey && !dashscopeApiKey) {
       setShowApiKeySetup(true);
       return;
     }
@@ -2253,17 +2314,22 @@ function HomeContent() {
     }
 
     const imageToUse = currentVersion.imageUrl || uploadedImage.url;
-    const newVersionIndex = currentVersions.length;
 
-    // Add processing version to state
-    const processingVersion: ImageVersion = {
+    // Determine which models to use
+    const modelsToUse = isCompareModelsEnabled && selectedModelsForCompare.length > 1
+      ? selectedModelsForCompare
+      : [selectedAIModel];
+
+    // Add processing versions for all models
+    const processingVersions: ImageVersion[] = modelsToUse.map(model => ({
       imageUrl: null,
-      prompt: backgroundLabel,
+      prompt: modelsToUse.length > 1 ? `${backgroundLabel} [${getModelDisplayName(model)}]` : backgroundLabel,
       parentIndex: safeIndex,
-      status: 'processing'
-    };
+      status: 'processing' as const
+    }));
 
-    setOriginalVersions([...currentVersions, processingVersion]);
+    const newVersionIndices = processingVersions.map((_, idx) => currentVersions.length + idx);
+    setOriginalVersions([...currentVersions, ...processingVersions]);
 
     try {
       // Convert image to base64 - use File directly if available (avoids blob URL fetch issues)
@@ -2310,52 +2376,60 @@ function HomeContent() {
       // Get selected reference image if any
       const selectedBgRef = backgroundReferences.find(r => r.id === selectedBackgroundRef);
 
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey,
-          openaiApiKey,
-          dashscopeApiKey,
-          image: base64,
-          mimeType: mimeType,
-          analysis: analysisToUse,
-          variationDescription: prompt,
-          aspectRatio: uploadedImage.aspectRatio,
-          isEdit: true,
-          isBackgroundOnly: true,
-          model: selectedAIModel,
-          quality: imageQuality,
-          // Include reference image if selected
-          ...(selectedBgRef && {
-            backgroundRefImage: selectedBgRef.base64,
-            backgroundRefMimeType: selectedBgRef.mimeType,
+      // Run generation for each model
+      const generateForModel = async (model: AIModel, versionIndex: number) => {
+        const apiKeys = getApiKeysForModel(model);
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...apiKeys,
+            image: base64,
+            mimeType: mimeType,
+            analysis: analysisToUse,
+            variationDescription: prompt,
+            aspectRatio: uploadedImage.aspectRatio,
+            isEdit: true,
+            isBackgroundOnly: true,
+            model,
+            quality: imageQuality,
+            // Include reference image if selected
+            ...(selectedBgRef && {
+              backgroundRefImage: selectedBgRef.base64,
+              backgroundRefMimeType: selectedBgRef.mimeType,
+            }),
           }),
-        }),
-      });
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        setOriginalVersions(prev => prev.map((v, idx) =>
-          idx === newVersionIndex
-            ? { ...v, imageUrl: data.imageUrl, status: 'completed' as const }
-            : v
-        ));
-        track('image_generated', { tool: 'background' });
-        if (selectedBgRef) {
-          track('reference_image_used', { tool: 'background' });
+        if (response.ok) {
+          const data = await response.json();
+          setOriginalVersions(prev => prev.map((v, idx) =>
+            idx === versionIndex
+              ? { ...v, imageUrl: data.imageUrl, status: 'completed' as const }
+              : v
+          ));
+          track('image_generated', { tool: 'background' });
+          if (selectedBgRef) {
+            track('reference_image_used', { tool: 'background' });
+          }
+        } else {
+          setOriginalVersions(prev => prev.map((v, idx) =>
+            idx === versionIndex
+              ? { ...v, status: 'error' as const }
+              : v
+          ));
         }
-      } else {
-        setOriginalVersions(prev => prev.map((v, idx) =>
-          idx === newVersionIndex
-            ? { ...v, status: 'error' as const }
-            : v
-        ));
-      }
+      };
+
+      // Execute generations in parallel
+      await Promise.allSettled(
+        modelsToUse.map((model, idx) => generateForModel(model, newVersionIndices[idx]))
+      );
     } catch (err) {
       console.error('Background change error:', err);
+      // Mark all processing versions as error
       setOriginalVersions(prev => prev.map((v, idx) =>
-        idx === newVersionIndex
+        newVersionIndices.includes(idx) && v.status === 'processing'
           ? { ...v, status: 'error' as const }
           : v
       ));
@@ -2515,7 +2589,7 @@ function HomeContent() {
       toast.info(t('common.uploadFirst'));
       return;
     }
-    if (!apiKey) {
+    if (!apiKey && !openaiApiKey && !dashscopeApiKey) {
       setShowApiKeySetup(true);
       return;
     }
@@ -2536,17 +2610,22 @@ function HomeContent() {
     }
 
     const imageToUse = currentVersion.imageUrl || uploadedImage.url;
-    const newVersionIndex = currentVersions.length;
 
-    // Add processing version to state
-    const processingVersion: ImageVersion = {
+    // Determine which models to use
+    const modelsToUse = isCompareModelsEnabled && selectedModelsForCompare.length > 1
+      ? selectedModelsForCompare
+      : [selectedAIModel];
+
+    // Add processing versions for all models
+    const processingVersions: ImageVersion[] = modelsToUse.map(model => ({
       imageUrl: null,
-      prompt: modelLabel,
+      prompt: modelsToUse.length > 1 ? `${modelLabel} [${getModelDisplayName(model)}]` : modelLabel,
       parentIndex: safeIndex,
-      status: 'processing'
-    };
+      status: 'processing' as const
+    }));
 
-    setOriginalVersions([...currentVersions, processingVersion]);
+    const newVersionIndices = processingVersions.map((_, idx) => currentVersions.length + idx);
+    setOriginalVersions([...currentVersions, ...processingVersions]);
 
     try {
       // Convert image to base64 - use File directly if available (avoids blob URL fetch issues)
@@ -2592,53 +2671,61 @@ function HomeContent() {
       // Get selected reference image if any
       const selectedModelReference = modelReferences.find(r => r.id === selectedModelRef);
 
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey,
-          openaiApiKey,
-          dashscopeApiKey,
-          image: base64,
-          mimeType: mimeType,
-          analysis: analysisToUse,
-          variationDescription: prompt,
-          aspectRatio: uploadedImage.aspectRatio,
-          isEdit: true,
-          isModelOnly: true,
-          keepClothing: keepClothing,
-          model: selectedAIModel,
-          quality: imageQuality,
-          // Include reference image if selected
-          ...(selectedModelReference && {
-            modelRefImage: selectedModelReference.base64,
-            modelRefMimeType: selectedModelReference.mimeType,
+      // Run generation for each model
+      const generateForModel = async (model: AIModel, versionIndex: number) => {
+        const apiKeys = getApiKeysForModel(model);
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...apiKeys,
+            image: base64,
+            mimeType: mimeType,
+            analysis: analysisToUse,
+            variationDescription: prompt,
+            aspectRatio: uploadedImage.aspectRatio,
+            isEdit: true,
+            isModelOnly: true,
+            keepClothing: keepClothing,
+            model,
+            quality: imageQuality,
+            // Include reference image if selected
+            ...(selectedModelReference && {
+              modelRefImage: selectedModelReference.base64,
+              modelRefMimeType: selectedModelReference.mimeType,
+            }),
           }),
-        }),
-      });
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        setOriginalVersions(prev => prev.map((v, idx) =>
-          idx === newVersionIndex
-            ? { ...v, imageUrl: data.imageUrl, status: 'completed' as const }
-            : v
-        ));
-        track('image_generated', { tool: 'model' });
-        if (selectedModelReference) {
-          track('reference_image_used', { tool: 'model' });
+        if (response.ok) {
+          const data = await response.json();
+          setOriginalVersions(prev => prev.map((v, idx) =>
+            idx === versionIndex
+              ? { ...v, imageUrl: data.imageUrl, status: 'completed' as const }
+              : v
+          ));
+          track('image_generated', { tool: 'model' });
+          if (selectedModelReference) {
+            track('reference_image_used', { tool: 'model' });
+          }
+        } else {
+          setOriginalVersions(prev => prev.map((v, idx) =>
+            idx === versionIndex
+              ? { ...v, status: 'error' as const }
+              : v
+          ));
         }
-      } else {
-        setOriginalVersions(prev => prev.map((v, idx) =>
-          idx === newVersionIndex
-            ? { ...v, status: 'error' as const }
-            : v
-        ));
-      }
+      };
+
+      // Execute generations in parallel
+      await Promise.allSettled(
+        modelsToUse.map((model, idx) => generateForModel(model, newVersionIndices[idx]))
+      );
     } catch (err) {
       console.error('Model change error:', err);
+      // Mark all processing versions as error
       setOriginalVersions(prev => prev.map((v, idx) =>
-        idx === newVersionIndex
+        newVersionIndices.includes(idx) && v.status === 'processing'
           ? { ...v, status: 'error' as const }
           : v
       ));
@@ -4484,14 +4571,26 @@ function HomeContent() {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-normal bg-card/80 hover:bg-card backdrop-blur-sm border border-border/50 text-foreground/40 hover:text-foreground/60 rounded-md transition-colors">
-                        {isOpenAIModel(selectedAIModel) ? (
-                          <OpenAILogoGrey className="w-3 h-3 opacity-30" />
-                        ) : isQwenModel(selectedAIModel) ? (
-                          <QwenLogoGrey className="w-3 h-3" />
+                        {isCompareModelsEnabled && selectedModelsForCompare.length > 0 ? (
+                          <>
+                            <SplitSquareHorizontal className="w-3 h-3" />
+                            Compare
+                            <span className="text-[9px] bg-primary/20 text-primary px-1 rounded">
+                              {selectedModelsForCompare.length}
+                            </span>
+                          </>
                         ) : (
-                          <GeminiLogoGrey className="w-3 h-3" />
+                          <>
+                            {isOpenAIModel(selectedAIModel) ? (
+                              <OpenAILogoGrey className="w-3 h-3 opacity-30" />
+                            ) : isQwenModel(selectedAIModel) ? (
+                              <QwenLogoGrey className="w-3 h-3" />
+                            ) : (
+                              <GeminiLogoGrey className="w-3 h-3" />
+                            )}
+                            {getModelDisplayName(selectedAIModel)}
+                          </>
                         )}
-                        {getModelDisplayName(selectedAIModel)}
                         <ChevronDown className="w-2.5 h-2.5" />
                       </button>
                     </DropdownMenuTrigger>
@@ -4505,20 +4604,68 @@ function HomeContent() {
 
                       {/* Gemini 3 Pro */}
                       <DropdownMenuItem
-                        onClick={() => apiKey ? setSelectedAIModel('gemini-3-pro-image-preview') : setShowApiKeySetup(true)}
+                        onClick={() => {
+                          if (!apiKey) {
+                            setShowApiKeySetup(true);
+                            return;
+                          }
+                          if (isCompareModelsEnabled) {
+                            toggleModelForCompare('gemini-3-pro-image-preview');
+                          } else {
+                            setSelectedAIModel('gemini-3-pro-image-preview');
+                          }
+                        }}
+                        onSelect={(e) => { if (isCompareModelsEnabled && apiKey) e.preventDefault(); }}
                         className={`justify-between ${!apiKey ? 'opacity-40' : ''}`}
                       >
-                        <span className="font-medium text-sm">Gemini 3 Pro</span>
-                        {selectedAIModel === 'gemini-3-pro-image-preview' && apiKey && <Check className="w-4 h-4 text-primary" />}
+                        <div className="flex items-center gap-2">
+                          {isCompareModelsEnabled && apiKey && (
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                              selectedModelsForCompare.includes('gemini-3-pro-image-preview')
+                                ? 'bg-primary border-primary'
+                                : 'border-muted-foreground/30'
+                            }`}>
+                              {selectedModelsForCompare.includes('gemini-3-pro-image-preview') && (
+                                <Check className="w-3 h-3 text-primary-foreground" />
+                              )}
+                            </div>
+                          )}
+                          <span className="font-medium text-sm">Gemini 3 Pro</span>
+                        </div>
+                        {!isCompareModelsEnabled && selectedAIModel === 'gemini-3-pro-image-preview' && apiKey && <Check className="w-4 h-4 text-primary" />}
                       </DropdownMenuItem>
 
                       {/* Gemini 2.5 Flash */}
                       <DropdownMenuItem
-                        onClick={() => apiKey ? setSelectedAIModel('gemini-2.5-flash-preview-05-20') : setShowApiKeySetup(true)}
+                        onClick={() => {
+                          if (!apiKey) {
+                            setShowApiKeySetup(true);
+                            return;
+                          }
+                          if (isCompareModelsEnabled) {
+                            toggleModelForCompare('gemini-2.5-flash-preview-05-20');
+                          } else {
+                            setSelectedAIModel('gemini-2.5-flash-preview-05-20');
+                          }
+                        }}
+                        onSelect={(e) => { if (isCompareModelsEnabled && apiKey) e.preventDefault(); }}
                         className={`justify-between ${!apiKey ? 'opacity-40' : ''}`}
                       >
-                        <span className="font-medium text-sm">Gemini 2.5 Flash</span>
-                        {selectedAIModel === 'gemini-2.5-flash-preview-05-20' && apiKey && <Check className="w-4 h-4 text-primary" />}
+                        <div className="flex items-center gap-2">
+                          {isCompareModelsEnabled && apiKey && (
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                              selectedModelsForCompare.includes('gemini-2.5-flash-preview-05-20')
+                                ? 'bg-primary border-primary'
+                                : 'border-muted-foreground/30'
+                            }`}>
+                              {selectedModelsForCompare.includes('gemini-2.5-flash-preview-05-20') && (
+                                <Check className="w-3 h-3 text-primary-foreground" />
+                              )}
+                            </div>
+                          )}
+                          <span className="font-medium text-sm">Gemini 2.5 Flash</span>
+                        </div>
+                        {!isCompareModelsEnabled && selectedAIModel === 'gemini-2.5-flash-preview-05-20' && apiKey && <Check className="w-4 h-4 text-primary" />}
                       </DropdownMenuItem>
 
                       <DropdownMenuSeparator />
@@ -4532,11 +4679,35 @@ function HomeContent() {
 
                       {/* GPT Image 1.5 */}
                       <DropdownMenuItem
-                        onClick={() => openaiApiKey ? setSelectedAIModel('gpt-image-1') : setShowApiKeySetup(true)}
+                        onClick={() => {
+                          if (!openaiApiKey) {
+                            setShowApiKeySetup(true);
+                            return;
+                          }
+                          if (isCompareModelsEnabled) {
+                            toggleModelForCompare('gpt-image-1');
+                          } else {
+                            setSelectedAIModel('gpt-image-1');
+                          }
+                        }}
+                        onSelect={(e) => { if (isCompareModelsEnabled && openaiApiKey) e.preventDefault(); }}
                         className={`justify-between ${!openaiApiKey ? 'opacity-40' : ''}`}
                       >
-                        <span className="font-medium text-sm">GPT Image 1.5</span>
-                        {selectedAIModel === 'gpt-image-1' && openaiApiKey && <Check className="w-4 h-4 text-primary" />}
+                        <div className="flex items-center gap-2">
+                          {isCompareModelsEnabled && openaiApiKey && (
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                              selectedModelsForCompare.includes('gpt-image-1')
+                                ? 'bg-primary border-primary'
+                                : 'border-muted-foreground/30'
+                            }`}>
+                              {selectedModelsForCompare.includes('gpt-image-1') && (
+                                <Check className="w-3 h-3 text-primary-foreground" />
+                              )}
+                            </div>
+                          )}
+                          <span className="font-medium text-sm">GPT Image 1.5</span>
+                        </div>
+                        {!isCompareModelsEnabled && selectedAIModel === 'gpt-image-1' && openaiApiKey && <Check className="w-4 h-4 text-primary" />}
                       </DropdownMenuItem>
 
                       <DropdownMenuSeparator />
@@ -4550,12 +4721,77 @@ function HomeContent() {
 
                       {/* Qwen Image Edit */}
                       <DropdownMenuItem
-                        onClick={() => dashscopeApiKey ? setSelectedAIModel('qwen-image-edit-plus') : setShowApiKeySetup(true)}
+                        onClick={() => {
+                          if (!dashscopeApiKey) {
+                            setShowApiKeySetup(true);
+                            return;
+                          }
+                          if (isCompareModelsEnabled) {
+                            toggleModelForCompare('qwen-image-edit-plus');
+                          } else {
+                            setSelectedAIModel('qwen-image-edit-plus');
+                          }
+                        }}
+                        onSelect={(e) => { if (isCompareModelsEnabled && dashscopeApiKey) e.preventDefault(); }}
                         className={`justify-between ${!dashscopeApiKey ? 'opacity-40' : ''}`}
                       >
-                        <span className="font-medium text-sm">Qwen Image Edit</span>
-                        {selectedAIModel === 'qwen-image-edit-plus' && dashscopeApiKey && <Check className="w-4 h-4 text-primary" />}
+                        <div className="flex items-center gap-2">
+                          {isCompareModelsEnabled && dashscopeApiKey && (
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                              selectedModelsForCompare.includes('qwen-image-edit-plus')
+                                ? 'bg-primary border-primary'
+                                : 'border-muted-foreground/30'
+                            }`}>
+                              {selectedModelsForCompare.includes('qwen-image-edit-plus') && (
+                                <Check className="w-3 h-3 text-primary-foreground" />
+                              )}
+                            </div>
+                          )}
+                          <span className="font-medium text-sm">Qwen Image Edit</span>
+                        </div>
+                        {!isCompareModelsEnabled && selectedAIModel === 'qwen-image-edit-plus' && dashscopeApiKey && <Check className="w-4 h-4 text-primary" />}
                       </DropdownMenuItem>
+
+                      {/* Compare Models Toggle */}
+                      <DropdownMenuSeparator />
+                      <div className="w-full px-2 py-1.5 flex items-center justify-between text-[10px] text-muted-foreground/60 font-normal">
+                        <div className="flex items-center gap-1">
+                          <span className="uppercase">Compare Models</span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                onClick={(e) => e.stopPropagation()}
+                                className="hover:text-muted-foreground transition-colors"
+                              >
+                                <Info className="w-2.5 h-2.5" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-[200px] text-xs">
+                              <p>Run edits on multiple models simultaneously. Results appear as separate versions.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsCompareModelsEnabled(!isCompareModelsEnabled);
+                            if (!isCompareModelsEnabled) {
+                              // When enabling, pre-select current model if it has API key
+                              if (hasApiKeyForModel(selectedAIModel) && !selectedModelsForCompare.includes(selectedAIModel)) {
+                                setSelectedModelsForCompare([selectedAIModel]);
+                              }
+                            }
+                          }}
+                          className={`relative w-7 h-4 rounded-full transition-colors ${
+                            isCompareModelsEnabled ? 'bg-primary' : 'bg-muted-foreground/30'
+                          }`}
+                        >
+                          <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-transform ${
+                            isCompareModelsEnabled ? 'translate-x-3.5' : 'translate-x-0.5'
+                          }`} />
+                        </button>
+                      </div>
 
                       {/* Quality Settings */}
                       <DropdownMenuSeparator />
@@ -4609,21 +4845,6 @@ function HomeContent() {
                         </div>
                       )}
 
-                      {/* Add API Key prompt */}
-                      {(!apiKey || !openaiApiKey || !dashscopeApiKey) && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setApiKeyModalTab(!apiKey ? 'gemini' : 'openai');
-                              setShowApiKeySetup(true);
-                            }}
-                            className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
-                          >
-                            + Add API Key
-                          </DropdownMenuItem>
-                        </>
-                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
