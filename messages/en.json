@@ -412,5 +412,17 @@
     "invalidApiKey": "Invalid API key",
     "rateLimited": "Rate limited. Please try again later.",
     "networkError": "Network error. Please check your connection."
+  },
+  "session": {
+    "resumeTitle": "Continue Previous Session?",
+    "resumeDescription": "You have unsaved work from your last visit.",
+    "lastEdited": "Last edited {time}",
+    "sessionSize": "Session size: {size}",
+    "continueEditing": "Continue Editing",
+    "startFresh": "Start Fresh",
+    "clearSession": "Clear Session",
+    "sessionCleared": "Session cleared",
+    "sessionSaved": "Session saved",
+    "sessionStorage": "Session Storage"
   }
 }

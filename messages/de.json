@@ -412,5 +412,17 @@
     "invalidApiKey": "Ungültiger API-Schlüssel",
     "rateLimited": "Rate-Limit erreicht. Bitte versuchen Sie es später erneut.",
     "networkError": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung."
+  },
+  "session": {
+    "resumeTitle": "Vorherige Sitzung fortsetzen?",
+    "resumeDescription": "Sie haben ungespeicherte Arbeit von Ihrem letzten Besuch.",
+    "lastEdited": "Zuletzt bearbeitet {time}",
+    "sessionSize": "Sitzungsgröße: {size}",
+    "continueEditing": "Weiter bearbeiten",
+    "startFresh": "Neu beginnen",
+    "clearSession": "Sitzung löschen",
+    "sessionCleared": "Sitzung gelöscht",
+    "sessionSaved": "Sitzung gespeichert",
+    "sessionStorage": "Sitzungsspeicher"
   }
 }

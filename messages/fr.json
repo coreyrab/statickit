@@ -412,5 +412,17 @@
     "invalidApiKey": "Cle API invalide",
     "rateLimited": "Limite de requetes atteinte. Veuillez reessayer plus tard.",
     "networkError": "Erreur reseau. Verifiez votre connexion."
+  },
+  "session": {
+    "resumeTitle": "Reprendre la session précédente ?",
+    "resumeDescription": "Vous avez du travail non enregistré de votre dernière visite.",
+    "lastEdited": "Dernière modification {time}",
+    "sessionSize": "Taille de session : {size}",
+    "continueEditing": "Continuer l'édition",
+    "startFresh": "Recommencer",
+    "clearSession": "Effacer la session",
+    "sessionCleared": "Session effacée",
+    "sessionSaved": "Session enregistrée",
+    "sessionStorage": "Stockage de session"
   }
 }

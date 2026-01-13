@@ -412,5 +412,17 @@
     "invalidApiKey": "無効なAPIキー",
     "rateLimited": "レート制限に達しました。後でお試しください。",
     "networkError": "ネットワークエラー。接続を確認してください。"
+  },
+  "session": {
+    "resumeTitle": "前回のセッションを続けますか？",
+    "resumeDescription": "前回のアクセスから保存されていない作業があります。",
+    "lastEdited": "最終編集 {time}",
+    "sessionSize": "セッションサイズ: {size}",
+    "continueEditing": "編集を続ける",
+    "startFresh": "新規開始",
+    "clearSession": "セッションをクリア",
+    "sessionCleared": "セッションをクリアしました",
+    "sessionSaved": "セッションを保存しました",
+    "sessionStorage": "セッションストレージ"
   }
 }

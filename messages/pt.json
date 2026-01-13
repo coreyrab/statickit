@@ -412,5 +412,17 @@
     "invalidApiKey": "Chave API invalida",
     "rateLimited": "Limite de requisicoes atingido. Tente novamente mais tarde.",
     "networkError": "Erro de rede. Verifique sua conexao."
+  },
+  "session": {
+    "resumeTitle": "Continuar sessão anterior?",
+    "resumeDescription": "Você tem trabalho não salvo da sua última visita.",
+    "lastEdited": "Última edição {time}",
+    "sessionSize": "Tamanho da sessão: {size}",
+    "continueEditing": "Continuar editando",
+    "startFresh": "Começar do zero",
+    "clearSession": "Limpar sessão",
+    "sessionCleared": "Sessão limpa",
+    "sessionSaved": "Sessão salva",
+    "sessionStorage": "Armazenamento de sessão"
   }
 }

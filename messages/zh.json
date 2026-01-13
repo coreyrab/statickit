@@ -412,5 +412,17 @@
     "invalidApiKey": "无效的API密钥",
     "rateLimited": "请求过于频繁，请稍后再试。",
     "networkError": "网络错误，请检查您的连接。"
+  },
+  "session": {
+    "resumeTitle": "继续上一个会话？",
+    "resumeDescription": "您有上次访问未保存的工作。",
+    "lastEdited": "上次编辑 {time}",
+    "sessionSize": "会话大小：{size}",
+    "continueEditing": "继续编辑",
+    "startFresh": "重新开始",
+    "clearSession": "清除会话",
+    "sessionCleared": "会话已清除",
+    "sessionSaved": "会话已保存",
+    "sessionStorage": "会话存储"
   }
 }

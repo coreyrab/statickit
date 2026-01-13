@@ -89,8 +89,10 @@ import {
 import { detectAspectRatio, AspectRatioKey } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import { Footer } from '@/components/landing/Footer';
-import { ApiKeySetupModal, WelcomeModal } from '@/components/onboarding';
+import { ApiKeySetupModal, WelcomeModal, ResumeSessionModal } from '@/components/onboarding';
 import { getStoredApiKey, setStoredApiKey, hasStoredApiKey, getStoredOpenAIKey, setStoredOpenAIKey, hasStoredOpenAIKey } from '@/lib/api-key-storage';
+import { useSessionPersistence, type SessionState } from '@/hooks/useSessionPersistence';
+import { HardDrive } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useLocale, useTranslations } from 'next-intl';
 import { routing, useRouter as useIntlRouter, usePathname as useIntlPathname, type Locale } from '@/i18n/routing';
@@ -250,6 +252,16 @@ function HomeContent() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showNewConfirmModal, setShowNewConfirmModal] = useState(false);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
+
+  // Session persistence state
+  const [showResumeSessionModal, setShowResumeSessionModal] = useState(false);
+  const [resumeSessionData, setResumeSessionData] = useState<{
+    thumbnailUrl: string | null;
+    savedAt: number;
+    size: number;
+  } | null>(null);
+  const [isRestoringSession, setIsRestoringSession] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSuggestingIteration, setIsSuggestingIteration] = useState(false);
   const [isAnalyzingForIterations, setIsAnalyzingForIterations] = useState(false);
@@ -418,6 +430,20 @@ function HomeContent() {
 
   // Animated upload icon ref
   const uploadIconRef = useRef<UploadHandle>(null);
+
+  // Session persistence hook
+  const {
+    scheduleSave,
+    saveNow,
+    clearSessionData,
+    restoreSession,
+    checkForExistingSession,
+    isSaving: isSessionSaving,
+    sessionSizeFormatted,
+    hasExistingSession,
+    isSessionLarge,
+    isSessionVeryLarge,
+  } = useSessionPersistence();
 
   // Touch swipe state for image navigation
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
@@ -849,12 +875,180 @@ function HomeContent() {
         setShowApiKeySetup(true);
       }
     }
+
+    // Check for existing session to resume
+    checkForExistingSession().then((sessionInfo) => {
+      setSessionChecked(true);
+      if (sessionInfo.exists && hasAnyKey) {
+        setResumeSessionData({
+          thumbnailUrl: sessionInfo.thumbnailUrl,
+          savedAt: sessionInfo.savedAt,
+          size: sessionInfo.size,
+        });
+        setShowResumeSessionModal(true);
+      }
+    });
   }, []);
 
   // Persist image quality preference to localStorage
   useEffect(() => {
     localStorage.setItem('imageQuality', imageQuality);
   }, [imageQuality]);
+
+  // Auto-save session when state changes (only if we have an uploaded image)
+  useEffect(() => {
+    if (!uploadedImage || !sessionChecked) return;
+
+    const sessionState: SessionState = {
+      uploadedImage,
+      analysis,
+      baseVersions,
+      variations,
+      activeBaseId,
+      selectedVariationId,
+      selectedTool,
+      selectedPresets,
+      customPrompt,
+      additionalContext,
+      originalEditPrompt,
+      backgroundCustomPrompt,
+      modelCustomPrompt,
+      keepClothing,
+      modelBuilder: {
+        gender: selectedGender,
+        ageRange: selectedAgeRange,
+        ethnicity: selectedEthnicity,
+        hairColor: selectedHairColor,
+        hairType: selectedHairType,
+        bodyType: selectedBodyType,
+        expression: selectedExpression,
+        vibe: selectedVibe,
+      },
+      backgroundReferences,
+      modelReferences,
+      editReferences,
+      selectedAIModel,
+      imageQuality,
+      weirdnessLevel,
+    };
+
+    scheduleSave(sessionState);
+  }, [
+    uploadedImage,
+    analysis,
+    baseVersions,
+    variations,
+    activeBaseId,
+    selectedVariationId,
+    selectedTool,
+    selectedPresets,
+    customPrompt,
+    additionalContext,
+    originalEditPrompt,
+    backgroundCustomPrompt,
+    modelCustomPrompt,
+    keepClothing,
+    selectedGender,
+    selectedAgeRange,
+    selectedEthnicity,
+    selectedHairColor,
+    selectedHairType,
+    selectedBodyType,
+    selectedExpression,
+    selectedVibe,
+    backgroundReferences,
+    modelReferences,
+    editReferences,
+    selectedAIModel,
+    imageQuality,
+    weirdnessLevel,
+    sessionChecked,
+    scheduleSave,
+  ]);
+
+  // Save session immediately before page unload
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (uploadedImage) {
+        saveNow();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && uploadedImage) {
+        saveNow();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [uploadedImage, saveNow]);
+
+  // Handle continuing a previous session
+  const handleContinueSession = async () => {
+    setIsRestoringSession(true);
+    try {
+      const restoredState = await restoreSession();
+      if (restoredState) {
+        // Restore all state
+        setUploadedImage(restoredState.uploadedImage as UploadedImage);
+        setAnalysis(restoredState.analysis);
+        setBaseVersions(restoredState.baseVersions);
+        setVariations(restoredState.variations);
+        setActiveBaseId(restoredState.activeBaseId);
+        setSelectedVariationId(restoredState.selectedVariationId);
+        setSelectedTool(restoredState.selectedTool as Tool);
+        setSelectedPresets(restoredState.selectedPresets);
+        setCustomPrompt(restoredState.customPrompt);
+        setAdditionalContext(restoredState.additionalContext);
+        setOriginalEditPrompt(restoredState.originalEditPrompt);
+        setBackgroundCustomPrompt(restoredState.backgroundCustomPrompt);
+        setModelCustomPrompt(restoredState.modelCustomPrompt);
+        setKeepClothing(restoredState.keepClothing);
+        setSelectedGender(restoredState.modelBuilder.gender);
+        setSelectedAgeRange(restoredState.modelBuilder.ageRange);
+        setSelectedEthnicity(restoredState.modelBuilder.ethnicity);
+        setSelectedHairColor(restoredState.modelBuilder.hairColor);
+        setSelectedHairType(restoredState.modelBuilder.hairType);
+        setSelectedBodyType(restoredState.modelBuilder.bodyType);
+        setSelectedExpression(restoredState.modelBuilder.expression);
+        setSelectedVibe(restoredState.modelBuilder.vibe);
+        setBackgroundReferences(restoredState.backgroundReferences);
+        setModelReferences(restoredState.modelReferences);
+        setEditReferences(restoredState.editReferences);
+        setSelectedAIModel(restoredState.selectedAIModel as AIModel);
+        setImageQuality(restoredState.imageQuality as ImageQuality);
+        setWeirdnessLevel(restoredState.weirdnessLevel);
+
+        // Switch to editor mode
+        setStep('editor');
+        toast.success(t('session.sessionSaved'));
+      }
+    } catch (error) {
+      console.error('Failed to restore session:', error);
+      toast.error('Failed to restore session');
+    } finally {
+      setIsRestoringSession(false);
+      setShowResumeSessionModal(false);
+    }
+  };
+
+  // Handle starting fresh (clear session)
+  const handleStartFresh = async () => {
+    await clearSessionData();
+    setShowResumeSessionModal(false);
+  };
+
+  // Handle clearing session from menu
+  const handleClearSession = async () => {
+    await clearSessionData();
+    toast.success(t('session.sessionCleared'));
+  };
 
   // Helper to update Gemini API key in both state and localStorage
   const handleSetApiKey = (key: string) => {
@@ -3326,6 +3520,49 @@ function HomeContent() {
                     ))}
                   </div>
                 </div>
+
+                {/* Session Storage Indicator */}
+                {uploadedImage && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <div className="px-2 py-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <HardDrive className={`w-3.5 h-3.5 ${
+                            isSessionVeryLarge ? 'text-red-500' :
+                            isSessionLarge ? 'text-amber-500' :
+                            'text-muted-foreground'
+                          }`} />
+                          <span className="text-xs text-muted-foreground">{t('session.sessionStorage')}</span>
+                        </div>
+                        <span className={`text-xs ${
+                          isSessionVeryLarge ? 'text-red-500 font-medium' :
+                          isSessionLarge ? 'text-amber-500' :
+                          'text-muted-foreground/60'
+                        }`}>
+                          {isSessionSaving ? (
+                            <Loader2 className="w-3 h-3 animate-spin inline" />
+                          ) : (
+                            sessionSizeFormatted
+                          )}
+                        </span>
+                      </div>
+                      {isSessionLarge && (
+                        <p className={`text-[10px] mt-1 ${isSessionVeryLarge ? 'text-red-400' : 'text-amber-400'}`}>
+                          {isSessionVeryLarge
+                            ? 'Session very large - consider clearing'
+                            : 'Session getting large'}
+                        </p>
+                      )}
+                      <button
+                        onClick={handleClearSession}
+                        className="mt-2 w-full text-xs text-muted-foreground hover:text-foreground py-1.5 px-2 rounded-md hover:bg-muted transition-colors text-left"
+                      >
+                        {t('session.clearSession')}
+                      </button>
+                    </div>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -7080,6 +7317,20 @@ function HomeContent() {
         onApiKeySet={handleSetApiKey}
         onOpenAIKeySet={handleSetOpenAIKey}
       />
+
+      {/* Resume Session Modal */}
+      {resumeSessionData && (
+        <ResumeSessionModal
+          open={showResumeSessionModal}
+          onOpenChange={setShowResumeSessionModal}
+          thumbnailUrl={resumeSessionData.thumbnailUrl}
+          savedAt={resumeSessionData.savedAt}
+          sessionSize={resumeSessionData.size}
+          onContinue={handleContinueSession}
+          onStartFresh={handleStartFresh}
+          isLoading={isRestoringSession}
+        />
+      )}
 
       {!uploadedImage && <Footer />}
     </div>

@@ -412,5 +412,17 @@
     "invalidApiKey": "Clave API invalida",
     "rateLimited": "Limite de solicitudes alcanzado. Intenta mas tarde.",
     "networkError": "Error de red. Verifica tu conexion."
+  },
+  "session": {
+    "resumeTitle": "¿Continuar sesión anterior?",
+    "resumeDescription": "Tienes trabajo sin guardar de tu última visita.",
+    "lastEdited": "Última edición {time}",
+    "sessionSize": "Tamaño de sesión: {size}",
+    "continueEditing": "Continuar editando",
+    "startFresh": "Empezar de nuevo",
+    "clearSession": "Borrar sesión",
+    "sessionCleared": "Sesión borrada",
+    "sessionSaved": "Sesión guardada",
+    "sessionStorage": "Almacenamiento de sesión"
   }
 }

@@ -412,5 +412,17 @@
     "invalidApiKey": "유효하지 않은 API 키",
     "rateLimited": "요청 한도에 도달했습니다. 나중에 다시 시도하세요.",
     "networkError": "네트워크 오류. 연결을 확인하세요."
+  },
+  "session": {
+    "resumeTitle": "이전 세션을 계속하시겠습니까?",
+    "resumeDescription": "지난 방문에서 저장되지 않은 작업이 있습니다.",
+    "lastEdited": "마지막 편집 {time}",
+    "sessionSize": "세션 크기: {size}",
+    "continueEditing": "편집 계속",
+    "startFresh": "새로 시작",
+    "clearSession": "세션 지우기",
+    "sessionCleared": "세션이 지워졌습니다",
+    "sessionSaved": "세션이 저장되었습니다",
+    "sessionStorage": "세션 저장소"
   }
 }
