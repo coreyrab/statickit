@@ -2016,12 +2016,17 @@ function HomeContent() {
       let mimeTypeToUse: string;
       if (currentImageUrl.startsWith('data:')) {
         // Extract mime type and base64 from data URL
-        const matches = currentImageUrl.match(/^data:([^;]+);base64,(.+)$/);
-        if (matches) {
-          mimeTypeToUse = matches[1];
-          imageToEdit = matches[2];
+        // Format: data:[<mediatype>][;base64],<data>
+        const commaIndex = currentImageUrl.indexOf(',');
+        if (commaIndex > 0) {
+          const header = currentImageUrl.substring(5, commaIndex); // skip "data:"
+          const mimeMatch = header.match(/^([^;,]+)/);
+          mimeTypeToUse = mimeMatch ? mimeMatch[1] : uploadedImage.file.type;
+          imageToEdit = currentImageUrl.substring(commaIndex + 1);
         } else {
-          imageToEdit = currentImageUrl.split(',')[1];
+          // Fallback: try to split by comma
+          const parts = currentImageUrl.split(',');
+          imageToEdit = parts.length > 1 ? parts[1] : parts[0];
           mimeTypeToUse = uploadedImage.file.type;
         }
       } else {
