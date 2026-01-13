@@ -373,7 +373,7 @@ function HomeContent() {
   const [selectedEditRef, setSelectedEditRef] = useState<string | null>(null);
 
   // AI Model selection - supports Gemini, OpenAI, and Qwen providers
-  type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-preview-05-20' | 'gpt-image-1' | 'qwen-image-edit-plus';
+  type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-image' | 'gpt-image-1' | 'qwen-image-edit-plus';
   const [selectedAIModel, setSelectedAIModel] = useState<AIModel>('gemini-3-pro-image-preview');
 
   // Compare Models mode - run same edit on multiple models simultaneously
@@ -387,7 +387,7 @@ function HomeContent() {
 
   // Helper to determine which provider a model belongs to
   const isOpenAIModel = (model: AIModel) => model === 'gpt-image-1';
-  const isGeminiModel = (model: AIModel) => model === 'gemini-3-pro-image-preview' || model === 'gemini-2.5-flash-preview-05-20';
+  const isGeminiModel = (model: AIModel) => model === 'gemini-3-pro-image-preview' || model === 'gemini-2.5-flash-image';
   const isQwenModel = (model: AIModel) => model === 'qwen-image-edit-plus';
 
   // Compare mode helpers
@@ -1118,7 +1118,7 @@ function HomeContent() {
   const getModelDisplayName = (model: AIModel): string => {
     switch (model) {
       case 'gemini-3-pro-image-preview': return 'Gemini 3 Pro';
-      case 'gemini-2.5-flash-preview-05-20': return 'Gemini 2.5 Flash';
+      case 'gemini-2.5-flash-image': return 'Gemini 2.5 Flash';
       case 'gpt-image-1': return 'GPT Image 1.5';
       case 'qwen-image-edit-plus': return 'Qwen Image Edit';
       default: return model;
@@ -4250,8 +4250,8 @@ function HomeContent() {
                         <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
                           <X className="w-6 h-6 text-red-400" />
                         </div>
-                        <span className="text-sm font-medium text-foreground">Generation Failed</span>
-                        <span className="text-xs text-muted-foreground/80">The AI couldn't process this edit. This can happen with certain prompts or images. Try a different edit or preset.</span>
+                        <span className="text-sm font-medium text-white">Generation Failed</span>
+                        <span className="text-xs text-gray-300">The AI couldn't process this edit. This can happen with certain prompts or images. Try a different edit or preset.</span>
                         <button
                           onClick={() => {
                             // Remove the failed version and go back to previous
@@ -4643,9 +4643,9 @@ function HomeContent() {
                             return;
                           }
                           if (isCompareModelsEnabled) {
-                            toggleModelForCompare('gemini-2.5-flash-preview-05-20');
+                            toggleModelForCompare('gemini-2.5-flash-image');
                           } else {
-                            setSelectedAIModel('gemini-2.5-flash-preview-05-20');
+                            setSelectedAIModel('gemini-2.5-flash-image');
                           }
                         }}
                         onSelect={(e) => { if (isCompareModelsEnabled && apiKey) e.preventDefault(); }}
@@ -4654,18 +4654,18 @@ function HomeContent() {
                         <div className="flex items-center gap-2">
                           {isCompareModelsEnabled && apiKey && (
                             <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                              selectedModelsForCompare.includes('gemini-2.5-flash-preview-05-20')
+                              selectedModelsForCompare.includes('gemini-2.5-flash-image')
                                 ? 'bg-primary border-primary'
                                 : 'border-muted-foreground/30'
                             }`}>
-                              {selectedModelsForCompare.includes('gemini-2.5-flash-preview-05-20') && (
+                              {selectedModelsForCompare.includes('gemini-2.5-flash-image') && (
                                 <Check className="w-3 h-3 text-primary-foreground" />
                               )}
                             </div>
                           )}
                           <span className="font-medium text-sm">Gemini 2.5 Flash</span>
                         </div>
-                        {!isCompareModelsEnabled && selectedAIModel === 'gemini-2.5-flash-preview-05-20' && apiKey && <Check className="w-4 h-4 text-primary" />}
+                        {!isCompareModelsEnabled && selectedAIModel === 'gemini-2.5-flash-image' && apiKey && <Check className="w-4 h-4 text-primary" />}
                       </DropdownMenuItem>
 
                       <DropdownMenuSeparator />
