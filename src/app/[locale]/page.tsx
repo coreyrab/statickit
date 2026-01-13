@@ -92,6 +92,8 @@ import { Footer } from '@/components/landing/Footer';
 import { ApiKeySetupModal, WelcomeModal } from '@/components/onboarding';
 import { getStoredApiKey, setStoredApiKey, hasStoredApiKey, getStoredOpenAIKey, setStoredOpenAIKey, hasStoredOpenAIKey } from '@/lib/api-key-storage';
 import { useTheme } from 'next-themes';
+import { useLocale, useTranslations } from 'next-intl';
+import { routing, useRouter as useIntlRouter, usePathname as useIntlPathname, type Locale } from '@/i18n/routing';
 import { track } from '@/lib/analytics';
 import { removeImageBackground, type ProgressState as BgRemovalProgress } from '@/lib/background-removal';
 import { AsciiGrid } from '@/components/ui/AsciiGrid';
@@ -148,6 +150,18 @@ const AD_SIZES = [
   { name: '4:5', width: 1080, height: 1350, label: 'Portrait' },
   { name: '2:3', width: 1080, height: 1620, label: 'Pinterest' },
 ] as const;
+
+// Language display names for the language selector
+const LANGUAGES: Record<Locale, { name: string; flag: string }> = {
+  en: { name: 'English', flag: '🇺🇸' },
+  es: { name: 'Español', flag: '🇪🇸' },
+  de: { name: 'Deutsch', flag: '🇩🇪' },
+  fr: { name: 'Français', flag: '🇫🇷' },
+  ja: { name: '日本語', flag: '🇯🇵' },
+  zh: { name: '中文', flag: '🇨🇳' },
+  ko: { name: '한국어', flag: '🇰🇷' },
+  pt: { name: 'Português', flag: '🇧🇷' },
+};
 
 interface ResizedVersion {
   size: string;
@@ -206,7 +220,14 @@ interface ReferenceImage {
 function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const intlRouter = useIntlRouter();
+  const intlPathname = useIntlPathname();
   const { theme, setTheme } = useTheme();
+  const locale = useLocale() as Locale;
+
+  // Translations
+  const t = useTranslations();
+
   const [step, setStep] = useState<Step>('editor');
   const [selectedTool, setSelectedTool] = useState<Tool>('edit');
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
@@ -1664,6 +1685,14 @@ function HomeContent() {
     }
   };
 
+  // Handle locale change
+  const handleLocaleChange = (newLocale: Locale) => {
+    // Set a cookie to persist the locale preference
+    document.cookie = `NEXT_LOCALE=${newLocale}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
+    // Use next-intl's router which handles locale prefixes correctly
+    intlRouter.replace(intlPathname, { locale: newLocale });
+  };
+
   // Apply presets to the current image
   const handleApplyPresets = async () => {
     if (!uploadedImage) {
@@ -3000,83 +3029,123 @@ function HomeContent() {
             </button>
           </div>
 
-          {/* Right: Keyboard shortcuts, GitHub Star & Settings Menu */}
-          <div className="flex items-center gap-2">
-            {/* Keyboard shortcuts - desktop only */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button className="hidden md:flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors">
-                  <Keyboard className="w-4 h-4 text-muted-foreground" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-xs">
-                <div className="space-y-2 text-xs">
-                  <p className="font-medium text-foreground mb-2">Keyboard Shortcuts</p>
-                  <div className="space-y-1 text-foreground/70">
-                    <div className="flex justify-between gap-4">
-                      <span>Navigate versions</span>
-                      <span className="text-muted-foreground/80">← →</span>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                      <span>Switch tools</span>
-                      <span className="text-muted-foreground/80">Shift + ← →</span>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                      <span>Delete version</span>
-                      <span className="text-muted-foreground/80">Backspace</span>
-                    </div>
-                  </div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-            {/* GitHub Star - desktop only */}
-            <a
-              href="https://github.com/CoreyRab/statickit"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors text-sm"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-              </svg>
-              <span className="font-medium">Star</span>
-            </a>
-            {/* Settings Menu - Far right */}
+          {/* Right: Hamburger Menu */}
+          <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors">
                   <Menu className="w-4 h-4 text-muted-foreground" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-56">
+                {/* API Key */}
                 <DropdownMenuItem onClick={() => setShowApiKeySetup(true)} className="cursor-pointer group">
                   <Key className={`w-4 h-4 ${apiKey ? 'text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300' : ''}`} />
-                  <span>API Key</span>
+                  <span>{t('nav.apiKeys')}</span>
                   {apiKey && (
-                    <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300">Active</span>
+                    <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300">{t('nav.apiKeysActive')}</span>
                   )}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="cursor-pointer">
-                  {theme === 'dark' ? (
-                    <Sun className="w-4 h-4" />
-                  ) : (
-                    <Moon className="w-4 h-4" />
-                  )}
-                  <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="md:hidden" />
-                <DropdownMenuItem asChild className="md:hidden cursor-pointer">
+
+                <DropdownMenuSeparator />
+
+                {/* Keyboard Shortcuts Section */}
+                <DropdownMenuLabel className="text-[10px] text-muted-foreground/60 font-normal flex items-center gap-1.5">
+                  <Keyboard className="w-3 h-3" />
+                  {t('nav.shortcuts')}
+                </DropdownMenuLabel>
+                <div className="px-2 py-1.5 space-y-1 text-xs text-muted-foreground">
+                  <div className="flex justify-between">
+                    <span>{t('nav.selectTool')}</span>
+                    <span className="text-muted-foreground/60">1 - 5</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t('nav.navigateVersions')}</span>
+                    <span className="text-muted-foreground/60">← →</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t('nav.deleteVersion')}</span>
+                    <span className="text-muted-foreground/60">⌫</span>
+                  </div>
+                </div>
+
+                <DropdownMenuSeparator />
+
+                {/* Links */}
+                <DropdownMenuItem asChild className="cursor-pointer">
                   <a
-                    href="https://github.com/CoreyRab/statickit"
+                    href="https://github.com/coreyrab/statickit"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
                     </svg>
-                    <span>GitHub</span>
+                    <span>{t('nav.github')}</span>
                   </a>
                 </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                {/* Theme Toggle */}
+                <div className="px-2 py-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-muted-foreground">{t('nav.theme')}</span>
+                  </div>
+                  <div className="flex items-center gap-1 p-1 bg-muted/50 rounded-lg">
+                    <button
+                      onClick={() => setTheme('light')}
+                      className={`flex-1 flex items-center justify-center p-1.5 rounded-md transition-colors ${
+                        theme === 'light' ? 'bg-background shadow-sm' : 'hover:bg-muted'
+                      }`}
+                    >
+                      <Sun className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setTheme('dark')}
+                      className={`flex-1 flex items-center justify-center p-1.5 rounded-md transition-colors ${
+                        theme === 'dark' ? 'bg-background shadow-sm' : 'hover:bg-muted'
+                      }`}
+                    >
+                      <Moon className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setTheme('system')}
+                      className={`flex-1 flex items-center justify-center p-1.5 rounded-md transition-colors ${
+                        theme === 'system' ? 'bg-background shadow-sm' : 'hover:bg-muted'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <rect x="2" y="3" width="20" height="14" rx="2" />
+                        <path d="M8 21h8M12 17v4" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <DropdownMenuSeparator />
+
+                {/* Language Selector */}
+                <div className="px-2 py-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-muted-foreground">Language</span>
+                    <span className="text-xs text-muted-foreground/60">{LANGUAGES[locale].flag}</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1">
+                    {routing.locales.map((loc) => (
+                      <button
+                        key={loc}
+                        onClick={() => handleLocaleChange(loc)}
+                        className={`flex items-center justify-center p-1.5 rounded-md transition-colors text-xs ${
+                          locale === loc ? 'bg-background shadow-sm font-medium' : 'hover:bg-muted'
+                        }`}
+                        title={LANGUAGES[loc].name}
+                      >
+                        {LANGUAGES[loc].flag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -3742,12 +3811,12 @@ function HomeContent() {
                       />
                     </div>
                     {isDragActive ? (
-                      <p className="text-primary font-medium">Drop your image here...</p>
+                      <p className="text-primary font-medium">{t('upload.dragDrop')}...</p>
                     ) : (
                       <>
                         <div className="text-center">
-                          <p className="font-medium mb-1">Drop your image here</p>
-                          <p className="text-muted-foreground/80 text-sm">or click to browse</p>
+                          <p className="font-medium mb-1">{t('upload.dragDrop')}</p>
+                          <p className="text-muted-foreground/80 text-sm">{t('upload.supportedFormats')}</p>
                         </div>
                         <p className="text-xs text-muted-foreground/50">PNG, JPG, WebP • Max 10MB</p>
                       </>
@@ -4121,14 +4190,14 @@ function HomeContent() {
                       </TooltipTrigger>
                       <TooltipContent>
                         {!previewImage
-                          ? "Upload an image first"
+                          ? t('common.uploadFirst')
                           : originalVersionIndex === 0
                             ? activeBaseId === 'original'
                               ? canDeleteBaseVersion('original')
-                                ? "Delete image and start over"
-                                : "Can't delete original (has edits or variations)"
-                              : "Delete this version"
-                            : "Delete this edit"}
+                                ? t('viewer.deleteImageStartOver')
+                                : t('viewer.cantDeleteOriginal')
+                              : t('viewer.deleteVersion')
+                            : t('viewer.deleteEdit')}
                       </TooltipContent>
                     </Tooltip>
                   )}
@@ -4151,7 +4220,7 @@ function HomeContent() {
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {previewImage ? 'Create new version from this image' : 'Upload an image first'}
+                      {previewImage ? t('viewer.newVersion') : t('common.uploadFirst')}
                     </TooltipContent>
                   </Tooltip>
                   {/* Compare button - always show for original/edits, ghosted when < 2 versions or no image */}
@@ -4172,12 +4241,12 @@ function HomeContent() {
                       </TooltipTrigger>
                       <TooltipContent>
                         {!previewImage
-                          ? 'Upload an image first'
+                          ? t('common.uploadFirst')
                           : isCompareMode
-                            ? 'Exit comparison mode'
+                            ? t('viewer.exitCompare')
                             : originalVersions.length >= 2
-                              ? 'Compare versions'
-                              : 'Make an edit to compare versions'}
+                              ? t('viewer.compare')
+                              : t('viewer.makeEditToCompare')}
                       </TooltipContent>
                     </Tooltip>
                   )}
@@ -4196,7 +4265,7 @@ function HomeContent() {
                         {isUIHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent>{isUIHidden ? 'Show UI' : 'Hide UI'}</TooltipContent>
+                    <TooltipContent>{isUIHidden ? t('viewer.showUI') : t('viewer.hideUI')}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -4213,7 +4282,7 @@ function HomeContent() {
                         <Download className="w-4 h-4" />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent>{previewImage ? 'Download image' : 'Upload an image first'}</TooltipContent>
+                    <TooltipContent>{previewImage ? t('viewer.download') : t('common.uploadFirst')}</TooltipContent>
                   </Tooltip>
                 </div>
 
@@ -4225,7 +4294,7 @@ function HomeContent() {
                     className="bg-muted hover:bg-muted backdrop-blur-sm"
                   >
                     <Copy className="w-4 h-4 mr-1.5" />
-                    Duplicate
+                    {t('viewer.duplicate')}
                   </Button>
                 </div>
               )}
@@ -4582,9 +4651,9 @@ function HomeContent() {
 
                 {/* Tool Content */}
                 <div className="p-4 flex-1 flex flex-col min-h-0">
-                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Wand2 className="w-3.5 h-3.5 text-primary-foreground" /></span>Edit</h2>
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Wand2 className="w-3.5 h-3.5 text-primary-foreground" /></span>{t('tools.edit')}</h2>
                   <div className="text-xs text-muted-foreground/80 mb-3">
-                    Apply preset effects for lighting, style, camera angles, and more.
+                    {t('edit.description')}
                     {uploadedImage && (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -4597,13 +4666,13 @@ function HomeContent() {
                                 : 'text-muted-foreground/50 cursor-not-allowed'
                             }`}
                           >
-                            <span>Image Details</span>
+                            <span>{t('edit.imageDetails')}</span>
                             <ChevronDown className={`w-3 h-3 transition-transform ${showImageDetails ? 'rotate-180' : ''}`} />
                           </button>
                         </TooltipTrigger>
                         {!analysis?.imageDescription && (
                           <TooltipContent side="bottom">
-                            <p className="text-xs">Still analyzing...</p>
+                            <p className="text-xs">{t('edit.stillAnalyzing')}</p>
                           </TooltipContent>
                         )}
                       </Tooltip>
@@ -4629,7 +4698,7 @@ function HomeContent() {
                               </button>
                             </TooltipTrigger>
                             <TooltipContent side="left">
-                              <p className="text-xs">Copy description</p>
+                              <p className="text-xs">{t('edit.copyDescription')}</p>
                             </TooltipContent>
                           </Tooltip>
                         </div>
@@ -4646,7 +4715,7 @@ function HomeContent() {
                       >
                         <div className="flex items-center gap-2">
                           <Sparkles className="w-4 h-4 text-muted-foreground/50" />
-                          <span>Enhance</span>
+                          <span>{t('edit.enhance')}</span>
                           {selectedPresets.enhance && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'enhance' ? 'rotate-180' : ''}`} />
@@ -4687,7 +4756,7 @@ function HomeContent() {
                       >
                         <div className="flex items-center gap-2">
                           <Sun className="w-4 h-4 text-muted-foreground/50" />
-                          <span>Lighting</span>
+                          <span>{t('edit.lighting')}</span>
                           {selectedPresets.lighting && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'lighting' ? 'rotate-180' : ''}`} />
@@ -4728,7 +4797,7 @@ function HomeContent() {
                       >
                         <div className="flex items-center gap-2">
                           <Palette className="w-4 h-4 text-muted-foreground/50" />
-                          <span>Style</span>
+                          <span>{t('edit.style')}</span>
                           {selectedPresets.style && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'style' ? 'rotate-180' : ''}`} />
@@ -4769,7 +4838,7 @@ function HomeContent() {
                       >
                         <div className="flex items-center gap-2">
                           <Camera className="w-4 h-4 text-muted-foreground/50" />
-                          <span>Camera</span>
+                          <span>{t('edit.cameraAngle')}</span>
                           {selectedPresets.camera && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'camera' ? 'rotate-180' : ''}`} />
@@ -4810,7 +4879,7 @@ function HomeContent() {
                       >
                         <div className="flex items-center gap-2">
                           <Heart className="w-4 h-4 text-muted-foreground/50" />
-                          <span>Mood</span>
+                          <span>{t('edit.mood')}</span>
                           {selectedPresets.mood && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'mood' ? 'rotate-180' : ''}`} />
@@ -4851,7 +4920,7 @@ function HomeContent() {
                       >
                         <div className="flex items-center gap-2">
                           <Droplets className="w-4 h-4 text-muted-foreground/50" />
-                          <span>Color</span>
+                          <span>{t('edit.color')}</span>
                           {selectedPresets.color && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground/80 transition-transform ${expandedPresetCategory === 'color' ? 'rotate-180' : ''}`} />
@@ -5205,9 +5274,9 @@ function HomeContent() {
 
                 {/* Tool Content */}
                 <div className="p-4 flex-1 flex flex-col overflow-hidden">
-                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Expand className="w-3.5 h-3.5 text-primary-foreground" /></span>Resize</h2>
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Expand className="w-3.5 h-3.5 text-primary-foreground" /></span>{t('export.resize')}</h2>
                   <p className="text-xs text-muted-foreground/80 mb-3">
-                    AI-powered resizing to fit any aspect ratio or platform.
+                    {t('export.description')}
                   </p>
 
                   {/* Smart Resize Section */}
@@ -5225,7 +5294,7 @@ function HomeContent() {
                         >
                           <div className="flex items-center gap-2.5">
                             <Check className={`w-3.5 h-3.5 ${!viewingOriginalResizedSize ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground/70'}`} />
-                            <span className={!viewingOriginalResizedSize ? 'text-emerald-700 dark:text-emerald-400' : ''}>Original</span>
+                            <span className={!viewingOriginalResizedSize ? 'text-emerald-700 dark:text-emerald-400' : ''}>{t('export.original')}</span>
                           </div>
                           <span className="text-muted-foreground/70 text-xs">{uploadedImage.width}×{uploadedImage.height}</span>
                         </button>
@@ -5297,7 +5366,7 @@ function HomeContent() {
                             disabled={isAnyResizing}
                             className="w-full mt-2 text-xs text-primary hover:text-primary disabled:text-muted-foreground/50 disabled:cursor-not-allowed transition-colors text-center py-1"
                           >
-                            {isAnyResizing ? 'Resizing (may take a minute)...' : `Generate all ${ungeneratedSizes.length} sizes`}
+                            {isAnyResizing ? t('export.resizingMayTakeMinute') : t('export.generateAllSizes', { count: ungeneratedSizes.length })}
                           </button>
                         );
                       })()}
@@ -5306,9 +5375,9 @@ function HomeContent() {
 
                 {/* Download Section */}
                 <div className="mt-auto space-y-2">
-                  <h3 className="text-xs text-muted-foreground/70 uppercase tracking-wide mb-2">Download</h3>
+                  <h3 className="text-xs text-muted-foreground/70 uppercase tracking-wide mb-2">{t('export.downloadSection')}</h3>
                   {!uploadedImage && (
-                    <div className="text-sm text-muted-foreground/70 italic">No images to download</div>
+                    <div className="text-sm text-muted-foreground/70 italic">{t('export.noImagesToDownload')}</div>
                   )}
                   {uploadedImage && (
                     <button
@@ -5326,7 +5395,7 @@ function HomeContent() {
                     >
                       <Download className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <div className="font-medium">Current View</div>
+                        <div className="font-medium">{t('export.currentView')}</div>
                         <div className="text-xs text-muted-foreground/70">
                           {viewingOriginalResizedSize || `${uploadedImage.width}×${uploadedImage.height}`}
                         </div>
@@ -5349,9 +5418,9 @@ function HomeContent() {
                     >
                       <FolderDown className="w-4 h-4 text-primary" />
                       <div>
-                        <div className="font-medium text-primary">Download All Sizes</div>
+                        <div className="font-medium text-primary">{t('export.downloadAllSizes')}</div>
                         <div className="text-xs text-muted-foreground/70">
-                          {originalResizedVersions.filter(r => r.status === 'completed').length + 1} sizes
+                          {t('export.sizes', { count: originalResizedVersions.filter(r => r.status === 'completed').length + 1 })}
                         </div>
                       </div>
                     </button>
@@ -5362,7 +5431,7 @@ function HomeContent() {
                         const count = getAllFileCount();
                         setDownloadModal({
                           isOpen: true,
-                          title: 'Download All',
+                          title: t('export.downloadAll'),
                           fileCount: count,
                           onConfirm: downloadAllGenerations,
                         });
@@ -5371,8 +5440,8 @@ function HomeContent() {
                     >
                       <FolderDown className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <div className="font-medium">Download All Versions</div>
-                        <div className="text-xs text-muted-foreground/70">{completedCount} generated images</div>
+                        <div className="font-medium">{t('export.downloadAllVersions')}</div>
+                        <div className="text-xs text-muted-foreground/70">{t('export.generatedImages', { count: completedCount })}</div>
                       </div>
                     </button>
                   )}
@@ -5468,9 +5537,9 @@ function HomeContent() {
 
                 {/* Tool Content */}
                 <div className="p-4 flex flex-col flex-1 overflow-hidden">
-                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><ImageIcon className="w-3.5 h-3.5 text-primary-foreground" /></span>Backgrounds</h2>
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><ImageIcon className="w-3.5 h-3.5 text-primary-foreground" /></span>{t('tools.backgrounds')}</h2>
                   <div className="text-xs text-muted-foreground/80 mb-3">
-                    Change the background while preserving the product and any models.
+                    {t('backgrounds.description')}
                     {uploadedImage && (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -5483,13 +5552,13 @@ function HomeContent() {
                                 : 'text-muted-foreground/50 cursor-not-allowed'
                             }`}
                           >
-                            <span>Current Background</span>
+                            <span>{t('backgrounds.currentBackground')}</span>
                             <ChevronDown className={`w-3 h-3 transition-transform ${showBackgroundDetails ? 'rotate-180' : ''}`} />
                           </button>
                         </TooltipTrigger>
                         {!analysis?.backgroundDescription && (
                           <TooltipContent side="bottom">
-                            <p className="text-xs">Still analyzing...</p>
+                            <p className="text-xs">{t('edit.stillAnalyzing')}</p>
                           </TooltipContent>
                         )}
                       </Tooltip>
@@ -5516,12 +5585,12 @@ function HomeContent() {
                   {isLoadingBackgroundSuggestions ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-muted-foreground/80">Analyzing...</span>
+                      <span className="text-muted-foreground/80">{t('backgrounds.suggesting')}</span>
                     </>
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4 text-primary/70" />
-                      Suggest backgrounds
+                      {t('backgrounds.suggestBackgrounds')}
                     </>
                   )}
                 </button>
@@ -5723,8 +5792,8 @@ function HomeContent() {
                   {/* Remove Background - Special feature (no API key needed) */}
                   <div className="border-t border-border/50 pt-3 mt-3">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-muted-foreground">Remove Background</span>
-                      <span className="text-[10px] text-muted-foreground/60">No API needed</span>
+                      <span className="text-xs text-muted-foreground">{t('backgrounds.removeBackground')}</span>
+                      <span className="text-[10px] text-muted-foreground/60">{t('backgrounds.noApiNeeded')}</span>
                     </div>
                     <button
                       onClick={handleRemoveBackground}
@@ -5734,12 +5803,12 @@ function HomeContent() {
                       {isRemovingBackground ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin text-muted-foreground/50" />
-                          <span>Working on it...</span>
+                          <span>{t('backgrounds.removing')}</span>
                         </>
                       ) : (
                         <>
                           <Eraser className="w-4 h-4 text-muted-foreground/50" />
-                          <span>Remove background</span>
+                          <span>{t('backgrounds.removeBackground')}</span>
                         </>
                       )}
                     </button>
@@ -5837,9 +5906,9 @@ function HomeContent() {
 
                 {/* Tool Content */}
                 <div className="p-4 flex flex-col flex-1 overflow-hidden">
-                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><User className="w-3.5 h-3.5 text-primary-foreground" /></span>Model</h2>
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><User className="w-3.5 h-3.5 text-primary-foreground" /></span>{t('tools.model')}</h2>
                   <div className="text-xs text-muted-foreground/80 mb-3">
-                    Change the model while preserving background, lighting & product.
+                    {t('model.description')}
                     {uploadedImage && (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -5852,13 +5921,13 @@ function HomeContent() {
                                 : 'text-muted-foreground/50 cursor-not-allowed'
                             }`}
                           >
-                            <span>Current Model</span>
+                            <span>{t('model.currentModel')}</span>
                             <ChevronDown className={`w-3 h-3 transition-transform ${showModelDetails ? 'rotate-180' : ''}`} />
                           </button>
                         </TooltipTrigger>
                         {!analysis?.subjectDescription && (
                           <TooltipContent side="bottom">
-                            <p className="text-xs">Still analyzing...</p>
+                            <p className="text-xs">{t('edit.stillAnalyzing')}</p>
                           </TooltipContent>
                         )}
                       </Tooltip>
@@ -5874,7 +5943,7 @@ function HomeContent() {
                 <div>
                   {/* Preserve Outfit Toggle */}
                   <div className="flex items-center justify-between mb-4 p-2 rounded-lg bg-muted/50 border border-border">
-                    <span className="text-sm text-foreground/70">Preserve outfit</span>
+                    <span className="text-sm text-foreground/70">{t('model.preserveOutfit')}</span>
                     <button
                       onClick={() => setKeepClothing(!keepClothing)}
                       className={`w-10 h-6 rounded-full transition-colors relative ${
@@ -5904,12 +5973,12 @@ function HomeContent() {
                   {isLoadingModelSuggestions ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-muted-foreground/80">Analyzing...</span>
+                      <span className="text-muted-foreground/80">{t('model.suggesting')}</span>
                     </>
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4 text-primary/70" />
-                      Suggest models
+                      {t('model.suggestModels')}
                     </>
                   )}
                 </button>
@@ -5918,7 +5987,7 @@ function HomeContent() {
                 <div className="border-t border-border/50 pt-3 mt-1 mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-1">
-                      <span className="text-xs text-muted-foreground">Reference Models</span>
+                      <span className="text-xs text-muted-foreground">{t('model.referenceModels')}</span>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
@@ -5926,7 +5995,7 @@ function HomeContent() {
                           </button>
                         </TooltipTrigger>
                         <TooltipContent side="right" className="max-w-[140px]">
-                          <p className="text-xs">Upload a person's photo to swap them into your image, preserving pose.</p>
+                          <p className="text-xs">{t('model.referenceTooltip')}</p>
                         </TooltipContent>
                       </Tooltip>
                     </div>
@@ -5939,7 +6008,7 @@ function HomeContent() {
                         }}
                         className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        Clear all
+                        {t('model.clearAll')}
                       </button>
                     )}
                   </div>
@@ -5993,7 +6062,7 @@ function HomeContent() {
                     className="w-full py-2 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition-colors flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                   >
                     <UserPlus className="w-4 h-4 text-muted-foreground/50" />
-                    Add reference model
+                    {t('model.addReferenceModel')}
                   </button>
 
                   {/* Hidden file input */}
@@ -6009,7 +6078,7 @@ function HomeContent() {
                 {/* AI-Generated Suggestions with Skeleton Loading */}
                 {(isLoadingModelSuggestions || modelSuggestions.length > 0) && (
                   <div className="mb-4">
-                    <h3 className="text-xs text-muted-foreground/70 uppercase tracking-wide mb-2">AI Suggestions</h3>
+                    <h3 className="text-xs text-muted-foreground/70 uppercase tracking-wide mb-2">{t('model.aiSuggestions')}</h3>
                     <div className="flex flex-wrap gap-2">
                       {isLoadingModelSuggestions ? (
                         <>
@@ -6060,7 +6129,7 @@ function HomeContent() {
                     className="w-full px-3 py-2 mb-3 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-center gap-2"
                   >
                     <ChevronDown className={`w-4 h-4 transition-transform ${isModelBuilderExpanded ? 'rotate-180' : ''}`} />
-                    <span>Model Builder</span>
+                    <span>{t('model.modelBuilder')}</span>
                   </button>
 
                   {isModelBuilderExpanded && (
@@ -6666,7 +6735,7 @@ function HomeContent() {
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'iterations' ? 'bg-primary/15' : ''}`}
           >
             <Layers className={`w-5 h-5 transition-colors ${selectedTool === 'iterations' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'iterations' ? 'text-primary' : 'text-muted-foreground'}`}>Versions</span>
+            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'iterations' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.iterations')}</span>
           </button>
           <button
             onClick={() => {
@@ -6676,7 +6745,7 @@ function HomeContent() {
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'edit' ? 'bg-primary/15' : ''}`}
           >
             <Wand2 className={`w-5 h-5 transition-colors ${selectedTool === 'edit' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'edit' ? 'text-primary' : 'text-muted-foreground'}`}>Edit</span>
+            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'edit' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.edit')}</span>
           </button>
           <button
             onClick={() => {
@@ -6686,7 +6755,7 @@ function HomeContent() {
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'backgrounds' ? 'bg-primary/15' : ''}`}
           >
             <ImageIcon className={`w-5 h-5 transition-colors ${selectedTool === 'backgrounds' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'backgrounds' ? 'text-primary' : 'text-muted-foreground'}`}>Background</span>
+            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'backgrounds' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.backgrounds')}</span>
           </button>
           <button
             onClick={() => {
@@ -6696,7 +6765,7 @@ function HomeContent() {
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'model' ? 'bg-primary/15' : ''}`}
           >
             <User className={`w-5 h-5 transition-colors ${selectedTool === 'model' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'model' ? 'text-primary' : 'text-muted-foreground'}`}>Model</span>
+            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'model' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.model')}</span>
           </button>
           <button
             onClick={() => {
@@ -6706,7 +6775,7 @@ function HomeContent() {
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'export' ? 'bg-primary/15' : ''}`}
           >
             <Expand className={`w-5 h-5 transition-colors ${selectedTool === 'export' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'export' ? 'text-primary' : 'text-muted-foreground'}`}>Resize</span>
+            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'export' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.export')}</span>
           </button>
         </div>
       </div>
