@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, ImageIcon, Clock, HardDrive } from "lucide-react";
@@ -53,16 +56,15 @@ export function ResumeSessionModal({
           }
         }}
       >
+        <DialogHeader className="text-center space-y-2">
+          <DialogTitle className="text-xl font-semibold text-foreground">
+            {t("session.resumeTitle")}
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            {t("session.resumeDescription")}
+          </DialogDescription>
+        </DialogHeader>
         <div className="space-y-6 py-4">
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <h2 className="text-xl font-semibold text-foreground">
-              {t("session.resumeTitle")}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {t("session.resumeDescription")}
-            </p>
-          </div>
 
           {/* Thumbnail Preview */}
           <div className="flex justify-center">

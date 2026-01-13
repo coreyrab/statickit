@@ -4,6 +4,8 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check, X, ExternalLink, Key } from "lucide-react";
@@ -176,13 +178,12 @@ export function WelcomeModal({
           }
         }}
       >
+        <DialogHeader className="text-center">
+          <DialogTitle className="text-2xl font-semibold text-foreground">
+            Welcome to StaticKit
+          </DialogTitle>
+        </DialogHeader>
         <div className="space-y-6 py-4">
-          {/* Welcome Header */}
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold text-foreground">
-              Welcome to StaticKit
-            </h2>
-          </div>
 
           {/* What is StaticKit */}
           <div className="space-y-3">
