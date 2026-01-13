@@ -4364,7 +4364,7 @@ function HomeContent() {
                     const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
                     const selectedRef = editReferences.find(r => r.id === selectedEditRef);
                     return (
-                      <div className={`bg-background/70 backdrop-blur-xl border border-border/50 shadow-lg overflow-hidden transition-all duration-200 ${
+                      <div className={`bg-background/40 backdrop-blur-xl border border-border/30 shadow-lg overflow-hidden transition-all duration-200 focus-within:bg-background/70 focus-within:border-border/50 ${
                         selectedRef ? 'rounded-2xl' : 'rounded-full'
                       }`}>
                         {/* Reference attachment row - animates in/out smoothly */}
@@ -4429,7 +4429,7 @@ function HomeContent() {
                     const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
                     const selectedRef = backgroundReferences.find(r => r.id === selectedBackgroundRef);
                     return (
-                      <div className={`bg-background/70 backdrop-blur-xl border border-border/50 shadow-lg overflow-hidden transition-all duration-200 ${
+                      <div className={`bg-background/40 backdrop-blur-xl border border-border/30 shadow-lg overflow-hidden transition-all duration-200 focus-within:bg-background/70 focus-within:border-border/50 ${
                         selectedRef ? 'rounded-2xl' : 'rounded-full'
                       }`}>
                         {/* Reference attachment row - animates in/out smoothly */}
@@ -4501,7 +4501,7 @@ function HomeContent() {
                     const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
                     const selectedRef = modelReferences.find(r => r.id === selectedModelRef);
                     return (
-                      <div className={`bg-background/70 backdrop-blur-xl border border-border/50 shadow-lg overflow-hidden transition-all duration-200 ${
+                      <div className={`bg-background/40 backdrop-blur-xl border border-border/30 shadow-lg overflow-hidden transition-all duration-200 focus-within:bg-background/70 focus-within:border-border/50 ${
                         selectedRef ? 'rounded-2xl' : 'rounded-full'
                       }`}>
                         {/* Reference attachment row - animates in/out smoothly */}
