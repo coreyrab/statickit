@@ -1,16 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createGeminiClient } from '@/lib/user-api-key';
 import { createOpenAIClient, editImageOpenAI, mapAspectRatioToOpenAISize, type OpenAIImageModel } from '@/lib/openai-client';
-import { editImageDashScope, mapAspectRatioToDashScopeSize, type WanImageModel } from '@/lib/dashscope-client';
 
 // Helper to determine if a model is from OpenAI
 const isOpenAIModel = (model: string): model is OpenAIImageModel => {
   return model === 'gpt-image-1';
-};
-
-// Helper to determine if a model is from Alibaba/Wanxiang
-const isWanModel = (model: string): model is WanImageModel => {
-  return model.startsWith('wan2.6');
 };
 
 export async function POST(request: NextRequest) {
@@ -29,8 +23,6 @@ export async function POST(request: NextRequest) {
       // OpenAI-specific params
       openaiApiKey,
       mask, // Base64 PNG mask for OpenAI edit endpoint
-      // Alibaba Cloud/Wanxiang-specific params
-      dashscopeApiKey,
     } = await request.json();
 
     // Calculate output dimensions based on quality setting
@@ -49,16 +41,12 @@ export async function POST(request: NextRequest) {
     // Determine which API key to use based on model
     const selectedModel = model || 'gemini-3-pro-image-preview';
     const useOpenAI = isOpenAIModel(selectedModel);
-    const useWan = isWanModel(selectedModel);
 
     // Validate API key for the selected provider
     if (useOpenAI && !openaiApiKey) {
       return NextResponse.json({ error: 'OpenAI API key required for this model' }, { status: 400 });
     }
-    if (useWan && !dashscopeApiKey) {
-      return NextResponse.json({ error: 'Alibaba Cloud API key required for Wanxiang models' }, { status: 400 });
-    }
-    if (!useOpenAI && !useWan && !apiKey) {
+    if (!useOpenAI && !apiKey) {
       return NextResponse.json({ error: 'Gemini API key required for this model' }, { status: 400 });
     }
 
@@ -67,30 +55,6 @@ export async function POST(request: NextRequest) {
         { error: 'Missing required fields' },
         { status: 400 }
       );
-    }
-
-    // Route to Wanxiang/DashScope if using a Wanxiang model
-    if (useWan) {
-      return handleWanGeneration({
-        dashscopeApiKey,
-        image,
-        mimeType,
-        variationDescription,
-        aspectRatio,
-        model: selectedModel as WanImageModel,
-        quality: quality || 'medium',
-        isEdit,
-        isBackgroundOnly,
-        isModelOnly,
-        keepClothing,
-        analysis,
-        backgroundRefImage,
-        backgroundRefMimeType,
-        modelRefImage,
-        modelRefMimeType,
-        editRefImage,
-        editRefMimeType,
-      });
     }
 
     // Route to OpenAI if using an OpenAI model
@@ -706,167 +670,6 @@ CONSTRAINTS:
 
     return NextResponse.json(
       { error: 'OpenAI generation failed', details: error?.message || 'Unknown error' },
-      { status: 500 }
-    );
-  }
-}
-
-// Wanxiang/DashScope generation handler
-async function handleWanGeneration(params: {
-  dashscopeApiKey: string;
-  image: string;
-  mimeType: string;
-  variationDescription: string;
-  aspectRatio: string;
-  model: WanImageModel;
-  quality: 'low' | 'medium' | 'high';
-  isEdit?: boolean;
-  isBackgroundOnly?: boolean;
-  isModelOnly?: boolean;
-  keepClothing?: boolean;
-  analysis: any;
-  backgroundRefImage?: string;
-  backgroundRefMimeType?: string;
-  modelRefImage?: string;
-  modelRefMimeType?: string;
-  editRefImage?: string;
-  editRefMimeType?: string;
-}) {
-  const {
-    dashscopeApiKey,
-    image,
-    mimeType,
-    variationDescription,
-    aspectRatio,
-    model,
-    quality,
-    isEdit,
-    isBackgroundOnly,
-    isModelOnly,
-    keepClothing,
-    analysis,
-    backgroundRefImage,
-    backgroundRefMimeType,
-    modelRefImage,
-    modelRefMimeType,
-    editRefImage,
-    editRefMimeType,
-  } = params;
-
-  try {
-    // Calculate output dimensions
-    const dimensions = mapAspectRatioToDashScopeSize(aspectRatio, quality);
-
-    // Build a descriptive prompt for Wanxiang
-    let prompt: string;
-
-    if (isBackgroundOnly) {
-      prompt = `Change the background of this image.
-
-PRESERVE EXACTLY:
-- The main subject/product: ${analysis.product || 'main subject'}
-${analysis.people_description ? `- Person: ${analysis.people_description} - preserve face, pose, expression exactly` : ''}
-
-NEW BACKGROUND: ${variationDescription}
-
-Requirements:
-- Keep the subject in the exact same position and pose
-- Match lighting naturally with the new background
-- Professional advertising photography quality`;
-    } else if (isModelOnly) {
-      const clothingInstruction = keepClothing
-        ? 'Keep the exact same clothing on the new model.'
-        : 'Dress appropriately for the scene.';
-
-      prompt = `Replace the person/model in this image.
-
-PRESERVE EXACTLY:
-- Background and environment: Keep unchanged
-- Product: ${analysis.product || 'Keep any products unchanged'}
-- Pose: The new model must match the exact same pose
-
-NEW MODEL: ${variationDescription}
-${clothingInstruction}
-
-Requirements:
-- Match the original lighting and shadows
-- Professional advertising photography quality`;
-    } else if (isEdit) {
-      prompt = `Edit this image according to the following instruction.
-
-PRESERVE:
-- Overall composition and framing
-${analysis.product ? `- Product: ${analysis.product}` : ''}
-${analysis.people_description ? `- Person identity and features: ${analysis.people_description}` : ''}
-- Any screens or displays should keep their content
-
-EDIT REQUEST: ${variationDescription}
-
-Make only the requested change. Keep everything else the same.`;
-    } else {
-      // General variation
-      prompt = `Create a variation of this advertising image.
-
-PRESERVE EXACTLY:
-${analysis.product ? `- Product: ${analysis.product} - same position, appearance, details` : '- Main subject'}
-${analysis.people_description ? `- Person: ${analysis.people_description} - same face, expression, pose` : ''}
-- Any screens must show the same content
-
-VARIATION: ${variationDescription}
-
-Create a professional advertising photo variation.`;
-    }
-
-    console.log(`Wanxiang generation: model=${model}, quality=${quality}, prompt="${prompt.substring(0, 100)}..."`);
-
-    // Build reference images array if provided
-    const referenceImages: Array<{ base64: string; mimeType: string }> = [];
-
-    if (backgroundRefImage && backgroundRefMimeType) {
-      referenceImages.push({ base64: backgroundRefImage, mimeType: backgroundRefMimeType });
-    }
-    if (modelRefImage && modelRefMimeType) {
-      referenceImages.push({ base64: modelRefImage, mimeType: modelRefMimeType });
-    }
-    if (editRefImage && editRefMimeType) {
-      referenceImages.push({ base64: editRefImage, mimeType: editRefMimeType });
-    }
-
-    const resultBase64 = await editImageDashScope({
-      apiKey: dashscopeApiKey,
-      image,
-      mimeType,
-      prompt,
-      model,
-      width: dimensions.width,
-      height: dimensions.height,
-      referenceImages: referenceImages.length > 0 ? referenceImages : undefined,
-    });
-
-    const imageUrl = `data:image/png;base64,${resultBase64}`;
-    console.log('Wanxiang image generated successfully');
-
-    return NextResponse.json({ imageUrl });
-  } catch (error: any) {
-    console.error('Wanxiang generation error:', error?.message || error);
-
-    // Handle specific DashScope errors
-    if (error?.message?.includes('Invalid') && error?.message?.includes('API key')) {
-      return NextResponse.json(
-        { error: 'Invalid API key', details: 'Your DashScope API key is invalid or expired.' },
-        { status: 401 }
-      );
-    }
-
-    if (error?.message?.includes('Rate limit') || error?.message?.includes('rate limited')) {
-      return NextResponse.json(
-        { error: 'Rate limited', details: 'DashScope rate limit exceeded. Please try again later.' },
-        { status: 429 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: 'Wanxiang generation failed', details: error?.message || 'Unknown error' },
       { status: 500 }
     );
   }

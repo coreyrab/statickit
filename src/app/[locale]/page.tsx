@@ -90,7 +90,7 @@ import { detectAspectRatio, AspectRatioKey } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import { Footer } from '@/components/landing/Footer';
 import { ApiKeySetupModal, WelcomeModal, ResumeSessionModal } from '@/components/onboarding';
-import { getStoredApiKey, setStoredApiKey, hasStoredApiKey, getStoredOpenAIKey, setStoredOpenAIKey, hasStoredOpenAIKey, getStoredDashScopeKey, setStoredDashScopeKey, hasStoredDashScopeKey } from '@/lib/api-key-storage';
+import { getStoredApiKey, setStoredApiKey, hasStoredApiKey, getStoredOpenAIKey, setStoredOpenAIKey, hasStoredOpenAIKey } from '@/lib/api-key-storage';
 import { useSessionPersistence, type SessionState } from '@/hooks/useSessionPersistence';
 import { HardDrive } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -115,13 +115,6 @@ const GeminiLogoGrey = ({ className }: { className?: string }) => (
 const OpenAILogoGrey = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855l-5.833-3.387L15.119 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/>
-  </svg>
-);
-
-// Qwen logo for model selector (Alibaba Cloud)
-const QwenLogoGrey = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor" fillRule="evenodd" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.35 }}>
-    <path d="M12.604 1.34c.393.69.784 1.382 1.174 2.075a.18.18 0 00.157.091h5.552c.174 0 .322.11.446.327l1.454 2.57c.19.337.24.478.024.837-.26.43-.513.864-.76 1.3l-.367.658c-.106.196-.223.28-.04.512l2.652 4.637c.172.301.111.494-.043.77-.437.785-.882 1.564-1.335 2.34-.159.272-.352.375-.68.37-.777-.016-1.552-.01-2.327.016a.099.099 0 00-.081.05 575.097 575.097 0 01-2.705 4.74c-.169.293-.38.363-.725.364-.997.003-2.002.004-3.017.002a.537.537 0 01-.465-.271l-1.335-2.323a.09.09 0 00-.083-.049H4.982c-.285.03-.553-.001-.805-.092l-1.603-2.77a.543.543 0 01-.002-.54l1.207-2.12a.198.198 0 000-.197 550.951 550.951 0 01-1.875-3.272l-.79-1.395c-.16-.31-.173-.496.095-.965.465-.813.927-1.625 1.387-2.436.132-.234.304-.334.584-.335a338.3 338.3 0 012.589-.001.124.124 0 00.107-.063l2.806-4.895a.488.488 0 01.422-.246c.524-.001 1.053 0 1.583-.006L11.704 1c.341-.003.724.032.9.34zm-3.432.403a.06.06 0 00-.052.03L6.254 6.788a.157.157 0 01-.135.078H3.253c-.056 0-.07.025-.041.074l5.81 10.156c.025.042.013.062-.034.063l-2.795.015a.218.218 0 00-.2.116l-1.32 2.31c-.044.078-.021.118.068.118l5.716.008c.046 0 .08.02.104.061l1.403 2.454c.046.081.092.082.139 0l5.006-8.76.783-1.382a.055.055 0 01.096 0l1.424 2.53a.122.122 0 00.107.062l2.763-.02a.04.04 0 00.035-.02.041.041 0 000-.04l-2.9-5.086a.108.108 0 010-.113l.293-.507 1.12-1.977c.024-.041.012-.062-.035-.062H9.2c-.059 0-.073-.026-.043-.077l1.434-2.505a.107.107 0 000-.114L9.225 1.774a.06.06 0 00-.053-.031zm6.29 8.02c.046 0 .058.02.034.06l-.832 1.465-2.613 4.585a.056.056 0 01-.05.029.058.058 0 01-.05-.029L8.498 9.841c-.02-.034-.01-.052.028-.054l.216-.012 6.722-.012z"/>
   </svg>
 );
 
@@ -279,12 +272,11 @@ function HomeContent() {
   // API key state - loaded from localStorage
   const [apiKey, setApiKeyState] = useState<string | null>(null);  // Gemini key (legacy name kept for compatibility)
   const [openaiApiKey, setOpenaiApiKeyState] = useState<string | null>(null);
-  const [dashscopeApiKey, setDashscopeApiKeyState] = useState<string | null>(null);
   const [isApiKeyLoaded, setIsApiKeyLoaded] = useState(false);
   const [apiKeyModalTab, setApiKeyModalTab] = useState<'gemini' | 'openai'>('gemini');
 
   // User can access editor if they have any API key
-  const canAccessEditor = !!apiKey || !!openaiApiKey || !!dashscopeApiKey;
+  const canAccessEditor = !!apiKey || !!openaiApiKey;
   const [showArchived, setShowArchived] = useState(false);
   const [showCustomVariationInput, setShowCustomVariationInput] = useState(false);
 
@@ -372,8 +364,8 @@ function HomeContent() {
   const [selectedModelRef, setSelectedModelRef] = useState<string | null>(null);
   const [selectedEditRef, setSelectedEditRef] = useState<string | null>(null);
 
-  // AI Model selection - supports Gemini, OpenAI, and Alibaba (Wanxiang) providers
-  type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-image' | 'gpt-image-1' | 'wan2.6-image';
+  // AI Model selection - supports Gemini and OpenAI providers
+  type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-image' | 'gpt-image-1';
   const [selectedAIModel, setSelectedAIModel] = useState<AIModel>('gemini-3-pro-image-preview');
 
   // Compare Models mode - run same edit on multiple models simultaneously
@@ -388,7 +380,6 @@ function HomeContent() {
   // Helper to determine which provider a model belongs to
   const isOpenAIModel = (model: AIModel) => model === 'gpt-image-1';
   const isGeminiModel = (model: AIModel) => model === 'gemini-3-pro-image-preview' || model === 'gemini-2.5-flash-image';
-  const isWanModel = (model: AIModel) => model === 'wan2.6-image';
 
   // Compare mode helpers
   const toggleModelForCompare = (model: AIModel) => {
@@ -402,14 +393,12 @@ function HomeContent() {
   const hasApiKeyForModel = (model: AIModel): boolean => {
     if (isGeminiModel(model)) return !!apiKey;
     if (isOpenAIModel(model)) return !!openaiApiKey;
-    if (isWanModel(model)) return !!dashscopeApiKey;
     return false;
   };
 
   const getApiKeysForModel = (model: AIModel) => ({
     apiKey: isGeminiModel(model) ? apiKey : undefined,
     openaiApiKey: isOpenAIModel(model) ? openaiApiKey : undefined,
-    dashscopeApiKey: isWanModel(model) ? dashscopeApiKey : undefined,
   });
 
   // Remove models from compare selection if their API key is removed
@@ -417,7 +406,7 @@ function HomeContent() {
     setSelectedModelsForCompare(prev =>
       prev.filter(model => hasApiKeyForModel(model))
     );
-  }, [apiKey, openaiApiKey, dashscopeApiKey]);
+  }, [apiKey, openaiApiKey]);
 
   // Get quality display label
   const getQualityLabel = (quality: ImageQuality): string => {
@@ -891,10 +880,6 @@ function HomeContent() {
     const storedOpenAIKey = getStoredOpenAIKey();
     setOpenaiApiKeyState(storedOpenAIKey);
 
-    // Load DashScope key
-    const storedDashScopeKey = getStoredDashScopeKey();
-    setDashscopeApiKeyState(storedDashScopeKey);
-
     setIsApiKeyLoaded(true);
 
     const savedWeirdness = localStorage.getItem('defaultWeirdness');
@@ -913,7 +898,7 @@ function HomeContent() {
 
     // Show welcome modal on first visit without any API key
     // Show API key setup on return visits without any API key
-    const hasAnyKey = storedGeminiKey || storedOpenAIKey || storedDashScopeKey;
+    const hasAnyKey = storedGeminiKey || storedOpenAIKey;
     if (!hasAnyKey) {
       if (!hasVisited) {
         setShowWelcome(true);
@@ -1108,19 +1093,12 @@ function HomeContent() {
     setOpenaiApiKeyState(key);
   };
 
-  // Helper to update DashScope API key in both state and localStorage
-  const handleSetDashScopeKey = (key: string) => {
-    setStoredDashScopeKey(key);
-    setDashscopeApiKeyState(key);
-  };
-
   // Get display name for selected model
   const getModelDisplayName = (model: AIModel): string => {
     switch (model) {
       case 'gemini-3-pro-image-preview': return 'Gemini 3 Pro';
       case 'gemini-2.5-flash-image': return 'Gemini 2.5 Flash';
       case 'gpt-image-1': return 'GPT Image 1.5';
-      case 'wan2.6-image': return 'Wan 2.6';
       default: return model;
     }
   };
@@ -1742,7 +1720,6 @@ function HomeContent() {
         body: JSON.stringify({
           apiKey,
           openaiApiKey,
-          dashscopeApiKey,
           image: base64,
           mimeType: uploadedImage.file.type,
           analysis,
@@ -1923,7 +1900,6 @@ function HomeContent() {
         body: JSON.stringify({
           apiKey,
           openaiApiKey,
-          dashscopeApiKey,
           image: variation.imageUrl?.startsWith('data:')
             ? variation.imageUrl.split(',')[1]
             : base64,
@@ -2144,7 +2120,7 @@ function HomeContent() {
       toast.info(t('common.uploadFirst'));
       return;
     }
-    if (!apiKey && !openaiApiKey && !dashscopeApiKey) {
+    if (!apiKey && !openaiApiKey) {
       setShowApiKeySetup(true);
       return;
     }
@@ -2292,7 +2268,7 @@ function HomeContent() {
       toast.info(t('common.uploadFirst'));
       return;
     }
-    if (!apiKey && !openaiApiKey && !dashscopeApiKey) {
+    if (!apiKey && !openaiApiKey) {
       setShowApiKeySetup(true);
       return;
     }
@@ -2589,7 +2565,7 @@ function HomeContent() {
       toast.info(t('common.uploadFirst'));
       return;
     }
-    if (!apiKey && !openaiApiKey && !dashscopeApiKey) {
+    if (!apiKey && !openaiApiKey) {
       setShowApiKeySetup(true);
       return;
     }
@@ -4583,8 +4559,6 @@ function HomeContent() {
                           <>
                             {isOpenAIModel(selectedAIModel) ? (
                               <OpenAILogoGrey className="w-3 h-3 opacity-30" />
-                            ) : isWanModel(selectedAIModel) ? (
-                              <QwenLogoGrey className="w-3 h-3" />
                             ) : (
                               <GeminiLogoGrey className="w-3 h-3" />
                             )}
@@ -4708,48 +4682,6 @@ function HomeContent() {
                           <span className="font-medium text-sm">GPT Image 1.5</span>
                         </div>
                         {!isCompareModelsEnabled && selectedAIModel === 'gpt-image-1' && openaiApiKey && <Check className="w-4 h-4 text-primary" />}
-                      </DropdownMenuItem>
-
-                      <DropdownMenuSeparator />
-
-                      {/* Qwen Models Section */}
-                      <DropdownMenuLabel className={`text-[10px] font-normal flex items-center gap-1.5 ${dashscopeApiKey ? 'text-muted-foreground/60' : 'text-muted-foreground/30'}`}>
-                        <QwenLogoGrey className="w-3 h-3" />
-                        QWEN (ALIBABA)
-                        {!dashscopeApiKey && <span className="ml-auto text-[9px]">No key</span>}
-                      </DropdownMenuLabel>
-
-                      {/* Qwen Image Edit */}
-                      <DropdownMenuItem
-                        onClick={() => {
-                          if (!dashscopeApiKey) {
-                            setShowApiKeySetup(true);
-                            return;
-                          }
-                          if (isCompareModelsEnabled) {
-                            toggleModelForCompare('wan2.6-image');
-                          } else {
-                            setSelectedAIModel('wan2.6-image');
-                          }
-                        }}
-                        onSelect={(e) => { if (isCompareModelsEnabled && dashscopeApiKey) e.preventDefault(); }}
-                        className={`justify-between ${!dashscopeApiKey ? 'opacity-40' : ''}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          {isCompareModelsEnabled && dashscopeApiKey && (
-                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                              selectedModelsForCompare.includes('wan2.6-image')
-                                ? 'bg-primary border-primary'
-                                : 'border-muted-foreground/30'
-                            }`}>
-                              {selectedModelsForCompare.includes('wan2.6-image') && (
-                                <Check className="w-3 h-3 text-primary-foreground" />
-                              )}
-                            </div>
-                          )}
-                          <span className="font-medium text-sm">Qwen Image Edit</span>
-                        </div>
-                        {!isCompareModelsEnabled && selectedAIModel === 'wan2.6-image' && dashscopeApiKey && <Check className="w-4 h-4 text-primary" />}
                       </DropdownMenuItem>
 
                       {/* Compare Models Toggle */}
@@ -7562,10 +7494,8 @@ function HomeContent() {
         onOpenChange={setShowApiKeySetup}
         onGeminiKeySet={handleSetApiKey}
         onOpenAIKeySet={handleSetOpenAIKey}
-        onDashScopeKeySet={handleSetDashScopeKey}
         currentGeminiKey={apiKey}
         currentOpenAIKey={openaiApiKey}
-        currentDashScopeKey={dashscopeApiKey}
         initialTab={apiKeyModalTab}
       />
 
