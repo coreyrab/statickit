@@ -92,6 +92,10 @@ export function ApiKeySetupModal({
   const [openaiError, setOpenaiError] = useState<string | null>(null);
   const [geminiSuccess, setGeminiSuccess] = useState(false);
   const [openaiSuccess, setOpenaiSuccess] = useState(false);
+  const [geminiTesting, setGeminiTesting] = useState(false);
+  const [openaiTesting, setOpenaiTesting] = useState(false);
+  const [geminiTestResult, setGeminiTestResult] = useState<'success' | 'error' | null>(null);
+  const [openaiTestResult, setOpenaiTestResult] = useState<'success' | 'error' | null>(null);
 
   // Mask API key to show only first 2-4 characters
   const getMaskedKey = (key: string) => {
@@ -177,6 +181,60 @@ export function ApiKeySetupModal({
     }
   };
 
+  const handleTestGeminiKey = async () => {
+    if (!effectiveGeminiKey) return;
+
+    setGeminiTesting(true);
+    setGeminiTestResult(null);
+
+    try {
+      const response = await fetch("/api/validate-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey: effectiveGeminiKey }),
+      });
+
+      const data = await response.json();
+      setGeminiTestResult(data.valid ? 'success' : 'error');
+
+      // Auto-clear result after 3 seconds
+      setTimeout(() => setGeminiTestResult(null), 3000);
+    } catch (err) {
+      console.error("Gemini API key test error:", err);
+      setGeminiTestResult('error');
+      setTimeout(() => setGeminiTestResult(null), 3000);
+    } finally {
+      setGeminiTesting(false);
+    }
+  };
+
+  const handleTestOpenAIKey = async () => {
+    if (!currentOpenAIKey) return;
+
+    setOpenaiTesting(true);
+    setOpenaiTestResult(null);
+
+    try {
+      const response = await fetch("/api/validate-openai-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey: currentOpenAIKey }),
+      });
+
+      const data = await response.json();
+      setOpenaiTestResult(data.valid ? 'success' : 'error');
+
+      // Auto-clear result after 3 seconds
+      setTimeout(() => setOpenaiTestResult(null), 3000);
+    } catch (err) {
+      console.error("OpenAI API key test error:", err);
+      setOpenaiTestResult('error');
+      setTimeout(() => setOpenaiTestResult(null), 3000);
+    } finally {
+      setOpenaiTesting(false);
+    }
+  };
+
   const handleRemoveGeminiKey = () => {
     localStorage.removeItem('statickit_gemini_api_key');
     window.location.reload();
@@ -195,6 +253,8 @@ export function ApiKeySetupModal({
       setOpenaiError(null);
       setGeminiSuccess(false);
       setOpenaiSuccess(false);
+      setGeminiTestResult(null);
+      setOpenaiTestResult(null);
     }
     onOpenChange(newOpen);
   };
@@ -236,14 +296,35 @@ export function ApiKeySetupModal({
                 <span className="text-sm text-muted-foreground font-mono">
                   {getMaskedKey(effectiveGeminiKey!)}
                 </span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleRemoveGeminiKey}
-                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 px-2"
-                >
-                  Remove
-                </Button>
+                <div className="flex items-center gap-2">
+                  {geminiTestResult === 'success' && (
+                    <span className="text-xs text-emerald-500">Working</span>
+                  )}
+                  {geminiTestResult === 'error' && (
+                    <span className="text-xs text-red-400">Invalid</span>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleTestGeminiKey}
+                    disabled={geminiTesting}
+                    className="text-muted-foreground hover:text-foreground h-7 px-2"
+                  >
+                    {geminiTesting ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      "Test"
+                    )}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleRemoveGeminiKey}
+                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 px-2"
+                  >
+                    Remove
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="space-y-2">
@@ -332,14 +413,35 @@ export function ApiKeySetupModal({
                 <span className="text-sm text-muted-foreground font-mono">
                   {getMaskedKey(currentOpenAIKey!)}
                 </span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleRemoveOpenAIKey}
-                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 px-2"
-                >
-                  Remove
-                </Button>
+                <div className="flex items-center gap-2">
+                  {openaiTestResult === 'success' && (
+                    <span className="text-xs text-emerald-500">Working</span>
+                  )}
+                  {openaiTestResult === 'error' && (
+                    <span className="text-xs text-red-400">Invalid</span>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleTestOpenAIKey}
+                    disabled={openaiTesting}
+                    className="text-muted-foreground hover:text-foreground h-7 px-2"
+                  >
+                    {openaiTesting ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      "Test"
+                    )}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleRemoveOpenAIKey}
+                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 px-2"
+                  >
+                    Remove
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="space-y-2">
