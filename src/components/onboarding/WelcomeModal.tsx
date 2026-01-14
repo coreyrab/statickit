@@ -217,7 +217,7 @@ export function WelcomeModal({
               <div className="flex items-stretch gap-2">
                 <div className="flex-1 flex items-center px-3 bg-muted/30 border border-border rounded-lg focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50">
                   <input
-                    type="password"
+                    type="text"
                     placeholder="AIza..."
                     value={geminiKeyInput}
                     onChange={(e) => {
@@ -230,7 +230,15 @@ export function WelcomeModal({
                         handleSaveGemini();
                       }
                     }}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-1p-ignore
+                    data-lpignore="true"
+                    data-form-type="other"
                     className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 focus:outline-none text-sm py-2.5"
+                    style={{ WebkitTextSecurity: 'disc' } as React.CSSProperties}
                   />
                 </div>
                 <Button
@@ -281,7 +289,7 @@ export function WelcomeModal({
               <div className="flex items-stretch gap-2">
                 <div className="flex-1 flex items-center px-3 bg-muted/30 border border-border rounded-lg focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50">
                   <input
-                    type="password"
+                    type="text"
                     placeholder="sk-..."
                     value={openaiKeyInput}
                     onChange={(e) => {
@@ -294,7 +302,15 @@ export function WelcomeModal({
                         handleSaveOpenAI();
                       }
                     }}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-1p-ignore
+                    data-lpignore="true"
+                    data-form-type="other"
                     className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 focus:outline-none text-sm py-2.5"
+                    style={{ WebkitTextSecurity: 'disc' } as React.CSSProperties}
                   />
                 </div>
                 <Button
