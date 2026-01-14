@@ -372,8 +372,8 @@ function HomeContent() {
   const [selectedModelRef, setSelectedModelRef] = useState<string | null>(null);
   const [selectedEditRef, setSelectedEditRef] = useState<string | null>(null);
 
-  // AI Model selection - supports Gemini, OpenAI, and Qwen providers
-  type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-image' | 'gpt-image-1' | 'qwen-image-edit-plus';
+  // AI Model selection - supports Gemini, OpenAI, and Alibaba (Wanxiang) providers
+  type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-image' | 'gpt-image-1' | 'wan2.6-image';
   const [selectedAIModel, setSelectedAIModel] = useState<AIModel>('gemini-3-pro-image-preview');
 
   // Compare Models mode - run same edit on multiple models simultaneously
@@ -388,7 +388,7 @@ function HomeContent() {
   // Helper to determine which provider a model belongs to
   const isOpenAIModel = (model: AIModel) => model === 'gpt-image-1';
   const isGeminiModel = (model: AIModel) => model === 'gemini-3-pro-image-preview' || model === 'gemini-2.5-flash-image';
-  const isQwenModel = (model: AIModel) => model === 'qwen-image-edit-plus';
+  const isWanModel = (model: AIModel) => model === 'wan2.6-image';
 
   // Compare mode helpers
   const toggleModelForCompare = (model: AIModel) => {
@@ -402,14 +402,14 @@ function HomeContent() {
   const hasApiKeyForModel = (model: AIModel): boolean => {
     if (isGeminiModel(model)) return !!apiKey;
     if (isOpenAIModel(model)) return !!openaiApiKey;
-    if (isQwenModel(model)) return !!dashscopeApiKey;
+    if (isWanModel(model)) return !!dashscopeApiKey;
     return false;
   };
 
   const getApiKeysForModel = (model: AIModel) => ({
     apiKey: isGeminiModel(model) ? apiKey : undefined,
     openaiApiKey: isOpenAIModel(model) ? openaiApiKey : undefined,
-    dashscopeApiKey: isQwenModel(model) ? dashscopeApiKey : undefined,
+    dashscopeApiKey: isWanModel(model) ? dashscopeApiKey : undefined,
   });
 
   // Remove models from compare selection if their API key is removed
@@ -1120,7 +1120,7 @@ function HomeContent() {
       case 'gemini-3-pro-image-preview': return 'Gemini 3 Pro';
       case 'gemini-2.5-flash-image': return 'Gemini 2.5 Flash';
       case 'gpt-image-1': return 'GPT Image 1.5';
-      case 'qwen-image-edit-plus': return 'Qwen Image Edit';
+      case 'wan2.6-image': return 'Wan 2.6';
       default: return model;
     }
   };
@@ -4583,7 +4583,7 @@ function HomeContent() {
                           <>
                             {isOpenAIModel(selectedAIModel) ? (
                               <OpenAILogoGrey className="w-3 h-3 opacity-30" />
-                            ) : isQwenModel(selectedAIModel) ? (
+                            ) : isWanModel(selectedAIModel) ? (
                               <QwenLogoGrey className="w-3 h-3" />
                             ) : (
                               <GeminiLogoGrey className="w-3 h-3" />
@@ -4727,9 +4727,9 @@ function HomeContent() {
                             return;
                           }
                           if (isCompareModelsEnabled) {
-                            toggleModelForCompare('qwen-image-edit-plus');
+                            toggleModelForCompare('wan2.6-image');
                           } else {
-                            setSelectedAIModel('qwen-image-edit-plus');
+                            setSelectedAIModel('wan2.6-image');
                           }
                         }}
                         onSelect={(e) => { if (isCompareModelsEnabled && dashscopeApiKey) e.preventDefault(); }}
@@ -4738,18 +4738,18 @@ function HomeContent() {
                         <div className="flex items-center gap-2">
                           {isCompareModelsEnabled && dashscopeApiKey && (
                             <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                              selectedModelsForCompare.includes('qwen-image-edit-plus')
+                              selectedModelsForCompare.includes('wan2.6-image')
                                 ? 'bg-primary border-primary'
                                 : 'border-muted-foreground/30'
                             }`}>
-                              {selectedModelsForCompare.includes('qwen-image-edit-plus') && (
+                              {selectedModelsForCompare.includes('wan2.6-image') && (
                                 <Check className="w-3 h-3 text-primary-foreground" />
                               )}
                             </div>
                           )}
                           <span className="font-medium text-sm">Qwen Image Edit</span>
                         </div>
-                        {!isCompareModelsEnabled && selectedAIModel === 'qwen-image-edit-plus' && dashscopeApiKey && <Check className="w-4 h-4 text-primary" />}
+                        {!isCompareModelsEnabled && selectedAIModel === 'wan2.6-image' && dashscopeApiKey && <Check className="w-4 h-4 text-primary" />}
                       </DropdownMenuItem>
 
                       {/* Compare Models Toggle */}

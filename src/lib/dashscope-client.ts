@@ -1,13 +1,12 @@
 /**
- * Alibaba Cloud DashScope client for Qwen Image Edit
+ * Alibaba Cloud DashScope client for Wanxiang (Wan) Image Edit
  *
- * API Documentation: https://www.alibabacloud.com/help/en/model-studio/qwen-image-edit-api
+ * API Documentation: https://www.alibabacloud.com/help/en/model-studio/wan-image-generation-api-reference
  */
 
-export type QwenImageModel =
-  | 'qwen-image-edit-plus'
-  | 'qwen-image-edit-plus-2025-12-15'
-  | 'qwen-image-edit';
+export type WanImageModel =
+  | 'wan2.6-image'     // Latest model with image editing support
+  | 'wan2.6-t2i';      // Text-to-image only
 
 // DashScope API endpoints by region
 const DASHSCOPE_ENDPOINTS = {
@@ -39,16 +38,18 @@ interface DashScopeMessage {
 }
 
 interface DashScopeRequest {
-  model: QwenImageModel;
+  model: WanImageModel;
   input: {
     messages: DashScopeMessage[];
   };
   parameters?: {
-    n?: number; // 1-6 for plus models, 1 for base
-    size?: string; // "width*height" format, 512-2048
+    enable_interleave?: boolean; // false for image editing mode
+    n?: number; // 1-4 for wan2.6-image
+    size?: string; // "width*height" format, 384-5000
     prompt_extend?: boolean;
     negative_prompt?: string;
     seed?: number;
+    watermark?: boolean;
   };
 }
 
@@ -72,14 +73,14 @@ interface DashScopeErrorResponse {
 }
 
 /**
- * Edit an image using Qwen Image Edit via DashScope API
+ * Edit an image using Wanxiang (Wan) 2.6 Image via DashScope API
  */
 export async function editImageDashScope(params: {
   apiKey: string;
   image: string; // Base64 image data (without data URL prefix)
   mimeType: string;
   prompt: string;
-  model?: QwenImageModel;
+  model?: WanImageModel;
   width?: number;
   height?: number;
   negativePrompt?: string;
@@ -92,7 +93,7 @@ export async function editImageDashScope(params: {
     image,
     mimeType,
     prompt,
-    model = 'qwen-image-edit-plus',
+    model = 'wan2.6-image',
     width,
     height,
     negativePrompt,
@@ -131,8 +132,10 @@ export async function editImageDashScope(params: {
       ],
     },
     parameters: {
+      enable_interleave: false, // Required for image editing mode
       n: 1,
-      prompt_extend: true, // Let Qwen optimize the prompt
+      prompt_extend: true, // Let Wan optimize the prompt
+      watermark: false,
     },
   };
 

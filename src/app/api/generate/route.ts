@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createGeminiClient } from '@/lib/user-api-key';
 import { createOpenAIClient, editImageOpenAI, mapAspectRatioToOpenAISize, type OpenAIImageModel } from '@/lib/openai-client';
-import { editImageDashScope, mapAspectRatioToDashScopeSize, type QwenImageModel } from '@/lib/dashscope-client';
+import { editImageDashScope, mapAspectRatioToDashScopeSize, type WanImageModel } from '@/lib/dashscope-client';
 
 // Helper to determine if a model is from OpenAI
 const isOpenAIModel = (model: string): model is OpenAIImageModel => {
   return model === 'gpt-image-1';
 };
 
-// Helper to determine if a model is from Qwen/DashScope
-const isQwenModel = (model: string): model is QwenImageModel => {
-  return model.startsWith('qwen-image-edit');
+// Helper to determine if a model is from Alibaba/Wanxiang
+const isWanModel = (model: string): model is WanImageModel => {
+  return model.startsWith('wan2.6');
 };
 
 export async function POST(request: NextRequest) {
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       // OpenAI-specific params
       openaiApiKey,
       mask, // Base64 PNG mask for OpenAI edit endpoint
-      // DashScope/Qwen-specific params
+      // Alibaba Cloud/Wanxiang-specific params
       dashscopeApiKey,
     } = await request.json();
 
@@ -49,16 +49,16 @@ export async function POST(request: NextRequest) {
     // Determine which API key to use based on model
     const selectedModel = model || 'gemini-3-pro-image-preview';
     const useOpenAI = isOpenAIModel(selectedModel);
-    const useQwen = isQwenModel(selectedModel);
+    const useWan = isWanModel(selectedModel);
 
     // Validate API key for the selected provider
     if (useOpenAI && !openaiApiKey) {
       return NextResponse.json({ error: 'OpenAI API key required for this model' }, { status: 400 });
     }
-    if (useQwen && !dashscopeApiKey) {
-      return NextResponse.json({ error: 'DashScope API key required for Qwen models' }, { status: 400 });
+    if (useWan && !dashscopeApiKey) {
+      return NextResponse.json({ error: 'Alibaba Cloud API key required for Wanxiang models' }, { status: 400 });
     }
-    if (!useOpenAI && !useQwen && !apiKey) {
+    if (!useOpenAI && !useWan && !apiKey) {
       return NextResponse.json({ error: 'Gemini API key required for this model' }, { status: 400 });
     }
 
@@ -69,15 +69,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Route to Qwen/DashScope if using a Qwen model
-    if (useQwen) {
-      return handleQwenGeneration({
+    // Route to Wanxiang/DashScope if using a Wanxiang model
+    if (useWan) {
+      return handleWanGeneration({
         dashscopeApiKey,
         image,
         mimeType,
         variationDescription,
         aspectRatio,
-        model: selectedModel as QwenImageModel,
+        model: selectedModel as WanImageModel,
         quality: quality || 'medium',
         isEdit,
         isBackgroundOnly,
@@ -711,14 +711,14 @@ CONSTRAINTS:
   }
 }
 
-// Qwen/DashScope generation handler
-async function handleQwenGeneration(params: {
+// Wanxiang/DashScope generation handler
+async function handleWanGeneration(params: {
   dashscopeApiKey: string;
   image: string;
   mimeType: string;
   variationDescription: string;
   aspectRatio: string;
-  model: QwenImageModel;
+  model: WanImageModel;
   quality: 'low' | 'medium' | 'high';
   isEdit?: boolean;
   isBackgroundOnly?: boolean;
@@ -757,7 +757,7 @@ async function handleQwenGeneration(params: {
     // Calculate output dimensions
     const dimensions = mapAspectRatioToDashScopeSize(aspectRatio, quality);
 
-    // Build a descriptive prompt for Qwen
+    // Build a descriptive prompt for Wanxiang
     let prompt: string;
 
     if (isBackgroundOnly) {
@@ -817,7 +817,7 @@ VARIATION: ${variationDescription}
 Create a professional advertising photo variation.`;
     }
 
-    console.log(`Qwen generation: model=${model}, quality=${quality}, prompt="${prompt.substring(0, 100)}..."`);
+    console.log(`Wanxiang generation: model=${model}, quality=${quality}, prompt="${prompt.substring(0, 100)}..."`);
 
     // Build reference images array if provided
     const referenceImages: Array<{ base64: string; mimeType: string }> = [];
@@ -844,11 +844,11 @@ Create a professional advertising photo variation.`;
     });
 
     const imageUrl = `data:image/png;base64,${resultBase64}`;
-    console.log('Qwen image generated successfully');
+    console.log('Wanxiang image generated successfully');
 
     return NextResponse.json({ imageUrl });
   } catch (error: any) {
-    console.error('Qwen generation error:', error?.message || error);
+    console.error('Wanxiang generation error:', error?.message || error);
 
     // Handle specific DashScope errors
     if (error?.message?.includes('Invalid') && error?.message?.includes('API key')) {
@@ -866,7 +866,7 @@ Create a professional advertising photo variation.`;
     }
 
     return NextResponse.json(
-      { error: 'Qwen generation failed', details: error?.message || 'Unknown error' },
+      { error: 'Wanxiang generation failed', details: error?.message || 'Unknown error' },
       { status: 500 }
     );
   }
