@@ -96,28 +96,48 @@ export async function POST(request: NextRequest) {
     if (isBackgroundOnly) {
       if (backgroundRefImage) {
         // Reference-based background composite
-        prompt = `Composite the subject from the first image into the environment shown in the second image.
+        prompt = `Place the subject from the first image INTO the environment shown in the second image.
 
-The subject is frozen in place—think green-screen compositing where the footage is locked. Preserve their exact pose, position, scale, and every detail including facial features, expression, clothing, and any product they're holding.
+The subject is frozen in place—preserve their exact pose, position, scale, and every detail including facial features, expression, clothing, and any product they're holding.
 
-Extract the background from the reference image: the environment, scenery, lighting direction, color temperature, and atmospheric quality. The goal is a seamless photograph where it appears the subject was actually shot on location.
+CRITICAL FOR REALISM - The subject must look PHOTOGRAPHED in this environment, not composited:
 
-Light the subject to match the environment naturally. If the reference has warm afternoon sunlight from the left, cast that same golden light onto the subject with matching shadows. Blend edges softly where subject meets background.
+1. LIGHTING: Analyze the reference image's light sources (direction, color temperature, intensity). Relight the subject to match exactly—same shadows, same highlights, same color cast on skin and clothing.
+
+2. COLOR GRADING: Extract the color grade from the reference (warm/cool cast, contrast, saturation). Apply this SAME grade to the subject so both share identical color treatment.
+
+3. AMBIENT LIGHT: The environment reflects colored light onto the subject. If there's green foliage, green bounces onto nearby surfaces. If warm walls, warm light spills onto the subject. Include these subtle color interactions.
+
+4. SHADOWS: The subject casts shadows INTO the environment—contact shadows where they touch surfaces, cast shadows matching the reference's light direction with appropriate softness.
+
+5. ATMOSPHERE: Match any haze, fog, or atmospheric perspective from the reference.
+
+6. DEPTH OF FIELD: Match the focus characteristics of the reference image.
 
 ${variationDescription ? `Additional direction: ${variationDescription}` : ''}
 
-Deliver a professional advertising photograph at ${aspectRatio} aspect ratio.`;
+Deliver a photograph where viewers cannot tell the subject was added. ${aspectRatio} aspect ratio.`;
       } else {
         // Text-based background change
-        prompt = `Replace the background behind the subject with: ${variationDescription}
+        prompt = `Place the subject naturally INTO this environment: ${variationDescription}
 
 The subject is frozen—same pose, position, scale, expression, and every physical detail preserved exactly as photographed. Their face must remain recognizable as the same person. Any product remains identical in appearance and position.
 
-The background adapts to the subject, not vice versa. If they're sitting, place them sitting naturally in the new environment. Adjust the camera angle of the background scene rather than the subject's pose.
+CRITICAL FOR REALISM - The subject must look like they were PHOTOGRAPHED in this environment, not composited:
 
-Match the lighting on the subject to the new environment. If you're placing them in warm sunset light, cast that golden glow on their skin with appropriate shadow direction. If the new scene is cool and overcast, adjust accordingly. Ground shadows should interact naturally with the new surface.
+1. LIGHTING INTEGRATION: Relight the subject to match the environment's light sources. If there's warm sunlight from the right, that same light must hit the subject from the right with matching color temperature. Cool environments need cool light on the subject.
 
-Deliver a seamless professional photograph at ${aspectRatio} aspect ratio where subject and environment feel naturally integrated.`;
+2. COLOR GRADING: Apply the same color grade to both subject and background. If the scene has a warm/cool cast, the subject's skin and clothing must share that cast. No color mismatch between subject and environment.
+
+3. AMBIENT/REFLECTED LIGHT: The environment bounces colored light onto the subject. Green grass reflects green onto legs. Warm walls reflect warmth onto nearby skin. Include these subtle color spills.
+
+4. SHADOWS: Cast realistic shadows FROM the subject onto the environment—contact shadows where they touch surfaces, and cast shadows matching the light direction. Shadows should have appropriate softness for the light source.
+
+5. ATMOSPHERE: If the environment has haze, fog, or atmospheric depth, apply subtle atmospheric effects to the subject to match.
+
+6. DEPTH OF FIELD: Match the focus characteristics—if the background has bokeh or blur, ensure the subject's focus matches what a real camera would capture.
+
+The goal is a photograph where viewers cannot tell the background was changed. Deliver at ${aspectRatio} aspect ratio.`;
       }
     } else if (isModelOnly) {
       const clothingNote = keepClothing
@@ -320,7 +340,14 @@ async function handleOpenAIGeneration(params: {
 
 CHANGE: Background/environment to: ${variationDescription}
 
-Match lighting on subject to new environment. Professional advertising quality.`;
+CRITICAL - Make subject look PHOTOGRAPHED in scene, not composited:
+- Relight subject to match environment (direction, color temperature, intensity)
+- Apply same color grade to subject AND background
+- Add ambient color spill from environment onto subject
+- Cast realistic shadows from subject onto ground/surfaces
+- Match depth of field between subject and background
+
+Professional advertising quality.`;
     } else if (isModelOnly) {
       // Model swap: Keep scene, replace person
       const clothingNote = keepClothing ? 'Keep EXACT same clothing.' : 'Appropriate attire for scene.';
