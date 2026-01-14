@@ -4714,7 +4714,6 @@ function HomeContent() {
                             </div>
                           )}
                           <span className="font-medium text-sm">GPT Image Mini</span>
-                          <span className="text-[9px] text-muted-foreground/60 ml-1">Faster</span>
                         </div>
                         {!isCompareModelsEnabled && selectedAIModel === 'gpt-image-1-mini' && openaiApiKey && <Check className="w-4 h-4 text-primary" />}
                       </DropdownMenuItem>
