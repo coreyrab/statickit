@@ -308,7 +308,7 @@ export function ApiKeySetupModal({
                     variant="ghost"
                     onClick={handleTestGeminiKey}
                     disabled={geminiTesting}
-                    className="text-muted-foreground hover:text-foreground h-7 px-2"
+                    className="text-muted-foreground hover:text-white h-7 px-2"
                   >
                     {geminiTesting ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
@@ -425,7 +425,7 @@ export function ApiKeySetupModal({
                     variant="ghost"
                     onClick={handleTestOpenAIKey}
                     disabled={openaiTesting}
-                    className="text-muted-foreground hover:text-foreground h-7 px-2"
+                    className="text-muted-foreground hover:text-white h-7 px-2"
                   >
                     {openaiTesting ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
