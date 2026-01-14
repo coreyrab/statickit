@@ -313,7 +313,7 @@ export function ApiKeySetupModal({
           </div>
 
           {/* Divider */}
-          <div className="border-t border-border/60 my-1" />
+          <div className="border-t border-border/60" />
 
           {/* OpenAI Section */}
           <div className="space-y-3">
@@ -395,24 +395,21 @@ export function ApiKeySetupModal({
                     {openaiError}
                   </div>
                 )}
-                <div className="flex items-center justify-between">
-                  <a
-                    href="https://platform.openai.com/api-keys"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 inline-flex items-center gap-1"
-                  >
-                    Get an API key from OpenAI
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                  <span className="text-xs text-amber-500/80">Paid account required</span>
-                </div>
+                <a
+                  href="https://platform.openai.com/api-keys"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 inline-flex items-center gap-1"
+                >
+                  Get an API key from OpenAI
+                  <ExternalLink className="w-3 h-3" />
+                </a>
               </div>
             )}
           </div>
 
           {/* Footer */}
-          <div className="pt-5 mt-2 border-t border-border/60 space-y-4">
+          <div className="pt-4 border-t border-border/60 space-y-4">
             <p className="text-xs text-muted-foreground/60 text-center">
               API keys are stored locally in your browser and never sent to our servers.{" "}
               <Link href="/blog/how-statickit-works" className="text-blue-500 dark:text-blue-400 hover:underline">
