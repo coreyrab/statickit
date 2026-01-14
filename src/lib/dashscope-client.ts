@@ -16,11 +16,11 @@ const DASHSCOPE_ENDPOINTS = {
   beijing: 'https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation',
 } as const;
 
-// Base URLs for validation (without specific service path)
-const DASHSCOPE_BASE_URLS = [
-  'https://dashscope-intl.aliyuncs.com',
-  'https://dashscope-us.aliyuncs.com',
-  'https://dashscope.aliyuncs.com',
+// Validation endpoints - using OpenAI-compatible mode which works across regions
+const DASHSCOPE_VALIDATION_URLS = [
+  'https://dashscope-us.aliyuncs.com/compatible-mode/v1/models',      // US (Virginia)
+  'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/models',    // International (Singapore)
+  'https://dashscope.aliyuncs.com/compatible-mode/v1/models',         // China (Beijing)
 ];
 
 interface DashScopeImageContent {
@@ -228,32 +228,30 @@ export async function editImageDashScope(params: {
 /**
  * Validate an Alibaba Cloud API key by making minimal test requests
  * Tries multiple regional endpoints since keys may be region-specific
+ * Uses OpenAI-compatible mode which works across all regions
  */
 export async function validateDashScopeKey(apiKey: string): Promise<boolean> {
   // Try each regional endpoint - key may only work in specific region
-  for (const baseUrl of DASHSCOPE_BASE_URLS) {
+  for (const url of DASHSCOPE_VALIDATION_URLS) {
     try {
-      // Use the models list endpoint to validate the key
+      // Use the OpenAI-compatible models list endpoint to validate the key
       // This is a lightweight call that doesn't incur image generation costs
-      const response = await fetch(
-        `${baseUrl}/api/v1/models`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-          },
-        }
-      );
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+        },
+      });
 
       if (response.ok) {
-        console.log(`Alibaba Cloud key validated successfully with ${baseUrl}`);
+        console.log(`Alibaba Cloud key validated successfully with ${url}`);
         return true;
       }
 
       // 401/403 means auth failed - try next endpoint
       // Other errors might be temporary, but we'll still try next endpoint
     } catch (error) {
-      console.error(`Alibaba Cloud key validation error for ${baseUrl}:`, error);
+      console.error(`Alibaba Cloud key validation error for ${url}:`, error);
       // Continue to next endpoint
     }
   }
