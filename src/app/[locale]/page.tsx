@@ -372,14 +372,21 @@ function HomeContent() {
   const [isCompareModelsEnabled, setIsCompareModelsEnabled] = useState(false);
   const [selectedModelsForCompare, setSelectedModelsForCompare] = useState<AIModel[]>([]);
 
-  // Image quality setting - affects output resolution and cost
+  // Image quality settings - per provider since each has different quality representations
   type ImageQuality = 'low' | 'medium' | 'high';
-  const [imageQuality, setImageQuality] = useState<ImageQuality>('medium');
-  const [showQualitySettings, setShowQualitySettings] = useState(false);
+  const [geminiQuality, setGeminiQuality] = useState<ImageQuality>('medium');
+  const [openaiQuality, setOpenaiQuality] = useState<ImageQuality>('medium');
+  const [showGeminiQuality, setShowGeminiQuality] = useState(false);
+  const [showOpenaiQuality, setShowOpenaiQuality] = useState(false);
 
   // Helper to determine which provider a model belongs to
   const isOpenAIModel = (model: AIModel) => model === 'gpt-image-1' || model === 'gpt-image-1-mini';
   const isGeminiModel = (model: AIModel) => model === 'gemini-3-pro-image-preview' || model === 'gemini-2.5-flash-image';
+
+  // Get quality setting for a specific model
+  const getQualityForModel = (model: AIModel): ImageQuality => {
+    return isOpenAIModel(model) ? openaiQuality : geminiQuality;
+  };
 
   // Compare mode helpers
   const toggleModelForCompare = (model: AIModel) => {
@@ -887,10 +894,14 @@ function HomeContent() {
       setWeirdnessLevel(parseInt(savedWeirdness));
     }
 
-    // Load saved image quality preference
-    const savedQuality = localStorage.getItem('imageQuality') as ImageQuality | null;
-    if (savedQuality && ['low', 'medium', 'high'].includes(savedQuality)) {
-      setImageQuality(savedQuality);
+    // Load saved image quality preferences (per provider)
+    const savedGeminiQuality = localStorage.getItem('geminiQuality') as ImageQuality | null;
+    const savedOpenaiQuality = localStorage.getItem('openaiQuality') as ImageQuality | null;
+    if (savedGeminiQuality && ['low', 'medium', 'high'].includes(savedGeminiQuality)) {
+      setGeminiQuality(savedGeminiQuality);
+    }
+    if (savedOpenaiQuality && ['low', 'medium', 'high'].includes(savedOpenaiQuality)) {
+      setOpenaiQuality(savedOpenaiQuality);
     }
 
     // Check if first visit
@@ -921,10 +932,14 @@ function HomeContent() {
     });
   }, []);
 
-  // Persist image quality preference to localStorage
+  // Persist image quality preferences to localStorage (per provider)
   useEffect(() => {
-    localStorage.setItem('imageQuality', imageQuality);
-  }, [imageQuality]);
+    localStorage.setItem('geminiQuality', geminiQuality);
+  }, [geminiQuality]);
+
+  useEffect(() => {
+    localStorage.setItem('openaiQuality', openaiQuality);
+  }, [openaiQuality]);
 
   // Auto-save session when state changes (only if we have an uploaded image)
   useEffect(() => {
@@ -959,7 +974,8 @@ function HomeContent() {
       modelReferences,
       editReferences,
       selectedAIModel,
-      imageQuality,
+      geminiQuality,
+      openaiQuality,
       weirdnessLevel,
     };
 
@@ -991,7 +1007,8 @@ function HomeContent() {
     modelReferences,
     editReferences,
     selectedAIModel,
-    imageQuality,
+    geminiQuality,
+    openaiQuality,
     weirdnessLevel,
     sessionChecked,
     scheduleSave,
@@ -1053,7 +1070,8 @@ function HomeContent() {
         setModelReferences(restoredState.modelReferences);
         setEditReferences(restoredState.editReferences);
         setSelectedAIModel(restoredState.selectedAIModel as AIModel);
-        setImageQuality(restoredState.imageQuality as ImageQuality);
+        setGeminiQuality(restoredState.geminiQuality as ImageQuality);
+        setOpenaiQuality(restoredState.openaiQuality as ImageQuality);
         setWeirdnessLevel(restoredState.weirdnessLevel);
 
         // Switch to editor mode
@@ -1727,7 +1745,7 @@ function HomeContent() {
           variationDescription: variation.description,
           aspectRatio: uploadedImage.aspectRatio,
           model: selectedAIModel,
-          quality: imageQuality,
+          quality: getQualityForModel(selectedAIModel),
         }),
       });
 
@@ -1910,7 +1928,7 @@ function HomeContent() {
           aspectRatio: uploadedImage.aspectRatio,
           isEdit: true,
           model: selectedAIModel,
-          quality: imageQuality,
+          quality: getQualityForModel(selectedAIModel),
         }),
       });
 
@@ -2051,7 +2069,7 @@ function HomeContent() {
             aspectRatio: aspectRatioToUse,
             isEdit: true,
             model,
-            quality: imageQuality,
+            quality: getQualityForModel(model),
             // Include edit reference if selected
             ...(selectedRef && {
               editRefImage: selectedRef.base64,
@@ -2229,7 +2247,7 @@ function HomeContent() {
             aspectRatio: uploadedImage.aspectRatio,
             isEdit: true,
             model,
-            quality: imageQuality,
+            quality: getQualityForModel(model),
           }),
         });
 
@@ -2369,7 +2387,7 @@ function HomeContent() {
             isEdit: true,
             isBackgroundOnly: true,
             model,
-            quality: imageQuality,
+            quality: getQualityForModel(model),
             // Include reference image if selected
             ...(selectedBgRef && {
               backgroundRefImage: selectedBgRef.base64,
@@ -2665,7 +2683,7 @@ function HomeContent() {
             isModelOnly: true,
             keepClothing: keepClothing,
             model,
-            quality: imageQuality,
+            quality: getQualityForModel(model),
             // Include reference image if selected
             ...(selectedModelReference && {
               modelRefImage: selectedModelReference.base64,
@@ -4575,7 +4593,42 @@ function HomeContent() {
                         <GeminiLogoGrey className="w-3 h-3" />
                         GOOGLE GEMINI
                         {!apiKey && <span className="ml-auto text-[9px]">No key</span>}
+                        {apiKey && (
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setShowGeminiQuality(!showGeminiQuality);
+                              setShowOpenaiQuality(false);
+                            }}
+                            className="ml-auto flex items-center gap-1 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                          >
+                            <span className="text-[8px] uppercase">{geminiQuality === 'low' ? 'Draft' : geminiQuality === 'medium' ? 'Std' : 'Best'}</span>
+                            <Settings className="w-2.5 h-2.5" />
+                          </button>
+                        )}
                       </DropdownMenuLabel>
+                      {showGeminiQuality && apiKey && (
+                        <div className="px-2 pb-1 flex gap-1">
+                          {(['low', 'medium', 'high'] as ImageQuality[]).map((q) => (
+                            <button
+                              key={q}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setGeminiQuality(q);
+                              }}
+                              className={`flex-1 px-2 py-1 rounded text-[10px] transition-colors ${
+                                geminiQuality === q
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted'
+                              }`}
+                            >
+                              {q === 'low' ? 'Draft' : q === 'medium' ? 'Standard' : 'Best'}
+                            </button>
+                          ))}
+                        </div>
+                      )}
 
                       {/* Gemini 3 Pro */}
                       <DropdownMenuItem
@@ -4650,7 +4703,42 @@ function HomeContent() {
                         <OpenAILogoGrey className="w-3 h-3 opacity-50" />
                         OPENAI
                         {!openaiApiKey && <span className="ml-auto text-[9px]">No key</span>}
+                        {openaiApiKey && (
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setShowOpenaiQuality(!showOpenaiQuality);
+                              setShowGeminiQuality(false);
+                            }}
+                            className="ml-auto flex items-center gap-1 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                          >
+                            <span className="text-[8px] uppercase">{openaiQuality === 'low' ? 'Draft' : openaiQuality === 'medium' ? 'Std' : 'Best'}</span>
+                            <Settings className="w-2.5 h-2.5" />
+                          </button>
+                        )}
                       </DropdownMenuLabel>
+                      {showOpenaiQuality && openaiApiKey && (
+                        <div className="px-2 pb-1 flex gap-1">
+                          {(['low', 'medium', 'high'] as ImageQuality[]).map((q) => (
+                            <button
+                              key={q}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setOpenaiQuality(q);
+                              }}
+                              className={`flex-1 px-2 py-1 rounded text-[10px] transition-colors ${
+                                openaiQuality === q
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted'
+                              }`}
+                            >
+                              {q === 'low' ? 'Draft' : q === 'medium' ? 'Standard' : 'Best'}
+                            </button>
+                          ))}
+                        </div>
+                      )}
 
                       {/* GPT Image 1.5 */}
                       <DropdownMenuItem
@@ -4759,57 +4847,6 @@ function HomeContent() {
                         </button>
                       </div>
 
-                      {/* Quality Settings */}
-                      <DropdownMenuSeparator />
-                      <div className="w-full px-2 py-1.5 flex items-center justify-between text-[10px] text-muted-foreground/60 font-normal">
-                        <div className="flex items-center gap-1">
-                          <span className="uppercase">{t('models.quality')}</span>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                onClick={(e) => e.stopPropagation()}
-                                className="hover:text-muted-foreground transition-colors"
-                              >
-                                <Info className="w-2.5 h-2.5" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="top" className="max-w-[220px] text-xs">
-                              <p className="font-medium mb-1">{t('quality.title')}</p>
-                              <ul className="space-y-1 text-muted-foreground">
-                                <li><span className="text-foreground">{t('quality.draft')}:</span> {t('quality.draftDescription')}</li>
-                                <li><span className="text-foreground">{t('quality.standard')}:</span> {t('quality.standardDescription')}</li>
-                                <li><span className="text-foreground">{t('quality.best')}:</span> {t('quality.bestDescription')}</li>
-                              </ul>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                        <button
-                          onClick={() => setShowQualitySettings(!showQualitySettings)}
-                          className="flex items-center gap-1.5 hover:text-muted-foreground transition-colors"
-                        >
-                          <QualityIcon quality={imageQuality} className="!w-4 !h-4" />
-                          <ChevronRight className={`w-2.5 h-2.5 transition-transform ${showQualitySettings ? 'rotate-90' : ''}`} />
-                        </button>
-                      </div>
-                      {showQualitySettings && (
-                        <div className="px-2 pb-2 flex flex-col gap-1">
-                          {(['low', 'medium', 'high'] as ImageQuality[]).map((q) => (
-                            <button
-                              key={q}
-                              onClick={() => setImageQuality(q)}
-                              className={`flex items-center gap-2 px-2 py-1.5 rounded-md text-xs transition-colors hover:bg-muted ${
-                                imageQuality === q
-                                  ? 'bg-primary/20 text-primary'
-                                  : 'text-muted-foreground hover:text-foreground'
-                              }`}
-                            >
-                              <QualityIcon quality={q} />
-                              <span>{getQualityLabel(q)}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
 
                     </DropdownMenuContent>
                   </DropdownMenu>

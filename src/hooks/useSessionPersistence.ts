@@ -124,7 +124,8 @@ export interface SessionState {
   modelReferences: ReferenceImage[];
   editReferences: ReferenceImage[];
   selectedAIModel: string;
-  imageQuality: string;
+  geminiQuality: string;
+  openaiQuality: string;
   weirdnessLevel: number;
 }
 
@@ -344,7 +345,8 @@ export function useSessionPersistence(): UseSessionPersistenceResult {
         modelReferences: serializedModelRefs,
         editReferences: serializedEditRefs,
         selectedAIModel: state.selectedAIModel,
-        imageQuality: state.imageQuality,
+        geminiQuality: state.geminiQuality,
+        openaiQuality: state.openaiQuality,
         weirdnessLevel: state.weirdnessLevel,
       };
 
@@ -580,7 +582,8 @@ export function useSessionPersistence(): UseSessionPersistenceResult {
       modelReferences: restoredModelRefs,
       editReferences: restoredEditRefs,
       selectedAIModel: session.selectedAIModel,
-      imageQuality: session.imageQuality,
+      geminiQuality: session.geminiQuality || 'medium',
+      openaiQuality: session.openaiQuality || 'medium',
       weirdnessLevel: session.weirdnessLevel,
     };
   }, []);

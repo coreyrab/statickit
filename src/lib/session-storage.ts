@@ -162,7 +162,8 @@ export interface SessionData {
 
   // Preferences (backup - primary in localStorage)
   selectedAIModel: string;
-  imageQuality: string;
+  geminiQuality: string;
+  openaiQuality: string;
   weirdnessLevel: number;
 }
 
