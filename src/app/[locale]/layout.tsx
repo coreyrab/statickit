@@ -125,6 +125,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         </Script>
         <Script
           src="https://cdn.userjot.com/sdk/v2/uj.js"
+          type="module"
           strategy="afterInteractive"
         />
         <Script id="userjot-config" strategy="lazyOnload">
