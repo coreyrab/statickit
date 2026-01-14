@@ -4603,7 +4603,7 @@ function HomeContent() {
                             }}
                             className="ml-auto flex items-center gap-1 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
                           >
-                            <span className="text-[8px] uppercase">{geminiQuality === 'low' ? 'Draft' : geminiQuality === 'medium' ? 'Std' : 'Best'}</span>
+                            <span className="text-[8px] uppercase">{geminiQuality === 'low' ? 'Low' : geminiQuality === 'medium' ? 'Med' : 'High'}</span>
                             <Settings className="w-2.5 h-2.5" />
                           </button>
                         )}
@@ -4624,7 +4624,7 @@ function HomeContent() {
                                   : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted'
                               }`}
                             >
-                              {q === 'low' ? 'Draft' : q === 'medium' ? 'Standard' : 'Best'}
+                              {q === 'low' ? 'Low' : q === 'medium' ? 'Medium' : 'High'}
                             </button>
                           ))}
                         </div>
@@ -4713,7 +4713,7 @@ function HomeContent() {
                             }}
                             className="ml-auto flex items-center gap-1 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
                           >
-                            <span className="text-[8px] uppercase">{openaiQuality === 'low' ? 'Draft' : openaiQuality === 'medium' ? 'Std' : 'Best'}</span>
+                            <span className="text-[8px] uppercase">{openaiQuality === 'low' ? 'Low' : openaiQuality === 'medium' ? 'Med' : 'High'}</span>
                             <Settings className="w-2.5 h-2.5" />
                           </button>
                         )}
@@ -4734,7 +4734,7 @@ function HomeContent() {
                                   : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted'
                               }`}
                             >
-                              {q === 'low' ? 'Draft' : q === 'medium' ? 'Standard' : 'Best'}
+                              {q === 'low' ? 'Low' : q === 'medium' ? 'Medium' : 'High'}
                             </button>
                           ))}
                         </div>
