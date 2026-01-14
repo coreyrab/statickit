@@ -365,7 +365,7 @@ function HomeContent() {
   const [selectedEditRef, setSelectedEditRef] = useState<string | null>(null);
 
   // AI Model selection - supports Gemini and OpenAI providers
-  type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-image' | 'gpt-image-1';
+  type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-image' | 'gpt-image-1' | 'gpt-image-1-mini';
   const [selectedAIModel, setSelectedAIModel] = useState<AIModel>('gemini-3-pro-image-preview');
 
   // Compare Models mode - run same edit on multiple models simultaneously
@@ -378,7 +378,7 @@ function HomeContent() {
   const [showQualitySettings, setShowQualitySettings] = useState(false);
 
   // Helper to determine which provider a model belongs to
-  const isOpenAIModel = (model: AIModel) => model === 'gpt-image-1';
+  const isOpenAIModel = (model: AIModel) => model === 'gpt-image-1' || model === 'gpt-image-1-mini';
   const isGeminiModel = (model: AIModel) => model === 'gemini-3-pro-image-preview' || model === 'gemini-2.5-flash-image';
 
   // Compare mode helpers
@@ -1099,6 +1099,7 @@ function HomeContent() {
       case 'gemini-3-pro-image-preview': return 'Gemini 3 Pro';
       case 'gemini-2.5-flash-image': return 'Gemini 2.5 Flash';
       case 'gpt-image-1': return 'GPT Image 1.5';
+      case 'gpt-image-1-mini': return 'GPT Image Mini';
       default: return model;
     }
   };
@@ -4682,6 +4683,40 @@ function HomeContent() {
                           <span className="font-medium text-sm">GPT Image 1.5</span>
                         </div>
                         {!isCompareModelsEnabled && selectedAIModel === 'gpt-image-1' && openaiApiKey && <Check className="w-4 h-4 text-primary" />}
+                      </DropdownMenuItem>
+
+                      {/* GPT Image Mini - cheaper alternative */}
+                      <DropdownMenuItem
+                        onClick={() => {
+                          if (!openaiApiKey) {
+                            setShowApiKeySetup(true);
+                            return;
+                          }
+                          if (isCompareModelsEnabled) {
+                            toggleModelForCompare('gpt-image-1-mini');
+                          } else {
+                            setSelectedAIModel('gpt-image-1-mini');
+                          }
+                        }}
+                        onSelect={(e) => { if (isCompareModelsEnabled && openaiApiKey) e.preventDefault(); }}
+                        className={`justify-between ${!openaiApiKey ? 'opacity-40' : ''}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          {isCompareModelsEnabled && openaiApiKey && (
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                              selectedModelsForCompare.includes('gpt-image-1-mini')
+                                ? 'bg-primary border-primary'
+                                : 'border-muted-foreground/30'
+                            }`}>
+                              {selectedModelsForCompare.includes('gpt-image-1-mini') && (
+                                <Check className="w-3 h-3 text-primary-foreground" />
+                              )}
+                            </div>
+                          )}
+                          <span className="font-medium text-sm">GPT Image Mini</span>
+                          <span className="text-[9px] text-muted-foreground/60 ml-1">Faster</span>
+                        </div>
+                        {!isCompareModelsEnabled && selectedAIModel === 'gpt-image-1-mini' && openaiApiKey && <Check className="w-4 h-4 text-primary" />}
                       </DropdownMenuItem>
 
                       {/* Compare Models Toggle */}

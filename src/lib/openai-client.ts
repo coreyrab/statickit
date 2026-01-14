@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { toFile } from 'openai/uploads';
 
-export type OpenAIImageModel = 'gpt-image-1';
+export type OpenAIImageModel = 'gpt-image-1' | 'gpt-image-1-mini';
 
 export function createOpenAIClient(apiKey: string): OpenAI {
   return new OpenAI({ apiKey });

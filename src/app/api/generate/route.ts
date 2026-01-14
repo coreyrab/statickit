@@ -4,7 +4,7 @@ import { createOpenAIClient, editImageOpenAI, mapAspectRatioToOpenAISize, type O
 
 // Helper to determine if a model is from OpenAI
 const isOpenAIModel = (model: string): model is OpenAIImageModel => {
-  return model === 'gpt-image-1';
+  return model === 'gpt-image-1' || model === 'gpt-image-1-mini';
 };
 
 export async function POST(request: NextRequest) {
