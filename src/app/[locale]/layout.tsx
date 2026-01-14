@@ -118,6 +118,24 @@ export default async function LocaleLayout({ children, params }: Props) {
           src="https://openpanel.dev/op1.js"
           strategy="afterInteractive"
         />
+        <Script id="userjot-init" strategy="afterInteractive">
+          {`
+            window.$ujq=window.$ujq||[];window.uj=window.uj||new Proxy({},{get:(_,p)=>(...a)=>window.$ujq.push([p,...a])});
+          `}
+        </Script>
+        <Script
+          src="https://cdn.userjot.com/sdk/v2/uj.js"
+          strategy="afterInteractive"
+        />
+        <Script id="userjot-config" strategy="lazyOnload">
+          {`
+            window.uj.init('cmkedorn70ywz15o39jvxa6wv', {
+              widget: true,
+              position: 'right',
+              theme: 'auto'
+            });
+          `}
+        </Script>
       </body>
     </html>
   );
