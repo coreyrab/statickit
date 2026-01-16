@@ -391,15 +391,38 @@
     "qualityHigh": "Hoch",
     "qualityTooltip": "Höhere Qualität = bessere Ergebnisse, aber höhere API-Kosten"
   },
+  "welcome": {
+    "title": "Willkommen bei StaticKit",
+    "description": "StaticKit ist ein kostenloser KI-Bildeditor. Passen Sie Bilder an, tauschen Sie Hintergründe aus, ändern Sie Modelle, skalieren Sie auf jedes Seitenverhältnis und mehr.",
+    "learnMore": "Mehr erfahren",
+    "byokTitle": "Eigenen Schlüssel mitbringen",
+    "byokDescription": "Ihr API-Schlüssel bleibt in Ihrem Browser und wird niemals an unsere Server gesendet. Sie zahlen nur für das, was Sie nutzen.",
+    "skipForNow": "Vorerst überspringen"
+  },
   "apiKey": {
     "title": "API-Schlüssel einrichten",
+    "settingsTitle": "API-Schlüssel Einstellungen",
     "description": "Geben Sie Ihren API-Schlüssel ein, um mit der Bearbeitung zu beginnen",
     "geminiKey": "Gemini API-Schlüssel",
     "openaiKey": "OpenAI API-Schlüssel",
+    "googleGemini": "Google Gemini",
+    "openai": "OpenAI",
     "getKey": "API-Schlüssel erhalten",
+    "getGeminiKey": "Kostenlosen API-Schlüssel von Google erhalten",
+    "getOpenAIKey": "API-Schlüssel von OpenAI erhalten",
     "keyPlaceholder": "Geben Sie Ihren API-Schlüssel ein...",
-    "save": "Schlüssel speichern",
-    "saved": "Schlüssel erfolgreich gespeichert"
+    "save": "Speichern",
+    "saved": "Schlüssel erfolgreich gespeichert",
+    "connected": "Verbunden",
+    "working": "Funktioniert",
+    "invalid": "Ungültig",
+    "test": "Testen",
+    "remove": "Entfernen",
+    "done": "Fertig",
+    "skipForNow": "Vorerst überspringen",
+    "storageNotice": "API-Schlüssel werden lokal in Ihrem Browser gespeichert und niemals an unsere Server gesendet.",
+    "validationFailed": "API-Schlüssel konnte nicht validiert werden. Bitte versuchen Sie es erneut.",
+    "invalidApiKey": "Ungültiger API-Schlüssel"
   },
   "versions": {
     "original": "Original",

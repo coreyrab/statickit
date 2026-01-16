@@ -391,15 +391,38 @@
     "qualityHigh": "High",
     "qualityTooltip": "Higher quality = better results but higher API cost"
   },
+  "welcome": {
+    "title": "Welcome to StaticKit",
+    "description": "StaticKit is a free AI image editor. Adjust images, swap backgrounds, change models, resize to any aspect ratio, and more.",
+    "learnMore": "Learn more",
+    "byokTitle": "Bring Your Own Key",
+    "byokDescription": "Your API key stays in your browser and is never sent to our servers. You only pay for what you use.",
+    "skipForNow": "Skip for now"
+  },
   "apiKey": {
     "title": "API Key Setup",
+    "settingsTitle": "API Key Settings",
     "description": "Enter your API key to start editing",
     "geminiKey": "Gemini API Key",
     "openaiKey": "OpenAI API Key",
+    "googleGemini": "Google Gemini",
+    "openai": "OpenAI",
     "getKey": "Get API Key",
+    "getGeminiKey": "Get a free API key from Google",
+    "getOpenAIKey": "Get an API key from OpenAI",
     "keyPlaceholder": "Enter your API key...",
-    "save": "Save Key",
-    "saved": "Key saved successfully"
+    "save": "Save",
+    "saved": "Key saved successfully",
+    "connected": "Connected",
+    "working": "Working",
+    "invalid": "Invalid",
+    "test": "Test",
+    "remove": "Remove",
+    "done": "Done",
+    "skipForNow": "Skip for now",
+    "storageNotice": "API keys are stored locally in your browser and never sent to our servers.",
+    "validationFailed": "Failed to validate API key. Please try again.",
+    "invalidApiKey": "Invalid API key"
   },
   "versions": {
     "original": "Original",

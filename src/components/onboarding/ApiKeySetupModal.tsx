@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Check, X, ExternalLink } from "lucide-react";
 import { track } from "@/lib/analytics";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 interface ApiKeySetupModalProps {
   open: boolean;
@@ -80,6 +81,7 @@ export function ApiKeySetupModal({
   onApiKeySet,
   currentApiKey,
 }: ApiKeySetupModalProps) {
+  const t = useTranslations();
   // Use legacy props if new ones aren't provided
   const effectiveGeminiKey = currentGeminiKey ?? currentApiKey;
   const effectiveGeminiCallback = onGeminiKeySet ?? onApiKeySet;
@@ -119,7 +121,7 @@ export function ApiKeySetupModal({
       const data = await response.json();
 
       if (!data.valid) {
-        setGeminiError(data.error || "Invalid API key");
+        setGeminiError(data.error || t("apiKey.invalidApiKey"));
         track('api_key_validated', { success: false });
         return;
       }
@@ -137,7 +139,7 @@ export function ApiKeySetupModal({
       }, 1500);
     } catch (err) {
       console.error("Gemini API key validation error:", err);
-      setGeminiError("Failed to validate API key. Please try again.");
+      setGeminiError(t("apiKey.validationFailed"));
     } finally {
       setGeminiValidating(false);
     }
@@ -159,7 +161,7 @@ export function ApiKeySetupModal({
       const data = await response.json();
 
       if (!data.valid) {
-        setOpenaiError(data.error || "Invalid API key");
+        setOpenaiError(data.error || t("apiKey.invalidApiKey"));
         return;
       }
 
@@ -175,7 +177,7 @@ export function ApiKeySetupModal({
       }, 1500);
     } catch (err) {
       console.error("OpenAI API key validation error:", err);
-      setOpenaiError("Failed to validate API key. Please try again.");
+      setOpenaiError(t("apiKey.validationFailed"));
     } finally {
       setOpenaiValidating(false);
     }
@@ -274,7 +276,7 @@ export function ApiKeySetupModal({
       >
         <DialogHeader>
           <DialogTitle className="text-xl text-center">
-            API Key Settings
+            {t("apiKey.settingsTitle")}
           </DialogTitle>
         </DialogHeader>
 
@@ -283,10 +285,10 @@ export function ApiKeySetupModal({
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <GeminiLogo className="w-5 h-5" />
-              <span className="font-medium text-foreground">Google Gemini</span>
+              <span className="font-medium text-foreground">{t("apiKey.googleGemini")}</span>
               {hasGeminiKey && (
                 <span className="ml-auto text-xs text-emerald-500 flex items-center gap-1">
-                  <Check className="w-3 h-3" /> Connected
+                  <Check className="w-3 h-3" /> {t("apiKey.connected")}
                 </span>
               )}
             </div>
@@ -298,10 +300,10 @@ export function ApiKeySetupModal({
                 </span>
                 <div className="flex items-center gap-2">
                   {geminiTestResult === 'success' && (
-                    <span className="text-xs text-emerald-500">Working</span>
+                    <span className="text-xs text-emerald-500">{t("apiKey.working")}</span>
                   )}
                   {geminiTestResult === 'error' && (
-                    <span className="text-xs text-red-400">Invalid</span>
+                    <span className="text-xs text-red-400">{t("apiKey.invalid")}</span>
                   )}
                   <Button
                     size="sm"
@@ -313,7 +315,7 @@ export function ApiKeySetupModal({
                     {geminiTesting ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
                     ) : (
-                      "Test"
+                      t("apiKey.test")
                     )}
                   </Button>
                   <Button
@@ -322,7 +324,7 @@ export function ApiKeySetupModal({
                     onClick={handleRemoveGeminiKey}
                     className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 px-2"
                   >
-                    Remove
+                    {t("apiKey.remove")}
                   </Button>
                 </div>
               </div>
@@ -370,7 +372,7 @@ export function ApiKeySetupModal({
                     ) : geminiSuccess ? (
                       <Check className="w-4 h-4" />
                     ) : (
-                      "Save"
+                      t("apiKey.save")
                     )}
                   </Button>
                 </div>
@@ -386,7 +388,7 @@ export function ApiKeySetupModal({
                   rel="noopener noreferrer"
                   className="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 inline-flex items-center gap-1"
                 >
-                  Get a free API key from Google
+                  {t("apiKey.getGeminiKey")}
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
@@ -400,10 +402,10 @@ export function ApiKeySetupModal({
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <OpenAILogo className="w-5 h-5" />
-              <span className="font-medium text-foreground">OpenAI</span>
+              <span className="font-medium text-foreground">{t("apiKey.openai")}</span>
               {hasOpenAIKey && (
                 <span className="ml-auto text-xs text-emerald-500 flex items-center gap-1">
-                  <Check className="w-3 h-3" /> Connected
+                  <Check className="w-3 h-3" /> {t("apiKey.connected")}
                 </span>
               )}
             </div>
@@ -415,10 +417,10 @@ export function ApiKeySetupModal({
                 </span>
                 <div className="flex items-center gap-2">
                   {openaiTestResult === 'success' && (
-                    <span className="text-xs text-emerald-500">Working</span>
+                    <span className="text-xs text-emerald-500">{t("apiKey.working")}</span>
                   )}
                   {openaiTestResult === 'error' && (
-                    <span className="text-xs text-red-400">Invalid</span>
+                    <span className="text-xs text-red-400">{t("apiKey.invalid")}</span>
                   )}
                   <Button
                     size="sm"
@@ -430,7 +432,7 @@ export function ApiKeySetupModal({
                     {openaiTesting ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
                     ) : (
-                      "Test"
+                      t("apiKey.test")
                     )}
                   </Button>
                   <Button
@@ -439,7 +441,7 @@ export function ApiKeySetupModal({
                     onClick={handleRemoveOpenAIKey}
                     className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 px-2"
                   >
-                    Remove
+                    {t("apiKey.remove")}
                   </Button>
                 </div>
               </div>
@@ -487,7 +489,7 @@ export function ApiKeySetupModal({
                     ) : openaiSuccess ? (
                       <Check className="w-4 h-4" />
                     ) : (
-                      "Save"
+                      t("apiKey.save")
                     )}
                   </Button>
                 </div>
@@ -503,7 +505,7 @@ export function ApiKeySetupModal({
                   rel="noopener noreferrer"
                   className="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 inline-flex items-center gap-1"
                 >
-                  Get an API key from OpenAI
+                  {t("apiKey.getOpenAIKey")}
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
@@ -513,9 +515,9 @@ export function ApiKeySetupModal({
           {/* Footer */}
           <div className="pt-4 border-t border-border/60 space-y-4">
             <p className="text-xs text-muted-foreground/60 text-center">
-              API keys are stored locally in your browser and never sent to our servers.{" "}
+              {t("apiKey.storageNotice")}{" "}
               <Link href="/blog/how-statickit-works" className="text-blue-500 dark:text-blue-400 hover:underline">
-                Learn more
+                {t("welcome.learnMore")}
               </Link>
             </p>
 
@@ -525,14 +527,14 @@ export function ApiKeySetupModal({
                 onClick={() => onOpenChange(false)}
                 className="w-full"
               >
-                Done
+                {t("apiKey.done")}
               </Button>
             ) : (
               <button
                 onClick={() => onOpenChange(false)}
                 className="w-full text-sm text-muted-foreground/70 hover:text-foreground transition-colors py-2"
               >
-                Skip for now
+                {t("apiKey.skipForNow")}
               </button>
             )}
           </div>

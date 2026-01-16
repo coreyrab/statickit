@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Check, X, ExternalLink, Key } from "lucide-react";
 import { track } from "@/lib/analytics";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 interface WelcomeModalProps {
   open: boolean;
@@ -69,6 +70,7 @@ export function WelcomeModal({
   onApiKeySet,
   onOpenAIKeySet,
 }: WelcomeModalProps) {
+  const t = useTranslations();
   const [geminiKeyInput, setGeminiKeyInput] = useState("");
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
   const [geminiValidating, setGeminiValidating] = useState(false);
@@ -94,7 +96,7 @@ export function WelcomeModal({
       const data = await response.json();
 
       if (!data.valid) {
-        setGeminiError(data.error || "Invalid API key");
+        setGeminiError(data.error || t("apiKey.invalidApiKey"));
         track('api_key_validated', { success: false });
         return;
       }
@@ -112,7 +114,7 @@ export function WelcomeModal({
       }, 1500);
     } catch (err) {
       console.error("Gemini API key validation error:", err);
-      setGeminiError("Failed to validate API key. Please try again.");
+      setGeminiError(t("apiKey.validationFailed"));
     } finally {
       setGeminiValidating(false);
     }
@@ -134,7 +136,7 @@ export function WelcomeModal({
       const data = await response.json();
 
       if (!data.valid) {
-        setOpenaiError(data.error || "Invalid API key");
+        setOpenaiError(data.error || t("apiKey.invalidApiKey"));
         return;
       }
 
@@ -150,7 +152,7 @@ export function WelcomeModal({
       }, 1500);
     } catch (err) {
       console.error("OpenAI API key validation error:", err);
-      setOpenaiError("Failed to validate API key. Please try again.");
+      setOpenaiError(t("apiKey.validationFailed"));
     } finally {
       setOpenaiValidating(false);
     }
@@ -180,7 +182,7 @@ export function WelcomeModal({
       >
         <DialogHeader className="text-center">
           <DialogTitle className="text-2xl font-semibold text-foreground">
-            Welcome to StaticKit
+            {t("welcome.title")}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-4">
@@ -188,9 +190,9 @@ export function WelcomeModal({
           {/* What is StaticKit */}
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              StaticKit is a free AI image editor. Adjust images, swap backgrounds, change models, resize to any aspect ratio, and more.{" "}
+              {t("welcome.description")}{" "}
               <Link href="/blog/how-statickit-works" className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300">
-                Learn more
+                {t("welcome.learnMore")}
               </Link>
             </p>
           </div>
@@ -199,10 +201,10 @@ export function WelcomeModal({
           <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-2">
             <div className="flex items-center gap-2">
               <Key className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-foreground">Bring Your Own Key</span>
+              <span className="text-sm font-medium text-foreground">{t("welcome.byokTitle")}</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Your API key stays in your browser and is never sent to our servers. You only pay for what you use.
+              {t("welcome.byokDescription")}
             </p>
           </div>
 
@@ -212,7 +214,7 @@ export function WelcomeModal({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <GeminiLogo className="w-4 h-4" />
-                <span className="text-sm font-medium text-foreground">Google Gemini</span>
+                <span className="text-sm font-medium text-foreground">{t("apiKey.googleGemini")}</span>
               </div>
               <div className="flex items-stretch gap-2">
                 <div className="flex-1 flex items-center px-3 bg-muted/30 border border-border rounded-lg focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50">
@@ -256,7 +258,7 @@ export function WelcomeModal({
                   ) : geminiSuccess ? (
                     <Check className="w-4 h-4" />
                   ) : (
-                    "Save"
+                    t("apiKey.save")
                   )}
                 </Button>
               </div>
@@ -272,7 +274,7 @@ export function WelcomeModal({
                 rel="noopener noreferrer"
                 className="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 inline-flex items-center gap-1"
               >
-                Get a free API key from Google
+                {t("apiKey.getGeminiKey")}
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>
@@ -284,7 +286,7 @@ export function WelcomeModal({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <OpenAILogo className="w-4 h-4" />
-                <span className="text-sm font-medium text-foreground">OpenAI</span>
+                <span className="text-sm font-medium text-foreground">{t("apiKey.openai")}</span>
               </div>
               <div className="flex items-stretch gap-2">
                 <div className="flex-1 flex items-center px-3 bg-muted/30 border border-border rounded-lg focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50">
@@ -328,7 +330,7 @@ export function WelcomeModal({
                   ) : openaiSuccess ? (
                     <Check className="w-4 h-4" />
                   ) : (
-                    "Save"
+                    t("apiKey.save")
                   )}
                 </Button>
               </div>
@@ -344,7 +346,7 @@ export function WelcomeModal({
                 rel="noopener noreferrer"
                 className="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 inline-flex items-center gap-1"
               >
-                Get an API key from OpenAI
+                {t("apiKey.getOpenAIKey")}
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>
@@ -356,7 +358,7 @@ export function WelcomeModal({
               onClick={() => onOpenChange(false)}
               className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors"
             >
-              Skip for now
+              {t("welcome.skipForNow")}
             </button>
           </div>
         </div>

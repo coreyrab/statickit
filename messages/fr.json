@@ -391,15 +391,38 @@
     "qualityHigh": "Haute",
     "qualityTooltip": "Qualite superieure = meilleurs resultats mais cout API plus eleve"
   },
+  "welcome": {
+    "title": "Bienvenue sur StaticKit",
+    "description": "StaticKit est un éditeur d'images IA gratuit. Ajustez les images, changez les arrière-plans, modifiez les modèles, redimensionnez à n'importe quel rapport d'aspect, et plus encore.",
+    "learnMore": "En savoir plus",
+    "byokTitle": "Apportez votre propre clé",
+    "byokDescription": "Votre clé API reste dans votre navigateur et n'est jamais envoyée à nos serveurs. Vous ne payez que ce que vous utilisez.",
+    "skipForNow": "Passer pour l'instant"
+  },
   "apiKey": {
     "title": "Configuration de la cle API",
+    "settingsTitle": "Paramètres des clés API",
     "description": "Entrez votre cle API pour commencer a editer",
     "geminiKey": "Cle API Gemini",
     "openaiKey": "Cle API OpenAI",
+    "googleGemini": "Google Gemini",
+    "openai": "OpenAI",
     "getKey": "Obtenir une cle API",
+    "getGeminiKey": "Obtenir une clé API gratuite de Google",
+    "getOpenAIKey": "Obtenir une clé API d'OpenAI",
     "keyPlaceholder": "Entrez votre cle API...",
-    "save": "Enregistrer la cle",
-    "saved": "Cle enregistree avec succes"
+    "save": "Enregistrer",
+    "saved": "Cle enregistree avec succes",
+    "connected": "Connectée",
+    "working": "Fonctionnelle",
+    "invalid": "Invalide",
+    "test": "Tester",
+    "remove": "Supprimer",
+    "done": "Terminé",
+    "skipForNow": "Passer pour l'instant",
+    "storageNotice": "Les clés API sont stockées localement dans votre navigateur et ne sont jamais envoyées à nos serveurs.",
+    "validationFailed": "Échec de la validation de la clé API. Veuillez réessayer.",
+    "invalidApiKey": "Clé API invalide"
   },
   "versions": {
     "original": "Original",
