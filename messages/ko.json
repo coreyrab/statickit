@@ -391,15 +391,38 @@
     "qualityHigh": "높음",
     "qualityTooltip": "높은 품질 = 더 나은 결과지만 API 비용 증가"
   },
+  "welcome": {
+    "title": "StaticKit에 오신 것을 환영합니다",
+    "description": "StaticKit은 무료 AI 이미지 편집기입니다. 이미지 조정, 배경 교체, 모델 변경, 모든 화면 비율로 크기 조정 등이 가능합니다.",
+    "learnMore": "자세히 알아보기",
+    "byokTitle": "자신의 키 사용",
+    "byokDescription": "API 키는 브라우저에 저장되며 서버로 전송되지 않습니다. 사용한 만큼만 지불합니다.",
+    "skipForNow": "나중에 하기"
+  },
   "apiKey": {
     "title": "API 키 설정",
+    "settingsTitle": "API 키 설정",
     "description": "편집을 시작하려면 API 키를 입력하세요",
     "geminiKey": "Gemini API 키",
     "openaiKey": "OpenAI API 키",
+    "googleGemini": "Google Gemini",
+    "openai": "OpenAI",
     "getKey": "API 키 받기",
+    "getGeminiKey": "Google에서 무료 API 키 받기",
+    "getOpenAIKey": "OpenAI에서 API 키 받기",
     "keyPlaceholder": "API 키를 입력하세요...",
-    "save": "키 저장",
-    "saved": "키가 성공적으로 저장되었습니다"
+    "save": "저장",
+    "saved": "키가 성공적으로 저장되었습니다",
+    "connected": "연결됨",
+    "working": "정상",
+    "invalid": "유효하지 않음",
+    "test": "테스트",
+    "remove": "제거",
+    "done": "완료",
+    "skipForNow": "나중에 하기",
+    "storageNotice": "API 키는 브라우저에 로컬 저장되며 서버로 전송되지 않습니다.",
+    "validationFailed": "API 키 검증에 실패했습니다. 다시 시도해 주세요.",
+    "invalidApiKey": "유효하지 않은 API 키"
   },
   "versions": {
     "original": "원본",

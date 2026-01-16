@@ -391,15 +391,38 @@
     "qualityHigh": "高",
     "qualityTooltip": "高品質 = より良い結果だがAPIコストが高くなります"
   },
+  "welcome": {
+    "title": "StaticKitへようこそ",
+    "description": "StaticKitは無料のAI画像エディターです。画像の調整、背景の変更、モデルの変更、あらゆるアスペクト比へのリサイズなどが可能です。",
+    "learnMore": "詳しく見る",
+    "byokTitle": "自分のキーを使用",
+    "byokDescription": "APIキーはブラウザ内に保存され、サーバーに送信されることはありません。使用した分だけお支払いいただきます。",
+    "skipForNow": "今はスキップ"
+  },
   "apiKey": {
     "title": "APIキーの設定",
+    "settingsTitle": "APIキー設定",
     "description": "編集を開始するにはAPIキーを入力してください",
     "geminiKey": "Gemini APIキー",
     "openaiKey": "OpenAI APIキー",
+    "googleGemini": "Google Gemini",
+    "openai": "OpenAI",
     "getKey": "APIキーを取得",
+    "getGeminiKey": "Googleから無料のAPIキーを取得",
+    "getOpenAIKey": "OpenAIからAPIキーを取得",
     "keyPlaceholder": "APIキーを入力...",
-    "save": "キーを保存",
-    "saved": "キーが正常に保存されました"
+    "save": "保存",
+    "saved": "キーが正常に保存されました",
+    "connected": "接続済み",
+    "working": "正常",
+    "invalid": "無効",
+    "test": "テスト",
+    "remove": "削除",
+    "done": "完了",
+    "skipForNow": "今はスキップ",
+    "storageNotice": "APIキーはブラウザにローカル保存され、サーバーに送信されることはありません。",
+    "validationFailed": "APIキーの検証に失敗しました。もう一度お試しください。",
+    "invalidApiKey": "無効なAPIキー"
   },
   "versions": {
     "original": "オリジナル",

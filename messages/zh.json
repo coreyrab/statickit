@@ -391,15 +391,38 @@
     "qualityHigh": "高",
     "qualityTooltip": "质量越高 = 效果越好，但API成本越高"
   },
+  "welcome": {
+    "title": "欢迎使用 StaticKit",
+    "description": "StaticKit 是一款免费的 AI 图片编辑器。调整图片、更换背景、更换模特、调整任意宽高比等。",
+    "learnMore": "了解更多",
+    "byokTitle": "自带密钥",
+    "byokDescription": "您的 API 密钥保存在浏览器中，永不发送到我们的服务器。您只需为实际使用付费。",
+    "skipForNow": "暂时跳过"
+  },
   "apiKey": {
     "title": "API密钥设置",
+    "settingsTitle": "API 密钥设置",
     "description": "输入您的API密钥以开始编辑",
     "geminiKey": "Gemini API密钥",
     "openaiKey": "OpenAI API密钥",
+    "googleGemini": "Google Gemini",
+    "openai": "OpenAI",
     "getKey": "获取API密钥",
+    "getGeminiKey": "从 Google 获取免费 API 密钥",
+    "getOpenAIKey": "从 OpenAI 获取 API 密钥",
     "keyPlaceholder": "输入您的API密钥...",
-    "save": "保存密钥",
-    "saved": "密钥保存成功"
+    "save": "保存",
+    "saved": "密钥保存成功",
+    "connected": "已连接",
+    "working": "正常",
+    "invalid": "无效",
+    "test": "测试",
+    "remove": "移除",
+    "done": "完成",
+    "skipForNow": "暂时跳过",
+    "storageNotice": "API 密钥本地存储在您的浏览器中，永不发送到我们的服务器。",
+    "validationFailed": "API 密钥验证失败。请重试。",
+    "invalidApiKey": "无效的 API 密钥"
   },
   "versions": {
     "original": "原始",
