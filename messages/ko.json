@@ -32,7 +32,8 @@
     "deleteVersion": "버전 삭제",
     "github": "GitHub",
     "theme": "테마",
-    "language": "언어"
+    "language": "언어",
+    "giveFeedback": "피드백 보내기"
   },
   "tools": {
     "iterations": "변형",

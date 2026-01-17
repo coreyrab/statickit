@@ -32,7 +32,8 @@
     "deleteVersion": "バージョンを削除",
     "github": "GitHub",
     "theme": "テーマ",
-    "language": "言語"
+    "language": "言語",
+    "giveFeedback": "フィードバックを送る"
   },
   "tools": {
     "iterations": "バリエーション",
