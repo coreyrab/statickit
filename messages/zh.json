@@ -32,7 +32,8 @@
     "deleteVersion": "删除版本",
     "github": "GitHub",
     "theme": "主题",
-    "language": "语言"
+    "language": "语言",
+    "giveFeedback": "提供反馈"
   },
   "tools": {
     "iterations": "变体",

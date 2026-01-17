@@ -131,8 +131,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <Script id="userjot-config" strategy="lazyOnload">
           {`
             window.uj.init('cmkedorn70ywz15o39jvxa6wv', {
-              widget: true,
-              position: 'right',
+              widget: false,
               theme: 'auto'
             });
           `}

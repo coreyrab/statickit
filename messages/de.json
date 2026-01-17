@@ -32,7 +32,8 @@
     "deleteVersion": "Version löschen",
     "github": "GitHub",
     "theme": "Design",
-    "language": "Sprache"
+    "language": "Sprache",
+    "giveFeedback": "Feedback geben"
   },
   "tools": {
     "iterations": "Variationen",
