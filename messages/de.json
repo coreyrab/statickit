@@ -66,7 +66,11 @@
     },
     "byok": "Eigenen Schlussel verwenden",
     "byokDescriptionAuth": "Ihr API-Schlussel ist verschlusselt und sicher in der Cloud gespeichert.",
-    "skip": "Vorerst uberspringen"
+    "skip": "Vorerst uberspringen",
+    "description": "StaticKit ist ein kostenloser KI-Bildeditor. Passen Sie Bilder an, tauschen Sie Hintergründe aus, ändern Sie Modelle, skalieren Sie auf jedes Seitenverhältnis und mehr.",
+    "byokTitle": "Eigenen Schlüssel mitbringen",
+    "byokDescription": "Ihr API-Schlüssel bleibt in Ihrem Browser und wird niemals an unsere Server gesendet. Sie zahlen nur für das, was Sie nutzen.",
+    "skipForNow": "Vorerst überspringen"
   },
   "apiKeys": {
     "title": "API-Schlussel-Einstellungen",
@@ -441,14 +445,6 @@
     "qualityMedium": "Mittel",
     "qualityHigh": "Hoch",
     "qualityTooltip": "Höhere Qualität = bessere Ergebnisse, aber höhere API-Kosten"
-  },
-  "welcome": {
-    "title": "Willkommen bei StaticKit",
-    "description": "StaticKit ist ein kostenloser KI-Bildeditor. Passen Sie Bilder an, tauschen Sie Hintergründe aus, ändern Sie Modelle, skalieren Sie auf jedes Seitenverhältnis und mehr.",
-    "learnMore": "Mehr erfahren",
-    "byokTitle": "Eigenen Schlüssel mitbringen",
-    "byokDescription": "Ihr API-Schlüssel bleibt in Ihrem Browser und wird niemals an unsere Server gesendet. Sie zahlen nur für das, was Sie nutzen.",
-    "skipForNow": "Vorerst überspringen"
   },
   "apiKey": {
     "title": "API-Schlüssel einrichten",

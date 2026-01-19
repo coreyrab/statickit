@@ -66,7 +66,11 @@
     },
     "byok": "Apportez votre propre cle",
     "byokDescriptionAuth": "Votre cle API est chiffree et stockee en toute securite dans le cloud.",
-    "skip": "Passer pour l'instant"
+    "skip": "Passer pour l'instant",
+    "description": "StaticKit est un éditeur d'images IA gratuit. Ajustez les images, changez les arrière-plans, modifiez les modèles, redimensionnez à n'importe quel rapport d'aspect, et plus encore.",
+    "byokTitle": "Apportez votre propre clé",
+    "byokDescription": "Votre clé API reste dans votre navigateur et n'est jamais envoyée à nos serveurs. Vous ne payez que ce que vous utilisez.",
+    "skipForNow": "Passer pour l'instant"
   },
   "apiKeys": {
     "title": "Parametres des cles API",
@@ -441,14 +445,6 @@
     "qualityMedium": "Moyenne",
     "qualityHigh": "Haute",
     "qualityTooltip": "Qualite superieure = meilleurs resultats mais cout API plus eleve"
-  },
-  "welcome": {
-    "title": "Bienvenue sur StaticKit",
-    "description": "StaticKit est un éditeur d'images IA gratuit. Ajustez les images, changez les arrière-plans, modifiez les modèles, redimensionnez à n'importe quel rapport d'aspect, et plus encore.",
-    "learnMore": "En savoir plus",
-    "byokTitle": "Apportez votre propre clé",
-    "byokDescription": "Votre clé API reste dans votre navigateur et n'est jamais envoyée à nos serveurs. Vous ne payez que ce que vous utilisez.",
-    "skipForNow": "Passer pour l'instant"
   },
   "apiKey": {
     "title": "Configuration de la cle API",

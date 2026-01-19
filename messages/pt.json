@@ -66,7 +66,11 @@
     },
     "byok": "Traga sua propria chave",
     "byokDescriptionAuth": "Sua chave API e criptografada e armazenada com seguranca na nuvem.",
-    "skip": "Pular por enquanto"
+    "skip": "Pular por enquanto",
+    "description": "StaticKit é um editor de imagens IA gratuito. Ajuste imagens, troque fundos, mude modelos, redimensione para qualquer proporção e muito mais.",
+    "byokTitle": "Traga sua própria chave",
+    "byokDescription": "Sua chave API permanece no seu navegador e nunca é enviada para nossos servidores. Você paga apenas pelo que usa.",
+    "skipForNow": "Pular por agora"
   },
   "apiKeys": {
     "title": "Configuracoes de chaves API",
@@ -441,14 +445,6 @@
     "qualityMedium": "Media",
     "qualityHigh": "Alta",
     "qualityTooltip": "Maior qualidade = melhores resultados, mas maior custo de API"
-  },
-  "welcome": {
-    "title": "Bem-vindo ao StaticKit",
-    "description": "StaticKit é um editor de imagens IA gratuito. Ajuste imagens, troque fundos, mude modelos, redimensione para qualquer proporção e muito mais.",
-    "learnMore": "Saiba mais",
-    "byokTitle": "Traga sua própria chave",
-    "byokDescription": "Sua chave API permanece no seu navegador e nunca é enviada para nossos servidores. Você paga apenas pelo que usa.",
-    "skipForNow": "Pular por agora"
   },
   "apiKey": {
     "title": "Configuracao da Chave API",

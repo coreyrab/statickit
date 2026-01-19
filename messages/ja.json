@@ -66,7 +66,11 @@
     },
     "byok": "自分のキーを使用",
     "byokDescriptionAuth": "APIキーは暗号化され、クラウドに安全に保存されます。",
-    "skip": "今はスキップ"
+    "skip": "今はスキップ",
+    "description": "StaticKitは無料のAI画像エディターです。画像の調整、背景の変更、モデルの変更、あらゆるアスペクト比へのリサイズなどが可能です。",
+    "byokTitle": "自分のキーを使用",
+    "byokDescription": "APIキーはブラウザ内に保存され、サーバーに送信されることはありません。使用した分だけお支払いいただきます。",
+    "skipForNow": "今はスキップ"
   },
   "apiKeys": {
     "title": "APIキー設定",
@@ -441,14 +445,6 @@
     "qualityMedium": "中",
     "qualityHigh": "高",
     "qualityTooltip": "高品質 = より良い結果だがAPIコストが高くなります"
-  },
-  "welcome": {
-    "title": "StaticKitへようこそ",
-    "description": "StaticKitは無料のAI画像エディターです。画像の調整、背景の変更、モデルの変更、あらゆるアスペクト比へのリサイズなどが可能です。",
-    "learnMore": "詳しく見る",
-    "byokTitle": "自分のキーを使用",
-    "byokDescription": "APIキーはブラウザ内に保存され、サーバーに送信されることはありません。使用した分だけお支払いいただきます。",
-    "skipForNow": "今はスキップ"
   },
   "apiKey": {
     "title": "APIキーの設定",

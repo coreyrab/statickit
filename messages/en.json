@@ -52,6 +52,7 @@
   "welcome": {
     "title": "Welcome to StaticKit",
     "tagline": "Free AI-powered photo editing for everyone",
+    "description": "StaticKit is a free AI image editor. Adjust images, swap backgrounds, change models, resize to any aspect ratio, and more.",
     "freeCallout": "100% free — just bring your own API key",
     "learnMore": "Learn how it works",
     "features": {
@@ -65,8 +66,11 @@
       "versionsDesc": "Compare and iterate on edits"
     },
     "byok": "Bring Your Own Key",
+    "byokTitle": "Bring Your Own Key",
+    "byokDescription": "Your API key stays in your browser and is never sent to our servers. You only pay for what you use.",
     "byokDescriptionAuth": "Your API key is encrypted and stored securely in the cloud.",
-    "skip": "Skip for now"
+    "skip": "Skip for now",
+    "skipForNow": "Skip for now"
   },
   "apiKeys": {
     "title": "API Key Settings",
@@ -441,14 +445,6 @@
     "qualityMedium": "Medium",
     "qualityHigh": "High",
     "qualityTooltip": "Higher quality = better results but higher API cost"
-  },
-  "welcome": {
-    "title": "Welcome to StaticKit",
-    "description": "StaticKit is a free AI image editor. Adjust images, swap backgrounds, change models, resize to any aspect ratio, and more.",
-    "learnMore": "Learn more",
-    "byokTitle": "Bring Your Own Key",
-    "byokDescription": "Your API key stays in your browser and is never sent to our servers. You only pay for what you use.",
-    "skipForNow": "Skip for now"
   },
   "apiKey": {
     "title": "API Key Setup",

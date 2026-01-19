@@ -66,7 +66,11 @@
     },
     "byok": "使用您自己的密钥",
     "byokDescriptionAuth": "您的API密钥已加密并安全地存储在云端。",
-    "skip": "暂时跳过"
+    "skip": "暂时跳过",
+    "description": "StaticKit 是一款免费的 AI 图片编辑器。调整图片、更换背景、更换模特、调整任意宽高比等。",
+    "byokTitle": "自带密钥",
+    "byokDescription": "您的 API 密钥保存在浏览器中，永不发送到我们的服务器。您只需为实际使用付费。",
+    "skipForNow": "暂时跳过"
   },
   "apiKeys": {
     "title": "API密钥设置",
@@ -441,14 +445,6 @@
     "qualityMedium": "中",
     "qualityHigh": "高",
     "qualityTooltip": "质量越高 = 效果越好，但API成本越高"
-  },
-  "welcome": {
-    "title": "欢迎使用 StaticKit",
-    "description": "StaticKit 是一款免费的 AI 图片编辑器。调整图片、更换背景、更换模特、调整任意宽高比等。",
-    "learnMore": "了解更多",
-    "byokTitle": "自带密钥",
-    "byokDescription": "您的 API 密钥保存在浏览器中，永不发送到我们的服务器。您只需为实际使用付费。",
-    "skipForNow": "暂时跳过"
   },
   "apiKey": {
     "title": "API密钥设置",
