@@ -7,6 +7,7 @@
     "delete": "Eliminar",
     "save": "Guardar",
     "close": "Cerrar",
+    "done": "Listo",
     "loading": "Cargando...",
     "processing": "Procesando...",
     "error": "Error",
@@ -22,6 +23,55 @@
     "suggested": "Sugerido",
     "reference": "Referencia",
     "clearAllSelections": "Borrar todas las selecciones"
+  },
+  "auth": {
+    "signIn": "Iniciar sesion",
+    "signUp": "Registrarse",
+    "signOut": "Cerrar sesion",
+    "signUpFree": "Registrate gratis",
+    "alreadyHaveAccount": "¿Ya tienes cuenta? Inicia sesión",
+    "benefits": {
+      "title": "Por que crear una cuenta?",
+      "encrypted": "Claves API encriptadas con AES-256",
+      "sync": "Sincroniza claves en todos tus dispositivos",
+      "secure": "Nunca pierdas tus claves"
+    }
+  },
+  "account": {
+    "title": "Cuenta",
+    "description": "Administra tu cuenta y claves API",
+    "connectedKeys": "Claves API conectadas",
+    "noKeys": "Sin claves API conectadas",
+    "encrypted": "Encriptado",
+    "encryptedStorage": "Claves almacenadas con encriptacion AES-256",
+    "test": "Probar",
+    "keyValid": "La clave API funciona",
+    "keyNotFound": "Clave API no encontrada",
+    "testFailed": "Error al probar la clave API"
+  },
+  "welcome": {
+    "title": "Bienvenido a StaticKit",
+    "tagline": "Edición de fotos con IA gratuita para todos",
+    "freeCallout": "100% gratis — solo trae tu propia clave API",
+    "learnMore": "Aprende cómo funciona",
+    "features": {
+      "presets": "Presets de un clic",
+      "presetsDesc": "Ediciones profesionales con un solo clic",
+      "backgrounds": "Cambio de fondo",
+      "backgroundsDesc": "Reemplaza cualquier fondo al instante",
+      "models": "Cambio de modelo",
+      "modelsDesc": "Cambia personas en fotos de productos",
+      "versions": "Historial de versiones",
+      "versionsDesc": "Compara e itera en tus ediciones"
+    },
+    "byok": "Trae tu propia clave",
+    "byokDescriptionAuth": "Tu clave API esta encriptada y almacenada de forma segura en la nube.",
+    "skip": "Omitir por ahora"
+  },
+  "apiKeys": {
+    "title": "Configuracion de claves API",
+    "storageBrowser": "Las claves API se almacenan localmente en tu navegador.",
+    "storageEncrypted": "Las claves API estan encriptadas y almacenadas de forma segura en la nube."
   },
   "nav": {
     "apiKeys": "Claves API",

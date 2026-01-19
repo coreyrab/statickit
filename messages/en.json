@@ -7,6 +7,7 @@
     "delete": "Delete",
     "save": "Save",
     "close": "Close",
+    "done": "Done",
     "loading": "Loading...",
     "processing": "Processing...",
     "error": "Error",
@@ -22,6 +23,55 @@
     "suggested": "Suggested",
     "reference": "Reference",
     "clearAllSelections": "Clear all selections"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "signUpFree": "Sign up free",
+    "alreadyHaveAccount": "Already have an account? Sign in",
+    "benefits": {
+      "title": "Why create an account?",
+      "encrypted": "API keys encrypted with AES-256",
+      "sync": "Sync keys across all your devices",
+      "secure": "Never lose your keys again"
+    }
+  },
+  "account": {
+    "title": "Account",
+    "description": "Manage your account and API keys",
+    "connectedKeys": "Connected API Keys",
+    "noKeys": "No API keys connected yet",
+    "encrypted": "Encrypted",
+    "encryptedStorage": "Keys stored with AES-256 encryption",
+    "test": "Test",
+    "keyValid": "API key is working",
+    "keyNotFound": "API key not found",
+    "testFailed": "Failed to test API key"
+  },
+  "welcome": {
+    "title": "Welcome to StaticKit",
+    "tagline": "Free AI-powered photo editing for everyone",
+    "freeCallout": "100% free — just bring your own API key",
+    "learnMore": "Learn how it works",
+    "features": {
+      "presets": "One-Click Presets",
+      "presetsDesc": "Professional edits with a single click",
+      "backgrounds": "Background Swap",
+      "backgroundsDesc": "Replace any background instantly",
+      "models": "Model Swap",
+      "modelsDesc": "Change people in product photos",
+      "versions": "Version History",
+      "versionsDesc": "Compare and iterate on edits"
+    },
+    "byok": "Bring Your Own Key",
+    "byokDescriptionAuth": "Your API key is encrypted and stored securely in the cloud.",
+    "skip": "Skip for now"
+  },
+  "apiKeys": {
+    "title": "API Key Settings",
+    "storageBrowser": "API keys are stored locally in your browser.",
+    "storageEncrypted": "API keys are encrypted and stored securely in the cloud."
   },
   "nav": {
     "apiKeys": "API Keys",

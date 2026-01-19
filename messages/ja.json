@@ -7,6 +7,7 @@
     "delete": "削除",
     "save": "保存",
     "close": "閉じる",
+    "done": "完了",
     "loading": "読み込み中...",
     "processing": "処理中...",
     "error": "エラー",
@@ -22,6 +23,55 @@
     "suggested": "おすすめ",
     "reference": "参照",
     "clearAllSelections": "すべての選択をクリア"
+  },
+  "auth": {
+    "signIn": "ログイン",
+    "signUp": "登録",
+    "signOut": "ログアウト",
+    "signUpFree": "無料で登録",
+    "alreadyHaveAccount": "アカウントをお持ちですか？ログイン",
+    "benefits": {
+      "title": "アカウントを作成する理由",
+      "encrypted": "AES-256でAPIキーを暗号化",
+      "sync": "すべてのデバイスでキーを同期",
+      "secure": "キーを失うことがなくなります"
+    }
+  },
+  "account": {
+    "title": "アカウント",
+    "description": "アカウントとAPIキーを管理",
+    "connectedKeys": "接続済みAPIキー",
+    "noKeys": "APIキーが接続されていません",
+    "encrypted": "暗号化済み",
+    "encryptedStorage": "AES-256暗号化で保存",
+    "test": "テスト",
+    "keyValid": "APIキーは有効です",
+    "keyNotFound": "APIキーが見つかりません",
+    "testFailed": "APIキーのテストに失敗しました"
+  },
+  "welcome": {
+    "title": "StaticKitへようこそ",
+    "tagline": "誰でも使える無料のAI写真編集",
+    "freeCallout": "100%無料 — APIキーを持参するだけ",
+    "learnMore": "仕組みを見る",
+    "features": {
+      "presets": "ワンクリックプリセット",
+      "presetsDesc": "ワンクリックでプロ仕様の編集",
+      "backgrounds": "背景の入れ替え",
+      "backgroundsDesc": "どんな背景も瞬時に置換",
+      "models": "モデルの入れ替え",
+      "modelsDesc": "商品写真の人物を変更",
+      "versions": "バージョン履歴",
+      "versionsDesc": "編集を比較して繰り返し改善"
+    },
+    "byok": "自分のキーを使用",
+    "byokDescriptionAuth": "APIキーは暗号化され、クラウドに安全に保存されます。",
+    "skip": "今はスキップ"
+  },
+  "apiKeys": {
+    "title": "APIキー設定",
+    "storageBrowser": "APIキーはブラウザにローカル保存されます。",
+    "storageEncrypted": "APIキーは暗号化され、クラウドに安全に保存されます。"
   },
   "nav": {
     "apiKeys": "APIキー",

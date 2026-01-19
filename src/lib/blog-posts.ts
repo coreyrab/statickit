@@ -14,120 +14,95 @@ export interface BlogPost {
 export const posts: Record<string, BlogPost> = {
   'how-statickit-works': {
     title: 'How StaticKit Works',
-    description: 'Learn how StaticKit delivers professional AI image editing without subscriptions or data collection. Explore the BYOK model, client-side API key storage, and why this architecture benefits users.',
-    excerpt: 'No accounts. No subscriptions. No data collection. Here\'s how StaticKit delivers professional AI editing while keeping you in control.',
-    readTime: '8 min read',
+    description: 'StaticKit is a free AI image editor that makes professional photo editing accessible to everyone. One-click presets, background swaps, model changes, and more.',
+    excerpt: 'Professional AI image editing without the learning curve. Here\'s what makes StaticKit different.',
+    readTime: '5 min read',
     date: '2025-01-01',
     author: 'Corey Rabazinski',
     coverImage: '/blog/how_statickit_works.jpg',
-    content: `Most AI image tools follow the same playbook: create an account, choose a subscription tier, upload your images to their servers, and hope they don't train on your data or disappear next month.
+    content: `Most AI image tools are either too complicated or too expensive. You're either wrestling with Photoshop-level complexity or paying $20/month for a subscription you barely use.
 
-StaticKit takes a fundamentally different approach. There's no account, no subscription, and your images never touch our servers. You bring your own AI, and everything runs through your browser.
+StaticKit is different. It's a powerful front-end for the best AI image models, designed to make professional editing fast and intuitive. No subscriptions—just pay pennies per edit directly to the AI provider.
 
-Here's exactly how it works—and why this architecture benefits you.
+## A Front-End for World-Class AI
 
-## The Core Concept: You Bring the AI
+StaticKit connects to Google's Gemini, one of the most capable AI image models available. But instead of writing prompts and wrestling with API documentation, you get a polished interface with smart features built in.
 
-StaticKit is a front-end for AI image models. Think of it like a professional camera app that works with any camera sensor. The app provides the interface, controls, and presets. The sensor (in this case, Google's Gemini) provides the actual image processing power.
+Think of it like the difference between coding a website from scratch versus using a website builder. Same powerful technology underneath, but dramatically easier to use.
 
-This is called BYOK: Bring Your Own Key.
+You bring your own API key (free from Google), and StaticKit handles everything else: the prompt engineering, the UI, the workflow optimization.
 
-You get a free API key from Google AI Studio, paste it into StaticKit once, and you're editing. StaticKit handles the complex prompt engineering, UI, and workflow. Gemini handles the actual AI image generation and editing.
+## One-Click Presets That Actually Work
 
-The result: professional-grade AI editing at API costs (pennies per image) instead of subscription prices ($10-20/month).
+The fastest way to edit in StaticKit is with presets. Instead of describing exactly what you want, click a preset and let StaticKit construct the perfect prompt.
 
-## How Your API Key Is Stored
+**Lighting presets** transform the mood instantly. Golden hour, studio lighting, dramatic shadows—one click each.
 
-This is where most people have questions—and rightfully so. Your API key is sensitive. Here's exactly what happens:
+**Style presets** apply consistent aesthetics. Film grain, clean and modern, moody and cinematic.
 
-When you enter your API key, the key is saved to your browser's localStorage (the same place websites store preferences and session data). It never leaves your device except when making direct API calls to Google. StaticKit's servers never see, store, or log your key. The key persists across sessions until you clear your browser data or explicitly remove it.
+**Enhancement presets** fix common issues. Sharpen details, reduce noise, boost colors naturally.
 
-What this means practically: Your key stays on your machine. Period. If you use StaticKit on a different device, you'll need to enter your key again. Clearing your browser data removes the key. No database breach can ever expose your key because we don't have a database of keys.
+Behind each preset is carefully engineered prompt logic that maintains your subject while applying the style. This is harder than it sounds—naive prompts often distort faces or change important details. StaticKit's presets are tuned to avoid these problems.
 
-This is a deliberate architectural choice. We could store keys server-side and make the experience slightly more convenient (sync across devices, password recovery, etc.). But that would mean building infrastructure that holds sensitive credentials—infrastructure that could be breached, subpoenaed, or misused.
+## Background Swap in Seconds
 
-By keeping everything client-side, there's nothing to breach.
+Need to change where your photo was taken? StaticKit's background replacement is remarkably good.
 
-## How Image Processing Works
+Upload a photo of someone in front of a white wall. Type "sunny beach at golden hour" or "modern office with city view" or "cozy coffee shop." StaticKit extracts your subject, generates the new environment, and blends them together with matching lighting.
 
-When you edit an image in StaticKit, here's the actual data flow:
+This used to require hours in Photoshop with manual masking. Now it's a 30-second operation.
 
-Step 1: You upload an image. The image loads directly into your browser's memory. It's not uploaded to any server—it stays in your browser tab.
+## Model Swap for Product Photos
 
-Step 2: You describe an edit. "Change the background to a sunny beach" or "Make the lighting warmer" or just click a preset.
+This is where StaticKit really shines for e-commerce and marketing.
 
-Step 3: StaticKit builds the API request. This is where the complexity happens. StaticKit constructs a carefully engineered prompt that preserves your subject while applying your requested changes. This prompt engineering is one of the main things you're getting from StaticKit—the difference between "make it a beach" (which might distort your product) and a multi-part prompt that maintains subject fidelity.
+Have a product photo with one model? Generate variations with different people without a reshoot. StaticKit can maintain the pose, clothing, and product placement while changing the person.
 
-Step 4: Direct API call to Google. Your browser makes a direct HTTPS request to Google's Gemini API. The request includes your API key (from localStorage) and the image/prompt data. This goes directly from your browser to Google—StaticKit's servers are not involved.
+This lets you test which demographics respond to which creative—without booking multiple photo shoots.
 
-Step 5: Google returns the edited image. The response comes directly back to your browser, where you can review it, iterate, or download.
+## Version History That Makes Sense
 
-At no point does your image pass through StaticKit infrastructure. The only servers involved are yours (your browser) and Google's (the AI).
+Every edit in StaticKit creates a new version. You can see your entire editing journey, compare versions side-by-side, and branch off in different directions.
 
-## Why the BYOK Model Works
+Made a change you don't like? Go back two versions and try something different. Want to see how the golden hour version compares to the studio lighting version? Put them next to each other.
 
-Skeptics often ask: "If it's free, what's the catch?" Here's why BYOK makes sense for everyone:
+This non-destructive workflow means you never lose good work experimenting with new ideas.
 
-For users: No subscription treadmill—pay Google a few cents per edit instead of $15/month whether you use it or not. No lock-in—your API key works with any Gemini-compatible tool. You're not trapped in our ecosystem. No data concerns—your images go to Google (which you've agreed to by using their API) and nowhere else. Unlimited usage—there's no "you've used your 50 monthly credits" moment.
+## Smart Aspect Ratio Resizing
 
-For StaticKit: No infrastructure costs—we don't run GPU servers, don't store images, don't manage user accounts. The biggest cost centers in AI SaaS don't exist. No billing complexity—we don't handle payments, refunds, subscription management, or failed charges. No liability—we're not holding your images or your credentials.
+Need the same image for Instagram (square), Stories (9:16), and your website (16:9)?
 
-This model lets us focus entirely on building great software instead of managing a SaaS business.
+StaticKit's smart resize doesn't just crop—it intelligently extends your image to fit new dimensions. The AI generates additional content that matches the original seamlessly.
 
-## What Happens on Your Device vs. Google's Servers
+One source image, unlimited output formats.
 
-Let's be precise about what runs where:
+## Natural Language Editing
 
-Entirely on your device (browser): Image upload and display, API key storage, background removal (WebGPU-powered, no server needed), version history and undo, export and download, and all UI interactions.
+Sometimes you know exactly what you want. Just describe it.
 
-On Google's servers (via direct API call): AI image generation and editing, image analysis, and prompt expansion.
+"Make her shirt blue instead of red."
+"Remove the coffee cup from the table."
+"Add some clouds to the sky."
+"Make the whole image feel warmer and more inviting."
 
-The only data that leaves your browser is what you explicitly send to Google for AI processing. And that's governed by Google's AI terms, not ours.
+StaticKit translates your plain English into the precise prompts that get results. No prompt engineering required on your end.
 
-## Privacy Compared to Traditional Tools
+## Why It's Free (Really)
 
-Let's compare StaticKit's architecture to typical AI editing tools:
+StaticKit is free because you bring your own AI. You get an API key from Google (also free to start), and you pay Google directly for what you use—typically a few cents per edit.
 
-Traditional AI editor: You create an account (email, password stored on their servers). You upload images (stored on their servers, possibly indefinitely). Their servers call AI APIs (they see your images). Results stored on their servers (tied to your account). They may train on your images (check the ToS). Data breach exposes: your email, password, all images, usage history.
+There's no subscription, no credits that expire, no "premium tier" with the good features locked away.
 
-StaticKit: No account (nothing to store). Images stay in your browser (nothing to upload). Your browser calls Google directly (we never see images). Results stay in your browser (nothing to store). We can't train on images we never see. Data breach exposes: nothing (we have nothing).
-
-The architecture makes privacy the default, not a policy promise.
-
-## The Technology Stack
-
-For the technically curious, here's what powers StaticKit:
-
-- **Next.js** handles the web application framework
-- **Gemini API** (via @google/generative-ai) powers all AI image operations
-- **WebGPU + ONNX Runtime** enables client-side background removal without any server
-- **localStorage** provides simple, secure API key persistence
-- **No backend database** means no user data to protect or breach
-
-The entire codebase is open source (MIT licensed). You can read every line, verify the claims in this post, or run your own instance.
+We make StaticKit because we use it ourselves and wanted something better than what existed. The BYOK model means we don't need to charge you to keep the lights on.
 
 ## Getting Started
 
-If you've read this far, you understand the model. Here's how to start:
+1. **Get a free API key** from [Google AI Studio](https://aistudio.google.com)
+2. **Create a free account** at [statickit.ai](https://statickit.ai)
+3. **Add your API key** (encrypted and synced across devices)
+4. **Upload an image** and start editing
 
-1. Get a Gemini API key (free): Go to [Google AI Studio](https://aistudio.google.com), click "Get API Key", and create one.
-
-2. Open StaticKit: Visit [statickit.ai](https://statickit.ai) or run it locally from the GitHub repo.
-
-3. Enter your key once: Paste your API key when prompted. It's saved to your browser.
-
-4. Start editing: Upload an image and describe what you want to change.
-
-That's it. No email confirmation, no credit card, no 14-day trial that auto-converts. Just software that works.
-
-## Key Takeaways
-
-- **BYOK means you control the AI.** Your key, your usage, your costs.
-- **Client-side storage means true privacy.** We can't leak what we don't have.
-- **Direct API calls mean no middleman.** Your images go straight to Google and back.
-- **Open source means trust but verify.** Don't take our word for it—read the code.
-
-The best software disappears. You don't think about the architecture, the business model, or the privacy policy. You just edit images. That's what we're building.`,
+That's it. Professional AI image editing, available right now.`,
   },
   'nano-banana-pro-without-watermarks': {
     title: 'How to Use Nano Banana Pro Without Watermarks',

@@ -7,6 +7,7 @@
     "delete": "Supprimer",
     "save": "Enregistrer",
     "close": "Fermer",
+    "done": "Termine",
     "loading": "Chargement...",
     "processing": "Traitement...",
     "error": "Erreur",
@@ -22,6 +23,55 @@
     "suggested": "Suggere",
     "reference": "Reference",
     "clearAllSelections": "Effacer toutes les selections"
+  },
+  "auth": {
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "signOut": "Se deconnecter",
+    "signUpFree": "Inscription gratuite",
+    "alreadyHaveAccount": "Vous avez déjà un compte? Connectez-vous",
+    "benefits": {
+      "title": "Pourquoi creer un compte?",
+      "encrypted": "Cles API chiffrees avec AES-256",
+      "sync": "Synchronisez vos cles sur tous vos appareils",
+      "secure": "Ne perdez plus jamais vos cles"
+    }
+  },
+  "account": {
+    "title": "Compte",
+    "description": "Gerez votre compte et vos cles API",
+    "connectedKeys": "Cles API connectees",
+    "noKeys": "Aucune cle API connectee",
+    "encrypted": "Chiffre",
+    "encryptedStorage": "Cles stockees avec chiffrement AES-256",
+    "test": "Tester",
+    "keyValid": "La cle API fonctionne",
+    "keyNotFound": "Cle API non trouvee",
+    "testFailed": "Echec du test de la cle API"
+  },
+  "welcome": {
+    "title": "Bienvenue sur StaticKit",
+    "tagline": "Retouche photo IA gratuite pour tous",
+    "freeCallout": "100% gratuit — apportez simplement votre propre clé API",
+    "learnMore": "Découvrez comment ça marche",
+    "features": {
+      "presets": "Presets en un clic",
+      "presetsDesc": "Retouches professionnelles en un seul clic",
+      "backgrounds": "Changement de fond",
+      "backgroundsDesc": "Remplacez n'importe quel arrière-plan instantanément",
+      "models": "Changement de modèle",
+      "modelsDesc": "Changez les personnes dans les photos de produits",
+      "versions": "Historique des versions",
+      "versionsDesc": "Comparez et itérez sur vos retouches"
+    },
+    "byok": "Apportez votre propre cle",
+    "byokDescriptionAuth": "Votre cle API est chiffree et stockee en toute securite dans le cloud.",
+    "skip": "Passer pour l'instant"
+  },
+  "apiKeys": {
+    "title": "Parametres des cles API",
+    "storageBrowser": "Les cles API sont stockees localement dans votre navigateur.",
+    "storageEncrypted": "Les cles API sont chiffrees et stockees en toute securite dans le cloud."
   },
   "nav": {
     "apiKeys": "Cles API",

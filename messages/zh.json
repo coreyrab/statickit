@@ -7,6 +7,7 @@
     "delete": "删除",
     "save": "保存",
     "close": "关闭",
+    "done": "完成",
     "loading": "加载中...",
     "processing": "处理中...",
     "error": "错误",
@@ -22,6 +23,55 @@
     "suggested": "推荐",
     "reference": "参考",
     "clearAllSelections": "清除所有选择"
+  },
+  "auth": {
+    "signIn": "登录",
+    "signUp": "注册",
+    "signOut": "退出登录",
+    "signUpFree": "免费注册",
+    "alreadyHaveAccount": "已有账户？立即登录",
+    "benefits": {
+      "title": "为什么要创建账户？",
+      "encrypted": "使用AES-256加密API密钥",
+      "sync": "在所有设备上同步密钥",
+      "secure": "永不丢失您的密钥"
+    }
+  },
+  "account": {
+    "title": "账户",
+    "description": "管理您的账户和API密钥",
+    "connectedKeys": "已连接的API密钥",
+    "noKeys": "尚未连接API密钥",
+    "encrypted": "已加密",
+    "encryptedStorage": "使用AES-256加密存储密钥",
+    "test": "测试",
+    "keyValid": "API密钥有效",
+    "keyNotFound": "未找到API密钥",
+    "testFailed": "API密钥测试失败"
+  },
+  "welcome": {
+    "title": "欢迎使用StaticKit",
+    "tagline": "人人可用的免费AI照片编辑",
+    "freeCallout": "100%免费 — 只需自带API密钥",
+    "learnMore": "了解工作原理",
+    "features": {
+      "presets": "一键预设",
+      "presetsDesc": "一键实现专业级编辑",
+      "backgrounds": "背景替换",
+      "backgroundsDesc": "即时替换任何背景",
+      "models": "模特替换",
+      "modelsDesc": "更换产品照片中的人物",
+      "versions": "版本历史",
+      "versionsDesc": "比较和迭代编辑效果"
+    },
+    "byok": "使用您自己的密钥",
+    "byokDescriptionAuth": "您的API密钥已加密并安全地存储在云端。",
+    "skip": "暂时跳过"
+  },
+  "apiKeys": {
+    "title": "API密钥设置",
+    "storageBrowser": "API密钥存储在您的浏览器本地。",
+    "storageEncrypted": "API密钥已加密并安全地存储在云端。"
   },
   "nav": {
     "apiKeys": "API密钥",

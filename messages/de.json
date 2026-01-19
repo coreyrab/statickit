@@ -7,6 +7,7 @@
     "delete": "Löschen",
     "save": "Speichern",
     "close": "Schließen",
+    "done": "Fertig",
     "loading": "Laden...",
     "processing": "Verarbeiten...",
     "error": "Fehler",
@@ -22,6 +23,55 @@
     "suggested": "Vorgeschlagen",
     "reference": "Referenz",
     "clearAllSelections": "Alle Auswahlen löschen"
+  },
+  "auth": {
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "signOut": "Abmelden",
+    "signUpFree": "Kostenlos registrieren",
+    "alreadyHaveAccount": "Bereits ein Konto? Anmelden",
+    "benefits": {
+      "title": "Warum ein Konto erstellen?",
+      "encrypted": "API-Schlussel mit AES-256 verschlusselt",
+      "sync": "Schlussel auf allen Geraten synchronisieren",
+      "secure": "Verlieren Sie nie wieder Ihre Schlussel"
+    }
+  },
+  "account": {
+    "title": "Konto",
+    "description": "Verwalten Sie Ihr Konto und API-Schlussel",
+    "connectedKeys": "Verbundene API-Schlussel",
+    "noKeys": "Noch keine API-Schlussel verbunden",
+    "encrypted": "Verschlusselt",
+    "encryptedStorage": "Schlussel mit AES-256-Verschlusselung gespeichert",
+    "test": "Testen",
+    "keyValid": "API-Schlussel funktioniert",
+    "keyNotFound": "API-Schlussel nicht gefunden",
+    "testFailed": "API-Schlussel-Test fehlgeschlagen"
+  },
+  "welcome": {
+    "title": "Willkommen bei StaticKit",
+    "tagline": "Kostenlose KI-Fotobearbeitung für alle",
+    "freeCallout": "100% kostenlos — bringen Sie einfach Ihren eigenen API-Schlüssel mit",
+    "learnMore": "Erfahren Sie, wie es funktioniert",
+    "features": {
+      "presets": "Ein-Klick-Vorlagen",
+      "presetsDesc": "Professionelle Bearbeitungen mit einem Klick",
+      "backgrounds": "Hintergrund tauschen",
+      "backgroundsDesc": "Jeden Hintergrund sofort ersetzen",
+      "models": "Modell tauschen",
+      "modelsDesc": "Personen in Produktfotos ändern",
+      "versions": "Versionsverlauf",
+      "versionsDesc": "Bearbeitungen vergleichen und iterieren"
+    },
+    "byok": "Eigenen Schlussel verwenden",
+    "byokDescriptionAuth": "Ihr API-Schlussel ist verschlusselt und sicher in der Cloud gespeichert.",
+    "skip": "Vorerst uberspringen"
+  },
+  "apiKeys": {
+    "title": "API-Schlussel-Einstellungen",
+    "storageBrowser": "API-Schlussel werden lokal in Ihrem Browser gespeichert.",
+    "storageEncrypted": "API-Schlussel sind verschlusselt und sicher in der Cloud gespeichert."
   },
   "nav": {
     "apiKeys": "API-Schlüssel",

@@ -8,9 +8,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, X, ExternalLink, Key } from "lucide-react";
+import { Loader2, Check, X, ExternalLink, Key, Shield, RefreshCw, Cloud, Sparkles, Image, Wand2, Layers } from "lucide-react";
 import { track } from "@/lib/analytics";
 import Link from "next/link";
+import { useClerk } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
 
 interface WelcomeModalProps {
@@ -70,7 +72,13 @@ export function WelcomeModal({
   onApiKeySet,
   onOpenAIKeySet,
 }: WelcomeModalProps) {
+  const { openSignUp } = useClerk();
+  const { isSignedIn, isLoaded } = useAuth();
   const t = useTranslations();
+
+  // View state: "auth" shows sign-up requirement, "keys" shows API key inputs (only when authenticated)
+  const [view, setView] = useState<"auth" | "keys">(isSignedIn ? "keys" : "auth");
+
   const [geminiKeyInput, setGeminiKeyInput] = useState("");
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
   const [geminiValidating, setGeminiValidating] = useState(false);
@@ -166,9 +174,20 @@ export function WelcomeModal({
       setOpenaiError(null);
       setGeminiSuccess(false);
       setOpenaiSuccess(false);
+      setView(isSignedIn ? "keys" : "auth");
     }
     onOpenChange(newOpen);
   };
+
+  const handleSignUp = () => {
+    openSignUp();
+    // Keep modal open - will be closed when auth completes
+  };
+
+  // If user just signed in, go directly to keys view
+  if (isLoaded && isSignedIn && view === "auth") {
+    setView("keys");
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -184,29 +203,103 @@ export function WelcomeModal({
           <DialogTitle className="text-2xl font-semibold text-foreground">
             {t("welcome.title")}
           </DialogTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t("welcome.tagline")}
+          </p>
         </DialogHeader>
-        <div className="space-y-6 py-4">
+        <div className="space-y-5 py-4">
 
-          {/* What is StaticKit */}
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {t("welcome.description")}{" "}
-              <Link href="/blog/how-statickit-works" className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300">
-                {t("welcome.learnMore")}
-              </Link>
-            </p>
-          </div>
+          {/* Auth View: Sign up required */}
+          {view === "auth" && (
+            <>
+              {/* Feature highlights */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Wand2 className="w-4 h-4 text-violet-500" />
+                    <span className="text-sm font-medium text-foreground">{t("welcome.features.presets")}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t("welcome.features.presetsDesc")}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Image className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm font-medium text-foreground">{t("welcome.features.backgrounds")}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t("welcome.features.backgroundsDesc")}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Sparkles className="w-4 h-4 text-amber-500" />
+                    <span className="text-sm font-medium text-foreground">{t("welcome.features.models")}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t("welcome.features.modelsDesc")}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Layers className="w-4 h-4 text-emerald-500" />
+                    <span className="text-sm font-medium text-foreground">{t("welcome.features.versions")}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t("welcome.features.versionsDesc")}</p>
+                </div>
+              </div>
 
-          {/* BYOK Explanation */}
-          <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-2">
-            <div className="flex items-center gap-2">
-              <Key className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-foreground">{t("welcome.byokTitle")}</span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {t("welcome.byokDescription")}
-            </p>
-          </div>
+              {/* Free callout */}
+              <div className="text-center py-2">
+                <span className="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                  <Check className="w-4 h-4" />
+                  {t("welcome.freeCallout")}
+                </span>
+              </div>
+
+              {/* Sign up button */}
+              <Button
+                onClick={handleSignUp}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                size="lg"
+              >
+                {t("auth.signUpFree")}
+              </Button>
+
+              {/* Already have an account */}
+              <div className="text-center">
+                <button
+                  onClick={handleSignUp}
+                  className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors"
+                >
+                  {t("auth.alreadyHaveAccount")}
+                </button>
+              </div>
+
+              {/* Learn more link */}
+              <div className="text-center">
+                <Link
+                  href="/blog/how-statickit-works"
+                  className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                >
+                  {t("welcome.learnMore")} →
+                </Link>
+              </div>
+            </>
+          )}
+
+          {/* Keys View: API key inputs */}
+          {view === "keys" && (
+            <>
+              {/* BYOK Explanation */}
+              <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-2">
+                <div className="flex items-center gap-2">
+                  <Key className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">{t("welcome.byok")}</span>
+                  <span className="ml-auto text-xs text-green-600 flex items-center gap-1">
+                    <Shield className="w-3 h-3" />
+                    {t("account.encrypted")}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {t("welcome.byokDescriptionAuth")}
+                </p>
+              </div>
 
           {/* API Key Inputs - Stacked */}
           <div className="space-y-5">
@@ -352,15 +445,17 @@ export function WelcomeModal({
             </div>
           </div>
 
-          {/* Skip option */}
-          <div className="pt-4 border-t border-border/60 text-center">
-            <button
-              onClick={() => onOpenChange(false)}
-              className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors"
-            >
-              {t("welcome.skipForNow")}
-            </button>
-          </div>
+          {/* Skip option for keys view */}
+              <div className="pt-4 border-t border-border/60 text-center">
+                <button
+                  onClick={() => onOpenChange(false)}
+                  className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors"
+                >
+                  {t("welcome.skip")}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>

@@ -99,6 +99,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { Footer } from '@/components/landing/Footer';
 import { ApiKeySetupModal, WelcomeModal, ResumeSessionModal } from '@/components/onboarding';
 import { getStoredApiKey, setStoredApiKey, hasStoredApiKey, getStoredOpenAIKey, setStoredOpenAIKey, hasStoredOpenAIKey } from '@/lib/api-key-storage';
+import { UserButton, SignUpButton } from '@/components/auth';
+import { useAuth } from '@/hooks/useAuth';
 import { useSessionPersistence, type SessionState } from '@/hooks/useSessionPersistence';
 import { HardDrive } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -237,6 +239,9 @@ function HomeContent() {
 
   // Translations
   const t = useTranslations();
+
+  // Auth state
+  const { isSignedIn, isLoaded: isAuthLoaded } = useAuth();
 
   const [step, setStep] = useState<Step>('editor');
   const [selectedTool, setSelectedTool] = useState<Tool>('edit');
@@ -912,21 +917,10 @@ function HomeContent() {
       setOpenaiQuality(savedOpenaiQuality);
     }
 
-    // Check if first visit
-    const hasVisited = localStorage.getItem('statickit_has_visited');
-
-    // Show welcome modal on first visit without any API key
-    // Show API key setup on return visits without any API key
-    const hasAnyKey = storedGeminiKey || storedOpenAIKey;
-    if (!hasAnyKey) {
-      if (!hasVisited) {
-        setShowWelcome(true);
-      } else {
-        setShowApiKeySetup(true);
-      }
-    }
+    // API key checks are now handled in the auth-aware useEffect below
 
     // Check for existing session to resume
+    const hasAnyKey = storedGeminiKey || storedOpenAIKey;
     checkForExistingSession().then((sessionInfo) => {
       setSessionChecked(true);
       if (sessionInfo.exists && hasAnyKey) {
@@ -939,6 +933,24 @@ function HomeContent() {
       }
     });
   }, []);
+
+  // Auth-aware welcome/API key modal logic
+  useEffect(() => {
+    if (!isAuthLoaded) return;
+
+    // If not signed in, show welcome modal (which requires sign-in)
+    if (!isSignedIn) {
+      setShowWelcome(true);
+      return;
+    }
+
+    // User is signed in - check for API keys
+    const hasAnyKey = apiKey || openaiApiKey;
+    if (!hasAnyKey && isApiKeyLoaded) {
+      // Signed in but no API keys - show API key setup
+      setShowApiKeySetup(true);
+    }
+  }, [isAuthLoaded, isSignedIn, apiKey, openaiApiKey, isApiKeyLoaded]);
 
   // Persist image quality preferences to localStorage (per provider)
   useEffect(() => {
@@ -3519,8 +3531,16 @@ function HomeContent() {
             </button>
           </div>
 
-          {/* Right: Hamburger Menu */}
-          <div className="flex items-center">
+          {/* Right: Auth + Hamburger Menu */}
+          <div className="flex items-center gap-2">
+            {/* Auth buttons */}
+            {isAuthLoaded && (
+              isSignedIn ? (
+                <UserButton />
+              ) : (
+                <SignUpButton variant="ghost" size="sm" showIcon={false} />
+              )
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors">
@@ -3528,16 +3548,19 @@ function HomeContent() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                {/* API Key */}
-                <DropdownMenuItem onClick={() => setShowApiKeySetup(true)} className="cursor-pointer group">
-                  <Key className={`w-4 h-4 ${apiKey ? 'text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300' : ''}`} />
-                  <span>{t('nav.apiKeys')}</span>
-                  {apiKey && (
-                    <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300">{t('nav.apiKeysActive')}</span>
-                  )}
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
+                {/* API Key - only show when authenticated */}
+                {isSignedIn && (
+                  <>
+                    <DropdownMenuItem onClick={() => setShowApiKeySetup(true)} className="cursor-pointer group">
+                      <Key className={`w-4 h-4 ${apiKey ? 'text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300' : ''}`} />
+                      <span>{t('nav.apiKeys')}</span>
+                      {apiKey && (
+                        <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300">{t('nav.apiKeysActive')}</span>
+                      )}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
 
                 {/* Keyboard Shortcuts Section */}
                 <DropdownMenuLabel className="text-[10px] text-muted-foreground/60 font-normal flex items-center gap-1.5">

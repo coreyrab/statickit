@@ -32,7 +32,7 @@
 
 StaticKit is an open-source frontend for AI image models. Instead of copy-pasting prompts into a chat interface, StaticKit gives you a proper editing UI with prompt engineering baked into presets. One click to swap a background, change lighting, or replace a model. The complex prompts happen under the hood.
 
-**Bring your own API key. No watermarks. No subscriptions. Keys stay in your browser.**
+**Bring your own API key. No watermarks. No subscriptions. Keys encrypted and synced across devices.**
 
 ## Features
 
@@ -56,8 +56,9 @@ StaticKit is an open-source frontend for AI image models. Instead of copy-pastin
 
 **BYOK (Bring Your Own Key)**
 - Use your own Gemini API key
-- Keys stored locally in your browser
-- No accounts, no tracking, no vendor lock-in
+- Free account with encrypted key storage
+- Keys sync across all your devices
+- No tracking, no vendor lock-in
 
 ## Quick Start
 
@@ -77,9 +78,10 @@ StaticKit is an open-source frontend for AI image models. Instead of copy-pastin
    npm run dev
    ```
 
-4. Add your API key
+4. Create a free account and add your API key
+   - Sign up with Google or email
    - Get a free Gemini API key from https://aistudio.google.com/apikey
-   - Paste it when prompted
+   - Paste it when prompted (encrypted and synced across devices)
 
 ## Tech Stack
 

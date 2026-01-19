@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { ConvexClerkProvider } from "@/providers/convex-provider";
 import { routing } from '@/i18n/routing';
 import "../globals.css";
 
@@ -90,14 +91,16 @@ export default async function LocaleLayout({ children, params }: Props) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        <ThemeProvider>
-          <TooltipProvider>
-            <NextIntlClientProvider messages={messages}>
-              {children}
-            </NextIntlClientProvider>
-          </TooltipProvider>
-          <Toaster position="bottom-left" />
-        </ThemeProvider>
+        <ConvexClerkProvider>
+          <ThemeProvider>
+            <TooltipProvider>
+              <NextIntlClientProvider messages={messages}>
+                {children}
+              </NextIntlClientProvider>
+            </TooltipProvider>
+            <Toaster position="bottom-left" />
+          </ThemeProvider>
+        </ConvexClerkProvider>
         <Script
           src="https://cdn.usefathom.com/script.js"
           data-site="GPULAWRW"

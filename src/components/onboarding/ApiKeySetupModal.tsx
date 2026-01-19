@@ -8,9 +8,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, X, ExternalLink } from "lucide-react";
+import { Loader2, Check, X, ExternalLink, Shield } from "lucide-react";
 import { track } from "@/lib/analytics";
 import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+import { useApiKeys } from "@/hooks/useApiKeys";
 import { useTranslations } from "next-intl";
 
 interface ApiKeySetupModalProps {
@@ -81,7 +83,10 @@ export function ApiKeySetupModal({
   onApiKeySet,
   currentApiKey,
 }: ApiKeySetupModalProps) {
+  const { isSignedIn } = useAuth();
+  const { setKey, removeKey, keys } = useApiKeys();
   const t = useTranslations();
+
   // Use legacy props if new ones aren't provided
   const effectiveGeminiKey = currentGeminiKey ?? currentApiKey;
   const effectiveGeminiCallback = onGeminiKeySet ?? onApiKeySet;
@@ -126,6 +131,12 @@ export function ApiKeySetupModal({
         return;
       }
 
+      // Use unified storage via hook (handles both auth and guest)
+      if (isSignedIn) {
+        await setKey("gemini", geminiKeyInput.trim());
+      }
+
+      // Also call the callback for state updates in parent
       if (effectiveGeminiCallback) {
         effectiveGeminiCallback(geminiKeyInput.trim());
       }
@@ -165,6 +176,12 @@ export function ApiKeySetupModal({
         return;
       }
 
+      // Use unified storage via hook (handles both auth and guest)
+      if (isSignedIn) {
+        await setKey("openai", openaiKeyInput.trim());
+      }
+
+      // Also call the callback for state updates in parent
       if (onOpenAIKeySet) {
         onOpenAIKeySet(openaiKeyInput.trim());
       }
@@ -237,13 +254,17 @@ export function ApiKeySetupModal({
     }
   };
 
-  const handleRemoveGeminiKey = () => {
-    localStorage.removeItem('statickit_gemini_api_key');
+  const handleRemoveGeminiKey = async () => {
+    if (isSignedIn) {
+      await removeKey("gemini");
+    }
     window.location.reload();
   };
 
-  const handleRemoveOpenAIKey = () => {
-    localStorage.removeItem('statickit_openai_api_key');
+  const handleRemoveOpenAIKey = async () => {
+    if (isSignedIn) {
+      await removeKey("openai");
+    }
     window.location.reload();
   };
 
@@ -276,8 +297,14 @@ export function ApiKeySetupModal({
       >
         <DialogHeader>
           <DialogTitle className="text-xl text-center">
-            {t("apiKey.settingsTitle")}
+            {t("apiKeys.title")}
           </DialogTitle>
+          {isSignedIn && (
+            <div className="flex items-center justify-center gap-1.5 text-xs text-green-600">
+              <Shield className="w-3.5 h-3.5" />
+              {t("account.encryptedStorage")}
+            </div>
+          )}
         </DialogHeader>
 
         <div className="space-y-6 py-4">
@@ -515,7 +542,7 @@ export function ApiKeySetupModal({
           {/* Footer */}
           <div className="pt-4 border-t border-border/60 space-y-4">
             <p className="text-xs text-muted-foreground/60 text-center">
-              {t("apiKey.storageNotice")}{" "}
+              {isSignedIn ? t("apiKeys.storageEncrypted") : t("apiKeys.storageBrowser")}{" "}
               <Link href="/blog/how-statickit-works" className="text-blue-500 dark:text-blue-400 hover:underline">
                 {t("welcome.learnMore")}
               </Link>
@@ -527,14 +554,14 @@ export function ApiKeySetupModal({
                 onClick={() => onOpenChange(false)}
                 className="w-full"
               >
-                {t("apiKey.done")}
+                {t("common.done")}
               </Button>
             ) : (
               <button
                 onClick={() => onOpenChange(false)}
                 className="w-full text-sm text-muted-foreground/70 hover:text-foreground transition-colors py-2"
               >
-                {t("apiKey.skipForNow")}
+                {t("welcome.skip")}
               </button>
             )}
           </div>

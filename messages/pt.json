@@ -7,6 +7,7 @@
     "delete": "Excluir",
     "save": "Salvar",
     "close": "Fechar",
+    "done": "Pronto",
     "loading": "Carregando...",
     "processing": "Processando...",
     "error": "Erro",
@@ -22,6 +23,55 @@
     "suggested": "Sugerido",
     "reference": "Referencia",
     "clearAllSelections": "Limpar todas as selecoes"
+  },
+  "auth": {
+    "signIn": "Entrar",
+    "signUp": "Cadastrar",
+    "signOut": "Sair",
+    "signUpFree": "Cadastre-se gratis",
+    "alreadyHaveAccount": "Já tem uma conta? Entre",
+    "benefits": {
+      "title": "Por que criar uma conta?",
+      "encrypted": "Chaves API criptografadas com AES-256",
+      "sync": "Sincronize chaves em todos os seus dispositivos",
+      "secure": "Nunca mais perca suas chaves"
+    }
+  },
+  "account": {
+    "title": "Conta",
+    "description": "Gerencie sua conta e chaves API",
+    "connectedKeys": "Chaves API conectadas",
+    "noKeys": "Nenhuma chave API conectada",
+    "encrypted": "Criptografado",
+    "encryptedStorage": "Chaves armazenadas com criptografia AES-256",
+    "test": "Testar",
+    "keyValid": "A chave API esta funcionando",
+    "keyNotFound": "Chave API nao encontrada",
+    "testFailed": "Falha ao testar a chave API"
+  },
+  "welcome": {
+    "title": "Bem-vindo ao StaticKit",
+    "tagline": "Edição de fotos com IA gratuita para todos",
+    "freeCallout": "100% grátis — basta trazer sua própria chave API",
+    "learnMore": "Saiba como funciona",
+    "features": {
+      "presets": "Presets de um clique",
+      "presetsDesc": "Edições profissionais com um único clique",
+      "backgrounds": "Troca de fundo",
+      "backgroundsDesc": "Substitua qualquer fundo instantaneamente",
+      "models": "Troca de modelo",
+      "modelsDesc": "Mude pessoas em fotos de produtos",
+      "versions": "Histórico de versões",
+      "versionsDesc": "Compare e itere nas edições"
+    },
+    "byok": "Traga sua propria chave",
+    "byokDescriptionAuth": "Sua chave API e criptografada e armazenada com seguranca na nuvem.",
+    "skip": "Pular por enquanto"
+  },
+  "apiKeys": {
+    "title": "Configuracoes de chaves API",
+    "storageBrowser": "As chaves API sao armazenadas localmente no seu navegador.",
+    "storageEncrypted": "As chaves API sao criptografadas e armazenadas com seguranca na nuvem."
   },
   "nav": {
     "apiKeys": "Chaves API",
