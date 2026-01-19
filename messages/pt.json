@@ -47,7 +47,12 @@
     "test": "Testar",
     "keyValid": "A chave API esta funcionando",
     "keyNotFound": "Chave API nao encontrada",
-    "testFailed": "Falha ao testar a chave API"
+    "testFailed": "Falha ao testar a chave API",
+    "addNewKey": "Adicionar chave API",
+    "addGeminiKey": "Adicionar chave do Google Gemini",
+    "addOpenAIKey": "Adicionar chave da OpenAI",
+    "getKey": "Obter chave",
+    "saveKey": "Salvar"
   },
   "welcome": {
     "title": "Bem-vindo ao StaticKit",

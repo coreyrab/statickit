@@ -47,7 +47,12 @@
     "test": "Testen",
     "keyValid": "API-Schlussel funktioniert",
     "keyNotFound": "API-Schlussel nicht gefunden",
-    "testFailed": "API-Schlussel-Test fehlgeschlagen"
+    "testFailed": "API-Schlussel-Test fehlgeschlagen",
+    "addNewKey": "API-Schlüssel hinzufügen",
+    "addGeminiKey": "Google Gemini-Schlüssel hinzufügen",
+    "addOpenAIKey": "OpenAI-Schlüssel hinzufügen",
+    "getKey": "Schlüssel holen",
+    "saveKey": "Speichern"
   },
   "welcome": {
     "title": "Willkommen bei StaticKit",

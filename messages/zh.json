@@ -47,7 +47,12 @@
     "test": "测试",
     "keyValid": "API密钥有效",
     "keyNotFound": "未找到API密钥",
-    "testFailed": "API密钥测试失败"
+    "testFailed": "API密钥测试失败",
+    "addNewKey": "添加API密钥",
+    "addGeminiKey": "添加Google Gemini密钥",
+    "addOpenAIKey": "添加OpenAI密钥",
+    "getKey": "获取密钥",
+    "saveKey": "保存"
   },
   "welcome": {
     "title": "欢迎使用StaticKit",

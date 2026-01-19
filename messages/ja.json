@@ -47,7 +47,12 @@
     "test": "テスト",
     "keyValid": "APIキーは有効です",
     "keyNotFound": "APIキーが見つかりません",
-    "testFailed": "APIキーのテストに失敗しました"
+    "testFailed": "APIキーのテストに失敗しました",
+    "addNewKey": "APIキーを追加",
+    "addGeminiKey": "Google Geminiキーを追加",
+    "addOpenAIKey": "OpenAIキーを追加",
+    "getKey": "キーを取得",
+    "saveKey": "保存"
   },
   "welcome": {
     "title": "StaticKitへようこそ",

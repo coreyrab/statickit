@@ -47,7 +47,12 @@
     "test": "Test",
     "keyValid": "API key is working",
     "keyNotFound": "API key not found",
-    "testFailed": "Failed to test API key"
+    "testFailed": "Failed to test API key",
+    "addNewKey": "Add API Key",
+    "addGeminiKey": "Add Google Gemini Key",
+    "addOpenAIKey": "Add OpenAI Key",
+    "getKey": "Get key",
+    "saveKey": "Save"
   },
   "welcome": {
     "title": "Welcome to StaticKit",
