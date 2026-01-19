@@ -97,7 +97,7 @@ import {
 import { detectAspectRatio, AspectRatioKey } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import { Footer } from '@/components/landing/Footer';
-import { ApiKeySetupModal, WelcomeModal, ResumeSessionModal } from '@/components/onboarding';
+import { ApiKeySetupModal, WelcomeModal } from '@/components/onboarding';
 import { getStoredApiKey, setStoredApiKey, hasStoredApiKey, getStoredOpenAIKey, setStoredOpenAIKey, hasStoredOpenAIKey } from '@/lib/api-key-storage';
 import { UserButton, SignUpButton } from '@/components/auth';
 import { useAuth } from '@/hooks/useAuth';
@@ -266,15 +266,6 @@ function HomeContent() {
   const [showNewConfirmModal, setShowNewConfirmModal] = useState(false);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
 
-  // Session persistence state
-  const [showResumeSessionModal, setShowResumeSessionModal] = useState(false);
-  const [resumeSessionData, setResumeSessionData] = useState<{
-    thumbnailUrl: string | null;
-    savedAt: number;
-    size: number;
-  } | null>(null);
-  const [isRestoringSession, setIsRestoringSession] = useState(false);
-  const [sessionChecked, setSessionChecked] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSuggestingIteration, setIsSuggestingIteration] = useState(false);
   const [isAnalyzingForIterations, setIsAnalyzingForIterations] = useState(false);
@@ -487,8 +478,6 @@ function HomeContent() {
     scheduleSave,
     saveNow,
     clearSessionData,
-    restoreSession,
-    checkForExistingSession,
     isSaving: isSessionSaving,
     sessionSizeFormatted,
     hasExistingSession,
@@ -918,20 +907,6 @@ function HomeContent() {
     }
 
     // API key checks are now handled in the auth-aware useEffect below
-
-    // Check for existing session to resume
-    const hasAnyKey = storedGeminiKey || storedOpenAIKey;
-    checkForExistingSession().then((sessionInfo) => {
-      setSessionChecked(true);
-      if (sessionInfo.exists && hasAnyKey) {
-        setResumeSessionData({
-          thumbnailUrl: sessionInfo.thumbnailUrl,
-          savedAt: sessionInfo.savedAt,
-          size: sessionInfo.size,
-        });
-        setShowResumeSessionModal(true);
-      }
-    });
   }, []);
 
   // Auth-aware welcome/API key modal logic
@@ -963,7 +938,7 @@ function HomeContent() {
 
   // Auto-save session when state changes (only if we have an uploaded image)
   useEffect(() => {
-    if (!uploadedImage || !sessionChecked) return;
+    if (!uploadedImage) return;
 
     const sessionState: SessionState = {
       uploadedImage,
@@ -1030,7 +1005,6 @@ function HomeContent() {
     geminiQuality,
     openaiQuality,
     weirdnessLevel,
-    sessionChecked,
     scheduleSave,
   ]);
 
@@ -1056,62 +1030,6 @@ function HomeContent() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [uploadedImage, saveNow]);
-
-  // Handle continuing a previous session
-  const handleContinueSession = async () => {
-    setIsRestoringSession(true);
-    try {
-      const restoredState = await restoreSession();
-      if (restoredState) {
-        // Restore all state
-        setUploadedImage(restoredState.uploadedImage as UploadedImage);
-        setAnalysis(restoredState.analysis);
-        setBaseVersions(restoredState.baseVersions);
-        setVariations(restoredState.variations);
-        setActiveBaseId(restoredState.activeBaseId);
-        setSelectedVariationId(restoredState.selectedVariationId);
-        setSelectedTool(restoredState.selectedTool as Tool);
-        setSelectedPresets(restoredState.selectedPresets);
-        setCustomPrompt(restoredState.customPrompt);
-        setAdditionalContext(restoredState.additionalContext);
-        setOriginalEditPrompt(restoredState.originalEditPrompt);
-        setBackgroundCustomPrompt(restoredState.backgroundCustomPrompt);
-        setModelCustomPrompt(restoredState.modelCustomPrompt);
-        setKeepClothing(restoredState.keepClothing);
-        setSelectedGender(restoredState.modelBuilder.gender);
-        setSelectedAgeRange(restoredState.modelBuilder.ageRange);
-        setSelectedEthnicity(restoredState.modelBuilder.ethnicity);
-        setSelectedHairColor(restoredState.modelBuilder.hairColor);
-        setSelectedHairType(restoredState.modelBuilder.hairType);
-        setSelectedBodyType(restoredState.modelBuilder.bodyType);
-        setSelectedExpression(restoredState.modelBuilder.expression);
-        setSelectedVibe(restoredState.modelBuilder.vibe);
-        setBackgroundReferences(restoredState.backgroundReferences);
-        setModelReferences(restoredState.modelReferences);
-        setEditReferences(restoredState.editReferences);
-        setSelectedAIModel(restoredState.selectedAIModel as AIModel);
-        setGeminiQuality(restoredState.geminiQuality as ImageQuality);
-        setOpenaiQuality(restoredState.openaiQuality as ImageQuality);
-        setWeirdnessLevel(restoredState.weirdnessLevel);
-
-        // Switch to editor mode
-        setStep('editor');
-        toast.success(t('session.sessionSaved'));
-      }
-    } catch (error) {
-      console.error('Failed to restore session:', error);
-      toast.error('Failed to restore session');
-    } finally {
-      setIsRestoringSession(false);
-      setShowResumeSessionModal(false);
-    }
-  };
-
-  // Handle starting fresh (clear session)
-  const handleStartFresh = async () => {
-    await clearSessionData();
-    setShowResumeSessionModal(false);
-  };
 
   // Handle clearing session from menu
   const handleClearSession = async () => {
@@ -7628,20 +7546,6 @@ function HomeContent() {
         onApiKeySet={handleSetApiKey}
         onOpenAIKeySet={handleSetOpenAIKey}
       />
-
-      {/* Resume Session Modal */}
-      {resumeSessionData && (
-        <ResumeSessionModal
-          open={showResumeSessionModal}
-          onOpenChange={setShowResumeSessionModal}
-          thumbnailUrl={resumeSessionData.thumbnailUrl}
-          savedAt={resumeSessionData.savedAt}
-          sessionSize={resumeSessionData.size}
-          onContinue={handleContinueSession}
-          onStartFresh={handleStartFresh}
-          isLoading={isRestoringSession}
-        />
-      )}
 
       {!uploadedImage && <Footer />}
     </div>
