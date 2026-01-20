@@ -2,6 +2,7 @@
 // Provides type-safe event tracking with the window.op function
 
 type AnalyticsEvents = {
+  user_signed_up: { provider: string };
   api_key_validated: { success: boolean };
   image_uploaded: { width: number; height: number; aspectRatio: string; fileSize: number };
   variations_generated: { count: number };
@@ -24,5 +25,11 @@ export function track<T extends keyof AnalyticsEvents>(
 ): void {
   if (typeof window !== 'undefined' && window.op) {
     window.op('track', event, properties);
+  }
+}
+
+export function identify(userId: string, traits?: { email?: string; name?: string }): void {
+  if (typeof window !== 'undefined' && window.op) {
+    window.op('identify', { profileId: userId, ...traits });
   }
 }

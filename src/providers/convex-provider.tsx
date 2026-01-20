@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import { ClerkProvider, useAuth } from "@clerk/nextjs";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ConvexReactClient } from "convex/react";
+import { SignupTracker } from "@/components/analytics/SignupTracker";
 
 /**
  * Convex Provider with Clerk Authentication
@@ -59,6 +60,7 @@ export function ConvexClerkProvider({ children }: ConvexClerkProviderProps) {
       afterSignOutUrl="/"
     >
       <ConvexProviderWithClerk client={convex!} useAuth={useAuth}>
+        <SignupTracker />
         {children}
       </ConvexProviderWithClerk>
     </ClerkProvider>
