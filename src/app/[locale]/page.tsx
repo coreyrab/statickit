@@ -4993,7 +4993,7 @@ function HomeContent() {
             </div>
             {/* Versions Tool */}
             {selectedTool === 'iterations' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col overflow-hidden">
+              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col md:overflow-hidden">
                 {/* Image Section */}
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
@@ -5239,7 +5239,7 @@ function HomeContent() {
 
             {/* Edit Tool - with resize presets */}
             {selectedTool === 'edit' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col h-full">
+              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col md:h-full">
                 {/* Image Section */}
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
@@ -5379,7 +5379,7 @@ function HomeContent() {
                     </div>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto space-y-2 touch-scroll pr-2 md:pr-0 pb-20 md:pb-16">
+                  <div className="pb-20 pr-2 space-y-2 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
                     {/* Enhance/Touchup */}
                     <div className="rounded-lg border border-border overflow-hidden">
                       <button
@@ -5862,7 +5862,7 @@ function HomeContent() {
 
             {/* Resize Tool */}
             {selectedTool === 'export' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col h-full">
+              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col md:h-full">
                 {/* Image Section */}
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
@@ -5946,7 +5946,7 @@ function HomeContent() {
                 </div>
 
                 {/* Tool Content */}
-                <div className="p-4 flex-1 flex flex-col overflow-hidden">
+                <div className="p-4 pb-20 md:pb-4 md:flex-1 flex flex-col md:overflow-hidden">
                   <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Expand className="w-3.5 h-3.5 text-primary-foreground" /></span>{t('export.resize')}</h2>
                   <p className="text-xs text-muted-foreground/80 mb-3">
                     {t('export.description')}
@@ -6125,7 +6125,7 @@ function HomeContent() {
 
             {/* Backgrounds Tool */}
             {selectedTool === 'backgrounds' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col h-full">
+              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col md:h-full">
                 {/* Image Section */}
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
@@ -6209,7 +6209,7 @@ function HomeContent() {
                 </div>
 
                 {/* Tool Content */}
-                <div className="p-4 flex flex-col flex-1 overflow-hidden">
+                <div className="p-4 flex flex-col md:flex-1 md:overflow-hidden">
                   <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><ImageIcon className="w-3.5 h-3.5 text-primary-foreground" /></span>{t('tools.backgrounds')}</h2>
                   <div className="text-xs text-muted-foreground/80 mb-3">
                     {t('backgrounds.description')}
@@ -6269,7 +6269,7 @@ function HomeContent() {
                 </button>
 
                 {/* Backgrounds Grid */}
-                <div className="flex-1 overflow-y-auto touch-scroll pr-2 md:pr-0 pb-20 md:pb-16">
+                <div className="pb-20 pr-2 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
                   <div className="grid grid-cols-2 gap-1.5">
                     {/* Separator above AI suggestions */}
                     {(isLoadingBackgroundSuggestions || backgroundSuggestions.length > 0) && (
@@ -6494,7 +6494,7 @@ function HomeContent() {
 
             {/* Model Tool */}
             {selectedTool === 'model' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col h-full overflow-hidden">
+              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col md:h-full md:overflow-hidden">
                 {/* Image Section */}
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
@@ -6578,7 +6578,7 @@ function HomeContent() {
                 </div>
 
                 {/* Tool Content */}
-                <div className="p-4 flex flex-col flex-1 overflow-hidden">
+                <div className="p-4 flex flex-col md:flex-1 md:overflow-hidden">
                   <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><User className="w-3.5 h-3.5 text-primary-foreground" /></span>{t('tools.model')}</h2>
                   <div className="text-xs text-muted-foreground/80 mb-3">
                     {t('model.description')}
@@ -6795,7 +6795,7 @@ function HomeContent() {
                 )}
 
                 {/* Model Builder */}
-                <div className="flex-1 overflow-y-auto touch-scroll pr-2 md:pr-0 pb-20 md:pb-16">
+                <div className="pb-20 pr-2 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
                   {/* Collapsible Header */}
                   <button
                     onClick={() => setIsModelBuilderExpanded(!isModelBuilderExpanded)}
@@ -7013,7 +7013,7 @@ function HomeContent() {
 
             {/* Variation Cards - Show for iterations tool when image uploaded */}
             {selectedTool === 'iterations' && uploadedImage && (
-              <div className="flex-1 overflow-y-auto px-4 pr-2 md:pr-4 pb-20 md:pb-4 space-y-3 touch-scroll">
+              <div className="px-4 pr-2 pb-20 space-y-3 md:flex-1 md:overflow-y-auto md:pr-4 md:pb-4 touch-scroll">
                 {/* Base Version Cards - Original and any "New Versions" */}
                 {baseVersions.map((base, baseIdx) => {
                   const isActive = activeBaseId === base.id && selectedVariationId === null;
