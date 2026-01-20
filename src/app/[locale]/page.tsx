@@ -103,7 +103,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Footer } from '@/components/landing/Footer';
 import { ApiKeySetupModal, WelcomeModal } from '@/components/onboarding';
 import { getStoredApiKey, setStoredApiKey, hasStoredApiKey, getStoredOpenAIKey, setStoredOpenAIKey, hasStoredOpenAIKey } from '@/lib/api-key-storage';
-import { UserButton, SignUpButton } from '@/components/auth';
+import { UserButton } from '@/components/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { useClerk } from '@clerk/nextjs';
 import { useSessionPersistence, type SessionState } from '@/hooks/useSessionPersistence';
@@ -4056,14 +4056,8 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
 
           {/* Right: Auth + Hamburger Menu */}
           <div className="flex items-center gap-2">
-            {/* Auth buttons */}
-            {isAuthLoaded && (
-              isSignedIn ? (
-                <UserButton />
-              ) : (
-                <SignUpButton variant="ghost" size="sm" showIcon={false} />
-              )
-            )}
+            {/* User button for signed-in users */}
+            {isAuthLoaded && isSignedIn && <UserButton />}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors">
