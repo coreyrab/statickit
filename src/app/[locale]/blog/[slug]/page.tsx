@@ -54,6 +54,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     alternates: {
       canonical: url,
+      types: {
+        'text/markdown': `https://statickit.ai/blog/md/${slug}.md`,
+      },
     },
   };
 }

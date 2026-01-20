@@ -4,3 +4,8 @@ Allow: /
 
 # Sitemap
 Sitemap: https://statickit.ai/sitemap.xml
+
+# LLM-friendly content
+# See https://statickit.ai/llms.txt for AI-parseable site information
+# Blog posts available as markdown at https://statickit.ai/blog/md/
+# Machine-readable blog index at https://statickit.ai/blog/index.json

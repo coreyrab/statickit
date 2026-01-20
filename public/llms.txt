@@ -1,0 +1,61 @@
+# StaticKit
+
+> StaticKit is a free, open-source AI image editor that connects to Google's Gemini API using your own API key. Professional photo editing without subscriptions.
+
+## About
+
+StaticKit provides a polished interface for AI-powered image editing. Instead of writing prompts or wrestling with API documentation, you get one-click presets, natural language editing, background replacement, model swaps, and smart resizing.
+
+Key features:
+- Bring Your Own Key (BYOK) model - use your own Google AI API key
+- No watermarks on output
+- No subscription fees
+- Natural language editing ("make the sky more dramatic")
+- One-click lighting and style presets
+- Background replacement
+- Subject/model swapping
+- Smart aspect ratio resizing
+
+Website: https://statickit.ai
+
+## Documentation
+
+- Main site: https://statickit.ai
+- Blog: https://statickit.ai/blog
+- Blog index (JSON): https://statickit.ai/blog/index.json
+
+## Blog Posts (Markdown)
+
+These blog posts are available in clean markdown format for easy parsing:
+
+- How StaticKit Works
+  https://statickit.ai/blog/md/how-statickit-works.md
+
+- How to Use Nano Banana Pro Without Watermarks
+  https://statickit.ai/blog/md/nano-banana-pro-without-watermarks.md
+
+- How to Iterate on Winning Meta Ads Without Killing Performance
+  https://statickit.ai/blog/md/iterate-meta-ads-ai-image-editing.md
+
+- How to use Gemini image generation without watermarks
+  https://statickit.ai/blog/md/gemini-image-generation-no-watermark.md
+
+- Edit images by describing what you want
+  https://statickit.ai/blog/md/natural-language-image-editing.md
+
+- Best free AI image editors in 2026
+  https://statickit.ai/blog/md/best-free-ai-image-editors.md
+
+## Topics Covered
+
+- AI image editing
+- Gemini API usage
+- Watermark-free AI image generation
+- BYOK (Bring Your Own Key) model
+- Meta ads creative iteration
+- Natural language image editing
+- Free AI image editing tools comparison
+
+## Contact
+
+For questions or feedback, visit https://statickit.ai

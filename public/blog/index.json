@@ -1,0 +1,85 @@
+{
+  "$schema": "https://statickit.ai/blog/schema.json",
+  "name": "StaticKit Blog",
+  "description": "Articles about AI image editing, creative workflows, and getting the most out of StaticKit.",
+  "url": "https://statickit.ai/blog",
+  "feed_url": "https://statickit.ai/blog/index.json",
+  "author": {
+    "name": "StaticKit Team",
+    "url": "https://statickit.ai"
+  },
+  "posts": [
+    {
+      "slug": "nano-banana-pro-without-watermarks",
+      "title": "How to Use Nano Banana Pro Without Watermarks",
+      "description": "Learn how to use Nano Banana Pro (Google's AI image tool) without watermarks. Use your own API key with free tools like StaticKit for clean, watermark-free output.",
+      "excerpt": "The watermark isn't a limitation of the AI — it's added by consumer interfaces. Here's how to get clean output with your own API key.",
+      "author": "Corey Rabazinski",
+      "date": "2025-01-12",
+      "read_time": "4 min read",
+      "url": "https://statickit.ai/blog/nano-banana-pro-without-watermarks",
+      "markdown_url": "https://statickit.ai/blog/md/nano-banana-pro-without-watermarks.md",
+      "cover_image": "https://statickit.ai/blog/nano_banana_no_watermark.jpg"
+    },
+    {
+      "slug": "iterate-meta-ads-ai-image-editing",
+      "title": "How to Iterate on Winning Meta Ads Without Killing Performance",
+      "description": "Learn the post-Andromeda framework for testing Meta ad creative variations. Use AI to test location swaps, lighting changes, and model variations in minutes instead of weeks.",
+      "excerpt": "Stop paying for expensive photoshoots every time you need a new ad variation. The AI-powered approach to creative testing.",
+      "author": "Corey Rabazinski",
+      "date": "2025-01-09",
+      "read_time": "10 min read",
+      "url": "https://statickit.ai/blog/iterate-meta-ads-ai-image-editing",
+      "markdown_url": "https://statickit.ai/blog/md/iterate-meta-ads-ai-image-editing.md",
+      "cover_image": "https://statickit.ai/blog/meta-ads-iteration.jpg"
+    },
+    {
+      "slug": "gemini-image-generation-no-watermark",
+      "title": "How to use Gemini image generation without watermarks",
+      "description": "Remove watermarks from Gemini AI-generated images by using the API directly. Learn how to get a free API key and use tools like StaticKit for watermark-free output.",
+      "excerpt": "Google's Gemini adds watermarks to AI-generated images — unless you use your own API key. Here's how.",
+      "author": "Corey Rabazinski",
+      "date": "2025-01-03",
+      "read_time": "5 min read",
+      "url": "https://statickit.ai/blog/gemini-image-generation-no-watermark",
+      "markdown_url": "https://statickit.ai/blog/md/gemini-image-generation-no-watermark.md",
+      "cover_image": "https://statickit.ai/blog/geminiwatermark_blog.jpg"
+    },
+    {
+      "slug": "natural-language-image-editing",
+      "title": "Edit images by describing what you want",
+      "description": "Natural language image editing lets you describe changes instead of learning complex tools. Discover what works well, what doesn't, and how to get better results.",
+      "excerpt": "\"Remove the background.\" \"Make it warmer.\" \"Change her shirt to blue.\" This is image editing now.",
+      "author": "Corey Rabazinski",
+      "date": "2025-01-03",
+      "read_time": "6 min read",
+      "url": "https://statickit.ai/blog/natural-language-image-editing",
+      "markdown_url": "https://statickit.ai/blog/md/natural-language-image-editing.md",
+      "cover_image": "https://statickit.ai/blog/painting_with_words.jpg"
+    },
+    {
+      "slug": "best-free-ai-image-editors",
+      "title": "Best free AI image editors in 2026",
+      "description": "A no-BS guide to actually free AI image editors. Compare BYOK tools, open source options, and free tiers without hidden paywalls or watermarks.",
+      "excerpt": "Most \"free AI image editors\" aren't really free. Here are the tools that actually deliver.",
+      "author": "Corey Rabazinski",
+      "date": "2025-01-03",
+      "read_time": "7 min read",
+      "url": "https://statickit.ai/blog/best-free-ai-image-editors",
+      "markdown_url": "https://statickit.ai/blog/md/best-free-ai-image-editors.md",
+      "cover_image": "https://statickit.ai/blog/statickit_before_after.jpg"
+    },
+    {
+      "slug": "how-statickit-works",
+      "title": "How StaticKit Works",
+      "description": "StaticKit is a free AI image editor that makes professional photo editing accessible to everyone. One-click presets, background swaps, model changes, and more.",
+      "excerpt": "Professional AI image editing without the learning curve. Here's what makes StaticKit different.",
+      "author": "Corey Rabazinski",
+      "date": "2025-01-01",
+      "read_time": "5 min read",
+      "url": "https://statickit.ai/blog/how-statickit-works",
+      "markdown_url": "https://statickit.ai/blog/md/how-statickit-works.md",
+      "cover_image": "https://statickit.ai/blog/how_statickit_works.jpg"
+    }
+  ]
+}
