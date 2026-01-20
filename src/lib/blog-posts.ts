@@ -1,4 +1,9 @@
 // Blog posts data - shared between server and client components
+export interface FAQ {
+  question: string;
+  answer: string;
+}
+
 export interface BlogPost {
   title: string;
   description: string; // SEO meta description
@@ -9,6 +14,7 @@ export interface BlogPost {
   authorUrl?: string;
   coverImage?: string;
   content: string;
+  faqs?: FAQ[]; // Optional FAQs for FAQ schema
 }
 
 export const posts: Record<string, BlogPost> = {
@@ -103,6 +109,20 @@ We make StaticKit because we use it ourselves and wanted something better than w
 4. **Upload an image** and start editing
 
 That's it. Professional AI image editing, available right now.`,
+    faqs: [
+      {
+        question: "What is StaticKit?",
+        answer: "StaticKit is a free AI image editor that connects to Google's Gemini API using your own API key. It provides one-click presets, background swaps, model changes, and natural language editing without subscriptions."
+      },
+      {
+        question: "How much does StaticKit cost?",
+        answer: "StaticKit itself is free. You pay Google directly for API usage, typically a few cents per edit. There are no subscriptions, no credits that expire, and no premium tiers."
+      },
+      {
+        question: "Do I need to know how to code to use StaticKit?",
+        answer: "No. StaticKit provides a polished interface so you don't need to write prompts or use API documentation. Just upload an image and start editing with presets or natural language descriptions."
+      }
+    ],
   },
   'nano-banana-pro-without-watermarks': {
     title: 'How to Use Nano Banana Pro Without Watermarks',
@@ -166,6 +186,20 @@ API costs: roughly $0.01-0.05 per image. Compare that to $10-20/month for subscr
 - **BYOK is often cheaper than subscriptions** for anyone who isn't generating hundreds of images daily.
 
 So next time someone asks how to use Nano Banana Pro without watermarks, you'll know: get an API key, use a BYOK tool, and skip the markup.`,
+    faqs: [
+      {
+        question: "Why does Nano Banana Pro add watermarks to images?",
+        answer: "Google adds watermarks to AI-generated images through consumer interfaces for content authenticity and responsible AI practices. The API itself does not add watermarks."
+      },
+      {
+        question: "How do I get watermark-free images from Nano Banana Pro?",
+        answer: "Use your own Google AI API key (free to create) with a BYOK tool like StaticKit. The API outputs clean images without watermarks."
+      },
+      {
+        question: "How much does it cost to use the API directly?",
+        answer: "API costs are roughly $0.01-0.05 per image, which is significantly cheaper than $10-20/month subscription tools for light to moderate use."
+      }
+    ],
   },
   'iterate-meta-ads-ai-image-editing': {
     title: 'How to Iterate on Winning Meta Ads Without Killing Performance',
@@ -342,6 +376,20 @@ For light to moderate use, paying per image through the API is significantly che
 - **You need a way to use the API.** Either write code or use a GUI tool like [StaticKit](https://statickit.ai).
 
 - **BYOK is often cheaper than subscriptions** for anyone who isn't generating hundreds of images daily.`,
+    faqs: [
+      {
+        question: "How do I remove watermarks from Gemini-generated images?",
+        answer: "Use the Gemini API directly with your own API key instead of Google's consumer interfaces. The API outputs clean images without watermarks. Tools like StaticKit provide a GUI for using the API."
+      },
+      {
+        question: "Is it free to get a Gemini API key?",
+        answer: "Yes, creating a Google AI API key is free. Google provides free credits to start, and after that you pay per use, typically a few cents per image."
+      },
+      {
+        question: "What's the cheapest way to use Gemini for image generation?",
+        answer: "Using the API directly through a BYOK tool like StaticKit costs roughly $0.01-0.05 per image, which is much cheaper than subscription-based tools for most users."
+      }
+    ],
   },
   'natural-language-image-editing': {
     title: 'Edit images by describing what you want',
@@ -416,6 +464,20 @@ Even with good tooling, some prompting habits help:
 - **Simple prompts beat complex ones** when the tool has good prompt engineering underneath.
 
 - **The underlying model matters less than the implementation.** Same model, different results depending on the tool. [StaticKit](https://statickit.ai) is built with optimized prompts under the hood so you don't have to be a prompt engineer.`,
+    faqs: [
+      {
+        question: "What is natural language image editing?",
+        answer: "Natural language image editing lets you describe changes in plain English instead of using complex tools. You say 'remove the background' or 'make it warmer' and AI handles the technical manipulation."
+      },
+      {
+        question: "What types of edits work best with natural language?",
+        answer: "Object removal, color and lighting changes, background replacement, style transfer, and adding elements work well. Precise positioning and complex multi-step edits are less reliable."
+      },
+      {
+        question: "Do I need to learn prompt engineering for AI image editing?",
+        answer: "No. Tools like StaticKit have optimized prompts built in. You describe what you want in plain English, and the tool handles the prompt engineering."
+      }
+    ],
   },
   'best-free-ai-image-editors': {
     title: 'Best free AI image editors in 2026',
@@ -522,6 +584,20 @@ Know which model you're dealing with.
 - **"Free tier" usually means "limited trial."** Check what's actually included before committing.
 
 - **Consider the business model.** It tells you how the tool will evolve.`,
+    faqs: [
+      {
+        question: "What is the best free AI image editor?",
+        answer: "For regular users who want full AI capabilities without subscriptions, StaticKit is recommended. It's free to use with your own API key, has no watermarks, and no artificial limits."
+      },
+      {
+        question: "What does BYOK mean for AI image editors?",
+        answer: "BYOK (Bring Your Own Key) means the tool is free, but you pay the AI provider directly for usage through your own API key. This is often cheaper than subscriptions for most users."
+      },
+      {
+        question: "Are there truly free AI image editors with no catch?",
+        answer: "Yes. BYOK tools like StaticKit and open source options like GIMP with Stable Diffusion plugins are genuinely free. You either pay minimal API costs or run everything locally."
+      }
+    ],
   },
 };
 

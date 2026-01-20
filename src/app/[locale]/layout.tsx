@@ -53,6 +53,9 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "StaticKit",
   },
+  other: {
+    "ai-content-declaration": "https://statickit.ai/llms.txt",
+  },
 };
 
 export const viewport: Viewport = {

@@ -2,5 +2,32 @@
 User-agent: *
 Allow: /
 
+# Explicitly allow AI crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Anthropic-AI
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Cohere-AI
+Allow: /
+
 # Sitemap
 Sitemap: https://statickit.ai/sitemap.xml
+
+# LLM-friendly content
+# AI policy and content index: https://statickit.ai/llms.txt
+# Blog posts as markdown: https://statickit.ai/blog/md/{slug}.md
+# Machine-readable blog index: https://statickit.ai/blog/index.json
