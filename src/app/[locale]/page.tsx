@@ -74,6 +74,7 @@ import {
   EyeOff,
   Shield,
   Globe,
+  Link2,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -267,6 +268,8 @@ function HomeContent() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showNewConfirmModal, setShowNewConfirmModal] = useState(false);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
+  const [imageUrlInput, setImageUrlInput] = useState('');
+  const [isLoadingUrlImage, setIsLoadingUrlImage] = useState(false);
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSuggestingIteration, setIsSuggestingIteration] = useState(false);
@@ -1521,6 +1524,118 @@ function HomeContent() {
       uploadIconRef.current?.stopAnimation();
     }
   }, [isDragActive]);
+
+  // Handle image upload from URL
+  const handleUrlUpload = useCallback(async (url: string) => {
+    if (!url.trim()) return;
+
+    setError(null);
+    setIsLoadingUrlImage(true);
+
+    try {
+      // Fetch the image
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.status}`);
+      }
+
+      const contentType = response.headers.get('content-type') || 'image/png';
+      if (!contentType.startsWith('image/')) {
+        throw new Error('URL does not point to an image');
+      }
+
+      const blob = await response.blob();
+
+      // Check file size (10MB limit)
+      if (blob.size > 10 * 1024 * 1024) {
+        throw new Error('Image size must be less than 10MB');
+      }
+
+      // Extract filename from URL or use default
+      let filename = 'image.png';
+      try {
+        const urlObj = new URL(url);
+        const pathParts = urlObj.pathname.split('/');
+        const lastPart = pathParts[pathParts.length - 1];
+        if (lastPart && lastPart.includes('.')) {
+          filename = decodeURIComponent(lastPart);
+        }
+      } catch {
+        // URL parsing failed, use default filename
+      }
+
+      // Ensure correct extension based on content type
+      const ext = contentType.split('/')[1]?.split(';')[0] || 'png';
+      if (!filename.toLowerCase().endsWith(`.${ext}`) &&
+          !filename.toLowerCase().endsWith('.jpg') &&
+          !filename.toLowerCase().endsWith('.jpeg') &&
+          !filename.toLowerCase().endsWith('.png') &&
+          !filename.toLowerCase().endsWith('.webp')) {
+        filename = `${filename.split('.')[0]}.${ext}`;
+      }
+
+      // Create File from Blob
+      const file = new File([blob], filename, { type: contentType });
+
+      // Load image to get dimensions
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(blob);
+
+      img.onload = () => {
+        const { key, label } = detectAspectRatio(img.width, img.height);
+        setUploadedImage({
+          file,
+          url: objectUrl,
+          filename,
+          width: img.width,
+          height: img.height,
+          aspectRatio: label,
+          aspectRatioKey: key,
+        });
+        // Initialize base versions with the Original
+        setBaseVersions([{
+          id: 'original',
+          name: 'Original',
+          baseImageUrl: objectUrl,
+          sourceLabel: 'From URL',
+          versions: [{ imageUrl: objectUrl, prompt: null, parentIndex: -1, status: 'completed' as const }],
+          currentVersionIndex: 0,
+          resizedVersions: [],
+        }]);
+        setActiveBaseId('original');
+        setStep('editor');
+        setSelectedTool('edit');
+        setImageUrlInput('');
+        setIsLoadingUrlImage(false);
+
+        // Track upload
+        track('image_uploaded', {
+          width: img.width,
+          height: img.height,
+          aspectRatio: label,
+          fileSize: file.size,
+        });
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        setError('Failed to load image from URL');
+        setIsLoadingUrlImage(false);
+      };
+
+      img.src = objectUrl;
+    } catch (err) {
+      console.error('URL upload error:', err);
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError('Could not fetch image. The server may not allow cross-origin requests.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to load image from URL');
+      }
+      setIsLoadingUrlImage(false);
+    }
+  }, []);
 
   // Generate iterations on-demand (called from the Iterations tool)
   const handleGenerateIterations = async () => {
@@ -4335,6 +4450,47 @@ function HomeContent() {
                           <p className="text-muted-foreground/80 text-sm">{t('upload.supportedFormats')}</p>
                         </div>
                         <p className="text-xs text-muted-foreground/50">PNG, JPG, WebP • Max 10MB</p>
+
+                        {/* URL Input Option */}
+                        <div className="w-full max-w-sm mt-4 pt-4 border-t border-border/50">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground/60 mb-2 justify-center">
+                            <span>{t('upload.orPasteUrl')}</span>
+                          </div>
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleUrlUpload(imageUrlInput);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex gap-2"
+                          >
+                            <div className="relative flex-1">
+                              <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                              <Input
+                                type="url"
+                                placeholder={t('upload.urlPlaceholder')}
+                                value={imageUrlInput}
+                                onChange={(e) => setImageUrlInput(e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                className="pl-9 h-9 text-sm bg-background/50 border-border/50 focus:border-primary/50"
+                              />
+                            </div>
+                            <Button
+                              type="submit"
+                              size="sm"
+                              disabled={!imageUrlInput.trim() || isLoadingUrlImage}
+                              onClick={(e) => e.stopPropagation()}
+                              className="h-9 px-4"
+                            >
+                              {isLoadingUrlImage ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                t('upload.load')
+                              )}
+                            </Button>
+                          </form>
+                        </div>
                       </>
                     )}
                   </div>

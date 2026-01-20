@@ -152,7 +152,10 @@
     "dragDrop": "ドラッグ＆ドロップまたはクリックしてアップロード",
     "supportedFormats": "PNG、JPG、WEBP（20MBまで）に対応",
     "pasteImage": "画像を貼り付け",
-    "ctrlV": "Ctrl+V"
+    "ctrlV": "Ctrl+V",
+    "orPasteUrl": "または画像URLを貼り付け",
+    "urlPlaceholder": "https://example.com/image.jpg",
+    "load": "読み込む"
   },
   "iterations": {
     "title": "バリエーションを生成",

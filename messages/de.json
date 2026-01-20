@@ -152,7 +152,10 @@
     "dragDrop": "Ziehen und ablegen oder klicken zum Hochladen",
     "supportedFormats": "Unterstützt PNG, JPG, WEBP bis 20MB",
     "pasteImage": "Bild einfügen",
-    "ctrlV": "Strg+V"
+    "ctrlV": "Strg+V",
+    "orPasteUrl": "oder Bild-URL einfügen",
+    "urlPlaceholder": "https://beispiel.de/bild.jpg",
+    "load": "Laden"
   },
   "iterations": {
     "title": "Variationen generieren",

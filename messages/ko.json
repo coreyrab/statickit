@@ -152,7 +152,10 @@
     "dragDrop": "드래그 앤 드롭하거나 클릭하여 업로드",
     "supportedFormats": "PNG, JPG, WEBP 지원 (최대 20MB)",
     "pasteImage": "이미지 붙여넣기",
-    "ctrlV": "Ctrl+V"
+    "ctrlV": "Ctrl+V",
+    "orPasteUrl": "또는 이미지 URL 붙여넣기",
+    "urlPlaceholder": "https://example.com/image.jpg",
+    "load": "불러오기"
   },
   "iterations": {
     "title": "변형 생성",

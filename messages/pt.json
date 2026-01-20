@@ -152,7 +152,10 @@
     "dragDrop": "Arraste e solte ou clique para enviar",
     "supportedFormats": "Suporta PNG, JPG, WEBP ate 20MB",
     "pasteImage": "Colar uma imagem",
-    "ctrlV": "Ctrl+V"
+    "ctrlV": "Ctrl+V",
+    "orPasteUrl": "ou cole uma URL de imagem",
+    "urlPlaceholder": "https://exemplo.com/imagem.jpg",
+    "load": "Carregar"
   },
   "iterations": {
     "title": "Gerar Variacoes",

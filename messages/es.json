@@ -152,7 +152,10 @@
     "dragDrop": "Arrastra y suelta o haz clic para subir",
     "supportedFormats": "Soporta PNG, JPG, WEBP hasta 20MB",
     "pasteImage": "Pegar una imagen",
-    "ctrlV": "Ctrl+V"
+    "ctrlV": "Ctrl+V",
+    "orPasteUrl": "o pega una URL de imagen",
+    "urlPlaceholder": "https://ejemplo.com/imagen.jpg",
+    "load": "Cargar"
   },
   "iterations": {
     "title": "Generar Variaciones",

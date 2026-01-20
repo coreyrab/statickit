@@ -152,7 +152,10 @@
     "dragDrop": "拖放或点击上传",
     "supportedFormats": "支持PNG、JPG、WEBP，最大20MB",
     "pasteImage": "粘贴图片",
-    "ctrlV": "Ctrl+V"
+    "ctrlV": "Ctrl+V",
+    "orPasteUrl": "或粘贴图片URL",
+    "urlPlaceholder": "https://example.com/image.jpg",
+    "load": "加载"
   },
   "iterations": {
     "title": "生成变体",
