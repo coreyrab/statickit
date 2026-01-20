@@ -4473,7 +4473,7 @@ function HomeContent() {
                                 value={imageUrlInput}
                                 onChange={(e) => setImageUrlInput(e.target.value)}
                                 onClick={(e) => e.stopPropagation()}
-                                className="pl-9 h-9 text-sm bg-background/50 border-border/50 focus:border-primary/50"
+                                className="pl-9 h-9 text-sm bg-background/50 border-border/50 focus:border-primary/50 placeholder:text-muted-foreground/30"
                               />
                             </div>
                             <Button
