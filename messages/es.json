@@ -433,9 +433,7 @@
     "lighting": "Iluminación de producto",
     "presentation": "Estilo de presentación",
     "enhance": "Mejorar producto",
-    "socialGrid": "Cuadrícula para redes sociales",
-    "gridDescription": "Genera 9 fotos de producto en cuadrícula 3×3 para Instagram/Facebook.",
-    "generateGrid": "Generar cuadrícula 3×3",
+    "creative": "Creativo",
     "generating": "Generando cuadrícula...",
     "gridComplete": "¡Cuadrícula generada!",
     "gridError": "Error al generar cuadrícula",
@@ -463,7 +461,13 @@
     "sharpenLabels": "Enfocar etiquetas",
     "enhanceMaterials": "Mejorar materiales",
     "colorAccurate": "Color preciso",
-    "removeImperfections": "Limpiar producto"
+    "removeImperfections": "Limpiar producto",
+    "socialGrid": "Cuadrícula 3×3 Social",
+    "waterSplash": "Salpicadura de Agua",
+    "ingredientBurst": "Explosión de Ingredientes",
+    "neonGlow": "Brillo Neón",
+    "natureScene": "Escena Natural",
+    "luxurySetting": "Ambiente de Lujo"
   },
   "export": {
     "title": "Exportar",

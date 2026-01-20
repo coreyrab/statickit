@@ -433,9 +433,7 @@
     "lighting": "Produktbeleuchtung",
     "presentation": "Präsentationsstil",
     "enhance": "Produkt verbessern",
-    "socialGrid": "Social Media Raster",
-    "gridDescription": "9 Produktaufnahmen in 3×3-Raster für Instagram/Facebook generieren.",
-    "generateGrid": "3×3 Raster generieren",
+    "creative": "Kreativ",
     "generating": "Raster wird generiert...",
     "gridComplete": "Raster erstellt!",
     "gridError": "Raster konnte nicht generiert werden",
@@ -463,7 +461,13 @@
     "sharpenLabels": "Etiketten schärfen",
     "enhanceMaterials": "Materialien verbessern",
     "colorAccurate": "Farbgenau",
-    "removeImperfections": "Produkt bereinigen"
+    "removeImperfections": "Produkt bereinigen",
+    "socialGrid": "3×3 Social-Raster",
+    "waterSplash": "Wasser-Splash",
+    "ingredientBurst": "Zutaten-Burst",
+    "neonGlow": "Neon-Glühen",
+    "natureScene": "Naturszene",
+    "luxurySetting": "Luxus-Setting"
   },
   "export": {
     "title": "Exportieren",

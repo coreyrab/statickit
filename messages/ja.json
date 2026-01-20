@@ -433,9 +433,7 @@
     "lighting": "商品ライティング",
     "presentation": "プレゼンテーション",
     "enhance": "商品を強化",
-    "socialGrid": "SNSグリッド",
-    "gridDescription": "Instagram/Facebook用に3×3グリッドで9枚の商品写真を生成。",
-    "generateGrid": "3×3グリッドを生成",
+    "creative": "クリエイティブ",
     "generating": "グリッド生成中...",
     "gridComplete": "グリッド完成！",
     "gridError": "グリッド生成に失敗",
@@ -463,7 +461,13 @@
     "sharpenLabels": "ラベルを鮮明化",
     "enhanceMaterials": "素材を強化",
     "colorAccurate": "色精度向上",
-    "removeImperfections": "商品をクリーン"
+    "removeImperfections": "商品をクリーン",
+    "socialGrid": "3×3 SNSグリッド",
+    "waterSplash": "水しぶき",
+    "ingredientBurst": "素材バースト",
+    "neonGlow": "ネオングロー",
+    "natureScene": "自然シーン",
+    "luxurySetting": "ラグジュアリー"
   },
   "export": {
     "title": "エクスポート",

@@ -433,9 +433,7 @@
     "lighting": "Product Lighting",
     "presentation": "Presentation Style",
     "enhance": "Enhance Product",
-    "socialGrid": "Social Media Grid",
-    "gridDescription": "Generate 9 product shots in 3×3 grid for Instagram/Facebook campaigns.",
-    "generateGrid": "Generate 3×3 Grid",
+    "creative": "Creative",
     "generating": "Generating grid...",
     "gridComplete": "Grid generated!",
     "gridError": "Failed to generate grid",
@@ -463,7 +461,13 @@
     "sharpenLabels": "Sharpen Labels",
     "enhanceMaterials": "Enhance Materials",
     "colorAccurate": "Color Accurate",
-    "removeImperfections": "Clean Product"
+    "removeImperfections": "Clean Product",
+    "socialGrid": "3×3 Social Grid",
+    "waterSplash": "Water Splash",
+    "ingredientBurst": "Ingredient Burst",
+    "neonGlow": "Neon Glow",
+    "natureScene": "Nature Scene",
+    "luxurySetting": "Luxury Setting"
   },
   "export": {
     "title": "Export",

@@ -433,9 +433,7 @@
     "lighting": "Eclairage du produit",
     "presentation": "Style de presentation",
     "enhance": "Ameliorer le produit",
-    "socialGrid": "Grille reseaux sociaux",
-    "gridDescription": "Generez 9 photos de produit en grille 3×3 pour Instagram/Facebook.",
-    "generateGrid": "Generer la grille 3×3",
+    "creative": "Creatif",
     "generating": "Generation de la grille...",
     "gridComplete": "Grille generee!",
     "gridError": "Echec de la generation de la grille",
@@ -463,7 +461,13 @@
     "sharpenLabels": "Affiner les etiquettes",
     "enhanceMaterials": "Ameliorer les materiaux",
     "colorAccurate": "Couleur precise",
-    "removeImperfections": "Nettoyer le produit"
+    "removeImperfections": "Nettoyer le produit",
+    "socialGrid": "Grille 3×3 Social",
+    "waterSplash": "Eclaboussure d'Eau",
+    "ingredientBurst": "Explosion d'Ingredients",
+    "neonGlow": "Lueur Neon",
+    "natureScene": "Scene Nature",
+    "luxurySetting": "Cadre Luxueux"
   },
   "export": {
     "title": "Exporter",

@@ -433,9 +433,7 @@
     "lighting": "제품 조명",
     "presentation": "프레젠테이션 스타일",
     "enhance": "제품 향상",
-    "socialGrid": "소셜 미디어 그리드",
-    "gridDescription": "Instagram/Facebook용 3×3 그리드로 9개의 제품 사진을 생성합니다.",
-    "generateGrid": "3×3 그리드 생성",
+    "creative": "크리에이티브",
     "generating": "그리드 생성 중...",
     "gridComplete": "그리드 완료!",
     "gridError": "그리드 생성 실패",
@@ -463,7 +461,13 @@
     "sharpenLabels": "라벨 선명화",
     "enhanceMaterials": "재질 향상",
     "colorAccurate": "정확한 색상",
-    "removeImperfections": "제품 정리"
+    "removeImperfections": "제품 정리",
+    "socialGrid": "3×3 소셜 그리드",
+    "waterSplash": "물 튀김",
+    "ingredientBurst": "재료 폭발",
+    "neonGlow": "네온 글로우",
+    "natureScene": "자연 장면",
+    "luxurySetting": "럭셔리 세팅"
   },
   "export": {
     "title": "내보내기",

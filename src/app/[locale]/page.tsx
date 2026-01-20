@@ -866,6 +866,14 @@ function HomeContent() {
       { id: 'color-accurate', name: 'Color Accurate', prompt: 'Correct color casts, ensure product colors are accurate and true-to-life. Neutral white balance. Colors as they appear in daylight. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
       { id: 'remove-imperfections', name: 'Clean Product', prompt: 'Remove dust, fingerprints, scratches, minor imperfections from product surface. Clean, pristine appearance. Do not alter design or branding. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
     ],
+    creative: [
+      { id: 'social-grid', name: '3×3 Social Grid', prompt: '__SPECIAL_GRID__', isSpecial: true },
+      { id: 'water-splash', name: 'Water Splash', prompt: 'Product dramatically emerging from or surrounded by dynamic water splash. Crystal clear water droplets frozen in motion. High-speed photography aesthetic with studio lighting. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'ingredient-burst', name: 'Ingredient Burst', prompt: 'Product surrounded by floating ingredients, components, or materials it contains. Dynamic composition with items orbiting the product. Clean studio background. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'neon-glow', name: 'Neon Glow', prompt: 'Product with vibrant neon lighting effects. Cyberpunk aesthetic with colorful rim lights (pink, blue, purple). Dark moody background with light trails. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'nature-scene', name: 'Nature Scene', prompt: 'Product placed in beautiful natural environment - lush greenery, flowers, natural light filtering through leaves. Organic, eco-friendly aesthetic. Shallow depth of field. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'luxury-setting', name: 'Luxury Setting', prompt: 'Product in opulent luxury setting - velvet, gold accents, champagne, jewels nearby. Premium high-end lifestyle context. Dramatic elegant lighting. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+    ],
   };
 
   // Product preset translation keys mapping
@@ -891,6 +899,12 @@ function HomeContent() {
     'enhance-materials': 'productPresets.enhanceMaterials',
     'color-accurate': 'productPresets.colorAccurate',
     'remove-imperfections': 'productPresets.removeImperfections',
+    'social-grid': 'productPresets.socialGrid',
+    'water-splash': 'productPresets.waterSplash',
+    'ingredient-burst': 'productPresets.ingredientBurst',
+    'neon-glow': 'productPresets.neonGlow',
+    'nature-scene': 'productPresets.natureScene',
+    'luxury-setting': 'productPresets.luxurySetting',
   };
 
   // Model builder options
@@ -7923,28 +7937,6 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                     </div>
                   )}
 
-                  {/* Social Media Grid Section */}
-                  <div className="mb-4 p-3 rounded-lg bg-muted/50 border border-border">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-medium">{t('products.socialGrid')}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-3">{t('products.gridDescription')}</p>
-                    <button
-                      onClick={handleGenerateProductGrid}
-                      disabled={isGeneratingGrid || !uploadedImage}
-                      className="w-full px-3 py-2 rounded-lg text-sm bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
-                    >
-                      {isGeneratingGrid ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          {t('products.generating')}
-                        </>
-                      ) : (
-                        t('products.generateGrid')
-                      )}
-                    </button>
-                  </div>
-
                   {/* Product Presets - Scrollable */}
                   <div className="pb-20 pr-2 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
                     {/* Product Isolation */}
@@ -8145,6 +8137,59 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                               >
                                 <span>{t(PRODUCT_PRESET_KEYS[preset.id]) || preset.name}</span>
                                 {useCount > 0 && <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{useCount}×</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Creative */}
+                    <div className="mb-3">
+                      <button
+                        onClick={() => setExpandedProductCategory(expandedProductCategory === 'creative' ? null : 'creative')}
+                        className="w-full px-3 py-2 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-between"
+                      >
+                        <span>{t('products.creative')}</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${expandedProductCategory === 'creative' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedProductCategory === 'creative' && (
+                        <div className="mt-2 space-y-1.5">
+                          {PRODUCT_PRESETS.creative.map((preset) => {
+                            const isActive = activeProductPresetId === preset.id;
+                            const useCount = productPresetUseCounts[preset.id] || 0;
+                            const isGridPreset = preset.id === 'social-grid';
+                            return (
+                              <button
+                                key={preset.id}
+                                onClick={() => {
+                                  if (!uploadedImage) {
+                                    toast.info(t('common.uploadFirst'));
+                                    return;
+                                  }
+                                  if (isGridPreset) {
+                                    // Special handling for 3x3 grid
+                                    handleGenerateProductGrid();
+                                  } else {
+                                    setActiveProductPresetId(preset.id);
+                                    setProductPresetUseCounts(prev => ({ ...prev, [preset.id]: (prev[preset.id] || 0) + 1 }));
+                                    handleApplyProductEdit(preset.prompt, preset.name);
+                                  }
+                                }}
+                                disabled={isGridPreset && isGeneratingGrid}
+                                className={`w-full px-3 py-2 rounded-lg text-sm text-left transition-all flex items-center justify-between ${
+                                  isActive
+                                    ? 'bg-primary/20 border border-primary/40 text-primary'
+                                    : isGridPreset
+                                      ? 'bg-gradient-to-r from-violet-500/10 to-pink-500/10 border border-violet-500/30 hover:border-violet-500/50 text-foreground/80'
+                                      : 'bg-muted/50 border border-border hover:bg-muted hover:border-border text-foreground/70'
+                                } disabled:opacity-50`}
+                              >
+                                <span className="flex items-center gap-2">
+                                  {isGridPreset && isGeneratingGrid && <Loader2 className="w-3 h-3 animate-spin" />}
+                                  {t(PRODUCT_PRESET_KEYS[preset.id]) || preset.name}
+                                </span>
+                                {useCount > 0 && !isGridPreset && <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{useCount}×</span>}
                               </button>
                             );
                           })}

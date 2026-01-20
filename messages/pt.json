@@ -433,9 +433,7 @@
     "lighting": "Iluminacao do produto",
     "presentation": "Estilo de apresentacao",
     "enhance": "Melhorar produto",
-    "socialGrid": "Grade para redes sociais",
-    "gridDescription": "Gere 9 fotos de produto em grade 3×3 para Instagram/Facebook.",
-    "generateGrid": "Gerar grade 3×3",
+    "creative": "Criativo",
     "generating": "Gerando grade...",
     "gridComplete": "Grade gerada!",
     "gridError": "Falha ao gerar grade",
@@ -463,7 +461,13 @@
     "sharpenLabels": "Nitidez nas etiquetas",
     "enhanceMaterials": "Melhorar materiais",
     "colorAccurate": "Cor precisa",
-    "removeImperfections": "Limpar produto"
+    "removeImperfections": "Limpar produto",
+    "socialGrid": "Grade 3×3 Social",
+    "waterSplash": "Respingo de Agua",
+    "ingredientBurst": "Explosao de Ingredientes",
+    "neonGlow": "Brilho Neon",
+    "natureScene": "Cena Natural",
+    "luxurySetting": "Ambiente Luxuoso"
   },
   "export": {
     "title": "Exportar",

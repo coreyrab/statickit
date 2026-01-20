@@ -433,9 +433,7 @@
     "lighting": "产品灯光",
     "presentation": "展示风格",
     "enhance": "增强产品",
-    "socialGrid": "社交媒体网格",
-    "gridDescription": "为Instagram/Facebook生成3×3网格的9张产品照片。",
-    "generateGrid": "生成3×3网格",
+    "creative": "创意",
     "generating": "生成网格中...",
     "gridComplete": "网格已生成！",
     "gridError": "网格生成失败",
@@ -463,7 +461,13 @@
     "sharpenLabels": "锐化标签",
     "enhanceMaterials": "增强材质",
     "colorAccurate": "色彩精准",
-    "removeImperfections": "清理产品"
+    "removeImperfections": "清理产品",
+    "socialGrid": "3×3 社交网格",
+    "waterSplash": "水花飞溅",
+    "ingredientBurst": "成分爆发",
+    "neonGlow": "霓虹发光",
+    "natureScene": "自然场景",
+    "luxurySetting": "奢华布景"
   },
   "export": {
     "title": "导出",
