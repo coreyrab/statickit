@@ -18,6 +18,79 @@ export interface ProgressState {
 
 export { subscribeToProgress, getCapabilities };
 
+// Maximum image dimension for mobile devices to prevent memory crashes
+const MOBILE_MAX_DIMENSION = 1024;
+
+/**
+ * Detect if the current device is mobile
+ */
+function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  // Check for mobile user agent
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+
+  // Also check screen size as a fallback
+  const isSmallScreen = window.innerWidth <= 768;
+
+  return isMobileUA || isSmallScreen;
+}
+
+/**
+ * Resize an image if it exceeds the maximum dimension (for mobile memory management)
+ */
+async function resizeImageIfNeeded(imageUrl: string, maxDimension: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    img.onload = () => {
+      const { width, height } = img;
+
+      // Check if resizing is needed
+      if (width <= maxDimension && height <= maxDimension) {
+        resolve(imageUrl); // Return original if small enough
+        return;
+      }
+
+      // Calculate new dimensions maintaining aspect ratio
+      let newWidth: number;
+      let newHeight: number;
+
+      if (width > height) {
+        newWidth = maxDimension;
+        newHeight = Math.round((height / width) * maxDimension);
+      } else {
+        newHeight = maxDimension;
+        newWidth = Math.round((width / height) * maxDimension);
+      }
+
+      // Create canvas and resize
+      const canvas = document.createElement('canvas');
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
+      }
+
+      // Use high-quality image smoothing
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+      // Return as data URL
+      resolve(canvas.toDataURL('image/png'));
+    };
+
+    img.onerror = () => reject(new Error('Failed to load image for resizing'));
+    img.src = imageUrl;
+  });
+}
+
 /**
  * Remove background from an image using AI (runs entirely in browser via WebGPU/WASM)
  */
@@ -41,7 +114,14 @@ export async function removeImageBackground(
     // Signal processing start
     onProgress?.({ phase: 'processing', progress: 0 });
 
-    const result = await rembgRemoveBackground(imageUrl);
+    // On mobile, resize the image first to prevent memory crashes
+    let processImageUrl = imageUrl;
+    if (isMobileDevice()) {
+      console.log('[Background Removal] Mobile device detected, resizing image...');
+      processImageUrl = await resizeImageIfNeeded(imageUrl, MOBILE_MAX_DIMENSION);
+    }
+
+    const result = await rembgRemoveBackground(processImageUrl);
 
     // Convert blob URL to base64 for storage/API compatibility
     const response = await fetch(result.blobUrl);
