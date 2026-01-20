@@ -75,6 +75,7 @@ import {
   Shield,
   Globe,
   Link2,
+  Package,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -132,7 +133,7 @@ const OpenAILogoGrey = ({ className }: { className?: string }) => (
 );
 
 type Step = 'upload' | 'editor';
-type Tool = 'edit' | 'iterations' | 'backgrounds' | 'model' | 'export' | null;
+type Tool = 'edit' | 'iterations' | 'backgrounds' | 'model' | 'products' | 'export' | null;
 
 interface UploadedImage {
   file: File;
@@ -373,6 +374,18 @@ function HomeContent() {
   const [selectedModelRef, setSelectedModelRef] = useState<string | null>(null);
   const [selectedEditRef, setSelectedEditRef] = useState<string | null>(null);
 
+  // Products tool state
+  const [productSuggestions, setProductSuggestions] = useState<{id: string, name: string, prompt: string}[]>([]);
+  const [isLoadingProductSuggestions, setIsLoadingProductSuggestions] = useState(false);
+  const [productCustomPrompt, setProductCustomPrompt] = useState('');
+  const [productReferences, setProductReferences] = useState<ReferenceImage[]>([]);
+  const [selectedProductRef, setSelectedProductRef] = useState<string | null>(null);
+  const [usedProductPresets, setUsedProductPresets] = useState<Set<string>>(new Set());
+  const [expandedProductCategory, setExpandedProductCategory] = useState<string | null>(null);
+  const [isGeneratingGrid, setIsGeneratingGrid] = useState(false);
+  const [activeProductPresetId, setActiveProductPresetId] = useState<string | null>(null);
+  const [productPresetUseCounts, setProductPresetUseCounts] = useState<Record<string, number>>({});
+
   // AI Model selection - supports Gemini and OpenAI providers
   type AIModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-image' | 'gpt-image-1' | 'gpt-image-1-mini';
   const [selectedAIModel, setSelectedAIModel] = useState<AIModel>('gemini-3-pro-image-preview');
@@ -474,6 +487,7 @@ function HomeContent() {
   const backgroundRefInputRef = useRef<HTMLInputElement>(null);
   const modelRefInputRef = useRef<HTMLInputElement>(null);
   const editRefInputRef = useRef<HTMLInputElement>(null);
+  const productRefInputRef = useRef<HTMLInputElement>(null);
 
   // Animated upload icon ref
   const uploadIconRef = useRef<UploadHandle>(null);
@@ -819,6 +833,66 @@ function HomeContent() {
     { id: 'rainy-day', name: 'Rainy Day', prompt: 'ATMOSPHERE ADJUSTMENT ONLY: Keep the exact same background scene and location. Apply rainy day mood with wet surface reflections, moody overcast lighting, atmospheric dampness. Add subtle rain atmosphere. Do not change or replace the background elements. IMPORTANT: The subject\'s face must remain exactly the same - same facial features, same expression, same identity. Any text or lettering in the image must not be changed or altered in any way.' },
   ];
 
+  // Product presets for the Products tool - organized by category
+  const PRODUCT_PRESETS = {
+    isolation: [
+      { id: 'remove-hand', name: 'Remove Hand', prompt: 'Remove the hand holding the product. Product floats naturally with consistent lighting and subtle shadow. Preserve exact product appearance, colors, labels, branding. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'float-white', name: 'Float on White', prompt: 'Isolate product on pure white background (#FFFFFF). Professional e-commerce style with subtle natural shadow. Product accuracy: shape, colors, labels, typography - 100% preserved. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'float-transparent', name: 'Transparent BG', prompt: 'Isolate product with transparent background for compositing. Clean edges, no fringing. Preserve exact product appearance and natural lighting. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'remove-context', name: 'Remove Context', prompt: 'Remove all background context and props, keep only main product. Clean isolation with subtle shadow. Product details and branding pixel-perfect. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+    ],
+    backgrounds: [
+      { id: 'gradient-subtle', name: 'Subtle Gradient', prompt: 'Place product on soft gradient background (light gray to white). Professional studio lighting. Product floats with natural shadow. E-commerce hero image style. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'marble-surface', name: 'Marble Surface', prompt: 'Place product on elegant white marble surface with subtle veining. Soft studio lighting from above. Luxury brand aesthetic with subtle reflection. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'wooden-table', name: 'Wooden Table', prompt: 'Place product on natural wood surface with visible grain texture. Warm lifestyle lighting. Artisanal, organic brand feel. Soft background blur. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'fabric-texture', name: 'Fabric Backdrop', prompt: 'Place product on soft fabric/linen backdrop with gentle texture and folds. Diffused natural lighting. Premium lifestyle photography aesthetic. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'color-sweep', name: 'Color Sweep', prompt: 'Place product on seamless colored paper sweep background. Clean studio lighting with soft shadows. Product photography standard setup. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+    ],
+    lighting: [
+      { id: 'hero-dramatic', name: 'Hero Dramatic', prompt: 'Apply dramatic hero lighting: strong key light from 45 degrees, deep shadows for depth, rim light outlining edges. High-end commercial advertising look. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'soft-diffused', name: 'Soft Diffused', prompt: 'Apply soft, evenly diffused lighting like large softbox from above. Minimal shadows, no harsh highlights. Clean e-commerce standard. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'backlit-glow', name: 'Backlit Glow', prompt: 'Apply backlighting creating luminous glow around product edges. Ethereal, premium feel. Great for transparent or semi-transparent products. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'natural-window', name: 'Natural Window', prompt: 'Apply natural window light from the side. Soft shadows, authentic lifestyle feel. Warm color temperature. Editorial product photography. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+    ],
+    presentation: [
+      { id: 'add-reflection', name: 'Add Reflection', prompt: 'Add subtle glossy surface reflection beneath product. Mirror-like floor effect fading to background. Premium showcase style. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'add-shadow', name: 'Natural Shadow', prompt: 'Add or enhance natural contact shadow and cast shadow beneath product. Shadow direction consistent with lighting. Grounds product realistically. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'levitate', name: 'Levitate', prompt: 'Make product appear to float/levitate with shadow on ground below. Dynamic angle suggesting motion or weightlessness. Modern tech presentation. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'exploded-view', name: 'Exploded View', prompt: 'Show product components in exploded diagram view - parts separated but aligned to show assembly. Technical illustration style. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+    ],
+    enhance: [
+      { id: 'sharpen-labels', name: 'Sharpen Labels', prompt: 'Enhance sharpness and clarity of all product labels, text, and branding. Make typography crisp and readable. Preserve colors accurately. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'enhance-materials', name: 'Enhance Materials', prompt: 'Enhance visual quality of product materials - shinier metal, clearer glass, visible fabric texture, cleaner plastic. Highlight material quality. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'color-accurate', name: 'Color Accurate', prompt: 'Correct color casts, ensure product colors are accurate and true-to-life. Neutral white balance. Colors as they appear in daylight. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+      { id: 'remove-imperfections', name: 'Clean Product', prompt: 'Remove dust, fingerprints, scratches, minor imperfections from product surface. Clean, pristine appearance. Do not alter design or branding. CRITICAL: Product shape, proportions, form must be EXACT match. Labels, text, typography must be EXACT match and readable. Colors and branding must be EXACT match. No distortion, deformation, or redesign.' },
+    ],
+  };
+
+  // Product preset translation keys mapping
+  const PRODUCT_PRESET_KEYS: Record<string, string> = {
+    'remove-hand': 'productPresets.removeHand',
+    'float-white': 'productPresets.floatWhite',
+    'float-transparent': 'productPresets.floatTransparent',
+    'remove-context': 'productPresets.removeContext',
+    'gradient-subtle': 'productPresets.gradientSubtle',
+    'marble-surface': 'productPresets.marbleSurface',
+    'wooden-table': 'productPresets.woodenTable',
+    'fabric-texture': 'productPresets.fabricTexture',
+    'color-sweep': 'productPresets.colorSweep',
+    'hero-dramatic': 'productPresets.heroDramatic',
+    'soft-diffused': 'productPresets.softDiffused',
+    'backlit-glow': 'productPresets.backlitGlow',
+    'natural-window': 'productPresets.naturalWindow',
+    'add-reflection': 'productPresets.addReflection',
+    'add-shadow': 'productPresets.addShadow',
+    'levitate': 'productPresets.levitate',
+    'exploded-view': 'productPresets.explodedView',
+    'sharpen-labels': 'productPresets.sharpenLabels',
+    'enhance-materials': 'productPresets.enhanceMaterials',
+    'color-accurate': 'productPresets.colorAccurate',
+    'remove-imperfections': 'productPresets.removeImperfections',
+  };
+
   // Model builder options
   const MODEL_OPTIONS = {
     gender: [
@@ -1087,7 +1161,7 @@ function HomeContent() {
 
       if (e.shiftKey && e.key === 'ArrowLeft') {
         // Shift + Left = Previous tool
-        const tools: Tool[] = ['iterations', 'edit', 'backgrounds', 'model', 'export'];
+        const tools: Tool[] = ['iterations', 'edit', 'backgrounds', 'model', 'products', 'export'];
         setSelectedTool(prev => {
           if (prev === null) return 'export'; // Start from end
           const currentIndex = tools.indexOf(prev);
@@ -1095,7 +1169,7 @@ function HomeContent() {
         });
       } else if (e.shiftKey && e.key === 'ArrowRight') {
         // Shift + Right = Next tool
-        const tools: Tool[] = ['iterations', 'edit', 'backgrounds', 'model', 'export'];
+        const tools: Tool[] = ['iterations', 'edit', 'backgrounds', 'model', 'products', 'export'];
         setSelectedTool(prev => {
           if (prev === null) return 'iterations'; // Start from beginning
           const currentIndex = tools.indexOf(prev);
@@ -1170,6 +1244,8 @@ function HomeContent() {
       } else if (e.key === '4') {
         setSelectedTool('model');
       } else if (e.key === '5') {
+        setSelectedTool('products');
+      } else if (e.key === '6') {
         setSelectedTool('export');
       }
     };
@@ -2996,6 +3072,402 @@ function HomeContent() {
     e.target.value = '';
   };
 
+  // Handle product reference image upload
+  const handleProductRefUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      const base64 = dataUrl.split(',')[1];
+
+      const newRef: ReferenceImage = {
+        id: `product-ref-${Date.now()}`,
+        url: dataUrl,
+        base64,
+        mimeType: file.type,
+        name: file.name,
+        type: 'product' as any, // Extend ReferenceImage type
+      };
+
+      setProductReferences(prev => [...prev, newRef]);
+      setSelectedProductRef(newRef.id);
+      track('reference_image_uploaded', { tool: 'product' });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  // Apply a product edit with product-scoped prompt
+  const handleApplyProductEdit = async (prompt: string, label: string) => {
+    if (!uploadedImage) {
+      toast.info(t('common.uploadFirst'));
+      return;
+    }
+    if (!apiKey && !openaiApiKey) {
+      setShowApiKeySetup(true);
+      return;
+    }
+
+    // Build product label for version history
+    const productLabel = `[product] ${label}`;
+
+    // Compute values BEFORE state update (React 18+ batches state updates)
+    const currentVersions: ImageVersion[] = originalVersions.length === 0
+      ? [{ imageUrl: uploadedImage.url, prompt: null, parentIndex: -1, status: 'completed' as const }]
+      : originalVersions;
+
+    const safeIndex = Math.min(originalVersionIndex, currentVersions.length - 1);
+    const currentVersion = currentVersions[safeIndex] || currentVersions[0];
+
+    // Only allow editing completed versions
+    if (!currentVersion || currentVersion.status !== 'completed') {
+      return;
+    }
+
+    const imageToUse = currentVersion.imageUrl || uploadedImage.url;
+
+    // Determine which models to use
+    const modelsToUse = isCompareModelsEnabled && selectedModelsForCompare.length > 1
+      ? selectedModelsForCompare
+      : [selectedAIModel];
+
+    // Add processing versions for all models
+    const processingVersions: ImageVersion[] = modelsToUse.map(model => ({
+      imageUrl: null,
+      prompt: modelsToUse.length > 1 ? `${productLabel} [${getModelDisplayName(model)}]` : productLabel,
+      parentIndex: safeIndex,
+      status: 'processing' as const
+    }));
+
+    const newVersionIndices = processingVersions.map((_, idx) => currentVersions.length + idx);
+    setOriginalVersions([...currentVersions, ...processingVersions]);
+
+    try {
+      // Convert image to base64 - use File directly if available (avoids blob URL fetch issues)
+      let base64: string;
+      let mimeType: string;
+
+      if (imageToUse === uploadedImage.url && uploadedImage.file) {
+        // Use the original file directly - more reliable than fetching blob URL
+        base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            resolve(result.split(',')[1]);
+          };
+          reader.readAsDataURL(uploadedImage.file);
+        });
+        mimeType = uploadedImage.file.type;
+      } else {
+        // Fetch the image (works for data URLs from API responses)
+        const imageResponse = await fetch(imageToUse);
+        const blob = await imageResponse.blob();
+        base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            resolve(result.split(',')[1]);
+          };
+          reader.readAsDataURL(blob);
+        });
+        mimeType = blob.type;
+      }
+
+      // Use analysis if available, otherwise provide minimal context
+      const analysisToUse = analysis || {
+        product: 'Product',
+        brand_style: 'Not specified',
+        visual_elements: [],
+        key_selling_points: [],
+        target_audience: 'General',
+        colors: [],
+        mood: 'Not specified',
+      };
+
+      // Get selected reference image if any
+      const selectedProdRef = productReferences.find(r => r.id === selectedProductRef);
+
+      // Run generation for each model
+      const generateForModel = async (model: AIModel, versionIndex: number) => {
+        const apiKeys = getApiKeysForModel(model);
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...apiKeys,
+            image: base64,
+            mimeType: mimeType,
+            analysis: analysisToUse,
+            variationDescription: prompt,
+            aspectRatio: uploadedImage.aspectRatio,
+            isEdit: true,
+            isProductOnly: true,
+            model,
+            quality: getQualityForModel(model),
+            // Include reference image if selected
+            ...(selectedProdRef && {
+              productRefImage: selectedProdRef.base64,
+              productRefMimeType: selectedProdRef.mimeType,
+            }),
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setOriginalVersions(prev => prev.map((v, idx) =>
+            idx === versionIndex
+              ? { ...v, imageUrl: data.imageUrl, status: 'completed' as const }
+              : v
+          ));
+          track('image_generated', { tool: 'product' });
+          if (selectedProdRef) {
+            track('reference_image_used', { tool: 'product' });
+          }
+        } else {
+          setOriginalVersions(prev => prev.map((v, idx) =>
+            idx === versionIndex
+              ? { ...v, status: 'error' as const }
+              : v
+          ));
+        }
+      };
+
+      // Execute generations in parallel
+      await Promise.allSettled(
+        modelsToUse.map((model, idx) => generateForModel(model, newVersionIndices[idx]))
+      );
+    } catch (err) {
+      console.error('Product edit error:', err);
+      // Mark all processing versions as error
+      setOriginalVersions(prev => prev.map((v, idx) =>
+        newVersionIndices.includes(idx) && v.status === 'processing'
+          ? { ...v, status: 'error' as const }
+          : v
+      ));
+    }
+  };
+
+  // Generate AI product edit suggestions based on current image
+  const handleGenerateProductSuggestions = async () => {
+    if (!uploadedImage) {
+      toast.info(t('common.uploadFirst'));
+      return;
+    }
+    if (!apiKey) {
+      setShowApiKeySetup(true);
+      return;
+    }
+
+    setIsLoadingProductSuggestions(true);
+
+    try {
+      // Get current image URL - use File directly if available
+      const currentVersion = originalVersions.length > 0 ? originalVersions[originalVersionIndex] : null;
+      const imageUrl = currentVersion?.imageUrl || uploadedImage.url;
+
+      let base64: string;
+      let mimeType: string;
+
+      if (imageUrl === uploadedImage.url && uploadedImage.file) {
+        // Use the original file directly
+        base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            resolve(result.split(',')[1]);
+          };
+          reader.readAsDataURL(uploadedImage.file);
+        });
+        mimeType = uploadedImage.file.type;
+      } else {
+        const imageResponse = await fetch(imageUrl);
+        const blob = await imageResponse.blob();
+        base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            resolve(result.split(',')[1]);
+          };
+          reader.readAsDataURL(blob);
+        });
+        mimeType = blob.type;
+      }
+
+      // Use analysis if available for better suggestions
+      const analysisToUse = analysis || {
+        product: 'Unknown',
+        brand_style: 'Not specified',
+        target_audience: 'General',
+        mood: 'Not specified',
+        visual_elements: [],
+      };
+
+      // Pass existing suggestion names to avoid duplicates
+      const existingSuggestionNames = productSuggestions.map(s => s.name);
+
+      const response = await fetch('/api/suggest-products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey,
+          image: base64,
+          mimeType: mimeType,
+          analysis: analysisToUse,
+          existingSuggestions: existingSuggestionNames,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Append new suggestions to existing ones
+        setProductSuggestions(prev => [...prev, ...(data.suggestions || [])]);
+      }
+    } catch (err) {
+      console.error('Product suggestions error:', err);
+    } finally {
+      setIsLoadingProductSuggestions(false);
+    }
+  };
+
+  // Generate 3x3 social media grid
+  const handleGenerateProductGrid = async () => {
+    if (!uploadedImage) {
+      toast.info(t('common.uploadFirst'));
+      return;
+    }
+    if (!apiKey && !openaiApiKey) {
+      setShowApiKeySetup(true);
+      return;
+    }
+
+    setIsGeneratingGrid(true);
+
+    try {
+      // Get current image for the grid
+      const currentVersion = originalVersions.length > 0 ? originalVersions[originalVersionIndex] : null;
+      const imageToUse = currentVersion?.imageUrl || uploadedImage.url;
+
+      let base64: string;
+      let mimeType: string;
+
+      if (imageToUse === uploadedImage.url && uploadedImage.file) {
+        base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            resolve(result.split(',')[1]);
+          };
+          reader.readAsDataURL(uploadedImage.file);
+        });
+        mimeType = uploadedImage.file.type;
+      } else {
+        const imageResponse = await fetch(imageToUse);
+        const blob = await imageResponse.blob();
+        base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            resolve(result.split(',')[1]);
+          };
+          reader.readAsDataURL(blob);
+        });
+        mimeType = blob.type;
+      }
+
+      const analysisToUse = analysis || {
+        product: 'Product',
+        brand_style: 'Not specified',
+      };
+
+      // Grid generation prompt - creates a single 3x3 combined image
+      const gridPrompt = `Create a 3×3 grid in 3:4 aspect ratio for a high-end commercial marketing campaign using this product as the central subject.
+
+Each frame must present a distinct visual concept while maintaining perfect product consistency across all nine images.
+
+Grid Concepts (one per cell):
+1. Iconic hero still life with bold composition
+2. Extreme macro detail highlighting material, surface, or texture
+3. Dynamic liquid or particle interaction surrounding the product
+4. Minimal sculptural arrangement with abstract forms
+5. Floating elements composition suggesting lightness and innovation
+6. Sensory close-up emphasizing tactility and realism
+7. Color-driven conceptual scene inspired by the product palette
+8. Ingredient or component abstraction (non-literal, symbolic)
+9. Surreal yet elegant fusion scene combining realism and imagination
+
+Visual Rules:
+- Product must remain 100% accurate in shape, proportions, label, typography, color, branding
+- No distortion, deformation, or redesign of the product
+- Clean separation between product and background
+
+Lighting & Style:
+- Soft, controlled studio lighting
+- Subtle highlights, realistic shadows
+- High dynamic range, ultra-sharp focus
+- Editorial luxury advertising aesthetic
+
+Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
+
+      // Add processing version
+      const currentVersions: ImageVersion[] = originalVersions.length === 0
+        ? [{ imageUrl: uploadedImage.url, prompt: null, parentIndex: -1, status: 'completed' as const }]
+        : originalVersions;
+
+      const processingVersion: ImageVersion = {
+        imageUrl: null,
+        prompt: '[product] 3x3 Social Grid',
+        parentIndex: Math.min(originalVersionIndex, currentVersions.length - 1),
+        status: 'processing'
+      };
+
+      const newVersionIndex = currentVersions.length;
+      setOriginalVersions([...currentVersions, processingVersion]);
+
+      const apiKeys = getApiKeysForModel(selectedAIModel);
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...apiKeys,
+          image: base64,
+          mimeType: mimeType,
+          analysis: analysisToUse,
+          variationDescription: gridPrompt,
+          aspectRatio: '3:4',
+          isEdit: true,
+          isProductOnly: true,
+          model: selectedAIModel,
+          quality: getQualityForModel(selectedAIModel),
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setOriginalVersions(prev => prev.map((v, idx) =>
+          idx === newVersionIndex
+            ? { ...v, imageUrl: data.imageUrl, status: 'completed' as const }
+            : v
+        ));
+        toast.success(t('products.gridComplete'));
+        track('image_generated', { tool: 'product', type: 'grid' });
+      } else {
+        setOriginalVersions(prev => prev.map((v, idx) =>
+          idx === newVersionIndex
+            ? { ...v, status: 'error' as const }
+            : v
+        ));
+        toast.error(t('products.gridError'));
+      }
+    } catch (err) {
+      console.error('Grid generation error:', err);
+      toast.error(t('products.gridError'));
+    } finally {
+      setIsGeneratingGrid(false);
+    }
+  };
+
   // Navigate original image versions
   const handleOriginalVersionChange = (direction: 'prev' | 'next') => {
     if (direction === 'prev' && originalVersionIndex > 0) {
@@ -3847,6 +4319,18 @@ function HomeContent() {
                 </button>
 
                 <button
+                  onClick={() => setSelectedTool('products')}
+                  className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
+                    selectedTool === 'products'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  <Package className="w-4 h-4" />
+                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'products' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>5</span>
+                </button>
+
+                <button
                   onClick={() => setSelectedTool('export')}
                   className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
                     selectedTool === 'export'
@@ -3855,7 +4339,7 @@ function HomeContent() {
                   }`}
                 >
                   <Expand className="w-4 h-4" />
-                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'export' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>5</span>
+                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'export' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>6</span>
                 </button>
               </div>
             </div>
@@ -4697,6 +5181,78 @@ function HomeContent() {
                               setModelCustomPrompt('');
                             }}
                             disabled={!modelCustomPrompt.trim() || currentVersionProcessing}
+                            className="p-2 rounded-full bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <Send className="w-4 h-4 text-primary-foreground" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* Floating Products Input - shows when products tool selected */}
+              {!isUIHidden && selectedTool === 'products' && !isShowingGenerated && uploadedImage && (
+                <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
+                  {(() => {
+                    const currentVersionProcessing = originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing';
+                    const selectedRef = productReferences.find(r => r.id === selectedProductRef);
+                    return (
+                      <div className={`bg-background/40 backdrop-blur-xl border border-border/30 shadow-lg overflow-hidden transition-all duration-200 focus-within:bg-background/70 focus-within:border-border/50 ${
+                        selectedRef ? 'rounded-2xl' : 'rounded-full'
+                      }`}>
+                        {/* Reference attachment row - animates in/out smoothly */}
+                        <div className={`overflow-hidden transition-all duration-200 ease-out ${
+                          selectedRef ? 'max-h-12 opacity-100' : 'max-h-0 opacity-0'
+                        }`}>
+                          <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30">
+                            <div className="relative">
+                              {selectedRef?.url && (
+                                <img
+                                  src={selectedRef.url}
+                                  alt={selectedRef.name || ''}
+                                  className="w-6 h-6 rounded object-cover"
+                                />
+                              )}
+                              <div className="absolute -top-1 -left-1 p-0.5 rounded-full bg-primary">
+                                <Paperclip className="w-2.5 h-2.5 text-primary-foreground" />
+                              </div>
+                            </div>
+                            <span className="text-xs text-primary font-medium">{t('common.reference')}</span>
+                            <button
+                              onClick={() => {
+                                setSelectedProductRef(null);
+                                setProductCustomPrompt('');
+                              }}
+                              className="p-0.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                        {/* Main input row */}
+                        <div className="flex items-center gap-2 pl-4 pr-1.5 py-1.5">
+                          <input
+                            type="text"
+                            placeholder={selectedRef ? t('products.describeUsingReference') : t('products.describePlaceholder')}
+                            value={productCustomPrompt}
+                            onChange={(e) => setProductCustomPrompt(e.target.value)}
+                            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 outline-none"
+                            disabled={currentVersionProcessing}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && productCustomPrompt.trim() && !currentVersionProcessing) {
+                                handleApplyProductEdit(productCustomPrompt, 'Custom');
+                                setProductCustomPrompt('');
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => {
+                              handleApplyProductEdit(productCustomPrompt, 'Custom');
+                              setProductCustomPrompt('');
+                            }}
+                            disabled={!productCustomPrompt.trim() || currentVersionProcessing}
                             className="p-2 rounded-full bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                           >
                             <Send className="w-4 h-4 text-primary-foreground" />
@@ -7159,6 +7715,447 @@ function HomeContent() {
               </div>
             )}
 
+            {/* Products Tool */}
+            {selectedTool === 'products' && (
+              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col md:h-full md:overflow-hidden">
+                {/* Image Section */}
+                <div className="p-4 border-b border-border">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-foreground/70">{t('sidebar.image')}</h3>
+                    <div className="flex items-center gap-2">
+                      {uploadedImage && (
+                        <button
+                          onClick={() => setShowClearConfirmModal(true)}
+                          className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-muted-foreground/50 hover:text-muted-foreground"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Clear
+                        </button>
+                      )}
+                      <button
+                        onClick={uploadedImage ? handleNewClick : openFileDialog}
+                        className="text-xs flex items-center gap-0.5 transition-colors cursor-pointer text-primary hover:text-primary/80"
+                      >
+                        <Plus className="w-3 h-3" />
+                        New
+                      </button>
+                    </div>
+                  </div>
+                  {uploadedImage ? (
+                    <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-muted-foreground/70 truncate flex-1 mr-2">{uploadedImage.filename}</span>
+                        <span className="text-[11px] text-muted-foreground/80">{uploadedImage.width}×{uploadedImage.height}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={openFileDialog}
+                      className="w-full p-3 rounded-lg border border-dashed border-border hover:border-border hover:bg-muted/50 transition-colors"
+                    >
+                      <span className="text-[11px] text-muted-foreground/50">No image uploaded</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Tool Content */}
+                <div className="p-4 flex flex-col md:flex-1 md:overflow-hidden">
+                  <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Package className="w-3.5 h-3.5 text-primary-foreground" /></span>{t('tools.products')}</h2>
+                  <div className="text-xs text-muted-foreground/80 mb-4">{t('products.description')}</div>
+
+                  {/* Generate AI Suggestions Button */}
+                  <button
+                    onClick={() => {
+                      if (!uploadedImage) {
+                        toast.info(t('common.uploadFirst'));
+                        return;
+                      }
+                      handleGenerateProductSuggestions();
+                    }}
+                    disabled={isLoadingProductSuggestions}
+                    className="w-full px-3 py-2 mb-4 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {isLoadingProductSuggestions ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-muted-foreground/80">{t('products.suggesting')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 text-primary/70" />
+                        {t('products.suggestEdits')}
+                      </>
+                    )}
+                  </button>
+
+                  {/* Reference Products Section */}
+                  <div className="border-t border-border/50 pt-3 mt-1 mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground">{t('products.referenceProduct')}</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+                              <Info className="w-3 h-3" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-[140px]">
+                            <p className="text-xs">{t('products.referenceTooltip')}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      {productReferences.length > 0 && (
+                        <button
+                          onClick={() => {
+                            setProductReferences([]);
+                            setSelectedProductRef(null);
+                            setProductCustomPrompt('');
+                          }}
+                          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {t('products.clearAll')}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Existing product references */}
+                    {productReferences.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mb-2">
+                        {productReferences.map((ref) => (
+                          <div
+                            key={ref.id}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => {
+                              setSelectedProductRef(ref.id);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                setSelectedProductRef(ref.id);
+                              }
+                            }}
+                            className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                              selectedProductRef === ref.id
+                                ? 'border-primary ring-2 ring-primary/20'
+                                : 'border-border hover:border-primary/50'
+                            }`}
+                          >
+                            <img src={ref.url} alt={ref.name} className="w-full h-full object-cover" />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setProductReferences(prev => prev.filter(r => r.id !== ref.id));
+                                if (selectedProductRef === ref.id) {
+                                  setSelectedProductRef(null);
+                                  setProductCustomPrompt('');
+                                }
+                              }}
+                              className="absolute top-0.5 right-0.5 p-0.5 rounded bg-black/50 hover:bg-black/70 transition-colors"
+                            >
+                              <X className="w-3 h-3 text-white" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Add product reference button */}
+                    <button
+                      onClick={() => productRefInputRef.current?.click()}
+                      className="w-full py-2 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition-colors flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                    >
+                      <ImagePlus className="w-4 h-4 text-muted-foreground/50" />
+                      {t('products.addReference')}
+                    </button>
+
+                    {/* Hidden file input */}
+                    <input
+                      ref={productRefInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleProductRefUpload}
+                    />
+                  </div>
+
+                  {/* AI-Generated Suggestions */}
+                  {(isLoadingProductSuggestions || productSuggestions.length > 0) && (
+                    <div className="mb-4">
+                      <h3 className="text-xs text-muted-foreground/70 uppercase tracking-wide mb-2">{t('products.aiSuggestions')}</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {isLoadingProductSuggestions ? (
+                          <>
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <div
+                                key={i}
+                                className="h-8 rounded-full bg-muted/50 border border-border animate-pulse"
+                                style={{ width: `${80 + Math.random() * 50}px` }}
+                              />
+                            ))}
+                          </>
+                        ) : (
+                          productSuggestions.map((suggestion) => {
+                            const isUsed = usedProductPresets.has(suggestion.id);
+                            return (
+                              <button
+                                key={suggestion.id}
+                                onClick={() => {
+                                  if (!uploadedImage) {
+                                    toast.info(t('common.uploadFirst'));
+                                    return;
+                                  }
+                                  setUsedProductPresets(prev => new Set([...prev, suggestion.id]));
+                                  handleApplyProductEdit(suggestion.prompt, suggestion.name);
+                                }}
+                                className={`px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-all ${
+                                  isUsed
+                                    ? 'bg-green-500/20 border border-green-500/40 text-green-700 dark:text-green-400'
+                                    : 'bg-primary/20 border border-primary/40 hover:bg-primary/30 hover:border-primary/60 text-primary'
+                                }`}
+                              >
+                                {isUsed && <Check className="w-3 h-3" />}
+                                {suggestion.name}
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Social Media Grid Section */}
+                  <div className="mb-4 p-3 rounded-lg bg-muted/50 border border-border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm font-medium">{t('products.socialGrid')}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-3">{t('products.gridDescription')}</p>
+                    <button
+                      onClick={handleGenerateProductGrid}
+                      disabled={isGeneratingGrid || !uploadedImage}
+                      className="w-full px-3 py-2 rounded-lg text-sm bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
+                    >
+                      {isGeneratingGrid ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          {t('products.generating')}
+                        </>
+                      ) : (
+                        t('products.generateGrid')
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Product Presets - Scrollable */}
+                  <div className="pb-20 pr-2 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
+                    {/* Product Isolation */}
+                    <div className="mb-3">
+                      <button
+                        onClick={() => setExpandedProductCategory(expandedProductCategory === 'isolation' ? null : 'isolation')}
+                        className="w-full px-3 py-2 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-between"
+                      >
+                        <span>{t('products.isolation')}</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${expandedProductCategory === 'isolation' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedProductCategory === 'isolation' && (
+                        <div className="mt-2 space-y-1.5">
+                          {PRODUCT_PRESETS.isolation.map((preset) => {
+                            const isActive = activeProductPresetId === preset.id;
+                            const useCount = productPresetUseCounts[preset.id] || 0;
+                            return (
+                              <button
+                                key={preset.id}
+                                onClick={() => {
+                                  if (!uploadedImage) {
+                                    toast.info(t('common.uploadFirst'));
+                                    return;
+                                  }
+                                  setActiveProductPresetId(preset.id);
+                                  setProductPresetUseCounts(prev => ({ ...prev, [preset.id]: (prev[preset.id] || 0) + 1 }));
+                                  handleApplyProductEdit(preset.prompt, preset.name);
+                                }}
+                                className={`w-full px-3 py-2 rounded-lg text-sm text-left transition-all flex items-center justify-between ${
+                                  isActive
+                                    ? 'bg-primary/20 border border-primary/40 text-primary'
+                                    : 'bg-muted/50 border border-border hover:bg-muted hover:border-border text-foreground/70'
+                                }`}
+                              >
+                                <span>{t(PRODUCT_PRESET_KEYS[preset.id]) || preset.name}</span>
+                                {useCount > 0 && <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{useCount}×</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Product Backgrounds */}
+                    <div className="mb-3">
+                      <button
+                        onClick={() => setExpandedProductCategory(expandedProductCategory === 'backgrounds' ? null : 'backgrounds')}
+                        className="w-full px-3 py-2 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-between"
+                      >
+                        <span>{t('products.backgrounds')}</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${expandedProductCategory === 'backgrounds' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedProductCategory === 'backgrounds' && (
+                        <div className="mt-2 space-y-1.5">
+                          {PRODUCT_PRESETS.backgrounds.map((preset) => {
+                            const isActive = activeProductPresetId === preset.id;
+                            const useCount = productPresetUseCounts[preset.id] || 0;
+                            return (
+                              <button
+                                key={preset.id}
+                                onClick={() => {
+                                  if (!uploadedImage) {
+                                    toast.info(t('common.uploadFirst'));
+                                    return;
+                                  }
+                                  setActiveProductPresetId(preset.id);
+                                  setProductPresetUseCounts(prev => ({ ...prev, [preset.id]: (prev[preset.id] || 0) + 1 }));
+                                  handleApplyProductEdit(preset.prompt, preset.name);
+                                }}
+                                className={`w-full px-3 py-2 rounded-lg text-sm text-left transition-all flex items-center justify-between ${
+                                  isActive
+                                    ? 'bg-primary/20 border border-primary/40 text-primary'
+                                    : 'bg-muted/50 border border-border hover:bg-muted hover:border-border text-foreground/70'
+                                }`}
+                              >
+                                <span>{t(PRODUCT_PRESET_KEYS[preset.id]) || preset.name}</span>
+                                {useCount > 0 && <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{useCount}×</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Product Lighting */}
+                    <div className="mb-3">
+                      <button
+                        onClick={() => setExpandedProductCategory(expandedProductCategory === 'lighting' ? null : 'lighting')}
+                        className="w-full px-3 py-2 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-between"
+                      >
+                        <span>{t('products.lighting')}</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${expandedProductCategory === 'lighting' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedProductCategory === 'lighting' && (
+                        <div className="mt-2 space-y-1.5">
+                          {PRODUCT_PRESETS.lighting.map((preset) => {
+                            const isActive = activeProductPresetId === preset.id;
+                            const useCount = productPresetUseCounts[preset.id] || 0;
+                            return (
+                              <button
+                                key={preset.id}
+                                onClick={() => {
+                                  if (!uploadedImage) {
+                                    toast.info(t('common.uploadFirst'));
+                                    return;
+                                  }
+                                  setActiveProductPresetId(preset.id);
+                                  setProductPresetUseCounts(prev => ({ ...prev, [preset.id]: (prev[preset.id] || 0) + 1 }));
+                                  handleApplyProductEdit(preset.prompt, preset.name);
+                                }}
+                                className={`w-full px-3 py-2 rounded-lg text-sm text-left transition-all flex items-center justify-between ${
+                                  isActive
+                                    ? 'bg-primary/20 border border-primary/40 text-primary'
+                                    : 'bg-muted/50 border border-border hover:bg-muted hover:border-border text-foreground/70'
+                                }`}
+                              >
+                                <span>{t(PRODUCT_PRESET_KEYS[preset.id]) || preset.name}</span>
+                                {useCount > 0 && <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{useCount}×</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Presentation Style */}
+                    <div className="mb-3">
+                      <button
+                        onClick={() => setExpandedProductCategory(expandedProductCategory === 'presentation' ? null : 'presentation')}
+                        className="w-full px-3 py-2 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-between"
+                      >
+                        <span>{t('products.presentation')}</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${expandedProductCategory === 'presentation' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedProductCategory === 'presentation' && (
+                        <div className="mt-2 space-y-1.5">
+                          {PRODUCT_PRESETS.presentation.map((preset) => {
+                            const isActive = activeProductPresetId === preset.id;
+                            const useCount = productPresetUseCounts[preset.id] || 0;
+                            return (
+                              <button
+                                key={preset.id}
+                                onClick={() => {
+                                  if (!uploadedImage) {
+                                    toast.info(t('common.uploadFirst'));
+                                    return;
+                                  }
+                                  setActiveProductPresetId(preset.id);
+                                  setProductPresetUseCounts(prev => ({ ...prev, [preset.id]: (prev[preset.id] || 0) + 1 }));
+                                  handleApplyProductEdit(preset.prompt, preset.name);
+                                }}
+                                className={`w-full px-3 py-2 rounded-lg text-sm text-left transition-all flex items-center justify-between ${
+                                  isActive
+                                    ? 'bg-primary/20 border border-primary/40 text-primary'
+                                    : 'bg-muted/50 border border-border hover:bg-muted hover:border-border text-foreground/70'
+                                }`}
+                              >
+                                <span>{t(PRODUCT_PRESET_KEYS[preset.id]) || preset.name}</span>
+                                {useCount > 0 && <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{useCount}×</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Enhance Product */}
+                    <div className="mb-3">
+                      <button
+                        onClick={() => setExpandedProductCategory(expandedProductCategory === 'enhance' ? null : 'enhance')}
+                        className="w-full px-3 py-2 rounded-lg text-sm border border-border hover:border-primary/50 hover:bg-primary/10 text-foreground/70 hover:text-primary transition-all flex items-center justify-between"
+                      >
+                        <span>{t('products.enhance')}</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${expandedProductCategory === 'enhance' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedProductCategory === 'enhance' && (
+                        <div className="mt-2 space-y-1.5">
+                          {PRODUCT_PRESETS.enhance.map((preset) => {
+                            const isActive = activeProductPresetId === preset.id;
+                            const useCount = productPresetUseCounts[preset.id] || 0;
+                            return (
+                              <button
+                                key={preset.id}
+                                onClick={() => {
+                                  if (!uploadedImage) {
+                                    toast.info(t('common.uploadFirst'));
+                                    return;
+                                  }
+                                  setActiveProductPresetId(preset.id);
+                                  setProductPresetUseCounts(prev => ({ ...prev, [preset.id]: (prev[preset.id] || 0) + 1 }));
+                                  handleApplyProductEdit(preset.prompt, preset.name);
+                                }}
+                                className={`w-full px-3 py-2 rounded-lg text-sm text-left transition-all flex items-center justify-between ${
+                                  isActive
+                                    ? 'bg-primary/20 border border-primary/40 text-primary'
+                                    : 'bg-muted/50 border border-border hover:bg-muted hover:border-border text-foreground/70'
+                                }`}
+                              >
+                                <span>{t(PRODUCT_PRESET_KEYS[preset.id]) || preset.name}</span>
+                                {useCount > 0 && <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{useCount}×</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* No tool selected */}
             {selectedTool === null && uploadedImage && (
               <div className="animate-in fade-in duration-200 p-4 flex-1 flex flex-col items-center justify-center text-center">
@@ -7595,6 +8592,16 @@ function HomeContent() {
           >
             <User className={`w-5 h-5 transition-colors ${selectedTool === 'model' ? 'text-primary' : 'text-muted-foreground'}`} />
             <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'model' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.model')}</span>
+          </button>
+          <button
+            onClick={() => {
+              setSelectedTool('products');
+              setIsMobileSidebarOpen(true);
+            }}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'products' ? 'bg-primary/15' : ''}`}
+          >
+            <Package className={`w-5 h-5 transition-colors ${selectedTool === 'products' ? 'text-primary' : 'text-muted-foreground'}`} />
+            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'products' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.products')}</span>
           </button>
           <button
             onClick={() => {

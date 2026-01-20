@@ -8,12 +8,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, X, ExternalLink, Shield } from "lucide-react";
+import { Loader2, Check, X, ExternalLink, Shield, Cloud, Key, HelpCircle, Lock } from "lucide-react";
 import { track } from "@/lib/analytics";
 import Link from "next/link";
+import { useClerk } from "@clerk/nextjs";
 import { useAuth } from "@/hooks/useAuth";
 import { useApiKeys } from "@/hooks/useApiKeys";
 import { useTranslations } from "next-intl";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ApiKeySetupModalProps {
   open: boolean;
@@ -83,13 +90,18 @@ export function ApiKeySetupModal({
   onApiKeySet,
   currentApiKey,
 }: ApiKeySetupModalProps) {
-  const { isSignedIn } = useAuth();
+  const { openSignUp } = useClerk();
+  const { isSignedIn, isLoaded } = useAuth();
   const { setKey, removeKey, keys } = useApiKeys();
   const t = useTranslations();
 
   // Use legacy props if new ones aren't provided
   const effectiveGeminiKey = currentGeminiKey ?? currentApiKey;
   const effectiveGeminiCallback = onGeminiKeySet ?? onApiKeySet;
+
+  // View state: "choice" shows options (for unauthenticated users without keys), "keys" shows API key inputs
+  const hasAnyKey = !!effectiveGeminiKey || !!currentOpenAIKey;
+  const [view, setView] = useState<"choice" | "keys">(isSignedIn || hasAnyKey ? "keys" : "choice");
 
   const [geminiKeyInput, setGeminiKeyInput] = useState("");
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
@@ -278,9 +290,25 @@ export function ApiKeySetupModal({
       setOpenaiSuccess(false);
       setGeminiTestResult(null);
       setOpenaiTestResult(null);
+      // Reset view based on current state
+      setView(isSignedIn || hasAnyKey ? "keys" : "choice");
     }
     onOpenChange(newOpen);
   };
+
+  const handleSignUp = () => {
+    openSignUp();
+    // Keep modal open - will close when auth completes
+  };
+
+  const handleAddKeysLocally = () => {
+    setView("keys");
+  };
+
+  // If user just signed in, go directly to keys view
+  if (isLoaded && isSignedIn && view === "choice") {
+    setView("keys");
+  }
 
   const hasGeminiKey = !!effectiveGeminiKey;
   const hasOpenAIKey = !!currentOpenAIKey;
@@ -297,9 +325,14 @@ export function ApiKeySetupModal({
       >
         <DialogHeader>
           <DialogTitle className="text-xl text-center">
-            {t("apiKeys.title")}
+            {view === "choice" ? t("apiKeyRequired.title") : t("apiKeys.title")}
           </DialogTitle>
-          {isSignedIn && (
+          {view === "choice" && (
+            <p className="text-sm text-muted-foreground text-center mt-1">
+              {t("apiKeyRequired.description")}
+            </p>
+          )}
+          {view === "keys" && isSignedIn && (
             <div className="flex items-center justify-center gap-1.5 text-xs text-green-600">
               <Shield className="w-3.5 h-3.5" />
               {t("account.encryptedStorage")}
@@ -308,7 +341,79 @@ export function ApiKeySetupModal({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Gemini Section */}
+          {/* Choice View: Show options to create account or add keys locally */}
+          {view === "choice" && (
+            <>
+              <div className="space-y-3">
+                {/* Create account option */}
+                <Button
+                  onClick={handleSignUp}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                  size="lg"
+                >
+                  <Cloud className="w-4 h-4 mr-2" />
+                  {t("apiKeyRequired.signUp")}
+                </Button>
+
+                {/* Divider with "or" */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="px-2 bg-card text-muted-foreground">{t("common.or")}</span>
+                  </div>
+                </div>
+
+                {/* Add keys locally option with tooltip */}
+                <TooltipProvider>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={handleAddKeysLocally}
+                      variant="outline"
+                      className="flex-1"
+                      size="lg"
+                    >
+                      <Key className="w-4 h-4 mr-2" />
+                      {t("apiKeyRequired.addKeys")}
+                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button className="p-2 rounded-lg hover:bg-muted transition-colors">
+                          <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[280px] p-3">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <Lock className="w-4 h-4 text-emerald-500" />
+                            {t("welcome.guestStorageTitle")}
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {t("welcome.guestStorageDescription")}
+                          </p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </TooltipProvider>
+              </div>
+
+              {/* Skip button */}
+              <div className="pt-2 text-center">
+                <button
+                  onClick={() => onOpenChange(false)}
+                  className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors"
+                >
+                  {t("welcome.skip")}
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Keys View: Gemini Section */}
+          {view === "keys" && (
+          <>
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <GeminiLogo className="w-5 h-5" />
@@ -565,6 +670,8 @@ export function ApiKeySetupModal({
               </button>
             )}
           </div>
+          </>
+          )}
         </div>
       </DialogContent>
     </Dialog>

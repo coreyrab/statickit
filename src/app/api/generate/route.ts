@@ -11,11 +11,12 @@ export async function POST(request: NextRequest) {
   try {
     const {
       apiKey, image, mimeType, analysis, variationDescription, aspectRatio,
-      isEdit, isBackgroundOnly, isModelOnly, keepClothing,
+      isEdit, isBackgroundOnly, isModelOnly, isProductOnly, keepClothing,
       // Reference image params
       backgroundRefImage, backgroundRefMimeType,
       modelRefImage, modelRefMimeType,
       editRefImage, editRefMimeType,
+      productRefImage, productRefMimeType,
       // Model selection
       model,
       // Quality setting (low/medium/high)
@@ -70,6 +71,7 @@ export async function POST(request: NextRequest) {
         isEdit,
         isBackgroundOnly,
         isModelOnly,
+        isProductOnly,
         keepClothing,
         analysis,
       });
@@ -173,6 +175,39 @@ If only hands or partial body are visible, change just those elements while main
 
 Deliver a seamless professional advertising photograph at ${aspectRatio} aspect ratio.`;
       }
+    } else if (isProductOnly) {
+      // Product-focused edit for e-commerce and marketing
+      if (productRefImage) {
+        // Reference-based product edit
+        prompt = `Edit this product image using the reference provided for style guidance.
+
+Edit requested: ${variationDescription}
+
+CRITICAL PRODUCT PRESERVATION RULES - The product is SACRED:
+- Product shape, proportions, form: EXACT match to the original
+- Labels, text, typography: EXACT match, must remain readable
+- Colors and branding: EXACT match
+- No distortion, deformation, or redesign of the product
+
+Apply the relevant qualities from the reference image—whether that's lighting style, background treatment, presentation technique, or atmosphere—while keeping the product's appearance pixel-perfect.
+
+Deliver a professional product photograph optimized for e-commerce and marketing at ${aspectRatio} aspect ratio.`;
+      } else {
+        // Standard product edit
+        prompt = `Edit this product image for professional e-commerce and marketing use.
+
+Edit requested: ${variationDescription}
+
+CRITICAL PRODUCT PRESERVATION RULES - The product is SACRED:
+- Product shape, proportions, form: EXACT match to the original
+- Labels, text, typography: EXACT match, must remain readable
+- Colors and branding: EXACT match
+- No distortion, deformation, or redesign of the product
+
+Make only this specific change. The product itself must remain absolutely identical—same shape, same colors, same labels, same branding. Only change what was explicitly requested (background, lighting, presentation, shadows, reflections, etc.).
+
+Deliver a professional product photograph optimized for e-commerce and marketing at ${aspectRatio} aspect ratio.`;
+      }
     } else if (isEdit) {
       if (editRefImage) {
         // Edit with reference image
@@ -251,6 +286,16 @@ Make the variation feel like an intentional creative direction—natural and pho
       });
     }
 
+    if (productRefImage && productRefMimeType) {
+      console.log('Including product reference image');
+      contentParts.push({
+        inlineData: {
+          mimeType: productRefMimeType,
+          data: productRefImage,
+        },
+      });
+    }
+
     // Add the prompt last
     contentParts.push(prompt);
 
@@ -307,6 +352,7 @@ async function handleOpenAIGeneration(params: {
   isEdit?: boolean;
   isBackgroundOnly?: boolean;
   isModelOnly?: boolean;
+  isProductOnly?: boolean;
   keepClothing?: boolean;
   analysis: any;
 }) {
@@ -321,6 +367,7 @@ async function handleOpenAIGeneration(params: {
     isEdit,
     isBackgroundOnly,
     isModelOnly,
+    isProductOnly,
     keepClothing,
     analysis,
   } = params;
@@ -360,6 +407,18 @@ CHANGE: Replace person with: ${variationDescription}
 POSE: Match exact same pose and body position as original.
 ${clothingNote}
 Integrate naturally with scene lighting. Professional advertising quality.`;
+    } else if (isProductOnly) {
+      // Product-focused edit for e-commerce and marketing
+      prompt = `PRODUCT PRESERVATION RULES (CRITICAL - do not violate):
+- Product shape, proportions, form: EXACT match
+- Labels, text, typography: EXACT match, must remain readable
+- Colors and branding: EXACT match
+- No distortion, deformation, or redesign
+
+CHANGE: ${variationDescription}
+
+Make ONLY this change to the product presentation. The product itself must be pixel-perfect identical.
+Professional e-commerce and marketing quality.`;
     } else if (isEdit) {
       // Targeted edit: Change only what's requested
       prompt = `KEEP EXACTLY (do not alter):

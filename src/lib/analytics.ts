@@ -6,11 +6,11 @@ type AnalyticsEvents = {
   api_key_validated: { success: boolean };
   image_uploaded: { width: number; height: number; aspectRatio: string; fileSize: number };
   variations_generated: { count: number };
-  image_generated: { tool: 'iterate' | 'background' | 'model' | 'resize' | 'edit' };
-  tool_used: { tool: 'background' | 'model' | 'resize' | 'compare' };
+  image_generated: { tool: 'iterate' | 'background' | 'model' | 'resize' | 'edit' | 'product'; type?: string };
+  tool_used: { tool: 'background' | 'model' | 'resize' | 'compare' | 'product' };
   image_downloaded: { type: 'single' | 'batch' | 'all_sizes' };
-  reference_image_uploaded: { tool: 'background' | 'model' | 'edit' };
-  reference_image_used: { tool: 'background' | 'model' | 'edit' };
+  reference_image_uploaded: { tool: 'background' | 'model' | 'edit' | 'product' };
+  reference_image_used: { tool: 'background' | 'model' | 'edit' | 'product' };
 };
 
 declare global {
