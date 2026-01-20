@@ -1,21 +1,33 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getPostBySlug, getAllPostSlugs } from '@/lib/blog-posts';
+import { getPostBySlug, getAllPostSlugs, getPostMetadata, type BlogMessages } from '@/lib/blog-posts';
+import { getMessages, getLocale } from 'next-intl/server';
 import BlogPostContent from './BlogPostContent';
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }
 
-// Generate static params for all blog posts
+// Generate static params for all blog posts across all locales
 export async function generateStaticParams() {
-  return getAllPostSlugs().map((slug) => ({ slug }));
+  const slugs = getAllPostSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const locale = await getLocale();
+  const messages = await getMessages();
+  const blogMessages = (messages as { blog?: BlogMessages }).blog;
+
+  if (!blogMessages) {
+    return {
+      title: 'Post Not Found - StaticKit Blog',
+    };
+  }
+
+  const post = getPostBySlug(slug, blogMessages);
 
   if (!post) {
     return {
@@ -23,7 +35,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const url = `https://statickit.ai/blog/${slug}`;
+  const baseUrl = 'https://statickit.ai';
+  const url = locale === 'en' ? `${baseUrl}/blog/${slug}` : `${baseUrl}/${locale}/blog/${slug}`;
 
   return {
     title: `${post.title} - StaticKit Blog`,
@@ -37,9 +50,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       authors: [post.author],
       url,
       siteName: 'StaticKit',
+      locale: locale,
       images: post.coverImage ? [
         {
-          url: `https://statickit.ai${post.coverImage}`,
+          url: `${baseUrl}${post.coverImage}`,
           width: 1200,
           height: 630,
           alt: post.title,
@@ -53,24 +67,38 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       creator: '@coreyrab',
     },
     alternates: {
-      canonical: url,
+      canonical: `${baseUrl}/blog/${slug}`,
+      languages: {
+        'en': `${baseUrl}/blog/${slug}`,
+        'es': `${baseUrl}/es/blog/${slug}`,
+        'de': `${baseUrl}/de/blog/${slug}`,
+        'fr': `${baseUrl}/fr/blog/${slug}`,
+        'ja': `${baseUrl}/ja/blog/${slug}`,
+        'zh': `${baseUrl}/zh/blog/${slug}`,
+        'ko': `${baseUrl}/ko/blog/${slug}`,
+        'pt': `${baseUrl}/pt/blog/${slug}`,
+      },
       types: {
-        'text/markdown': `https://statickit.ai/blog/md/${slug}.md`,
+        'text/markdown': `${baseUrl}/blog/md/${slug}.md`,
       },
     },
   };
 }
 
 // JSON-LD structured data for Article schema
-function generateArticleSchema(slug: string, post: NonNullable<ReturnType<typeof getPostBySlug>>) {
+function generateArticleSchema(slug: string, post: NonNullable<ReturnType<typeof getPostBySlug>>, locale: string) {
+  const baseUrl = 'https://statickit.ai';
+  const url = locale === 'en' ? `${baseUrl}/blog/${slug}` : `${baseUrl}/${locale}/blog/${slug}`;
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: post.title,
     description: post.description,
-    image: post.coverImage ? `https://statickit.ai${post.coverImage}` : undefined,
+    image: post.coverImage ? `${baseUrl}${post.coverImage}` : undefined,
     datePublished: post.date,
     dateModified: post.date,
+    inLanguage: locale,
     author: {
       '@type': 'Person',
       name: post.author,
@@ -81,12 +109,12 @@ function generateArticleSchema(slug: string, post: NonNullable<ReturnType<typeof
       name: 'StaticKit',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://statickit.ai/logo.svg',
+        url: `${baseUrl}/logo.svg`,
       },
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://statickit.ai/blog/${slug}`,
+      '@id': url,
     },
   };
 }
@@ -111,13 +139,21 @@ function generateFAQSchema(post: NonNullable<ReturnType<typeof getPostBySlug>>) 
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const locale = await getLocale();
+  const messages = await getMessages();
+  const blogMessages = (messages as { blog?: BlogMessages }).blog;
+
+  if (!blogMessages) {
+    notFound();
+  }
+
+  const post = getPostBySlug(slug, blogMessages);
 
   if (!post) {
     notFound();
   }
 
-  const articleSchema = generateArticleSchema(slug, post);
+  const articleSchema = generateArticleSchema(slug, post, locale);
   const faqSchema = generateFAQSchema(post);
 
   return (

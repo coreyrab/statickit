@@ -5,22 +5,35 @@ import { ArrowLeft, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { Footer } from '@/components/landing/Footer';
-import { posts as blogPosts, getAllPostSlugs } from '@/lib/blog-posts';
-
-// Transform posts data for listing with slug included
-const posts = getAllPostSlugs().map(slug => ({
-  slug,
-  ...blogPosts[slug],
-})).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+import { getAllPosts, type BlogMessages } from '@/lib/blog-posts';
+import { useTranslations, useMessages, useLocale } from 'next-intl';
 
 export default function BlogPage() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const locale = useLocale();
+  const messages = useMessages();
+  const t = useTranslations('blog');
+
+  // Get blog messages for posts
+  const blogMessages = (messages as { blog?: BlogMessages }).blog;
+
+  // Get translated posts
+  const posts = blogMessages ? getAllPosts(blogMessages) : [];
 
   // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Format date based on locale
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(locale, {
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -52,7 +65,7 @@ export default function BlogPage() {
                 className="text-muted-foreground text-sm hover:text-foreground transition-colors flex items-center gap-1"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Back
+                {t('back')}
               </Link>
             </div>
           </div>
@@ -63,10 +76,10 @@ export default function BlogPage() {
           <div className="max-w-3xl mx-auto">
             {/* Page title */}
             <h1 className="font-serif text-3xl sm:text-4xl text-foreground mb-4">
-              Blog
+              {t('pageTitle')}
             </h1>
             <p className="text-muted-foreground mb-12">
-              Thoughts on AI image editing, creative tools, and making things easier.
+              {t('pageDescription')}
             </p>
 
             {/* Posts grid */}
@@ -91,10 +104,7 @@ export default function BlogPage() {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
                           <time className="font-mono">
-                            {new Date(post.date).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                            })}
+                            {formatDate(post.date)}
                           </time>
                           <span>·</span>
                           <span className="font-mono">{post.readTime}</span>
@@ -112,7 +122,7 @@ export default function BlogPage() {
               </div>
             ) : (
               <p className="text-muted-foreground/70 text-sm font-mono">
-                No posts yet. Check back soon.
+                {t('noPosts')}
               </p>
             )}
           </div>

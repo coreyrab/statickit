@@ -1,15 +1,15 @@
 import { MetadataRoute } from 'next';
-import { getAllPostSlugs, getPostBySlug } from '@/lib/blog-posts';
+import { getAllPostSlugs, getPostMetadata } from '@/lib/blog-posts';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://statickit.ai';
 
   // Dynamic blog posts from shared data
   const blogUrls = getAllPostSlugs().map((slug) => {
-    const post = getPostBySlug(slug);
+    const metadata = getPostMetadata(slug);
     return {
       url: `${baseUrl}/blog/${slug}`,
-      lastModified: post ? new Date(post.date) : new Date(),
+      lastModified: metadata ? new Date(metadata.date) : new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     };
