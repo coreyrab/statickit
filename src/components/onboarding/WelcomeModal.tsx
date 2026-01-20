@@ -8,12 +8,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, X, ExternalLink, Key, Shield, RefreshCw, Cloud, Sparkles, Image, Wand2, Layers } from "lucide-react";
+import { Loader2, Check, X, ExternalLink, Key, Shield, RefreshCw, Cloud, Sparkles, Image, Wand2, Layers, HelpCircle, Lock, Globe } from "lucide-react";
 import { track } from "@/lib/analytics";
 import Link from "next/link";
 import { useClerk } from "@clerk/nextjs";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface WelcomeModalProps {
   open: boolean;
@@ -76,8 +82,9 @@ export function WelcomeModal({
   const { isSignedIn, isLoaded } = useAuth();
   const t = useTranslations();
 
-  // View state: "auth" shows sign-up requirement, "keys" shows API key inputs (only when authenticated)
-  const [view, setView] = useState<"auth" | "keys">(isSignedIn ? "keys" : "auth");
+  // View state: "auth" shows options, "keys" shows API key inputs (authenticated), "guest-keys" shows API key inputs (guest/browser storage)
+  const [view, setView] = useState<"auth" | "keys" | "guest-keys">(isSignedIn ? "keys" : "auth");
+  const [isGuestMode, setIsGuestMode] = useState(false);
 
   const [geminiKeyInput, setGeminiKeyInput] = useState("");
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
@@ -175,8 +182,14 @@ export function WelcomeModal({
       setGeminiSuccess(false);
       setOpenaiSuccess(false);
       setView(isSignedIn ? "keys" : "auth");
+      setIsGuestMode(false);
     }
     onOpenChange(newOpen);
+  };
+
+  const handleGuestMode = () => {
+    setIsGuestMode(true);
+    setView("guest-keys");
   };
 
   const handleSignUp = () => {
@@ -252,14 +265,61 @@ export function WelcomeModal({
                 </span>
               </div>
 
-              {/* Sign up button */}
-              <Button
-                onClick={handleSignUp}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                size="lg"
-              >
-                {t("auth.signUpFree")}
-              </Button>
+              {/* Two option buttons */}
+              <div className="space-y-3">
+                {/* Create account option */}
+                <Button
+                  onClick={handleSignUp}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                  size="lg"
+                >
+                  <Cloud className="w-4 h-4 mr-2" />
+                  {t("welcome.createAccount")}
+                </Button>
+
+                {/* Divider with "or" */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="px-2 bg-card text-muted-foreground">{t("common.or")}</span>
+                  </div>
+                </div>
+
+                {/* Guest mode option with tooltip */}
+                <TooltipProvider>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={handleGuestMode}
+                      variant="outline"
+                      className="flex-1"
+                      size="lg"
+                    >
+                      <Key className="w-4 h-4 mr-2" />
+                      {t("welcome.addApiKeys")}
+                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button className="p-2 rounded-lg hover:bg-muted transition-colors">
+                          <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[280px] p-3">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <Lock className="w-4 h-4 text-emerald-500" />
+                            {t("welcome.guestStorageTitle")}
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {t("welcome.guestStorageDescription")}
+                          </p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </TooltipProvider>
+              </div>
 
               {/* Already have an account */}
               <div className="text-center">
@@ -283,21 +343,28 @@ export function WelcomeModal({
             </>
           )}
 
-          {/* Keys View: API key inputs */}
-          {view === "keys" && (
+          {/* Keys View: API key inputs (both authenticated and guest) */}
+          {(view === "keys" || view === "guest-keys") && (
             <>
-              {/* BYOK Explanation */}
+              {/* BYOK Explanation - different for auth vs guest */}
               <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-2">
                 <div className="flex items-center gap-2">
                   <Key className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium text-foreground">{t("welcome.byok")}</span>
-                  <span className="ml-auto text-xs text-green-600 flex items-center gap-1">
-                    <Shield className="w-3 h-3" />
-                    {t("account.encrypted")}
-                  </span>
+                  {view === "keys" ? (
+                    <span className="ml-auto text-xs text-green-600 flex items-center gap-1">
+                      <Shield className="w-3 h-3" />
+                      {t("account.encrypted")}
+                    </span>
+                  ) : (
+                    <span className="ml-auto text-xs text-blue-600 flex items-center gap-1">
+                      <Globe className="w-3 h-3" />
+                      {t("welcome.browserStorage")}
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  {t("welcome.byokDescriptionAuth")}
+                  {view === "keys" ? t("welcome.byokDescriptionAuth") : t("welcome.byokDescriptionGuest")}
                 </p>
               </div>
 
@@ -445,14 +512,30 @@ export function WelcomeModal({
             </div>
           </div>
 
-          {/* Skip option for keys view */}
-              <div className="pt-4 border-t border-border/60 text-center">
-                <button
-                  onClick={() => onOpenChange(false)}
-                  className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors"
-                >
-                  {t("welcome.skip")}
-                </button>
+          {/* Footer for keys view */}
+              <div className="pt-4 border-t border-border/60 space-y-3">
+                {/* For guest mode: show sign up prompt */}
+                {view === "guest-keys" && (
+                  <div className="text-center">
+                    <button
+                      onClick={() => {
+                        setIsGuestMode(false);
+                        handleSignUp();
+                      }}
+                      className="text-xs text-muted-foreground/70 hover:text-foreground transition-colors"
+                    >
+                      {t("welcome.wantEncryption")}
+                    </button>
+                  </div>
+                )}
+                <div className="text-center">
+                  <button
+                    onClick={() => onOpenChange(false)}
+                    className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors"
+                  >
+                    {t("welcome.skip")}
+                  </button>
+                </div>
               </div>
             </>
           )}

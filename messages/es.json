@@ -37,6 +37,13 @@
       "secure": "Nunca pierdas tus claves"
     }
   },
+  "apiKeyRequired": {
+    "title": "Clave API requerida",
+    "description": "Necesitas agregar una clave API para usar esta función. Crea una cuenta para almacenamiento encriptado en la nube o agrega tus claves directamente.",
+    "signUp": "Crear cuenta",
+    "addKeys": "Agregar claves API",
+    "browserStorageHint": "Las claves se almacenan de forma segura en tu navegador"
+  },
   "account": {
     "title": "Cuenta",
     "description": "Administra tu cuenta y claves API",
@@ -75,7 +82,14 @@
     "description": "StaticKit es un editor de imágenes con IA gratuito. Ajusta imágenes, cambia fondos, cambia modelos, redimensiona a cualquier relación de aspecto y más.",
     "byokTitle": "Trae Tu Propia Clave",
     "byokDescription": "Tu clave API permanece en tu navegador y nunca se envía a nuestros servidores. Solo pagas por lo que usas.",
-    "skipForNow": "Omitir por ahora"
+    "skipForNow": "Omitir por ahora",
+    "createAccount": "Crear una cuenta",
+    "addApiKeys": "Agrega tus claves API",
+    "browserStorage": "Almacenamiento del navegador",
+    "guestStorageTitle": "Almacenamiento seguro del navegador",
+    "guestStorageDescription": "Tus claves API se almacenan de forma segura en el almacenamiento local de tu navegador. Nunca salen de tu dispositivo y solo se usan para hacer llamadas API directamente desde tu navegador.",
+    "wantEncryption": "¿Quieres almacenamiento en la nube encriptado? Crea una cuenta →",
+    "byokDescriptionGuest": "Tu clave API se almacena de forma segura en el almacenamiento local de tu navegador. Nunca sale de tu dispositivo."
   },
   "apiKeys": {
     "title": "Configuracion de claves API",
@@ -85,6 +99,9 @@
   "nav": {
     "apiKeys": "Claves API",
     "apiKeysActive": "Activa",
+    "addKeys": "Agregar claves",
+    "keysStoredInAccount": "Claves almacenadas en tu cuenta",
+    "keysStoredInBrowser": "Claves almacenadas en tu navegador",
     "shortcuts": "ATAJOS",
     "selectTool": "Seleccionar herramienta",
     "navigateVersions": "Navegar versiones",

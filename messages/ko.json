@@ -37,6 +37,13 @@
       "secure": "키를 다시는 잃지 않습니다"
     }
   },
+  "apiKeyRequired": {
+    "title": "API 키 필요",
+    "description": "이 기능을 사용하려면 API 키를 추가해야 합니다. 암호화된 클라우드 저장소를 위해 계정을 만들거나 키를 직접 추가하세요.",
+    "signUp": "계정 만들기",
+    "addKeys": "API 키 추가",
+    "browserStorageHint": "키는 브라우저에 안전하게 저장됩니다"
+  },
   "account": {
     "title": "계정",
     "description": "계정 및 API 키 관리",
@@ -75,7 +82,14 @@
     "description": "StaticKit은 무료 AI 이미지 편집기입니다. 이미지 조정, 배경 교체, 모델 변경, 모든 화면 비율로 크기 조정 등이 가능합니다.",
     "byokTitle": "자신의 키 사용",
     "byokDescription": "API 키는 브라우저에 저장되며 서버로 전송되지 않습니다. 사용한 만큼만 지불합니다.",
-    "skipForNow": "나중에 하기"
+    "skipForNow": "나중에 하기",
+    "createAccount": "계정 만들기",
+    "addApiKeys": "API 키 추가",
+    "browserStorage": "브라우저 저장소",
+    "guestStorageTitle": "안전한 브라우저 저장소",
+    "guestStorageDescription": "API 키는 브라우저의 로컬 저장소에 안전하게 저장됩니다. 기기를 떠나지 않으며 브라우저에서 직접 API 호출을 수행하는 데만 사용됩니다.",
+    "wantEncryption": "암호화된 클라우드 저장소를 원하시나요? 계정 만들기 →",
+    "byokDescriptionGuest": "API 키는 브라우저의 로컬 저장소에 안전하게 저장됩니다. 기기를 떠나지 않습니다."
   },
   "apiKeys": {
     "title": "API 키 설정",
@@ -85,6 +99,9 @@
   "nav": {
     "apiKeys": "API 키",
     "apiKeysActive": "활성",
+    "addKeys": "키 추가",
+    "keysStoredInAccount": "계정에 저장된 키",
+    "keysStoredInBrowser": "브라우저에 저장된 키",
     "shortcuts": "단축키",
     "selectTool": "도구 선택",
     "navigateVersions": "버전 탐색",

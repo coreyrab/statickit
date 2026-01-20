@@ -37,6 +37,13 @@
       "secure": "Never lose your keys again"
     }
   },
+  "apiKeyRequired": {
+    "title": "API key required",
+    "description": "You need to add an API key to use this feature. Create an account for encrypted cloud storage, or add your keys directly.",
+    "signUp": "Create account",
+    "addKeys": "Add API keys",
+    "browserStorageHint": "Keys are stored securely in your browser"
+  },
   "account": {
     "title": "Account",
     "description": "Manage your account and API keys",
@@ -74,8 +81,15 @@
     "byokTitle": "Bring Your Own Key",
     "byokDescription": "Your API key stays in your browser and is never sent to our servers. You only pay for what you use.",
     "byokDescriptionAuth": "Your API key is encrypted and stored securely in the cloud.",
+    "byokDescriptionGuest": "Your API key is stored securely in your browser's local storage. It never leaves your device.",
     "skip": "Skip for now",
-    "skipForNow": "Skip for now"
+    "skipForNow": "Skip for now",
+    "createAccount": "Create an account",
+    "addApiKeys": "Add your API keys",
+    "browserStorage": "Browser storage",
+    "guestStorageTitle": "Secure browser storage",
+    "guestStorageDescription": "Your API keys are stored securely in your browser's local storage. They never leave your device and are only used to make API calls directly from your browser.",
+    "wantEncryption": "Want encrypted cloud storage? Create an account →"
   },
   "apiKeys": {
     "title": "API Key Settings",
@@ -85,6 +99,9 @@
   "nav": {
     "apiKeys": "API Keys",
     "apiKeysActive": "Active",
+    "addKeys": "Add keys",
+    "keysStoredInAccount": "Keys stored in your account",
+    "keysStoredInBrowser": "Keys stored in your browser",
     "shortcuts": "SHORTCUTS",
     "selectTool": "Select tool",
     "navigateVersions": "Navigate versions",

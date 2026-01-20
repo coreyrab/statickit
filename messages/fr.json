@@ -37,6 +37,13 @@
       "secure": "Ne perdez plus jamais vos cles"
     }
   },
+  "apiKeyRequired": {
+    "title": "Clé API requise",
+    "description": "Vous devez ajouter une clé API pour utiliser cette fonctionnalité. Créez un compte pour le stockage cloud crypté ou ajoutez vos clés directement.",
+    "signUp": "Créer un compte",
+    "addKeys": "Ajouter des clés API",
+    "browserStorageHint": "Les clés sont stockées en toute sécurité dans votre navigateur"
+  },
   "account": {
     "title": "Compte",
     "description": "Gerez votre compte et vos cles API",
@@ -75,7 +82,14 @@
     "description": "StaticKit est un éditeur d'images IA gratuit. Ajustez les images, changez les arrière-plans, modifiez les modèles, redimensionnez à n'importe quel rapport d'aspect, et plus encore.",
     "byokTitle": "Apportez votre propre clé",
     "byokDescription": "Votre clé API reste dans votre navigateur et n'est jamais envoyée à nos serveurs. Vous ne payez que ce que vous utilisez.",
-    "skipForNow": "Passer pour l'instant"
+    "skipForNow": "Passer pour l'instant",
+    "createAccount": "Créer un compte",
+    "addApiKeys": "Ajoutez vos clés API",
+    "browserStorage": "Stockage du navigateur",
+    "guestStorageTitle": "Stockage sécurisé du navigateur",
+    "guestStorageDescription": "Vos clés API sont stockées en toute sécurité dans le stockage local de votre navigateur. Elles ne quittent jamais votre appareil et ne sont utilisées que pour effectuer des appels API directement depuis votre navigateur.",
+    "wantEncryption": "Vous voulez un stockage cloud chiffré ? Créez un compte →",
+    "byokDescriptionGuest": "Votre clé API est stockée en toute sécurité dans le stockage local de votre navigateur. Elle ne quitte jamais votre appareil."
   },
   "apiKeys": {
     "title": "Parametres des cles API",
@@ -85,6 +99,9 @@
   "nav": {
     "apiKeys": "Cles API",
     "apiKeysActive": "Active",
+    "addKeys": "Ajouter des clés",
+    "keysStoredInAccount": "Clés stockées dans votre compte",
+    "keysStoredInBrowser": "Clés stockées dans votre navigateur",
     "shortcuts": "RACCOURCIS",
     "selectTool": "Selectionner l'outil",
     "navigateVersions": "Naviguer les versions",

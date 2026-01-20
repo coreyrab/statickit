@@ -72,6 +72,8 @@ import {
   Paperclip,
   Eye,
   EyeOff,
+  Shield,
+  Globe,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -3466,16 +3468,41 @@ function HomeContent() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                {/* API Key - only show when authenticated */}
-                {isSignedIn && (
+                {/* API Keys Section - show for everyone */}
+                {isSignedIn ? (
+                  // Signed in: show API Keys with account info
                   <>
                     <DropdownMenuItem onClick={() => setShowApiKeySetup(true)} className="cursor-pointer group">
-                      <Key className={`w-4 h-4 ${apiKey ? 'text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300' : ''}`} />
+                      <Key className={`w-4 h-4 ${apiKey || openaiApiKey ? 'text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300' : ''}`} />
                       <span>{t('nav.apiKeys')}</span>
-                      {apiKey && (
+                      {(apiKey || openaiApiKey) && (
                         <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300">{t('nav.apiKeysActive')}</span>
                       )}
                     </DropdownMenuItem>
+                    <div className="px-2 py-1.5 text-xs text-muted-foreground/60 flex items-center gap-1.5">
+                      <Shield className="w-3 h-3 text-emerald-500" />
+                      {t('nav.keysStoredInAccount')}
+                    </div>
+                    <DropdownMenuSeparator />
+                  </>
+                ) : (
+                  // Not signed in: show guest API key options
+                  <>
+                    <DropdownMenuItem onClick={() => setShowApiKeySetup(true)} className="cursor-pointer group">
+                      <Key className={`w-4 h-4 ${apiKey || openaiApiKey ? 'text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300' : ''}`} />
+                      <span>{t('nav.apiKeys')}</span>
+                      {(apiKey || openaiApiKey) ? (
+                        <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300">{t('nav.apiKeysActive')}</span>
+                      ) : (
+                        <span className="ml-auto text-xs text-muted-foreground/60">{t('nav.addKeys')}</span>
+                      )}
+                    </DropdownMenuItem>
+                    {(apiKey || openaiApiKey) && (
+                      <div className="px-2 py-1.5 text-xs text-muted-foreground/60 flex items-center gap-1.5">
+                        <Globe className="w-3 h-3 text-blue-500" />
+                        {t('nav.keysStoredInBrowser')}
+                      </div>
+                    )}
                     <DropdownMenuSeparator />
                   </>
                 )}

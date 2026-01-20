@@ -37,6 +37,13 @@
       "secure": "Nunca mais perca suas chaves"
     }
   },
+  "apiKeyRequired": {
+    "title": "Chave API necessária",
+    "description": "Você precisa adicionar uma chave API para usar este recurso. Crie uma conta para armazenamento criptografado na nuvem ou adicione suas chaves diretamente.",
+    "signUp": "Criar conta",
+    "addKeys": "Adicionar chaves API",
+    "browserStorageHint": "As chaves são armazenadas com segurança no seu navegador"
+  },
   "account": {
     "title": "Conta",
     "description": "Gerencie sua conta e chaves API",
@@ -75,7 +82,14 @@
     "description": "StaticKit é um editor de imagens IA gratuito. Ajuste imagens, troque fundos, mude modelos, redimensione para qualquer proporção e muito mais.",
     "byokTitle": "Traga sua própria chave",
     "byokDescription": "Sua chave API permanece no seu navegador e nunca é enviada para nossos servidores. Você paga apenas pelo que usa.",
-    "skipForNow": "Pular por agora"
+    "skipForNow": "Pular por agora",
+    "createAccount": "Criar uma conta",
+    "addApiKeys": "Adicione suas chaves API",
+    "browserStorage": "Armazenamento do navegador",
+    "guestStorageTitle": "Armazenamento seguro do navegador",
+    "guestStorageDescription": "Suas chaves API são armazenadas com segurança no armazenamento local do seu navegador. Elas nunca saem do seu dispositivo e são usadas apenas para fazer chamadas de API diretamente do seu navegador.",
+    "wantEncryption": "Quer armazenamento em nuvem criptografado? Crie uma conta →",
+    "byokDescriptionGuest": "Sua chave API é armazenada com segurança no armazenamento local do seu navegador. Ela nunca sai do seu dispositivo."
   },
   "apiKeys": {
     "title": "Configuracoes de chaves API",
@@ -85,6 +99,9 @@
   "nav": {
     "apiKeys": "Chaves API",
     "apiKeysActive": "Ativa",
+    "addKeys": "Adicionar chaves",
+    "keysStoredInAccount": "Chaves armazenadas na sua conta",
+    "keysStoredInBrowser": "Chaves armazenadas no seu navegador",
     "shortcuts": "ATALHOS",
     "selectTool": "Selecionar ferramenta",
     "navigateVersions": "Navegar versoes",

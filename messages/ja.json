@@ -37,6 +37,13 @@
       "secure": "キーを失うことがなくなります"
     }
   },
+  "apiKeyRequired": {
+    "title": "APIキーが必要です",
+    "description": "この機能を使用するにはAPIキーを追加する必要があります。暗号化されたクラウドストレージ用にアカウントを作成するか、キーを直接追加してください。",
+    "signUp": "アカウント作成",
+    "addKeys": "APIキーを追加",
+    "browserStorageHint": "キーはブラウザに安全に保存されます"
+  },
   "account": {
     "title": "アカウント",
     "description": "アカウントとAPIキーを管理",
@@ -75,7 +82,14 @@
     "description": "StaticKitは無料のAI画像エディターです。画像の調整、背景の変更、モデルの変更、あらゆるアスペクト比へのリサイズなどが可能です。",
     "byokTitle": "自分のキーを使用",
     "byokDescription": "APIキーはブラウザ内に保存され、サーバーに送信されることはありません。使用した分だけお支払いいただきます。",
-    "skipForNow": "今はスキップ"
+    "skipForNow": "今はスキップ",
+    "createAccount": "アカウントを作成",
+    "addApiKeys": "APIキーを追加",
+    "browserStorage": "ブラウザストレージ",
+    "guestStorageTitle": "安全なブラウザストレージ",
+    "guestStorageDescription": "APIキーはブラウザのローカルストレージに安全に保存されます。デバイスから外に出ることはなく、ブラウザから直接API呼び出しを行うためにのみ使用されます。",
+    "wantEncryption": "暗号化されたクラウドストレージをご希望ですか？アカウントを作成 →",
+    "byokDescriptionGuest": "APIキーはブラウザのローカルストレージに安全に保存されます。デバイスから外に出ることはありません。"
   },
   "apiKeys": {
     "title": "APIキー設定",
@@ -85,6 +99,9 @@
   "nav": {
     "apiKeys": "APIキー",
     "apiKeysActive": "有効",
+    "addKeys": "キーを追加",
+    "keysStoredInAccount": "アカウントに保存されたキー",
+    "keysStoredInBrowser": "ブラウザに保存されたキー",
     "shortcuts": "ショートカット",
     "selectTool": "ツールを選択",
     "navigateVersions": "バージョンを移動",

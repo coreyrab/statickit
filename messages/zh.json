@@ -37,6 +37,13 @@
       "secure": "永不丢失您的密钥"
     }
   },
+  "apiKeyRequired": {
+    "title": "需要API密钥",
+    "description": "您需要添加API密钥才能使用此功能。创建账户以使用加密云存储，或直接添加您的密钥。",
+    "signUp": "创建账户",
+    "addKeys": "添加API密钥",
+    "browserStorageHint": "密钥安全存储在您的浏览器中"
+  },
   "account": {
     "title": "账户",
     "description": "管理您的账户和API密钥",
@@ -75,7 +82,14 @@
     "description": "StaticKit 是一款免费的 AI 图片编辑器。调整图片、更换背景、更换模特、调整任意宽高比等。",
     "byokTitle": "自带密钥",
     "byokDescription": "您的 API 密钥保存在浏览器中，永不发送到我们的服务器。您只需为实际使用付费。",
-    "skipForNow": "暂时跳过"
+    "skipForNow": "暂时跳过",
+    "createAccount": "创建账户",
+    "addApiKeys": "添加您的API密钥",
+    "browserStorage": "浏览器存储",
+    "guestStorageTitle": "安全的浏览器存储",
+    "guestStorageDescription": "您的API密钥安全地存储在浏览器的本地存储中。它们永远不会离开您的设备，仅用于直接从浏览器进行API调用。",
+    "wantEncryption": "想要加密的云存储？创建账户 →",
+    "byokDescriptionGuest": "您的API密钥安全地存储在浏览器的本地存储中。它永远不会离开您的设备。"
   },
   "apiKeys": {
     "title": "API密钥设置",
@@ -85,6 +99,9 @@
   "nav": {
     "apiKeys": "API密钥",
     "apiKeysActive": "已激活",
+    "addKeys": "添加密钥",
+    "keysStoredInAccount": "密钥存储在您的账户中",
+    "keysStoredInBrowser": "密钥存储在您的浏览器中",
     "shortcuts": "快捷键",
     "selectTool": "选择工具",
     "navigateVersions": "浏览版本",

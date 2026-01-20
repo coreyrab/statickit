@@ -37,6 +37,13 @@
       "secure": "Verlieren Sie nie wieder Ihre Schlussel"
     }
   },
+  "apiKeyRequired": {
+    "title": "API-Schlüssel erforderlich",
+    "description": "Sie benötigen einen API-Schlüssel, um diese Funktion zu nutzen. Erstellen Sie ein Konto für verschlüsselten Cloud-Speicher oder fügen Sie Ihre Schlüssel direkt hinzu.",
+    "signUp": "Konto erstellen",
+    "addKeys": "API-Schlüssel hinzufügen",
+    "browserStorageHint": "Schlüssel werden sicher in Ihrem Browser gespeichert"
+  },
   "account": {
     "title": "Konto",
     "description": "Verwalten Sie Ihr Konto und API-Schlussel",
@@ -75,7 +82,14 @@
     "description": "StaticKit ist ein kostenloser KI-Bildeditor. Passen Sie Bilder an, tauschen Sie Hintergründe aus, ändern Sie Modelle, skalieren Sie auf jedes Seitenverhältnis und mehr.",
     "byokTitle": "Eigenen Schlüssel mitbringen",
     "byokDescription": "Ihr API-Schlüssel bleibt in Ihrem Browser und wird niemals an unsere Server gesendet. Sie zahlen nur für das, was Sie nutzen.",
-    "skipForNow": "Vorerst überspringen"
+    "skipForNow": "Vorerst überspringen",
+    "createAccount": "Konto erstellen",
+    "addApiKeys": "Fügen Sie Ihre API-Schlüssel hinzu",
+    "browserStorage": "Browser-Speicher",
+    "guestStorageTitle": "Sichere Browser-Speicherung",
+    "guestStorageDescription": "Ihre API-Schlüssel werden sicher im lokalen Speicher Ihres Browsers gespeichert. Sie verlassen niemals Ihr Gerät und werden nur verwendet, um API-Aufrufe direkt von Ihrem Browser aus zu tätigen.",
+    "wantEncryption": "Möchten Sie verschlüsselten Cloud-Speicher? Erstellen Sie ein Konto →",
+    "byokDescriptionGuest": "Ihr API-Schlüssel wird sicher im lokalen Speicher Ihres Browsers gespeichert. Er verlässt niemals Ihr Gerät."
   },
   "apiKeys": {
     "title": "API-Schlussel-Einstellungen",
@@ -85,6 +99,9 @@
   "nav": {
     "apiKeys": "API-Schlüssel",
     "apiKeysActive": "Aktiv",
+    "addKeys": "Schlüssel hinzufügen",
+    "keysStoredInAccount": "Schlüssel in Ihrem Konto gespeichert",
+    "keysStoredInBrowser": "Schlüssel in Ihrem Browser gespeichert",
     "shortcuts": "TASTENKÜRZEL",
     "selectTool": "Werkzeug wählen",
     "navigateVersions": "Versionen navigieren",
