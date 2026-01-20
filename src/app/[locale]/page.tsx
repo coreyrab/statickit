@@ -105,6 +105,7 @@ import { ApiKeySetupModal, WelcomeModal } from '@/components/onboarding';
 import { getStoredApiKey, setStoredApiKey, hasStoredApiKey, getStoredOpenAIKey, setStoredOpenAIKey, hasStoredOpenAIKey } from '@/lib/api-key-storage';
 import { UserButton, SignUpButton } from '@/components/auth';
 import { useAuth } from '@/hooks/useAuth';
+import { useClerk } from '@clerk/nextjs';
 import { useSessionPersistence, type SessionState } from '@/hooks/useSessionPersistence';
 import { HardDrive } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -246,6 +247,7 @@ function HomeContent() {
 
   // Auth state
   const { isSignedIn, isLoaded: isAuthLoaded } = useAuth();
+  const { openSignUp } = useClerk();
 
   const [step, setStep] = useState<Step>('editor');
   const [selectedTool, setSelectedTool] = useState<Tool>('edit');
@@ -4087,8 +4089,12 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                     <DropdownMenuSeparator />
                   </>
                 ) : (
-                  // Not signed in: show guest API key options
+                  // Not signed in: show guest API key options + sign up
                   <>
+                    <DropdownMenuItem onClick={() => openSignUp()} className="cursor-pointer group">
+                      <UserPlus className="w-4 h-4 text-primary" />
+                      <span>{t('auth.signUp')}</span>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setShowApiKeySetup(true)} className="cursor-pointer group">
                       <Key className={`w-4 h-4 ${apiKey || openaiApiKey ? 'text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300' : ''}`} />
                       <span>{t('nav.apiKeys')}</span>
