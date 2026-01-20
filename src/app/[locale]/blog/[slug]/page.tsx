@@ -91,6 +91,24 @@ function generateArticleSchema(slug: string, post: NonNullable<ReturnType<typeof
   };
 }
 
+// JSON-LD structured data for FAQPage schema
+function generateFAQSchema(post: NonNullable<ReturnType<typeof getPostBySlug>>) {
+  if (!post.faqs || post.faqs.length === 0) return null;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: post.faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  };
+}
+
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
   const post = getPostBySlug(slug);
@@ -100,6 +118,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   }
 
   const articleSchema = generateArticleSchema(slug, post);
+  const faqSchema = generateFAQSchema(post);
 
   return (
     <>
@@ -108,6 +127,12 @@ export default async function BlogPostPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
       <BlogPostContent post={post} />
     </>
   );
