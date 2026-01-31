@@ -220,19 +220,19 @@ export function WelcomeModal({
           {view === "auth" && (
             <>
               {/* Feature highlights */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 {[
                   { icon: <Wand2 className="w-4 h-4 text-violet-500 shrink-0" />, title: t("welcome.features.presets"), desc: t("welcome.features.presetsDesc") },
                   { icon: <Image className="w-4 h-4 text-blue-500 shrink-0" />, title: t("welcome.features.backgrounds"), desc: t("welcome.features.backgroundsDesc") },
                   { icon: <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />, title: t("welcome.features.models"), desc: t("welcome.features.modelsDesc") },
                   { icon: <Layers className="w-4 h-4 text-emerald-500 shrink-0" />, title: t("welcome.features.versions"), desc: t("welcome.features.versionsDesc") },
                 ].map((feature, i) => (
-                  <div key={i} className="p-3 rounded-lg bg-muted/50 border border-border flex flex-col h-full min-h-[5.5rem]">
-                    <div className="flex items-center gap-2 mb-1">
+                  <div key={i} className="p-3 rounded-lg bg-muted/50 border border-border flex items-start gap-3 sm:flex-col sm:gap-0 sm:min-h-[5.5rem]">
+                    <div className="flex items-center gap-2 sm:mb-1">
                       {feature.icon}
                       <span className="text-sm font-medium text-foreground leading-tight">{feature.title}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed flex-1">{feature.desc}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed sm:flex-1">{feature.desc}</p>
                   </div>
                 ))}
               </div>
