@@ -69,13 +69,13 @@
     "learnMore": "Learn how it works",
     "features": {
       "presets": "Smart Presets",
-      "presetsDesc": "One click to remove backgrounds, adjust lighting, and more",
+      "presetsDesc": "One-click lighting, color, and style adjustments",
       "backgrounds": "Background Swap",
-      "backgroundsDesc": "Drop in any scene or studio backdrop",
+      "backgroundsDesc": "Drop in any scene or backdrop",
       "models": "Model Swap",
-      "modelsDesc": "Add or change people in your photos",
+      "modelsDesc": "Add or swap people in your photos",
       "versions": "Version History",
-      "versionsDesc": "Branch, compare, and undo any edit"
+      "versionsDesc": "Branch, compare, and undo edits"
     },
     "byok": "Bring Your Own Key",
     "byokTitle": "Bring Your Own Key",

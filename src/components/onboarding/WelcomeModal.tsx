@@ -8,18 +8,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, X, ExternalLink, Key, Shield, RefreshCw, Cloud, Sparkles, Image, Wand2, Layers, HelpCircle, Lock, Globe } from "lucide-react";
+import { Loader2, Check, X, ExternalLink, Key, Shield, RefreshCw, Cloud, Sparkles, Image, Wand2, Layers, Lock, Globe } from "lucide-react";
 import { track } from "@/lib/analytics";
 import Link from "next/link";
 import { useClerk } from "@clerk/nextjs";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface WelcomeModalProps {
   open: boolean;
@@ -226,35 +220,21 @@ export function WelcomeModal({
           {view === "auth" && (
             <>
               {/* Feature highlights */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-lg bg-muted/50 border border-border">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Wand2 className="w-4 h-4 text-violet-500" />
-                    <span className="text-sm font-medium text-foreground">{t("welcome.features.presets")}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                {[
+                  { icon: <Wand2 className="w-4 h-4 text-violet-500 shrink-0" />, title: t("welcome.features.presets"), desc: t("welcome.features.presetsDesc") },
+                  { icon: <Image className="w-4 h-4 text-blue-500 shrink-0" />, title: t("welcome.features.backgrounds"), desc: t("welcome.features.backgroundsDesc") },
+                  { icon: <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />, title: t("welcome.features.models"), desc: t("welcome.features.modelsDesc") },
+                  { icon: <Layers className="w-4 h-4 text-emerald-500 shrink-0" />, title: t("welcome.features.versions"), desc: t("welcome.features.versionsDesc") },
+                ].map((feature, i) => (
+                  <div key={i} className="p-3 rounded-lg bg-muted/50 border border-border flex items-start gap-3 sm:flex-col sm:gap-0 sm:min-h-[5.5rem]">
+                    <div className="flex items-center gap-2 sm:mb-1">
+                      {feature.icon}
+                      <span className="text-sm font-medium text-foreground leading-tight">{feature.title}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed sm:flex-1">{feature.desc}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground">{t("welcome.features.presetsDesc")}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/50 border border-border">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Image className="w-4 h-4 text-blue-500" />
-                    <span className="text-sm font-medium text-foreground">{t("welcome.features.backgrounds")}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{t("welcome.features.backgroundsDesc")}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/50 border border-border">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                    <span className="text-sm font-medium text-foreground">{t("welcome.features.models")}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{t("welcome.features.modelsDesc")}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/50 border border-border">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Layers className="w-4 h-4 text-emerald-500" />
-                    <span className="text-sm font-medium text-foreground">{t("welcome.features.versions")}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{t("welcome.features.versionsDesc")}</p>
-                </div>
+                ))}
               </div>
 
               {/* Free callout */}
@@ -287,38 +267,22 @@ export function WelcomeModal({
                   </div>
                 </div>
 
-                {/* Guest mode option with tooltip */}
-                <TooltipProvider>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={handleGuestMode}
-                      variant="outline"
-                      className="flex-1"
-                      size="lg"
-                    >
-                      <Key className="w-4 h-4 mr-2" />
-                      {t("welcome.addApiKeys")}
-                    </Button>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button className="p-2 rounded-lg hover:bg-muted transition-colors">
-                          <HelpCircle className="w-4 h-4 text-muted-foreground" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[280px] p-3">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm font-medium">
-                            <Lock className="w-4 h-4 text-emerald-500" />
-                            {t("welcome.guestStorageTitle")}
-                          </div>
-                          <p className="text-xs text-muted-foreground leading-relaxed">
-                            {t("welcome.guestStorageDescription")}
-                          </p>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                </TooltipProvider>
+                {/* Guest mode option */}
+                <Button
+                  onClick={handleGuestMode}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  <Key className="w-4 h-4 mr-2" />
+                  {t("welcome.addApiKeys")}
+                </Button>
+
+                {/* Guest storage note */}
+                <p className="text-xs text-muted-foreground/70 text-center flex items-center justify-center gap-1.5">
+                  <Lock className="w-3 h-3 text-emerald-500/70" />
+                  {t("welcome.guestStorageDescription")}
+                </p>
               </div>
 
               {/* Already have an account */}
