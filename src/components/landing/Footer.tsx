@@ -45,6 +45,13 @@ export function Footer() {
               Blog
             </Link>
             <span className="text-muted-foreground/40">·</span>
+            <Link
+              href="/use-cases"
+              className="hover:text-foreground transition-colors cursor-pointer"
+            >
+              Use Cases
+            </Link>
+            <span className="text-muted-foreground/40">·</span>
             <button
               onClick={() => setMadeByHumanOpen(true)}
               className="hover:text-foreground transition-colors cursor-pointer"
