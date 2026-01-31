@@ -65,7 +65,7 @@
     "title": "Welcome to StaticKit",
     "tagline": "Professional image editing powered by your own AI keys",
     "description": "Edit images, swap backgrounds, add models, and export to any size. All in your browser.",
-    "freeCallout": "Free to use. You provide your own API key.",
+    "freeCallout": "Free to use with your own API key. Save keys to your account or store them in your browser.",
     "learnMore": "Learn how it works",
     "features": {
       "presets": "Smart Presets",
