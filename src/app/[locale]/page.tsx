@@ -39,7 +39,8 @@ import {
   ChevronUp,
   Maximize2,
   Info,
-  Layers,
+  GitBranch,
+  GitFork,
   Sun,
   Moon,
   Heart,
@@ -218,7 +219,8 @@ interface BaseVersion {
   id: string;
   name: string;
   baseImageUrl: string; // The base image URL for this version
-  sourceLabel: string; // Description of where this came from (e.g., "From: Soft Lighting edit")
+  sourceLabel: string; // Description of where this came from (e.g., "Branched from Original")
+  parentBaseId: string | null; // ID of the base version this was branched from (null for Original)
   versions: ImageVersion[]; // Edit history for this base
   currentVersionIndex: number; // Which edit is currently shown
   resizedVersions: ResizedVersion[]; // Resized versions for this base
@@ -1447,6 +1449,7 @@ function HomeContent() {
             name: 'Original',
             baseImageUrl: data.originalImageUrl,
             sourceLabel: 'Restored from session',
+            parentBaseId: null,
             versions: [{ imageUrl: data.originalImageUrl, prompt: null, parentIndex: -1, status: 'completed' as const }],
             currentVersionIndex: 0,
             resizedVersions: [],
@@ -1571,6 +1574,7 @@ function HomeContent() {
         name: 'Original',
         baseImageUrl: objectUrl,
         sourceLabel: 'Uploaded image',
+        parentBaseId: null,
         versions: [{ imageUrl: objectUrl, prompt: null, parentIndex: -1, status: 'completed' as const }],
         currentVersionIndex: 0,
         resizedVersions: [],
@@ -1690,6 +1694,7 @@ function HomeContent() {
           name: 'Original',
           baseImageUrl: objectUrl,
           sourceLabel: 'From URL',
+          parentBaseId: null,
           versions: [{ imageUrl: objectUrl, prompt: null, parentIndex: -1, status: 'completed' as const }],
           currentVersionIndex: 0,
           resizedVersions: [],
@@ -3796,17 +3801,18 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
     setCompareRightIndex(null);
   };
 
-  // Create a new base version from the current image
+  // Create a new branch from the current image
   // This adds a new card to the sidebar with its own fresh edit history
-  const handleCreateVersion = (imageUrl: string, sourceLabel: string) => {
+  const handleCreateVersion = (imageUrl: string, sourceLabel: string, parentBaseId: string | null) => {
     const newBaseId = `base-${Date.now()}`;
-    const versionNumber = baseVersions.length; // 0 is original, so this gives us 1, 2, 3...
+    const branchNumber = baseVersions.filter(b => b.id !== 'original').length + 1;
 
     const newBaseVersion: BaseVersion = {
       id: newBaseId,
-      name: `Version ${versionNumber}`,
+      name: `Branch ${branchNumber}`,
       baseImageUrl: imageUrl,
       sourceLabel: sourceLabel,
+      parentBaseId: parentBaseId,
       versions: [{ imageUrl, prompt: null, parentIndex: -1, status: 'completed' as const }],
       currentVersionIndex: 0,
       resizedVersions: [],
@@ -3821,11 +3827,12 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
     // Switch to viewing original (non-generated) to show the new version
     setSelectedVariationId(null);
 
-    // Switch to Versions tool so user sees where the new version is
+    // Switch to Versions tool so user sees where the new branch is
     setSelectedTool('iterations');
 
     // Show confirmation toast
-    toast.success(`Version ${versionNumber} created`, {
+    const parentName = baseVersions.find(b => b.id === parentBaseId)?.name || 'Original';
+    toast.success(`Branch created from ${parentName}`, {
       description: 'Find it in the Versions panel on the left',
       duration: 3000,
     });
@@ -4292,7 +4299,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                       : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
                   }`}
                 >
-                  <Layers className="w-4 h-4" />
+                  <GitBranch className="w-4 h-4" />
                   <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'iterations' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>1</span>
                 </button>
 
@@ -5600,26 +5607,29 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                       </TooltipContent>
                     </Tooltip>
                   )}
-                  {/* Create Version button - works on any image */}
+                  {/* Branch button - works on any image */}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
                         onClick={previewImage ? () => {
+                          const parentId = isShowingGenerated && selectedVariation
+                            ? activeBaseId
+                            : activeBaseId;
                           const sourceLabel = isShowingGenerated && selectedVariation
-                            ? `From: ${selectedVariation.title}`
+                            ? `from ${selectedVariation.title}`
                             : originalVersionIndex === 0
-                              ? 'From: Original'
-                              : originalVersions[originalVersionIndex]?.prompt || 'From: Edit';
-                          handleCreateVersion(previewImage, sourceLabel);
+                              ? `from ${baseVersions.find(b => b.id === activeBaseId)?.name || 'Original'}`
+                              : originalVersions[originalVersionIndex]?.prompt || 'from edit';
+                          handleCreateVersion(previewImage, sourceLabel, parentId);
                         } : undefined}
                         disabled={!previewImage}
                         className="p-2 rounded-lg bg-card/80 hover:bg-card backdrop-blur-sm text-foreground/70 hover:text-foreground transition-colors disabled:opacity-30 disabled:hover:bg-card/80 disabled:hover:text-foreground/70 disabled:cursor-not-allowed"
                       >
-                        <Layers className="w-4 h-4" />
+                        <GitFork className="w-4 h-4" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {previewImage ? t('viewer.newVersion') : t('common.uploadFirst')}
+                      {previewImage ? t('viewer.branchFromHere') : t('common.uploadFirst')}
                     </TooltipContent>
                   </Tooltip>
                   {/* Compare button - always show for original/edits, ghosted when < 2 versions or no image */}
@@ -5806,7 +5816,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-1.5 mb-2">
-                        <h2 className="font-semibold text-base flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Layers className="w-3.5 h-3.5 text-primary-foreground" /></span>{t('sidebar.versions')}</h2>
+                        <h2 className="font-semibold text-base flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><GitBranch className="w-3.5 h-3.5 text-primary-foreground" /></span>{t('sidebar.versions')}</h2>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
@@ -8212,95 +8222,131 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
             {/* Variation Cards - Show for iterations tool when image uploaded */}
             {selectedTool === 'iterations' && uploadedImage && (
               <div className="px-4 pr-2 pb-20 space-y-3 md:flex-1 md:overflow-y-auto md:pr-4 md:pb-4 touch-scroll">
-                {/* Base Version Cards - Original and any "New Versions" */}
-                {baseVersions.map((base, baseIdx) => {
-                  const isActive = activeBaseId === base.id && selectedVariationId === null;
-                  const isOriginal = base.id === 'original';
-                  const editCount = base.versions.length - 1;
-                  const resizeCount = base.resizedVersions.filter(r => r.status === 'completed').length;
+                {/* Base Version Cards - Original and any branches, rendered as a tree */}
+                {(() => {
+                  // Build tree: render Original first, then its children indented
+                  const getChildren = (parentId: string) =>
+                    baseVersions.filter(b => b.parentBaseId === parentId);
+                  const hasChildren = (baseId: string) =>
+                    baseVersions.some(b => b.parentBaseId === baseId);
 
-                  return (
-                    <div
-                      key={base.id}
-                      onClick={() => {
-                        setActiveBaseId(base.id);
-                        setSelectedVariationId(null);
-                        setViewingResizedSize(null);
-                      }}
-                      className={`rounded-xl border transition-all cursor-pointer ${
-                        isActive
-                          ? isOriginal ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-500/10' : 'border-primary bg-primary/10'
-                          : 'border-border bg-muted/50 hover:border-border'
-                      }`}
-                    >
-                      <div className="p-4">
-                        <div className="flex gap-3">
-                          {/* Thumbnail */}
-                          <div className="w-16 h-20 rounded-lg bg-muted overflow-hidden flex-shrink-0">
-                            <img
-                              src={base.baseImageUrl}
-                              alt={base.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              {isOriginal ? (
-                                <ImageIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                              ) : (
-                                <Layers className="w-4 h-4 text-primary" />
-                              )}
-                              <span className={`font-medium text-sm ${isOriginal ? 'text-emerald-700 dark:text-emerald-400' : 'text-primary'}`}>
-                                {base.name}
-                              </span>
-                              {editCount > 0 && (
-                                <span className="text-xs text-muted-foreground/70 bg-muted px-1.5 py-0.5 rounded">
-                                  {editCount} edit{editCount > 1 ? 's' : ''}
-                                </span>
-                              )}
-                              {resizeCount > 0 && (
-                                <span className="text-xs text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded">
-                                  {resizeCount + 1} sizes
-                                </span>
-                              )}
-                              {/* Delete button */}
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteBaseVersion(base.id);
-                                    }}
-                                    disabled={!canDeleteBaseVersion(base.id)}
-                                    className="ml-auto p-1 rounded hover:bg-red-500/20 text-muted-foreground/50 hover:text-red-500 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground/50 disabled:cursor-not-allowed"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  {canDeleteBaseVersion(base.id)
-                                    ? isOriginal ? 'Delete image' : 'Delete version'
-                                    : 'Cannot delete (has edits or variations)'}
-                                </TooltipContent>
-                              </Tooltip>
+                  const renderBranchCard = (base: BaseVersion, depth: number) => {
+                    const isActive = activeBaseId === base.id && selectedVariationId === null;
+                    const isOriginal = base.id === 'original';
+                    const editCount = base.versions.length - 1;
+                    const resizeCount = base.resizedVersions.filter(r => r.status === 'completed').length;
+                    const isBranchPoint = hasChildren(base.id);
+                    const children = getChildren(base.id);
+
+                    return (
+                      <div key={base.id}>
+                        <div className={depth > 0 ? 'ml-5 relative' : ''}>
+                          {/* Connector line for child branches */}
+                          {depth > 0 && (
+                            <div className="absolute left-0 top-0 bottom-0 w-px -ml-2.5">
+                              <div className="absolute left-0 top-5 w-2.5 h-px bg-border" />
+                              <div className="absolute left-0 top-0 h-5 w-px bg-border" />
                             </div>
-                            <p className="text-xs text-muted-foreground/80 truncate">
-                              {isOriginal ? uploadedImage.filename : base.sourceLabel}
-                            </p>
-                            {isOriginal && (
-                              <p className="text-xs text-muted-foreground/70 mt-1">
-                                {uploadedImage.aspectRatio.includes('(')
-                                  ? uploadedImage.aspectRatio
-                                  : `${uploadedImage.aspectRatio} • ${uploadedImage.width}×${uploadedImage.height}`}
-                              </p>
-                            )}
+                          )}
+                          <div
+                            onClick={() => {
+                              setActiveBaseId(base.id);
+                              setSelectedVariationId(null);
+                              setViewingResizedSize(null);
+                            }}
+                            className={`rounded-xl border transition-all cursor-pointer ${
+                              isActive
+                                ? isOriginal ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-500/10' : 'border-primary bg-primary/10'
+                                : 'border-border bg-muted/50 hover:border-border'
+                            }`}
+                          >
+                            <div className="p-4">
+                              <div className="flex gap-3">
+                                {/* Thumbnail */}
+                                <div className="w-16 h-20 rounded-lg bg-muted overflow-hidden flex-shrink-0">
+                                  <img
+                                    src={base.baseImageUrl}
+                                    alt={base.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {isOriginal ? (
+                                      <ImageIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                                    ) : (
+                                      <GitBranch className="w-4 h-4 text-primary" />
+                                    )}
+                                    <span className={`font-medium text-sm ${isOriginal ? 'text-emerald-700 dark:text-emerald-400' : 'text-primary'}`}>
+                                      {base.name}
+                                    </span>
+                                    {editCount > 0 && (
+                                      <span className="text-xs text-muted-foreground/70 bg-muted px-1.5 py-0.5 rounded">
+                                        {editCount} edit{editCount > 1 ? 's' : ''}
+                                      </span>
+                                    )}
+                                    {resizeCount > 0 && (
+                                      <span className="text-xs text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded">
+                                        {resizeCount + 1} sizes
+                                      </span>
+                                    )}
+                                    {isBranchPoint && (
+                                      <span className="text-xs text-muted-foreground/60 bg-muted px-1.5 py-0.5 rounded flex items-center gap-1">
+                                        <GitFork className="w-3 h-3" />
+                                        {children.length}
+                                      </span>
+                                    )}
+                                    {/* Delete button */}
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteBaseVersion(base.id);
+                                          }}
+                                          disabled={!canDeleteBaseVersion(base.id)}
+                                          className="ml-auto p-1 rounded hover:bg-red-500/20 text-muted-foreground/50 hover:text-red-500 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground/50 disabled:cursor-not-allowed"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        {canDeleteBaseVersion(base.id)
+                                          ? isOriginal ? 'Delete image' : 'Delete branch'
+                                          : 'Cannot delete (has edits or variations)'}
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground/80 truncate">
+                                    {isOriginal ? uploadedImage.filename : base.sourceLabel}
+                                  </p>
+                                  {isOriginal && (
+                                    <p className="text-xs text-muted-foreground/70 mt-1">
+                                      {uploadedImage.aspectRatio.includes('(')
+                                        ? uploadedImage.aspectRatio
+                                        : `${uploadedImage.aspectRatio} • ${uploadedImage.width}×${uploadedImage.height}`}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
+                        {/* Render children recursively */}
+                        {children.length > 0 && (
+                          <div className="space-y-3 mt-3">
+                            {children.map(child => renderBranchCard(child, depth + 1))}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  };
+
+                  // Start rendering from root nodes (Original and any orphaned branches)
+                  const rootVersions = baseVersions.filter(b => b.parentBaseId === null || b.parentBaseId === undefined);
+                  return rootVersions.map(root => renderBranchCard(root, 0));
+                })()}
 
               {/* Divider - only show when there are variations */}
               {variations.length > 0 && (
@@ -8605,7 +8651,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
             }}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'iterations' ? 'bg-primary/15' : ''}`}
           >
-            <Layers className={`w-5 h-5 transition-colors ${selectedTool === 'iterations' ? 'text-primary' : 'text-muted-foreground'}`} />
+            <GitBranch className={`w-5 h-5 transition-colors ${selectedTool === 'iterations' ? 'text-primary' : 'text-muted-foreground'}`} />
             <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'iterations' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.iterations')}</span>
           </button>
           <button

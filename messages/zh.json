@@ -73,8 +73,8 @@
       "backgroundsDesc": "即时替换任何背景",
       "models": "模特替换",
       "modelsDesc": "更换产品照片中的人物",
-      "versions": "版本历史",
-      "versionsDesc": "比较和迭代编辑效果"
+      "versions": "分支管理",
+      "versionsDesc": "创建分支、比较和迭代编辑效果"
     },
     "byok": "使用您自己的密钥",
     "byokDescriptionAuth": "您的API密钥已加密并安全地存储在云端。",
@@ -122,10 +122,10 @@
   },
   "sidebar": {
     "image": "图片",
-    "versions": "版本",
-    "savedEditsDescription": "已保存的编辑，您可以继续在此基础上构建。",
+    "versions": "分支",
+    "savedEditsDescription": "已保存的编辑，您可以从中创建新分支。",
     "generateSuggestions": "生成建议",
-    "snapshotsDescription": "您可以从这些快照分支出来测试不同的方法。"
+    "snapshotsDescription": "您可以从这些快照创建分支来测试不同的方法。"
   },
   "sizes": {
     "square": "正方形",
@@ -495,6 +495,7 @@
     "download": "下载图片",
     "uploadNew": "上传新图片",
     "newVersion": "从此图片创建新版本",
+    "branchFromHere": "从此处创建分支",
     "compare": "比较版本",
     "exitCompare": "退出比较模式",
     "makeEditToCompare": "进行编辑以比较版本",
@@ -549,7 +550,7 @@
   },
   "versions": {
     "original": "原始",
-    "version": "版本 {number}",
+    "version": "分支 {number}",
     "current": "当前"
   },
   "errors": {

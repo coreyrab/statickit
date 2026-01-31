@@ -73,8 +73,8 @@
       "backgroundsDesc": "Remplacez n'importe quel arrière-plan instantanément",
       "models": "Changement de modèle",
       "modelsDesc": "Changez les personnes dans les photos de produits",
-      "versions": "Historique des versions",
-      "versionsDesc": "Comparez et itérez sur vos retouches"
+      "versions": "Ramification",
+      "versionsDesc": "Ramifiez, comparez et iterez sur vos retouches"
     },
     "byok": "Apportez votre propre cle",
     "byokDescriptionAuth": "Votre cle API est chiffree et stockee en toute securite dans le cloud.",
@@ -122,10 +122,10 @@
   },
   "sidebar": {
     "image": "Image",
-    "versions": "Versions",
-    "savedEditsDescription": "Modifications enregistrees sur lesquelles vous pouvez continuer a construire.",
+    "versions": "Branches",
+    "savedEditsDescription": "Modifications enregistrees a partir desquelles vous pouvez creer de nouvelles branches.",
     "generateSuggestions": "Generer des suggestions",
-    "snapshotsDescription": "Instantanes a partir desquels vous pouvez bifurquer pour tester differentes approches."
+    "snapshotsDescription": "Instantanes a partir desquels vous pouvez creer des branches pour tester differentes approches."
   },
   "sizes": {
     "square": "Carre",
@@ -495,6 +495,7 @@
     "download": "Telecharger l'image",
     "uploadNew": "Telecharger une nouvelle image",
     "newVersion": "Creer une nouvelle version a partir de cette image",
+    "branchFromHere": "Creer une branche a partir d'ici",
     "compare": "Comparer les versions",
     "exitCompare": "Quitter le mode comparaison",
     "makeEditToCompare": "Effectuez une modification pour comparer les versions",
@@ -549,7 +550,7 @@
   },
   "versions": {
     "original": "Original",
-    "version": "Version {number}",
+    "version": "Branche {number}",
     "current": "Actuel"
   },
   "errors": {

@@ -73,8 +73,8 @@
       "backgroundsDesc": "Jeden Hintergrund sofort ersetzen",
       "models": "Modell tauschen",
       "modelsDesc": "Personen in Produktfotos ändern",
-      "versions": "Versionsverlauf",
-      "versionsDesc": "Bearbeitungen vergleichen und iterieren"
+      "versions": "Branching",
+      "versionsDesc": "Bearbeitungen verzweigen, vergleichen und iterieren"
     },
     "byok": "Eigenen Schlussel verwenden",
     "byokDescriptionAuth": "Ihr API-Schlussel ist verschlusselt und sicher in der Cloud gespeichert.",
@@ -122,10 +122,10 @@
   },
   "sidebar": {
     "image": "Bild",
-    "versions": "Versionen",
-    "savedEditsDescription": "Gespeicherte Bearbeitungen, auf denen Sie weiter aufbauen können.",
+    "versions": "Branches",
+    "savedEditsDescription": "Gespeicherte Bearbeitungen, von denen Sie neue Branches erstellen können.",
     "generateSuggestions": "Vorschläge generieren",
-    "snapshotsDescription": "Schnappschüsse, von denen Sie abzweigen können, um verschiedene Ansätze zu testen."
+    "snapshotsDescription": "Schnappschüsse, von denen Sie neue Branches erstellen können, um verschiedene Ansätze zu testen."
   },
   "sizes": {
     "square": "Quadrat",
@@ -495,6 +495,7 @@
     "download": "Bild herunterladen",
     "uploadNew": "Neues Bild hochladen",
     "newVersion": "Neue Version aus diesem Bild erstellen",
+    "branchFromHere": "Von hier aus verzweigen",
     "compare": "Versionen vergleichen",
     "exitCompare": "Vergleichsmodus beenden",
     "makeEditToCompare": "Bearbeiten Sie das Bild, um Versionen zu vergleichen",
@@ -549,7 +550,7 @@
   },
   "versions": {
     "original": "Original",
-    "version": "Version {number}",
+    "version": "Branch {number}",
     "current": "Aktuell"
   },
   "errors": {

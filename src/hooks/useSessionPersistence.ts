@@ -89,6 +89,7 @@ interface BaseVersion {
   name: string;
   baseImageUrl: string;
   sourceLabel: string;
+  parentBaseId: string | null;
   versions: ImageVersion[];
   currentVersionIndex: number;
   resizedVersions: ResizedVersion[];
@@ -277,6 +278,7 @@ export function useSessionPersistence(): UseSessionPersistenceResult {
           name: base.name,
           baseImageId: (await serializeImageUrl(base.baseImageUrl))!,
           sourceLabel: base.sourceLabel,
+          parentBaseId: base.parentBaseId,
           versions: await Promise.all(base.versions.map(serializeImageVersion)),
           currentVersionIndex: base.currentVersionIndex,
           resizedVersions: await Promise.all(base.resizedVersions.map(serializeResizedVersion)),
@@ -467,6 +469,7 @@ export function useSessionPersistence(): UseSessionPersistenceResult {
         name: base.name,
         baseImageUrl: (await restoreImageUrl(base.baseImageId))!,
         sourceLabel: base.sourceLabel,
+        parentBaseId: base.parentBaseId ?? null,
         versions: await Promise.all(
           base.versions.map(async (v) => ({
             imageUrl: await restoreImageUrl(v.imageId),

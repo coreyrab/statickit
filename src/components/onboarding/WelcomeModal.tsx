@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, X, ExternalLink, Key, Shield, RefreshCw, Cloud, Sparkles, Image, Wand2, Layers, Lock, Globe } from "lucide-react";
+import { Loader2, Check, X, ExternalLink, Key, Shield, RefreshCw, Cloud, Sparkles, Image, Wand2, GitBranch, Lock, Globe } from "lucide-react";
 import { track } from "@/lib/analytics";
 import Link from "next/link";
 import { useClerk } from "@clerk/nextjs";
@@ -225,7 +225,7 @@ export function WelcomeModal({
                   { icon: <Wand2 className="w-4 h-4 text-violet-500 shrink-0" />, title: t("welcome.features.presets"), desc: t("welcome.features.presetsDesc") },
                   { icon: <Image className="w-4 h-4 text-blue-500 shrink-0" />, title: t("welcome.features.backgrounds"), desc: t("welcome.features.backgroundsDesc") },
                   { icon: <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />, title: t("welcome.features.models"), desc: t("welcome.features.modelsDesc") },
-                  { icon: <Layers className="w-4 h-4 text-emerald-500 shrink-0" />, title: t("welcome.features.versions"), desc: t("welcome.features.versionsDesc") },
+                  { icon: <GitBranch className="w-4 h-4 text-emerald-500 shrink-0" />, title: t("welcome.features.versions"), desc: t("welcome.features.versionsDesc") },
                 ].map((feature, i) => (
                   <div key={i} className="p-3 rounded-lg bg-muted/50 border border-border flex items-start gap-3 sm:flex-col sm:gap-0 sm:min-h-[5.5rem]">
                     <div className="flex items-center gap-2 sm:mb-1">

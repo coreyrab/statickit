@@ -73,8 +73,8 @@
       "backgroundsDesc": "모든 배경을 즉시 교체",
       "models": "모델 교체",
       "modelsDesc": "제품 사진의 인물 변경",
-      "versions": "버전 기록",
-      "versionsDesc": "편집 비교 및 반복 작업"
+      "versions": "브랜치 관리",
+      "versionsDesc": "브랜치를 만들어 편집을 비교하고 반복 작업"
     },
     "byok": "나만의 키 사용",
     "byokDescriptionAuth": "API 키는 암호화되어 클라우드에 안전하게 저장됩니다.",
@@ -122,10 +122,10 @@
   },
   "sidebar": {
     "image": "이미지",
-    "versions": "버전",
-    "savedEditsDescription": "저장된 편집을 계속 구축할 수 있습니다.",
+    "versions": "브랜치",
+    "savedEditsDescription": "저장된 편집에서 새 브랜치를 만들 수 있습니다.",
     "generateSuggestions": "제안 생성",
-    "snapshotsDescription": "다양한 접근 방식을 테스트하기 위해 분기할 수 있는 스냅샷입니다."
+    "snapshotsDescription": "다양한 접근 방식을 테스트하기 위해 브랜치를 만들 수 있는 스냅샷입니다."
   },
   "sizes": {
     "square": "정사각형",
@@ -495,6 +495,7 @@
     "download": "이미지 다운로드",
     "uploadNew": "새 이미지 업로드",
     "newVersion": "이 이미지에서 새 버전 만들기",
+    "branchFromHere": "여기서 브랜치 만들기",
     "compare": "버전 비교",
     "exitCompare": "비교 모드 종료",
     "makeEditToCompare": "버전을 비교하려면 편집하세요",
@@ -549,7 +550,7 @@
   },
   "versions": {
     "original": "원본",
-    "version": "버전 {number}",
+    "version": "브랜치 {number}",
     "current": "현재"
   },
   "errors": {

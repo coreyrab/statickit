@@ -73,8 +73,8 @@
       "backgroundsDesc": "Substitua qualquer fundo instantaneamente",
       "models": "Troca de modelo",
       "modelsDesc": "Mude pessoas em fotos de produtos",
-      "versions": "Histórico de versões",
-      "versionsDesc": "Compare e itere nas edições"
+      "versions": "Ramificacao",
+      "versionsDesc": "Ramifique, compare e itere nas edicoes"
     },
     "byok": "Traga sua propria chave",
     "byokDescriptionAuth": "Sua chave API e criptografada e armazenada com seguranca na nuvem.",
@@ -122,10 +122,10 @@
   },
   "sidebar": {
     "image": "Imagem",
-    "versions": "Versoes",
-    "savedEditsDescription": "Edicoes salvas que voce pode continuar a desenvolver.",
+    "versions": "Ramificacoes",
+    "savedEditsDescription": "Edicoes salvas a partir das quais voce pode criar novas ramificacoes.",
     "generateSuggestions": "Gerar sugestoes",
-    "snapshotsDescription": "Instantaneos dos quais voce pode ramificar para testar diferentes abordagens."
+    "snapshotsDescription": "Instantaneos dos quais voce pode criar ramificacoes para testar diferentes abordagens."
   },
   "sizes": {
     "square": "Quadrado",
@@ -495,6 +495,7 @@
     "download": "Baixar imagem",
     "uploadNew": "Enviar nova imagem",
     "newVersion": "Criar nova versao a partir desta imagem",
+    "branchFromHere": "Ramificar a partir daqui",
     "compare": "Comparar versoes",
     "exitCompare": "Sair do modo de comparacao",
     "makeEditToCompare": "Faca uma edicao para comparar versoes",
@@ -549,7 +550,7 @@
   },
   "versions": {
     "original": "Original",
-    "version": "Versao {number}",
+    "version": "Ramificacao {number}",
     "current": "Atual"
   },
   "errors": {

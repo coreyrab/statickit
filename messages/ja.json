@@ -73,8 +73,8 @@
       "backgroundsDesc": "どんな背景も瞬時に置換",
       "models": "モデルの入れ替え",
       "modelsDesc": "商品写真の人物を変更",
-      "versions": "バージョン履歴",
-      "versionsDesc": "編集を比較して繰り返し改善"
+      "versions": "ブランチ管理",
+      "versionsDesc": "ブランチを作成して編集を比較・改善"
     },
     "byok": "自分のキーを使用",
     "byokDescriptionAuth": "APIキーは暗号化され、クラウドに安全に保存されます。",
@@ -122,10 +122,10 @@
   },
   "sidebar": {
     "image": "画像",
-    "versions": "バージョン",
-    "savedEditsDescription": "保存された編集を元に、さらに作業を続けられます。",
+    "versions": "ブランチ",
+    "savedEditsDescription": "保存された編集から新しいブランチを作成できます。",
     "generateSuggestions": "提案を生成",
-    "snapshotsDescription": "異なるアプローチをテストするために分岐できるスナップショット。"
+    "snapshotsDescription": "異なるアプローチをテストするためにブランチを作成できるスナップショット。"
   },
   "sizes": {
     "square": "正方形",
@@ -495,6 +495,7 @@
     "download": "画像をダウンロード",
     "uploadNew": "新しい画像をアップロード",
     "newVersion": "この画像から新しいバージョンを作成",
+    "branchFromHere": "ここからブランチを作成",
     "compare": "バージョンを比較",
     "exitCompare": "比較モードを終了",
     "makeEditToCompare": "バージョンを比較するには編集してください",
@@ -549,7 +550,7 @@
   },
   "versions": {
     "original": "オリジナル",
-    "version": "バージョン {number}",
+    "version": "ブランチ {number}",
     "current": "現在"
   },
   "errors": {

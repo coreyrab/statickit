@@ -74,8 +74,8 @@
       "backgroundsDesc": "Drop in any scene or backdrop",
       "models": "Model Swap",
       "modelsDesc": "Add or swap people in your photos",
-      "versions": "Version History",
-      "versionsDesc": "Branch, compare, and undo edits"
+      "versions": "Branching",
+      "versionsDesc": "Branch, compare, and explore different directions"
     },
     "byok": "Bring Your Own Key",
     "byokTitle": "Bring Your Own Key",
@@ -122,10 +122,10 @@
   },
   "sidebar": {
     "image": "Image",
-    "versions": "Versions",
-    "savedEditsDescription": "Saved edits you can continue to build on.",
+    "versions": "Branches",
+    "savedEditsDescription": "Your edit branches. Fork from any point to explore different directions.",
     "generateSuggestions": "Generate suggestions",
-    "snapshotsDescription": "Snapshots you can branch from to test different approaches."
+    "snapshotsDescription": "Branch from any version to test different approaches."
   },
   "sizes": {
     "square": "Square",
@@ -495,6 +495,7 @@
     "download": "Download image",
     "uploadNew": "Upload new image",
     "newVersion": "Create new version from this image",
+    "branchFromHere": "Branch from here",
     "compare": "Compare versions",
     "exitCompare": "Exit comparison mode",
     "makeEditToCompare": "Make an edit to compare versions",
@@ -549,7 +550,7 @@
   },
   "versions": {
     "original": "Original",
-    "version": "Version {number}",
+    "version": "Branch {number}",
     "current": "Current"
   },
   "errors": {

@@ -73,8 +73,8 @@
       "backgroundsDesc": "Reemplaza cualquier fondo al instante",
       "models": "Cambio de modelo",
       "modelsDesc": "Cambia personas en fotos de productos",
-      "versions": "Historial de versiones",
-      "versionsDesc": "Compara e itera en tus ediciones"
+      "versions": "Ramificacion",
+      "versionsDesc": "Ramifica, compara e itera en tus ediciones"
     },
     "byok": "Trae tu propia clave",
     "byokDescriptionAuth": "Tu clave API esta encriptada y almacenada de forma segura en la nube.",
@@ -122,10 +122,10 @@
   },
   "sidebar": {
     "image": "Imagen",
-    "versions": "Versiones",
-    "savedEditsDescription": "Ediciones guardadas sobre las que puedes seguir construyendo.",
+    "versions": "Ramas",
+    "savedEditsDescription": "Ediciones guardadas desde las que puedes crear nuevas ramas.",
     "generateSuggestions": "Generar sugerencias",
-    "snapshotsDescription": "Instantaneas desde las que puedes ramificar para probar diferentes enfoques."
+    "snapshotsDescription": "Instantaneas desde las que puedes crear ramas para probar diferentes enfoques."
   },
   "sizes": {
     "square": "Cuadrado",
@@ -495,6 +495,7 @@
     "download": "Descargar imagen",
     "uploadNew": "Subir nueva imagen",
     "newVersion": "Crear nueva version desde esta imagen",
+    "branchFromHere": "Ramificar desde aqui",
     "compare": "Comparar versiones",
     "exitCompare": "Salir del modo de comparacion",
     "makeEditToCompare": "Realiza una edicion para comparar versiones",
@@ -549,7 +550,7 @@
   },
   "versions": {
     "original": "Original",
-    "version": "Version {number}",
+    "version": "Rama {number}",
     "current": "Actual"
   },
   "errors": {

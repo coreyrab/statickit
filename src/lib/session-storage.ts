@@ -69,6 +69,7 @@ export interface SerializedBaseVersion {
   name: string;
   baseImageId: string; // References images store
   sourceLabel: string;
+  parentBaseId?: string | null; // ID of the parent base version this was branched from
   versions: SerializedImageVersion[];
   currentVersionIndex: number;
   resizedVersions: SerializedResizedVersion[];
