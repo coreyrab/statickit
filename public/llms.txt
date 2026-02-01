@@ -46,6 +46,55 @@ These blog posts are available in clean markdown format for easy parsing:
 - Best free AI image editors in 2026
   https://statickit.ai/blog/md/best-free-ai-image-editors.md
 
+## Use Cases
+
+Detailed guides for specific AI photo editing workflows:
+
+- E-commerce Product Photography
+  https://statickit.ai/use-cases/ecommerce-product-photography
+
+- Social Media Ad Creatives
+  https://statickit.ai/use-cases/social-media-ad-creatives
+
+- Background Replacement
+  https://statickit.ai/use-cases/background-replacement
+
+- Model Replacement for Ads
+  https://statickit.ai/use-cases/model-replacement-for-ads
+
+- Aspect Ratio Resizing
+  https://statickit.ai/use-cases/aspect-ratio-resizing
+
+- Product Lifestyle Shots
+  https://statickit.ai/use-cases/product-lifestyle-shots
+
+- Real Estate Photo Enhancement
+  https://statickit.ai/use-cases/real-estate-photo-enhancement
+
+- Fashion & Apparel Marketing
+  https://statickit.ai/use-cases/fashion-apparel-marketing
+
+- Food & Restaurant Photography
+  https://statickit.ai/use-cases/food-restaurant-photography
+
+- Headshot & Portrait Enhancement
+  https://statickit.ai/use-cases/headshot-portrait-enhancement
+
+- A/B Testing Ad Creatives
+  https://statickit.ai/use-cases/ab-testing-ad-creatives
+
+- Seasonal Campaign Updates
+  https://statickit.ai/use-cases/seasonal-campaign-updates
+
+- Brand Consistency at Scale
+  https://statickit.ai/use-cases/brand-consistency-at-scale
+
+- Influencer & UGC Enhancement
+  https://statickit.ai/use-cases/influencer-ugc-enhancement
+
+- Rapid Creative Iteration
+  https://statickit.ai/use-cases/rapid-creative-iteration
+
 ## Topics Covered
 
 - AI image editing
@@ -55,6 +104,12 @@ These blog posts are available in clean markdown format for easy parsing:
 - Meta ads creative iteration
 - Natural language image editing
 - Free AI image editing tools comparison
+- AI product photography for e-commerce
+- Background replacement and model swapping
+- Real estate photo enhancement
+- Food and restaurant photography
+- A/B testing ad creatives with AI
+- Brand consistency and creative iteration
 
 ## Contact
 

@@ -27,6 +27,24 @@ Allow: /
 # Sitemap
 Sitemap: https://statickit.ai/sitemap.xml
 
+# Use cases
+Allow: /use-cases/
+Allow: /use-cases/ecommerce-product-photography
+Allow: /use-cases/social-media-ad-creatives
+Allow: /use-cases/background-replacement
+Allow: /use-cases/model-replacement-for-ads
+Allow: /use-cases/aspect-ratio-resizing
+Allow: /use-cases/product-lifestyle-shots
+Allow: /use-cases/real-estate-photo-enhancement
+Allow: /use-cases/fashion-apparel-marketing
+Allow: /use-cases/food-restaurant-photography
+Allow: /use-cases/headshot-portrait-enhancement
+Allow: /use-cases/ab-testing-ad-creatives
+Allow: /use-cases/seasonal-campaign-updates
+Allow: /use-cases/brand-consistency-at-scale
+Allow: /use-cases/influencer-ugc-enhancement
+Allow: /use-cases/rapid-creative-iteration
+
 # LLM-friendly content
 # AI policy and content index: https://statickit.ai/llms.txt
 # Blog posts as markdown: https://statickit.ai/blog/md/{slug}.md
