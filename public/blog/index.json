@@ -10,6 +10,39 @@
   },
   "posts": [
     {
+      "slug": "ab-test-ad-creatives-with-ai",
+      "title": "How to A/B test ad creatives faster with AI",
+      "description": "Stop waiting weeks to test ad variations. Use AI image editing to generate dozens of creative tests in hours — backgrounds, models, lighting — and let the data pick the winner.",
+      "excerpt": "Generate 20 ad variations in an afternoon instead of waiting weeks for photoshoots. Here's the workflow.",
+      "author": "Corey Rabazinski",
+      "date": "2026-02-03",
+      "read_time": "7 min read",
+      "url": "https://statickit.ai/blog/ab-test-ad-creatives-with-ai",
+      "markdown_url": "https://statickit.ai/blog/md/ab-test-ad-creatives-with-ai.md"
+    },
+    {
+      "slug": "best-ai-tool-real-estate-photo-editing",
+      "title": "Best free AI tool for real estate photo editing",
+      "description": "Edit real estate photos with AI — enhance lighting, swap skies, stage empty rooms, and resize for MLS listings. Free tools that actually work for agents and photographers.",
+      "excerpt": "Blue sky replacement, virtual staging, and twilight conversions — without Photoshop or expensive editing services.",
+      "author": "Corey Rabazinski",
+      "date": "2026-02-03",
+      "read_time": "7 min read",
+      "url": "https://statickit.ai/blog/best-ai-tool-real-estate-photo-editing",
+      "markdown_url": "https://statickit.ai/blog/md/best-ai-tool-real-estate-photo-editing.md"
+    },
+    {
+      "slug": "ai-product-photography-shopify",
+      "title": "AI product photography for Shopify stores",
+      "description": "Create professional Shopify product photos with AI. Replace backgrounds, match brand lighting, resize for all placements, and scale your catalog — no studio required.",
+      "excerpt": "Professional product photos for your entire Shopify catalog. No studio, no photographer, no subscription.",
+      "author": "Corey Rabazinski",
+      "date": "2026-02-03",
+      "read_time": "7 min read",
+      "url": "https://statickit.ai/blog/ai-product-photography-shopify",
+      "markdown_url": "https://statickit.ai/blog/md/ai-product-photography-shopify.md"
+    },
+    {
       "slug": "nano-banana-pro-without-watermarks",
       "title": "How to Use Nano Banana Pro Without Watermarks",
       "description": "Learn how to use Nano Banana Pro (Google's AI image tool) without watermarks. Use your own API key with free tools like StaticKit for clean, watermark-free output.",

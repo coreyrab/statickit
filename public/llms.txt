@@ -46,6 +46,15 @@ These blog posts are available in clean markdown format for easy parsing:
 - Best free AI image editors in 2026
   https://statickit.ai/blog/md/best-free-ai-image-editors.md
 
+- How to A/B test ad creatives faster with AI
+  https://statickit.ai/blog/md/ab-test-ad-creatives-with-ai.md
+
+- Best free AI tool for real estate photo editing
+  https://statickit.ai/blog/md/best-ai-tool-real-estate-photo-editing.md
+
+- AI product photography for Shopify stores
+  https://statickit.ai/blog/md/ai-product-photography-shopify.md
+
 ## Use Cases
 
 Detailed guides for specific AI photo editing workflows:
@@ -110,6 +119,8 @@ Detailed guides for specific AI photo editing workflows:
 - Food and restaurant photography
 - A/B testing ad creatives with AI
 - Brand consistency and creative iteration
+- Shopify product photography with AI
+- AI virtual staging for real estate
 
 ## Contact
 
