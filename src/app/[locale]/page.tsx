@@ -274,7 +274,13 @@ function HomeContent() {
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [isLoadingUrlImage, setIsLoadingUrlImage] = useState(false);
 
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  // Mobile bottom sheet state (replaces sidebar)
+  const [mobileSheetState, setMobileSheetState] = useState<'closed' | 'half' | 'full'>('closed');
+  const [sheetDragStartY, setSheetDragStartY] = useState<number | null>(null);
+  const [sheetDragDeltaY, setSheetDragDeltaY] = useState(0);
+  const [isDraggingSheet, setIsDraggingSheet] = useState(false);
+  const sheetDragStartTimeRef = useRef<number>(0);
+  const sheetBaseHeightRef = useRef<number>(0);
   const [isSuggestingIteration, setIsSuggestingIteration] = useState(false);
   const [isAnalyzingForIterations, setIsAnalyzingForIterations] = useState(false);
   const [numGenerations, setNumGenerations] = useState(5);
@@ -438,6 +444,14 @@ function HomeContent() {
       prev.filter(model => hasApiKeyForModel(model))
     );
   }, [apiKey, openaiApiKey]);
+
+  // Track bottom sheet base height for drag calculations
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (mobileSheetState === 'half') sheetBaseHeightRef.current = window.innerHeight * 0.45;
+    else if (mobileSheetState === 'full') sheetBaseHeightRef.current = window.innerHeight - 120;
+    else sheetBaseHeightRef.current = 0;
+  }, [mobileSheetState]);
 
   // Get quality display label
   const getQualityLabel = (quality: ImageQuality): string => {
@@ -721,6 +735,19 @@ function HomeContent() {
     'lift-shadows': 'presets.enhance.liftShadows',
   };
 
+  // Edit preset category metadata for mobile horizontal tabs
+  const EDIT_PRESET_CATEGORIES = [
+    { id: 'enhance' as const, icon: Sparkles, labelKey: 'edit.enhance' },
+    { id: 'lighting' as const, icon: Sun, labelKey: 'edit.lighting' },
+    { id: 'style' as const, icon: Palette, labelKey: 'edit.style' },
+    { id: 'camera' as const, icon: Camera, labelKey: 'edit.camera' },
+    { id: 'mood' as const, icon: Heart, labelKey: 'edit.mood' },
+    { id: 'color' as const, icon: Droplets, labelKey: 'edit.color' },
+    { id: 'era' as const, icon: Clock, labelKey: 'edit.era' },
+    { id: 'framing' as const, icon: Scan, labelKey: 'edit.framing' },
+    { id: 'rotation' as const, icon: RotateCw, labelKey: 'edit.rotation' },
+  ];
+
   // Translation key mappings for background presets
   const BACKGROUND_PRESET_KEYS: Record<string, string> = {
     'blur-bg': 'backgroundPresets.blurBg',
@@ -908,6 +935,15 @@ function HomeContent() {
     'nature-scene': 'productPresets.natureScene',
     'luxury-setting': 'productPresets.luxurySetting',
   };
+
+  const PRODUCT_PRESET_CATEGORIES = [
+    { id: 'isolation' as const, icon: Eraser, labelKey: 'products.isolation' },
+    { id: 'backgrounds' as const, icon: ImageIcon, labelKey: 'products.backgrounds' },
+    { id: 'lighting' as const, icon: Sun, labelKey: 'products.lighting' },
+    { id: 'presentation' as const, icon: Layers, labelKey: 'products.presentation' },
+    { id: 'enhance' as const, icon: Sparkles, labelKey: 'products.enhance' },
+    { id: 'creative' as const, icon: Palette, labelKey: 'products.creative' },
+  ];
 
   // Model builder options
   const MODEL_OPTIONS = {
@@ -1365,6 +1401,54 @@ function HomeContent() {
 
     setTouchStart(null);
   }, [touchStart, selectedVariationId, variations, originalVersions, originalVersionIndex, setVariations, setOriginalVersionIndex, zoomLevel]);
+
+  // Bottom sheet drag gesture handlers
+  const handleSheetDragStart = useCallback((e: React.TouchEvent) => {
+    setSheetDragStartY(e.touches[0].clientY);
+    setSheetDragDeltaY(0);
+    setIsDraggingSheet(true);
+    sheetDragStartTimeRef.current = Date.now();
+  }, []);
+
+  const handleSheetDragMove = useCallback((e: React.TouchEvent) => {
+    if (sheetDragStartY === null) return;
+    const delta = e.touches[0].clientY - sheetDragStartY; // positive = dragging down
+    setSheetDragDeltaY(delta);
+  }, [sheetDragStartY]);
+
+  const handleSheetDragEnd = useCallback((e: React.TouchEvent) => {
+    setIsDraggingSheet(false);
+
+    if (sheetDragStartY === null) {
+      setSheetDragDeltaY(0);
+      return;
+    }
+
+    const endY = e.changedTouches[0].clientY;
+    const delta = endY - sheetDragStartY; // positive = dragged down
+    const elapsed = Date.now() - sheetDragStartTimeRef.current;
+    const velocity = Math.abs(delta) / Math.max(elapsed, 1); // px/ms
+    const isFastFlick = velocity > 0.5;
+
+    const DRAG_THRESHOLD = 80;
+
+    if (mobileSheetState === 'half') {
+      if (delta > 0 && (delta > DRAG_THRESHOLD || isFastFlick)) {
+        setMobileSheetState('closed');
+      } else if (delta < 0 && (Math.abs(delta) > DRAG_THRESHOLD || isFastFlick)) {
+        setMobileSheetState('full');
+      }
+    } else if (mobileSheetState === 'full') {
+      if (delta > DRAG_THRESHOLD * 2 || (isFastFlick && delta > DRAG_THRESHOLD)) {
+        setMobileSheetState('closed');
+      } else if (delta > DRAG_THRESHOLD) {
+        setMobileSheetState('half');
+      }
+    }
+
+    setSheetDragStartY(null);
+    setSheetDragDeltaY(0);
+  }, [sheetDragStartY, mobileSheetState]);
 
   // Automatically analyze image when uploaded (for the image description tooltip)
   useEffect(() => {
@@ -4027,7 +4111,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
           <div className="flex items-center gap-2">
             {/* Mobile: Slider panel button */}
             <button
-              onClick={() => setIsMobileSidebarOpen(true)}
+              onClick={() => setMobileSheetState(mobileSheetState === 'closed' ? 'half' : 'closed')}
               className="md:hidden p-2 -ml-1 rounded-lg hover:bg-muted transition-colors"
               aria-label="Open edits drawer"
             >
@@ -4268,14 +4352,6 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
           </div>
         </div>
       </header>
-
-      {/* Mobile Sidebar Overlay */}
-      {isMobileSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-40 md:hidden touch-none"
-          onClick={() => setIsMobileSidebarOpen(false)}
-        />
-      )}
 
       {/* Main Interface */}
       <main className="flex-1 flex flex-col md:flex-row p-3 md:p-6 gap-3 md:gap-6 pb-20 md:pb-6 overflow-hidden">
@@ -5700,28 +5776,41 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
             </div>
           </div>
 
-          {/* Left Panel - Tool Panel */}
-          <div className={`
-            fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[360px] transform transition-transform duration-300 ease-in-out
-            md:relative md:inset-auto md:z-auto md:w-[360px] md:transform-none
-            ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-            flex-shrink-0 border-r md:border border-border md:rounded-2xl bg-background md:bg-muted/30 flex flex-col overflow-y-auto overscroll-contain pr-2 md:pr-0 md:overflow-hidden md:order-first
-          `}>
-            {/* Mobile Sidebar Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border md:hidden">
-              <span className="font-semibold">{t('tools.title')}</span>
-              <button
-                onClick={() => setIsMobileSidebarOpen(false)}
-                className="p-2 -mr-2 rounded-lg hover:bg-muted transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+          {/* Tool Panel — Bottom sheet on mobile, sidebar on desktop */}
+          <div
+            className={`
+              fixed left-0 right-0 bottom-14 z-50 rounded-t-2xl border-t border-border bg-background
+              ${!isDraggingSheet ? 'transition-[height] duration-300 ease-in-out' : ''}
+              ${mobileSheetState === 'closed' ? 'pointer-events-none' : ''}
+              md:relative md:inset-auto md:bottom-auto md:z-auto md:w-[360px] md:rounded-2xl md:border md:border-border md:bg-muted/30
+              md:pointer-events-auto md:transition-none md:h-auto
+              flex-shrink-0 flex flex-col overflow-y-auto overscroll-contain md:overflow-hidden md:order-first
+            `}
+            style={{
+              height: isDraggingSheet
+                ? `${Math.max(0, Math.min(typeof window !== 'undefined' ? window.innerHeight - 120 : 600, sheetBaseHeightRef.current - sheetDragDeltaY))}px`
+                : mobileSheetState === 'closed' ? '0px'
+                : mobileSheetState === 'half' ? '45vh'
+                : 'calc(100vh - 120px)',
+            }}
+          >
+            {/* Mobile Drag Handle */}
+            <div
+              className="md:hidden flex flex-col items-center pt-2 pb-1 cursor-grab active:cursor-grabbing flex-shrink-0"
+              onTouchStart={handleSheetDragStart}
+              onTouchMove={handleSheetDragMove}
+              onTouchEnd={handleSheetDragEnd}
+            >
+              <div className="w-8 h-1 rounded-full bg-muted-foreground/30" />
+              <span className="text-[10px] text-muted-foreground/50 mt-1">
+                {selectedTool ? t(`tools.${selectedTool}`) : ''}
+              </span>
             </div>
             {/* Versions Tool */}
             {selectedTool === 'iterations' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col md:overflow-hidden">
-                {/* Image Section */}
-                <div className="p-4 border-b border-border">
+              <div className="animate-in fade-in duration-150 flex flex-col md:overflow-hidden">
+                {/* Image Section — hidden on mobile (image visible above bottom sheet) */}
+                <div className="hidden md:block p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-medium text-foreground/70">{t('sidebar.image')}</h3>
                     <div className="flex items-center gap-2">
@@ -5965,9 +6054,9 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
 
             {/* Edit Tool - with resize presets */}
             {selectedTool === 'edit' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col md:h-full">
-                {/* Image Section */}
-                <div className="p-4 border-b border-border">
+              <div className="animate-in fade-in duration-150 flex flex-col md:h-full">
+                {/* Image Section — hidden on mobile (image visible above bottom sheet) */}
+                <div className="hidden md:block p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-medium text-foreground/70">{t('sidebar.image')}</h3>
                     <div className="flex items-center gap-2">
@@ -6105,7 +6194,135 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                     </div>
                   </div>
 
-                  <div className="pb-20 pr-2 space-y-2 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
+                  {/* Mobile: Horizontal category tabs */}
+                  <div className="md:hidden pb-4 px-4 space-y-3 overflow-y-auto touch-scroll">
+                    {/* Scrollable category chips */}
+                    <div className="flex overflow-x-auto gap-2 pb-2 hide-scrollbar -mx-1 px-1">
+                      {EDIT_PRESET_CATEGORIES.map(cat => {
+                        const Icon = cat.icon;
+                        const isActive = expandedPresetCategory === cat.id;
+                        const hasSelection = selectedPresets[cat.id];
+                        return (
+                          <button
+                            key={cat.id}
+                            onClick={() => setExpandedPresetCategory(isActive ? null : cat.id)}
+                            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-all touch-manipulation ${
+                              isActive
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted/50 border border-border text-muted-foreground hover:bg-muted'
+                            }`}
+                          >
+                            <Icon className="w-3.5 h-3.5" />
+                            {t(cat.labelKey)}
+                            {hasSelection && !isActive && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Selected category presets grid */}
+                    {expandedPresetCategory && PRESETS[expandedPresetCategory as keyof typeof PRESETS] && (
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {(PRESETS[expandedPresetCategory as keyof typeof PRESETS] as Array<{id: string; name: string; prompt: string}>).map((preset) => (
+                          <button
+                            key={preset.id}
+                            onClick={() => {
+                              if (!uploadedImage) {
+                                toast.info(t('common.uploadFirst'));
+                                return;
+                              }
+                              const category = expandedPresetCategory as keyof typeof selectedPresets;
+                              setSelectedPresets(prev => ({
+                                ...prev,
+                                [category]: prev[category] === preset.id ? null : preset.id
+                              }));
+                            }}
+                            className={`px-3 py-2.5 rounded-lg text-left text-xs transition-all touch-manipulation ${
+                              selectedPresets[expandedPresetCategory as keyof typeof selectedPresets] === preset.id
+                                ? 'bg-primary/20 text-primary border border-primary/30'
+                                : 'bg-muted/50 text-foreground/70 border border-transparent hover:bg-muted'
+                            }`}
+                          >
+                            {t(PRESET_KEYS[preset.id]) || preset.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Reference Image section (mobile) */}
+                    <div className="border-t border-border/50 pt-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-muted-foreground/80">{t('edit.referenceImage')}</span>
+                        {editReferences.length > 0 && (
+                          <button
+                            onClick={() => { setEditReferences([]); setSelectedEditRef(null); }}
+                            className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground"
+                          >
+                            {t('common.clearAll')}
+                          </button>
+                        )}
+                      </div>
+                      {editReferences.length > 0 && (
+                        <div className="grid grid-cols-4 gap-1.5 mb-2">
+                          {editReferences.map((ref) => (
+                            <div
+                              key={ref.id}
+                              onClick={() => setSelectedEditRef(selectedEditRef === ref.id ? null : ref.id)}
+                              className={`relative aspect-square rounded-lg overflow-hidden border-2 cursor-pointer transition-all ${
+                                selectedEditRef === ref.id ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-border/80'
+                              }`}
+                            >
+                              <img src={ref.url} alt={ref.name || ''} className="w-full h-full object-cover" />
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditReferences(prev => prev.filter(r => r.id !== ref.id));
+                                  if (selectedEditRef === ref.id) setSelectedEditRef(null);
+                                }}
+                                className="absolute top-0.5 right-0.5 p-0.5 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+                              >
+                                <X className="w-3 h-3 text-white" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <button
+                        onClick={() => editRefInputRef.current?.click()}
+                        className="w-full py-2 px-3 rounded-lg border border-dashed border-border/50 hover:border-border hover:bg-muted/30 transition-all flex items-center justify-center gap-2 text-xs text-muted-foreground/70"
+                      >
+                        <ImagePlus className="w-4 h-4" />
+                        {t('edit.addReference')}
+                      </button>
+                    </div>
+
+                    {/* Apply button (mobile) */}
+                    <div className={`pt-3 border-t border-border transition-opacity duration-150 ${
+                      (selectedPresets.lighting || selectedPresets.style || selectedPresets.mood || selectedPresets.color || selectedPresets.era || selectedPresets.camera || selectedPresets.framing || selectedPresets.rotation || selectedPresets.enhance)
+                        ? 'opacity-100'
+                        : 'opacity-0 pointer-events-none h-0 overflow-hidden'
+                    }`}>
+                      <Button
+                        onClick={() => handleApplyPresets()}
+                        disabled={originalVersions.length > 0 && originalVersions[originalVersionIndex]?.status === 'processing'}
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                      >
+                        <Wand2 className="w-4 h-4 mr-2" />
+                        Apply {Object.values(selectedPresets).filter(Boolean).length > 1 ? 'Presets' : 'Preset'}
+                      </Button>
+                      <button
+                        onClick={() => setSelectedPresets({ lighting: null, style: null, mood: null, color: null, era: null, camera: null, framing: null, rotation: null, enhance: null })}
+                        className="w-full mt-2 text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors"
+                      >
+                        Clear selections
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Desktop: Accordion categories (hidden on mobile) */}
+                  <div className="hidden md:block pb-4 space-y-2 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
                     {/* Enhance/Touchup */}
                     <div className="rounded-lg border border-border overflow-hidden">
                       <button
@@ -6588,9 +6805,9 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
 
             {/* Resize Tool */}
             {selectedTool === 'export' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col md:h-full">
-                {/* Image Section */}
-                <div className="p-4 border-b border-border">
+              <div className="animate-in fade-in duration-150 flex flex-col md:h-full">
+                {/* Image Section — hidden on mobile (image visible above bottom sheet) */}
+                <div className="hidden md:block p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-medium text-foreground/70">{t('sidebar.image')}</h3>
                     <div className="flex items-center gap-2">
@@ -6672,7 +6889,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                 </div>
 
                 {/* Tool Content */}
-                <div className="p-4 pb-20 md:pb-4 md:flex-1 flex flex-col md:overflow-hidden">
+                <div className="p-4 pb-4 md:pb-4 md:flex-1 flex flex-col md:overflow-hidden">
                   <h2 className="font-semibold text-base mb-2 flex items-center gap-2"><span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0"><Expand className="w-3.5 h-3.5 text-primary-foreground" /></span>{t('export.resize')}</h2>
                   <p className="text-xs text-muted-foreground/80 mb-3">
                     {t('export.description')}
@@ -6851,9 +7068,9 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
 
             {/* Backgrounds Tool */}
             {selectedTool === 'backgrounds' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col md:h-full">
-                {/* Image Section */}
-                <div className="p-4 border-b border-border">
+              <div className="animate-in fade-in duration-150 flex flex-col md:h-full">
+                {/* Image Section — hidden on mobile (image visible above bottom sheet) */}
+                <div className="hidden md:block p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-medium text-foreground/70">{t('sidebar.image')}</h3>
                     <div className="flex items-center gap-2">
@@ -6995,7 +7212,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                 </button>
 
                 {/* Backgrounds Grid */}
-                <div className="pb-20 pr-2 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
+                <div className="pb-4 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
                   <div className="grid grid-cols-2 gap-1.5">
                     {/* Separator above AI suggestions */}
                     {(isLoadingBackgroundSuggestions || backgroundSuggestions.length > 0) && (
@@ -7220,9 +7437,9 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
 
             {/* Model Tool */}
             {selectedTool === 'model' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col md:h-full md:overflow-hidden">
-                {/* Image Section */}
-                <div className="p-4 border-b border-border">
+              <div className="animate-in fade-in duration-150 flex flex-col md:h-full md:overflow-hidden">
+                {/* Image Section — hidden on mobile (image visible above bottom sheet) */}
+                <div className="hidden md:block p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-medium text-foreground/70">{t('sidebar.image')}</h3>
                     <div className="flex items-center gap-2">
@@ -7521,7 +7738,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                 )}
 
                 {/* Model Builder */}
-                <div className="pb-20 pr-2 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
+                <div className="pb-4 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
                   {/* Collapsible Header */}
                   <button
                     onClick={() => setIsModelBuilderExpanded(!isModelBuilderExpanded)}
@@ -7731,9 +7948,9 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
 
             {/* Products Tool */}
             {selectedTool === 'products' && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col md:h-full md:overflow-hidden">
-                {/* Image Section */}
-                <div className="p-4 border-b border-border">
+              <div className="animate-in fade-in duration-150 flex flex-col md:h-full md:overflow-hidden">
+                {/* Image Section — hidden on mobile (image visible above bottom sheet) */}
+                <div className="hidden md:block p-4 border-b border-border">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-medium text-foreground/70">{t('sidebar.image')}</h3>
                     <div className="flex items-center gap-2">
@@ -7937,8 +8154,76 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                     </div>
                   )}
 
-                  {/* Product Presets - Scrollable */}
-                  <div className="pb-20 pr-2 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
+                  {/* Product Presets - Mobile Horizontal Tabs */}
+                  <div className="md:hidden pb-4 touch-scroll">
+                    {/* Category chips - horizontal scroll */}
+                    <div className="flex gap-2 overflow-x-auto hide-scrollbar px-1 pb-2">
+                      {PRODUCT_PRESET_CATEGORIES.map((cat) => {
+                        const Icon = cat.icon;
+                        const isSelected = expandedProductCategory === cat.id;
+                        return (
+                          <button
+                            key={cat.id}
+                            onClick={() => setExpandedProductCategory(isSelected ? null : cat.id)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs whitespace-nowrap border transition-all flex-shrink-0 ${
+                              isSelected
+                                ? 'bg-primary/20 border-primary/40 text-primary'
+                                : 'bg-muted/50 border-border text-foreground/70 hover:bg-muted'
+                            }`}
+                          >
+                            <Icon className="w-3 h-3" />
+                            {t(cat.labelKey)}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Selected category presets - 2-column grid */}
+                    {expandedProductCategory && PRODUCT_PRESETS[expandedProductCategory as keyof typeof PRODUCT_PRESETS] && (
+                      <div className="grid grid-cols-2 gap-2 mt-2 px-1">
+                        {PRODUCT_PRESETS[expandedProductCategory as keyof typeof PRODUCT_PRESETS].map((preset) => {
+                          const isActive = activeProductPresetId === preset.id;
+                          const useCount = productPresetUseCounts[preset.id] || 0;
+                          const isGridPreset = 'isSpecial' in preset && preset.id === 'social-grid';
+                          return (
+                            <button
+                              key={preset.id}
+                              onClick={() => {
+                                if (!uploadedImage) {
+                                  toast.info(t('common.uploadFirst'));
+                                  return;
+                                }
+                                if (isGridPreset) {
+                                  handleGenerateProductGrid();
+                                } else {
+                                  setActiveProductPresetId(preset.id);
+                                  setProductPresetUseCounts(prev => ({ ...prev, [preset.id]: (prev[preset.id] || 0) + 1 }));
+                                  handleApplyProductEdit(preset.prompt, preset.name);
+                                }
+                              }}
+                              disabled={isGridPreset && isGeneratingGrid}
+                              className={`px-3 py-2 rounded-lg text-xs text-left transition-all flex items-center justify-between ${
+                                isActive
+                                  ? 'bg-primary/20 border border-primary/40 text-primary'
+                                  : isGridPreset
+                                    ? 'bg-gradient-to-r from-violet-500/10 to-pink-500/10 border border-violet-500/30 text-foreground/80'
+                                    : 'bg-muted/50 border border-border text-foreground/70'
+                              } disabled:opacity-50`}
+                            >
+                              <span className="flex items-center gap-1.5 truncate">
+                                {isGridPreset && isGeneratingGrid && <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />}
+                                {t(PRODUCT_PRESET_KEYS[preset.id]) || preset.name}
+                              </span>
+                              {useCount > 0 && !isGridPreset && <span className="text-[10px] text-muted-foreground bg-muted px-1 py-0.5 rounded ml-1 flex-shrink-0">{useCount}×</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Product Presets - Desktop Accordions */}
+                  <div className="hidden md:block pb-4 md:flex-1 md:overflow-y-auto md:pr-0 md:pb-16 touch-scroll">
                     {/* Product Isolation */}
                     <div className="mb-3">
                       <button
@@ -8211,7 +8496,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
 
             {/* Variation Cards - Show for iterations tool when image uploaded */}
             {selectedTool === 'iterations' && uploadedImage && (
-              <div className="px-4 pr-2 pb-20 space-y-3 md:flex-1 md:overflow-y-auto md:pr-4 md:pb-4 touch-scroll">
+              <div className="px-4 pb-4 space-y-3 md:flex-1 md:overflow-y-auto md:pr-4 md:pb-4 touch-scroll">
                 {/* Base Version Cards - Original and any "New Versions" */}
                 {baseVersions.map((base, baseIdx) => {
                   const isActive = activeBaseId === base.id && selectedVariationId === null;
@@ -8598,66 +8883,30 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
       {/* Mobile Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border z-30 md:hidden safe-area-pb">
         <div className="flex items-stretch h-14">
-          <button
-            onClick={() => {
-              setSelectedTool('iterations');
-              setIsMobileSidebarOpen(true);
-            }}
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'iterations' ? 'bg-primary/15' : ''}`}
-          >
-            <Layers className={`w-5 h-5 transition-colors ${selectedTool === 'iterations' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'iterations' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.iterations')}</span>
-          </button>
-          <button
-            onClick={() => {
-              setSelectedTool('edit');
-              setIsMobileSidebarOpen(true);
-            }}
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'edit' ? 'bg-primary/15' : ''}`}
-          >
-            <Wand2 className={`w-5 h-5 transition-colors ${selectedTool === 'edit' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'edit' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.edit')}</span>
-          </button>
-          <button
-            onClick={() => {
-              setSelectedTool('backgrounds');
-              setIsMobileSidebarOpen(true);
-            }}
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'backgrounds' ? 'bg-primary/15' : ''}`}
-          >
-            <ImageIcon className={`w-5 h-5 transition-colors ${selectedTool === 'backgrounds' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'backgrounds' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.backgrounds')}</span>
-          </button>
-          <button
-            onClick={() => {
-              setSelectedTool('model');
-              setIsMobileSidebarOpen(true);
-            }}
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'model' ? 'bg-primary/15' : ''}`}
-          >
-            <User className={`w-5 h-5 transition-colors ${selectedTool === 'model' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'model' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.model')}</span>
-          </button>
-          <button
-            onClick={() => {
-              setSelectedTool('products');
-              setIsMobileSidebarOpen(true);
-            }}
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'products' ? 'bg-primary/15' : ''}`}
-          >
-            <Package className={`w-5 h-5 transition-colors ${selectedTool === 'products' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'products' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.products')}</span>
-          </button>
-          <button
-            onClick={() => {
-              setSelectedTool('export');
-              setIsMobileSidebarOpen(true);
-            }}
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'export' ? 'bg-primary/15' : ''}`}
-          >
-            <Expand className={`w-5 h-5 transition-colors ${selectedTool === 'export' ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'export' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.export')}</span>
-          </button>
+          {([
+            { tool: 'iterations' as Tool, icon: Layers, labelKey: 'tools.iterations' },
+            { tool: 'edit' as Tool, icon: Wand2, labelKey: 'tools.edit' },
+            { tool: 'backgrounds' as Tool, icon: ImageIcon, labelKey: 'tools.backgrounds' },
+            { tool: 'model' as Tool, icon: User, labelKey: 'tools.model' },
+            { tool: 'products' as Tool, icon: Package, labelKey: 'tools.products' },
+            { tool: 'export' as Tool, icon: Expand, labelKey: 'tools.export' },
+          ] as const).map(({ tool, icon: Icon, labelKey }) => (
+            <button
+              key={tool}
+              onClick={() => {
+                if (selectedTool === tool && mobileSheetState !== 'closed') {
+                  setMobileSheetState('closed');
+                } else {
+                  setSelectedTool(tool);
+                  setMobileSheetState('half');
+                }
+              }}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === tool && mobileSheetState !== 'closed' ? 'bg-primary/15' : ''}`}
+            >
+              <Icon className={`w-5 h-5 transition-colors ${selectedTool === tool ? 'text-primary' : 'text-muted-foreground'}`} />
+              <span className={`text-[10px] font-medium transition-colors ${selectedTool === tool ? 'text-primary' : 'text-muted-foreground'}`}>{t(labelKey)}</span>
+            </button>
+          ))}
         </div>
       </div>
 

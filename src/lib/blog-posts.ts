@@ -347,7 +347,7 @@ The first part takes about 2 minutes. The second part is where most people get s
 
 ## Getting your Gemini API key
 
-Go to Google AI Studio (aistudio.google.com), click "Get API Key" in the left sidebar, create a new key or use an existing Google Cloud project, and copy your key somewhere safe.
+Go to [Google AI Studio](https://aistudio.google.com), click "Get API Key" in the left sidebar, create a new key or use an existing Google Cloud project, and copy your key somewhere safe.
 
 That's it. Google gives you free credits to start, and after that it's usage-based pricing. For image generation, costs are typically a few cents per image.
 
@@ -819,6 +819,7 @@ One listing's worth of edits will cost less than a coffee. And you'll have them 
     readTime: '7 min read',
     date: '2026-02-03',
     author: 'Corey Rabazinski',
+    coverImage: '/blog/ai-product-photography-shopify.png',
     content: `You launched a Shopify store. You have products. Now you need photos that don't look like you shot them on your kitchen table.
 
 Professional product photography costs $25-50 per image for basic white-background shots, $100-300 for lifestyle scenes, and $500+ for a full-day studio shoot. For a store with 50 products that need 3-4 images each, you're looking at $3,750-$10,000 before you've made a single sale.

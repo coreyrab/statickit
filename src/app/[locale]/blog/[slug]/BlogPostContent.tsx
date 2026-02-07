@@ -20,33 +20,36 @@ export default function BlogPostContent({ post }: BlogPostContentProps) {
     setMounted(true);
   }, []);
 
-  // Parse markdown links into JSX
-  const parseLinks = (text: string) => {
-    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  // Parse inline markdown (bold and links) into JSX
+  const parseInline = (text: string): React.ReactNode => {
+    const inlineRegex = /(\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\))/g;
     const parts: React.ReactNode[] = [];
     let lastIndex = 0;
     let match;
 
-    while ((match = linkRegex.exec(text)) !== null) {
-      // Add text before the link
+    while ((match = inlineRegex.exec(text)) !== null) {
       if (match.index > lastIndex) {
         parts.push(text.slice(lastIndex, match.index));
       }
-      // Add the link
-      parts.push(
-        <a
-          key={match.index}
-          href={match[2]}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary hover:text-primary/80 underline underline-offset-2"
-        >
-          {match[1]}
-        </a>
-      );
+      if (match[2] !== undefined) {
+        // Bold: **text**
+        parts.push(<strong key={`b${match.index}`} className="text-foreground">{match[2]}</strong>);
+      } else if (match[3] !== undefined) {
+        // Link: [text](url)
+        parts.push(
+          <a
+            key={`l${match.index}`}
+            href={match[4]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:text-primary/80 underline underline-offset-2"
+          >
+            {match[3]}
+          </a>
+        );
+      }
       lastIndex = match.index + match[0].length;
     }
-    // Add remaining text
     if (lastIndex < text.length) {
       parts.push(text.slice(lastIndex));
     }
@@ -81,39 +84,43 @@ export default function BlogPostContent({ post }: BlogPostContentProps) {
       if (paragraph.startsWith('## ')) {
         return (
           <h2 key={i} className="text-2xl text-foreground font-serif font-semibold mt-12 mb-4">
-            {parseLinks(paragraph.replace('## ', ''))}
+            {parseInline(paragraph.replace('## ', ''))}
           </h2>
         );
       }
 
-      // List items
-      if (paragraph.startsWith('- **')) {
+      // Unordered list items
+      if (paragraph.startsWith('- ')) {
         const items = paragraph.split('\n').filter(Boolean);
         return (
           <ul key={i} className="space-y-3 my-6">
-            {items.map((item, j) => {
-              const match = item.match(/- \*\*(.+?)\*\* (.+)/);
-              if (match) {
-                return (
-                  <li key={j} className="text-muted-foreground text-[17px] leading-[1.8] pl-4 border-l-2 border-border">
-                    <strong className="text-foreground">{match[1]}</strong> {parseLinks(match[2])}
-                  </li>
-                );
-              }
-              return (
-                <li key={j} className="text-muted-foreground text-[17px] leading-[1.8] pl-4 border-l-2 border-border">
-                  {parseLinks(item.replace('- ', ''))}
-                </li>
-              );
-            })}
+            {items.map((item, j) => (
+              <li key={j} className="text-muted-foreground text-[17px] leading-[1.8] pl-4 border-l-2 border-border">
+                {parseInline(item.replace(/^- /, ''))}
+              </li>
+            ))}
           </ul>
+        );
+      }
+
+      // Ordered (numbered) list items
+      if (/^\d+\.\s/.test(paragraph)) {
+        const items = paragraph.split('\n').filter(Boolean);
+        return (
+          <ol key={i} className="space-y-3 my-6 list-decimal list-outside pl-6">
+            {items.map((item, j) => (
+              <li key={j} className="text-muted-foreground text-[17px] leading-[1.8]">
+                {parseInline(item.replace(/^\d+\.\s/, ''))}
+              </li>
+            ))}
+          </ol>
         );
       }
 
       // Regular paragraph
       return (
         <p key={i} className="text-muted-foreground text-[17px] leading-[1.8] mb-6">
-          {parseLinks(paragraph)}
+          {parseInline(paragraph)}
         </p>
       );
     });
