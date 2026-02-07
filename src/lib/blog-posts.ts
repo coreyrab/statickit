@@ -363,6 +363,8 @@ If you'd rather not write Python every time you want to edit an image, you need 
 
 Setup takes about a minute: paste your API key, and you're editing.
 
+Once you're in, you can describe edits in plain English ("remove the background," "make the lighting warmer"), apply one-click presets for common styles like studio lighting or film grain, swap backgrounds by describing a new environment, generate model and demographic variations for ad testing, and smart-resize images to any aspect ratio without awkward cropping. All watermark-free, all running through your own API key.
+
 ## The cost comparison
 
 For light to moderate use, paying per image through the API is significantly cheaper than a subscription. Gemini API costs roughly $0.01-0.05 per image edit. Compare that to $10-20/month for subscription tools. And you're not locked into any platform.
@@ -606,6 +608,7 @@ Know which model you're dealing with.
     readTime: '7 min read',
     date: '2026-02-03',
     author: 'Corey Rabazinski',
+    coverImage: '/blog/ab-test-ad-creatives.jpg',
     content: `Most creative testing is slow because production is slow. You have a hypothesis — "this ad would perform better with an outdoor background" — but testing it means a new shoot, new assets, and two weeks before you have data.
 
 By then, your winning ad is fatiguing and you've already lost revenue.
@@ -708,6 +711,7 @@ You're not saving on ad spend — you're eliminating production cost and time. T
     readTime: '7 min read',
     date: '2026-02-03',
     author: 'Corey Rabazinski',
+    coverImage: '/blog/real-estate-ai-editing.jpg',
     content: `Real estate photography has a dirty secret: most listing photos are heavily edited. That "perfect blue sky" was probably grey when the photographer showed up. The "twilight exterior" was shot at 2pm. The beautifully staged living room might have been completely empty.
 
 The difference between a listing that gets clicks and one that doesn't often comes down to photo editing. And until recently, that editing required either Photoshop skills or $5-15 per image from editing services.
