@@ -4308,7 +4308,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                 <>
                   {/* Dots row - fixed position */}
                   <div className="flex items-center justify-center gap-2">
-                    {/* Always show dot for original */}
+                    {/* Always show dot for uploaded */}
                     {originalVersions.length === 0 && (
                       <button
                         className="w-2.5 h-2.5 rounded-full transition-all bg-emerald-500 scale-110"
@@ -4356,6 +4356,10 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                         />
                       )
                     ))}
+                    {/* Ghost dot — hints that edits will appear here */}
+                    {originalVersions.length <= 1 && (
+                      <div className="w-2.5 h-2.5 rounded-full border border-dashed border-muted-foreground/30" />
+                    )}
                   </div>
                   {/* Label row - changes but dots stay fixed */}
                   <span className="text-xs text-muted-foreground/80 text-center max-w-xs">
@@ -4386,9 +4390,13 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                         <span className="italic text-muted-foreground">"{originalVersions[originalVersionIndex].prompt}"</span>
                       )
                     ) : (
-                      activeBase?.name || 'Original'
+                      activeBase?.name === 'Original' ? 'Uploaded' : (activeBase?.name || 'Uploaded')
                     )}
                   </span>
+                  {/* Hint text for first-time users — disappears after first edit */}
+                  {originalVersions.length <= 1 && (
+                    <span className="text-[11px] text-muted-foreground/40">Use the prompt above to edit</span>
+                  )}
                 </>
               )}
 
@@ -4577,7 +4585,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                                 />
                               </TooltipTrigger>
                               <TooltipContent>
-                                {version.prompt ? `v${idx + 1}: "${version.prompt}"` : `v${idx + 1}: ${activeBase?.name || 'Original'}`}
+                                {version.prompt ? `v${idx + 1}: "${version.prompt}"` : `v${idx + 1}: ${activeBase?.name === 'Original' ? 'Uploaded' : (activeBase?.name || 'Uploaded')}`}
                               </TooltipContent>
                             </Tooltip>
                           ))}
@@ -4590,7 +4598,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                           <ChevronRight className="w-4 h-4" />
                         </button>
                         <span className="text-[10px] text-muted-foreground/70 ml-1">
-                          {originalVersionIndex === 0 ? (activeBase?.name || 'Original') : `${activeBase?.name || 'Original'} v${originalVersionIndex + 1}`}
+                          {originalVersionIndex === 0 ? (activeBase?.name === 'Original' ? 'Uploaded' : (activeBase?.name || 'Uploaded')) : `${activeBase?.name === 'Original' ? 'Uploaded' : (activeBase?.name || 'Uploaded')} v${originalVersionIndex + 1}`}
                           {originalVersions[originalVersionIndex]?.prompt && (
                             <span className="italic ml-1">
                               · "{originalVersions[originalVersionIndex].prompt}"
@@ -4675,7 +4683,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                             />
                             {/* Left side label */}
                             {!isUIHidden && (() => {
-                              const leftText = compareLeftIndex === 0 ? 'Original' : (originalVersions[compareLeftIndex]?.prompt || `Edit ${compareLeftIndex}`);
+                              const leftText = compareLeftIndex === 0 ? 'Uploaded' : (originalVersions[compareLeftIndex]?.prompt || `Edit ${compareLeftIndex}`);
                               const isTruncated = leftText.length > 22;
                               const labelContent = (
                                 <div className={`absolute top-3 left-3 px-2 py-1 rounded bg-black/60 text-white text-xs backdrop-blur-sm max-w-[200px] ${isTruncated ? 'cursor-default' : ''}`}>
@@ -4705,7 +4713,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                             />
                             {/* Right side label */}
                             {!isUIHidden && (() => {
-                              const rightText = compareRightIndex === 0 ? 'Original' : (originalVersions[compareRightIndex]?.prompt || `Edit ${compareRightIndex}`);
+                              const rightText = compareRightIndex === 0 ? 'Uploaded' : (originalVersions[compareRightIndex]?.prompt || `Edit ${compareRightIndex}`);
                               const isTruncated = rightText.length > 22;
                               const labelContent = (
                                 <div className={`absolute top-3 right-3 px-2 py-1 rounded bg-blue-500/80 text-white text-xs backdrop-blur-sm max-w-[200px] ${isTruncated ? 'cursor-default' : ''}`}>
