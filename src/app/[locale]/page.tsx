@@ -1180,17 +1180,23 @@ function HomeContent() {
         // Shift + Left = Previous tool
         const tools: Tool[] = ['iterations', 'edit', 'backgrounds', 'model', 'products', 'export'];
         setSelectedTool(prev => {
-          if (prev === null) return 'export'; // Start from end
           const currentIndex = tools.indexOf(prev);
-          return currentIndex <= 0 ? null : tools[currentIndex - 1];
+          if (currentIndex > 0) {
+            setIsSidebarExpanded(true);
+            return tools[currentIndex - 1];
+          }
+          return prev;
         });
       } else if (e.shiftKey && e.key === 'ArrowRight') {
         // Shift + Right = Next tool
         const tools: Tool[] = ['iterations', 'edit', 'backgrounds', 'model', 'products', 'export'];
         setSelectedTool(prev => {
-          if (prev === null) return 'iterations'; // Start from beginning
           const currentIndex = tools.indexOf(prev);
-          return currentIndex >= tools.length - 1 ? null : tools[currentIndex + 1];
+          if (currentIndex < tools.length - 1) {
+            setIsSidebarExpanded(true);
+            return tools[currentIndex + 1];
+          }
+          return prev;
         });
       } else if (e.key === 'ArrowLeft') {
         if (inCompareMode && rightIdx !== null) {
@@ -1252,18 +1258,18 @@ function HomeContent() {
             setOriginalVersionIndex(Math.max(0, originalVersionIndex - 1));
           }
         }
-      } else if (e.key === '1') {
-        setSelectedTool('iterations');
-      } else if (e.key === '2') {
-        setSelectedTool('edit');
-      } else if (e.key === '3') {
-        setSelectedTool('backgrounds');
-      } else if (e.key === '4') {
-        setSelectedTool('model');
-      } else if (e.key === '5') {
-        setSelectedTool('products');
-      } else if (e.key === '6') {
-        setSelectedTool('export');
+      } else if (e.key >= '1' && e.key <= '6') {
+        const tools: Tool[] = ['iterations', 'edit', 'backgrounds', 'model', 'products', 'export'];
+        const tool = tools[parseInt(e.key) - 1];
+        setSelectedTool(prev => {
+          if (prev === tool) {
+            // Toggle: same tool pressed, collapse sidebar
+            setIsSidebarExpanded(expanded => !expanded);
+            return prev;
+          }
+          setIsSidebarExpanded(true);
+          return tool;
+        });
       }
     };
 
