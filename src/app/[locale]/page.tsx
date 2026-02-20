@@ -4295,36 +4295,6 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
       <main className="flex-1 flex flex-col md:flex-row p-3 md:p-6 gap-3 md:gap-6 pb-20 md:pb-6 overflow-hidden">
           {/* Center Panel - Image Preview */}
           <div className="flex-1 flex flex-col min-w-0 order-1 md:order-none overflow-hidden">
-            {/* Horizontal Toolbar - Above Image (hidden on mobile, hidden pre-upload) */}
-            {uploadedImage && <div className="hidden md:flex items-center justify-center mb-4 animate-in fade-in duration-200">
-              <div className="flex items-center gap-1 p-1 bg-muted/30 border border-border rounded-xl">
-                {([
-                  { tool: 'iterations' as Tool, icon: Layers, num: '1' },
-                  { tool: 'edit' as Tool, icon: Wand2, num: '2' },
-                  { tool: 'backgrounds' as Tool, icon: ImageIcon, num: '3' },
-                  { tool: 'model' as Tool, icon: User, num: '4' },
-                  { tool: 'products' as Tool, icon: Package, num: '5' },
-                  { tool: 'export' as Tool, icon: Expand, num: '6' },
-                ] as const).map(({ tool, icon: Icon, num }) => {
-                  const isActive = selectedTool === tool && isSidebarExpanded;
-                  return (
-                    <button
-                      key={tool}
-                      onClick={() => handleToolbarClick(tool)}
-                      className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
-                        isActive
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span className={`text-[10px] leading-none self-end mb-[-2px] ${isActive ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>{num}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>}
-
             {/* Version Control Bar (hidden pre-upload) */}
             {uploadedImage && <div className="flex flex-col items-center gap-1.5 mb-3">
               {/* Original image versions */}
@@ -5667,24 +5637,45 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
             </div>
           </div>
 
-          {/* Collapsed icon rail (desktop only) — shown when sidebar is not expanded */}
-          {!isSidebarExpanded && (
-            <div className="hidden md:flex flex-col items-center w-12 flex-shrink-0 py-4 gap-3 order-first">
-              <PanelLeft className="w-5 h-5 text-muted-foreground/30 mb-1" />
-              {([
-                { tool: 'iterations' as Tool, icon: Layers, label: 'Versions' },
-                { tool: 'edit' as Tool, icon: Wand2, label: 'Edit' },
-                { tool: 'backgrounds' as Tool, icon: ImageIcon, label: 'Backgrounds' },
-                { tool: 'model' as Tool, icon: User, label: 'Model' },
-                { tool: 'products' as Tool, icon: Package, label: 'Products' },
-                { tool: 'export' as Tool, icon: Expand, label: 'Export' },
-              ]).map(({ tool, icon: Icon, label }) => (
+          {/* Icon rail (desktop only) — always visible, acts as primary tool nav */}
+          <div className="hidden md:flex flex-col items-center w-12 flex-shrink-0 py-3 gap-1 order-first">
+            {/* Collapse/expand toggle */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
+                  className={`p-2 rounded-lg mb-1 transition-colors ${isSidebarExpanded ? 'text-foreground hover:bg-muted' : 'text-muted-foreground/30 hover:text-muted-foreground/60'}`}
+                  disabled={!uploadedImage}
+                >
+                  <PanelLeft className="w-5 h-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p className="text-xs">{!uploadedImage ? 'Upload an image to get started' : isSidebarExpanded ? 'Collapse panel' : 'Expand panel'}</p>
+              </TooltipContent>
+            </Tooltip>
+            {([
+              { tool: 'iterations' as Tool, icon: Layers, label: 'Versions' },
+              { tool: 'edit' as Tool, icon: Wand2, label: 'Edit' },
+              { tool: 'backgrounds' as Tool, icon: ImageIcon, label: 'Backgrounds' },
+              { tool: 'model' as Tool, icon: User, label: 'Model' },
+              { tool: 'products' as Tool, icon: Package, label: 'Products' },
+              { tool: 'export' as Tool, icon: Expand, label: 'Export' },
+            ]).map(({ tool, icon: Icon, label }) => {
+              const isActive = selectedTool === tool && isSidebarExpanded;
+              return (
                 <Tooltip key={label}>
                   <TooltipTrigger asChild>
                     <button
                       disabled={!uploadedImage}
                       onClick={() => handleToolbarClick(tool)}
-                      className={`p-2 rounded-lg transition-colors ${uploadedImage ? 'opacity-60 hover:opacity-100 hover:bg-muted cursor-pointer' : 'opacity-30 cursor-default'}`}
+                      className={`p-2 rounded-lg transition-all ${
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : uploadedImage
+                            ? 'opacity-60 hover:opacity-100 hover:bg-muted cursor-pointer'
+                            : 'opacity-30 cursor-default'
+                      }`}
                     >
                       <Icon className="w-5 h-5" />
                     </button>
@@ -5693,16 +5684,16 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                     <p className="text-xs">{uploadedImage ? label : 'Upload an image to get started'}</p>
                   </TooltipContent>
                 </Tooltip>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
 
           {/* Left Panel - Tool Panel (shown when sidebar is expanded) */}
           {isSidebarExpanded && uploadedImage && <div className={`
             fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[360px] transform transition-transform duration-300 ease-in-out
             md:relative md:inset-auto md:z-auto md:w-[360px] md:transform-none
             ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-            flex-shrink-0 border-r md:border border-border md:rounded-2xl bg-background md:bg-muted/30 flex flex-col overflow-y-auto overscroll-contain pr-2 md:pr-0 md:overflow-hidden md:order-first animate-in fade-in slide-in-from-left-2 duration-200
+            flex-shrink-0 border-r md:border border-border md:rounded-r-2xl bg-background md:bg-muted/30 flex flex-col overflow-y-auto overscroll-contain pr-2 md:pr-0 md:overflow-hidden md:order-first animate-in fade-in slide-in-from-left-2 duration-200
           `}>
 
             {/* Mobile Sidebar Header */}
