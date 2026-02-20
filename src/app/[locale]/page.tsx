@@ -251,6 +251,7 @@ function HomeContent() {
 
   const [step, setStep] = useState<Step>('editor');
   const [selectedTool, setSelectedTool] = useState<Tool>('edit');
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [variations, setVariations] = useState<Variation[]>([]);
@@ -3738,7 +3739,18 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
     setActiveBaseId('original');
     setViewingOriginalResizedSize(null);
     setSelectedTool('edit');
+    setIsSidebarExpanded(false);
     setShowNewConfirmModal(false);
+  };
+
+  // Toggle sidebar: clicking same tool closes it, clicking different tool opens/switches
+  const handleToolbarClick = (tool: Tool) => {
+    if (selectedTool === tool && isSidebarExpanded) {
+      setIsSidebarExpanded(false);
+    } else {
+      setSelectedTool(tool);
+      setIsSidebarExpanded(true);
+    }
   };
 
   const handleDownload = async (imageUrl: string, filename: string, trackAs?: 'single' | 'batch' | 'all_sizes') => {
@@ -4025,14 +4037,16 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
         <div className="px-4 md:px-6 h-14 flex items-center justify-between">
           {/* Left section: Logo and mobile slider button */}
           <div className="flex items-center gap-2">
-            {/* Mobile: Slider panel button */}
-            <button
-              onClick={() => setIsMobileSidebarOpen(true)}
-              className="md:hidden p-2 -ml-1 rounded-lg hover:bg-muted transition-colors"
-              aria-label="Open edits drawer"
-            >
-              <SlidersHorizontal className="w-5 h-5" />
-            </button>
+            {/* Mobile: Slider panel button (hidden pre-upload) */}
+            {uploadedImage && (
+              <button
+                onClick={() => { setIsMobileSidebarOpen(true); setIsSidebarExpanded(true); }}
+                className="md:hidden p-2 -ml-1 rounded-lg hover:bg-muted transition-colors"
+                aria-label="Open edits drawer"
+              >
+                <SlidersHorizontal className="w-5 h-5" />
+              </button>
+            )}
             {/* Logo - far left */}
             <button onClick={uploadedImage ? () => setShowNewConfirmModal(true) : handleReset} className="flex items-center gap-2 font-semibold hover:opacity-80 transition-opacity">
               <svg className="w-8 h-8 text-foreground" viewBox="0 0 101 101" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -4273,7 +4287,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
       {isMobileSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/60 z-40 md:hidden touch-none"
-          onClick={() => setIsMobileSidebarOpen(false)}
+          onClick={() => { setIsMobileSidebarOpen(false); setIsSidebarExpanded(false); }}
         />
       )}
 
@@ -4281,85 +4295,38 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
       <main className="flex-1 flex flex-col md:flex-row p-3 md:p-6 gap-3 md:gap-6 pb-20 md:pb-6 overflow-hidden">
           {/* Center Panel - Image Preview */}
           <div className="flex-1 flex flex-col min-w-0 order-1 md:order-none overflow-hidden">
-            {/* Horizontal Toolbar - Above Image (hidden on mobile) */}
-            <div className="hidden md:flex items-center justify-center mb-4">
+            {/* Horizontal Toolbar - Above Image (hidden on mobile, hidden pre-upload) */}
+            {uploadedImage && <div className="hidden md:flex items-center justify-center mb-4 animate-in fade-in duration-200">
               <div className="flex items-center gap-1 p-1 bg-muted/30 border border-border rounded-xl">
-                <button
-                  onClick={() => setSelectedTool('iterations')}
-                  className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
-                    selectedTool === 'iterations'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
-                  }`}
-                >
-                  <Layers className="w-4 h-4" />
-                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'iterations' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>1</span>
-                </button>
-
-                <button
-                  onClick={() => setSelectedTool('edit')}
-                  className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
-                    selectedTool === 'edit'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
-                  }`}
-                >
-                  <Wand2 className="w-4 h-4" />
-                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'edit' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>2</span>
-                </button>
-
-                <button
-                  onClick={() => setSelectedTool('backgrounds')}
-                  className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
-                    selectedTool === 'backgrounds'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
-                  }`}
-                >
-                  <ImageIcon className="w-4 h-4" />
-                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'backgrounds' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>3</span>
-                </button>
-
-                <button
-                  onClick={() => setSelectedTool('model')}
-                  className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
-                    selectedTool === 'model'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
-                  }`}
-                >
-                  <User className="w-4 h-4" />
-                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'model' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>4</span>
-                </button>
-
-                <button
-                  onClick={() => setSelectedTool('products')}
-                  className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
-                    selectedTool === 'products'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
-                  }`}
-                >
-                  <Package className="w-4 h-4" />
-                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'products' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>5</span>
-                </button>
-
-                <button
-                  onClick={() => setSelectedTool('export')}
-                  className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
-                    selectedTool === 'export'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
-                  }`}
-                >
-                  <Expand className="w-4 h-4" />
-                  <span className={`text-[10px] leading-none self-end mb-[-2px] ${selectedTool === 'export' ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>6</span>
-                </button>
+                {([
+                  { tool: 'iterations' as Tool, icon: Layers, num: '1' },
+                  { tool: 'edit' as Tool, icon: Wand2, num: '2' },
+                  { tool: 'backgrounds' as Tool, icon: ImageIcon, num: '3' },
+                  { tool: 'model' as Tool, icon: User, num: '4' },
+                  { tool: 'products' as Tool, icon: Package, num: '5' },
+                  { tool: 'export' as Tool, icon: Expand, num: '6' },
+                ] as const).map(({ tool, icon: Icon, num }) => {
+                  const isActive = selectedTool === tool && isSidebarExpanded;
+                  return (
+                    <button
+                      key={tool}
+                      onClick={() => handleToolbarClick(tool)}
+                      className={`px-2 py-2 rounded-lg flex items-end gap-0.5 transition-all duration-200 ${
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className={`text-[10px] leading-none self-end mb-[-2px] ${isActive ? 'text-primary-foreground/60' : 'text-muted-foreground/40'}`}>{num}</span>
+                    </button>
+                  );
+                })}
               </div>
-            </div>
+            </div>}
 
-            {/* Version Control Bar */}
-            <div className="flex flex-col items-center gap-1.5 mb-3">
+            {/* Version Control Bar (hidden pre-upload) */}
+            {uploadedImage && <div className="flex flex-col items-center gap-1.5 mb-3">
               {/* Original image versions */}
               {!isShowingGenerated && uploadedImage && (
                 <>
@@ -4501,7 +4468,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                   </span>
                 </>
               )}
-            </div>
+            </div>}
 
             {/* Legacy Controls Section - Removed, keeping closing structure */}
             <div className="hidden">
@@ -5700,18 +5667,49 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
             </div>
           </div>
 
-          {/* Left Panel - Tool Panel */}
-          <div className={`
+          {/* Collapsed icon rail (desktop only) — shown when sidebar is not expanded */}
+          {!isSidebarExpanded && (
+            <div className="hidden md:flex flex-col items-center w-12 flex-shrink-0 py-4 gap-3 order-first">
+              <PanelLeft className="w-5 h-5 text-muted-foreground/30 mb-1" />
+              {([
+                { tool: 'iterations' as Tool, icon: Layers, label: 'Versions' },
+                { tool: 'edit' as Tool, icon: Wand2, label: 'Edit' },
+                { tool: 'backgrounds' as Tool, icon: ImageIcon, label: 'Backgrounds' },
+                { tool: 'model' as Tool, icon: User, label: 'Model' },
+                { tool: 'products' as Tool, icon: Package, label: 'Products' },
+                { tool: 'export' as Tool, icon: Expand, label: 'Export' },
+              ]).map(({ tool, icon: Icon, label }) => (
+                <Tooltip key={label}>
+                  <TooltipTrigger asChild>
+                    <button
+                      disabled={!uploadedImage}
+                      onClick={() => handleToolbarClick(tool)}
+                      className={`p-2 rounded-lg transition-colors ${uploadedImage ? 'opacity-60 hover:opacity-100 hover:bg-muted cursor-pointer' : 'opacity-30 cursor-default'}`}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p className="text-xs">{uploadedImage ? label : 'Upload an image to get started'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
+          )}
+
+          {/* Left Panel - Tool Panel (shown when sidebar is expanded) */}
+          {isSidebarExpanded && uploadedImage && <div className={`
             fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[360px] transform transition-transform duration-300 ease-in-out
             md:relative md:inset-auto md:z-auto md:w-[360px] md:transform-none
             ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-            flex-shrink-0 border-r md:border border-border md:rounded-2xl bg-background md:bg-muted/30 flex flex-col overflow-y-auto overscroll-contain pr-2 md:pr-0 md:overflow-hidden md:order-first
+            flex-shrink-0 border-r md:border border-border md:rounded-2xl bg-background md:bg-muted/30 flex flex-col overflow-y-auto overscroll-contain pr-2 md:pr-0 md:overflow-hidden md:order-first animate-in fade-in slide-in-from-left-2 duration-200
           `}>
+
             {/* Mobile Sidebar Header */}
             <div className="flex items-center justify-between p-4 border-b border-border md:hidden">
               <span className="font-semibold">{t('tools.title')}</span>
               <button
-                onClick={() => setIsMobileSidebarOpen(false)}
+                onClick={() => { setIsMobileSidebarOpen(false); setIsSidebarExpanded(false); }}
                 className="p-2 -mr-2 rounded-lg hover:bg-muted transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -8592,16 +8590,17 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
               )}
               </div>
             )}
-          </div>
+          </div>}
         </main>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border z-30 md:hidden safe-area-pb">
+      {/* Mobile Bottom Navigation (hidden pre-upload) */}
+      {uploadedImage && <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border z-30 md:hidden safe-area-pb">
         <div className="flex items-stretch h-14">
           <button
             onClick={() => {
               setSelectedTool('iterations');
               setIsMobileSidebarOpen(true);
+              setIsSidebarExpanded(true);
             }}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'iterations' ? 'bg-primary/15' : ''}`}
           >
@@ -8612,6 +8611,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
             onClick={() => {
               setSelectedTool('edit');
               setIsMobileSidebarOpen(true);
+              setIsSidebarExpanded(true);
             }}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'edit' ? 'bg-primary/15' : ''}`}
           >
@@ -8622,6 +8622,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
             onClick={() => {
               setSelectedTool('backgrounds');
               setIsMobileSidebarOpen(true);
+              setIsSidebarExpanded(true);
             }}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'backgrounds' ? 'bg-primary/15' : ''}`}
           >
@@ -8632,6 +8633,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
             onClick={() => {
               setSelectedTool('model');
               setIsMobileSidebarOpen(true);
+              setIsSidebarExpanded(true);
             }}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'model' ? 'bg-primary/15' : ''}`}
           >
@@ -8642,6 +8644,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
             onClick={() => {
               setSelectedTool('products');
               setIsMobileSidebarOpen(true);
+              setIsSidebarExpanded(true);
             }}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'products' ? 'bg-primary/15' : ''}`}
           >
@@ -8652,6 +8655,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
             onClick={() => {
               setSelectedTool('export');
               setIsMobileSidebarOpen(true);
+              setIsSidebarExpanded(true);
             }}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 mx-1 rounded-lg transition-all ${selectedTool === 'export' ? 'bg-primary/15' : ''}`}
           >
@@ -8659,7 +8663,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
             <span className={`text-[10px] font-medium transition-colors ${selectedTool === 'export' ? 'text-primary' : 'text-muted-foreground'}`}>{t('tools.export')}</span>
           </button>
         </div>
-      </div>
+      </div>}
 
       {/* Download Confirmation Modal */}
       <Dialog open={!!downloadModal} onOpenChange={(open) => !open && setDownloadModal(null)}>
