@@ -5661,13 +5661,13 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
               </TooltipContent>
             </Tooltip>
             {([
-              { tool: 'iterations' as Tool, icon: Layers, label: 'Versions' },
-              { tool: 'edit' as Tool, icon: Wand2, label: 'Edit' },
-              { tool: 'backgrounds' as Tool, icon: ImageIcon, label: 'Backgrounds' },
-              { tool: 'model' as Tool, icon: User, label: 'Model' },
-              { tool: 'products' as Tool, icon: Package, label: 'Products' },
-              { tool: 'export' as Tool, icon: Expand, label: 'Export' },
-            ]).map(({ tool, icon: Icon, label }) => {
+              { tool: 'iterations' as Tool, icon: Layers, label: 'Versions', num: '1' },
+              { tool: 'edit' as Tool, icon: Wand2, label: 'Edit', num: '2' },
+              { tool: 'backgrounds' as Tool, icon: ImageIcon, label: 'Backgrounds', num: '3' },
+              { tool: 'model' as Tool, icon: User, label: 'Model', num: '4' },
+              { tool: 'products' as Tool, icon: Package, label: 'Products', num: '5' },
+              { tool: 'export' as Tool, icon: Expand, label: 'Export', num: '6' },
+            ]).map(({ tool, icon: Icon, label, num }) => {
               const isActive = selectedTool === tool && isSidebarExpanded;
               return (
                 <Tooltip key={label}>
@@ -5675,7 +5675,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                     <button
                       disabled={!uploadedImage}
                       onClick={() => handleToolbarClick(tool)}
-                      className={`p-2 rounded-lg transition-all ${
+                      className={`relative p-2 rounded-lg transition-all ${
                         isActive
                           ? 'bg-primary text-primary-foreground'
                           : uploadedImage
@@ -5684,6 +5684,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                       }`}
                     >
                       <Icon className="w-5 h-5" />
+                      <span className={`absolute bottom-0.5 right-0.5 text-[9px] leading-none ${isActive ? 'text-primary-foreground/50' : 'text-muted-foreground/40'}`}>{num}</span>
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="right">
