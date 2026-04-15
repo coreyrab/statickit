@@ -85,6 +85,7 @@ StaticKit is an open-source frontend for AI image models. Instead of copy-pastin
 
 ## Environment Variables
 
+
 Before running the app, copy the example environment file and fill in your credentials:
 
 ```bash
@@ -96,19 +97,30 @@ Then, edit the new `.env` file and provide the required values:
 ```
 # https://www.convex.dev/
 NEXT_PUBLIC_CONVEX_URL=https://<YOUR_CONVEX_PROJECT>
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<YOUR_CLERK_PUBLISHABLE_KEY>
 
 # https://clerk.com/
+CLERK_JWT_ISSUER_DOMAIN=https://your-instance.clerk.accounts.dev
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<YOUR_CLERK_PUBLISHABLE_KEY>
 CLERK_SECRET_KEY=<YOUR_CLERK_SECRET_KEY>
+
+# https://cloud.google.com/ai-platform/vertex-ai/docs/generative-ai/overview
+GOOGLE_AI_API_KEY=<YOUR_GOOGLE_AI_API_KEY>
+
+# Must be a 32-byte (64 hex character) string
+ENCRYPTION_KEY=<YOUR_ENCRYPTION_KEY>
 ```
 
 **Descriptions:**
 
 - `NEXT_PUBLIC_CONVEX_URL`: Your [Convex](https://www.convex.dev/) project URL for backend data and API.
+- `CLERK_JWT_ISSUER_DOMAIN`: Your Clerk JWT issuer domain (see your Clerk dashboard; required for Convex authentication).
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Your [Clerk](https://clerk.com/) publishable key for authentication.
 - `CLERK_SECRET_KEY`: Your Clerk secret key for authentication.
+- `GOOGLE_AI_API_KEY`: Your Google AI API key for image generation (see [Vertex AI docs](https://cloud.google.com/ai-platform/vertex-ai/docs/generative-ai/overview)).
+- `ENCRYPTION_KEY`: A secret key used to encrypt user API keys (generate a secure random string).
 
-You can find these values in your Convex and Clerk dashboards. All keys are required for the app to function properly.
+You can find these values in your Convex, Clerk, and Google Cloud dashboards. All keys are required for the app to function properly.
 
 ## Tech Stack
 
