@@ -246,7 +246,7 @@ function HomeContent() {
   const t = useTranslations();
 
   // Auth state
-  const { isSignedIn, isLoaded: isAuthLoaded } = useAuth();
+  const { isSignedIn, isLoaded: isAuthLoaded, user: authUser, signOut: handleSignOut } = useAuth();
   const { openSignUp } = useClerk();
 
   const [step, setStep] = useState<Step>('editor');
@@ -4072,23 +4072,22 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
               </svg>
               <span className="text-lg">StaticKit</span>
             </button>
+          </div>
+
+          {/* Right: Star + Hamburger Menu */}
+          <div className="flex items-center gap-2">
+            {/* GitHub Star button */}
             <a
               href="https://github.com/coreyrab/statickit"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 rounded-md text-muted-foreground/40 hover:text-muted-foreground transition-colors"
-              aria-label="GitHub"
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-muted-foreground/60 hover:text-muted-foreground border border-border/50 hover:border-border hover:bg-muted/50 transition-all"
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
               </svg>
+              Star
             </a>
-          </div>
-
-          {/* Right: Auth + Hamburger Menu */}
-          <div className="flex items-center gap-2">
-            {/* User button for signed-in users */}
-            {isAuthLoaded && isSignedIn && <UserButton />}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors">
@@ -4096,10 +4095,30 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                {/* API Keys Section - show for everyone */}
-                {isSignedIn ? (
-                  // Signed in: show API Keys with account info
+                {/* Account Section */}
+                {isSignedIn && isAuthLoaded ? (
+                  // Signed in: show profile + API keys
                   <>
+                    <div className="px-2 py-2 flex items-center gap-2">
+                      {authUser?.imageUrl ? (
+                        <img src={authUser.imageUrl} alt="" className="w-7 h-7 rounded-full flex-shrink-0" />
+                      ) : (
+                        <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary flex-shrink-0">
+                          <User className="w-3.5 h-3.5" />
+                        </div>
+                      )}
+                      <div className="flex flex-col overflow-hidden">
+                        {authUser?.name && <span className="text-sm font-medium truncate">{authUser.name}</span>}
+                        {authUser?.email && <span className="text-xs text-muted-foreground truncate">{authUser.email}</span>}
+                      </div>
+                    </div>
+                    <DropdownMenuItem onClick={() => handleSignOut()} className="cursor-pointer text-destructive focus:text-destructive">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span>{t('auth.signOut')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setShowApiKeySetup(true)} className="cursor-pointer group">
                       <Key className={`w-4 h-4 ${apiKey || openaiApiKey ? 'text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-300' : ''}`} />
                       <span>{t('nav.apiKeys')}</span>
@@ -4114,7 +4133,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                     <DropdownMenuSeparator />
                   </>
                 ) : (
-                  // Not signed in: show guest API key options + sign up
+                  // Not signed in: show sign up + guest API key options
                   <>
                     <DropdownMenuItem onClick={() => openSignUp()} className="cursor-pointer group">
                       <UserPlus className="w-4 h-4 text-primary" />
@@ -4160,20 +4179,6 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                 </div>
 
                 <DropdownMenuSeparator />
-
-                {/* GitHub Link */}
-                <DropdownMenuItem asChild className="cursor-pointer">
-                  <a
-                    href="https://github.com/coreyrab/statickit"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                    </svg>
-                    <span>Star us on GitHub</span>
-                  </a>
-                </DropdownMenuItem>
 
                 {/* Give Feedback */}
                 <DropdownMenuItem
