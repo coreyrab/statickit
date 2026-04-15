@@ -75,7 +75,16 @@ StaticKit is an open-source frontend for AI image models. Instead of copy-pastin
    npm run dev
    ```
 
-4. Create a free account and add your API key
+4. Set up environment variables
+   ```bash
+   cp .env.example .env
+   ```
+   Fill in your [Convex](https://www.convex.dev/) URL, [Clerk](https://clerk.com/) keys, and generate an encryption key:
+   ```bash
+   openssl rand -hex 32
+   ```
+
+5. Create a free account and add your API key
    - Sign up with Google or email
    - Get a free Gemini API key from https://aistudio.google.com/apikey
    - Paste it when prompted (encrypted and synced across devices)
