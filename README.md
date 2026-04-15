@@ -106,6 +106,8 @@ CLERK_SECRET_KEY=<YOUR_CLERK_SECRET_KEY>
 
 # https://cloud.google.com/ai-platform/vertex-ai/docs/generative-ai/overview
 GOOGLE_AI_API_KEY=<YOUR_GOOGLE_AI_API_KEY>
+# Model name, e.g. gemini-2.5-flash-preview-05-20
+GOOGLE_AI_MODEL=gemini-2.5-flash-preview-05-20
 
 # Must be a 32-byte (64 hex character) string
 ENCRYPTION_KEY=<YOUR_ENCRYPTION_KEY>
@@ -118,6 +120,7 @@ ENCRYPTION_KEY=<YOUR_ENCRYPTION_KEY>
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Your [Clerk](https://clerk.com/) publishable key for authentication.
 - `CLERK_SECRET_KEY`: Your Clerk secret key for authentication.
 - `GOOGLE_AI_API_KEY`: Your Google AI API key for image generation (see [Vertex AI docs](https://cloud.google.com/ai-platform/vertex-ai/docs/generative-ai/overview)).
+- `GOOGLE_AI_MODEL`: The model name to use for Google Generative AI (e.g. `models/gemini-2.5-flash`). You can list available models with the API.
 - `ENCRYPTION_KEY`: A secret key used to encrypt user API keys (generate a secure random string).
 
 You can find these values in your Convex, Clerk, and Google Cloud dashboards. All keys are required for the app to function properly.
