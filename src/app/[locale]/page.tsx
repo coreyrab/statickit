@@ -5683,7 +5683,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                     <button
                       disabled={!uploadedImage}
                       onClick={() => handleToolbarClick(tool)}
-                      className={`relative p-2 rounded-lg transition-all ${
+                      className={`relative p-2.5 rounded-lg transition-all ${
                         isActive
                           ? 'bg-primary text-primary-foreground'
                           : uploadedImage
@@ -5692,7 +5692,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
                       }`}
                     >
                       <Icon className="w-5 h-5" />
-                      <span className={`absolute bottom-0.5 right-0.5 text-[9px] leading-none ${isActive ? 'text-primary-foreground/50' : 'text-muted-foreground/40'}`}>{num}</span>
+                      <span className={`absolute bottom-1 right-1 text-[9px] leading-none ${isActive ? 'text-primary-foreground/50' : 'text-muted-foreground/40'}`}>{num}</span>
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="right">
