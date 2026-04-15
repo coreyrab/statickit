@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/banner.jpg?v=4" width="700" alt="StaticKit" />
+  <img src="public/statickit_gh_logo.png" width="400" alt="StaticKit" />
 </p>
 
 <p align="center">
@@ -22,6 +22,10 @@
 
 <p align="center">
   <a href="https://statickit.ai">Website</a> · <a href="https://github.com/CoreyRab/statickit">GitHub</a> · <a href="https://x.com/coreyrab">Twitter</a>
+</p>
+
+<p align="center">
+  <img src="public/statickit_repo.jpg" width="700" alt="StaticKit Editor" />
 </p>
 
 <p align="center">
