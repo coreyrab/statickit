@@ -239,8 +239,7 @@ export function WelcomeModal({
 
               {/* Free callout */}
               <div className="text-center py-2">
-                <span className="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
-                  <Check className="w-4 h-4" />
+                <span className="text-sm text-muted-foreground">
                   {t("welcome.freeCallout")}
                 </span>
               </div>
@@ -279,8 +278,7 @@ export function WelcomeModal({
                 </Button>
 
                 {/* Guest storage note */}
-                <p className="text-xs text-muted-foreground/70 text-center flex items-center justify-center gap-1.5">
-                  <Lock className="w-3 h-3 text-emerald-500/70" />
+                <p className="text-xs text-muted-foreground/70 text-center">
                   {t("welcome.guestStorageDescription")}
                 </p>
               </div>
