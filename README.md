@@ -83,6 +83,33 @@ StaticKit is an open-source frontend for AI image models. Instead of copy-pastin
    - Get a free Gemini API key from https://aistudio.google.com/apikey
    - Paste it when prompted (encrypted and synced across devices)
 
+## Environment Variables
+
+Before running the app, copy the example environment file and fill in your credentials:
+
+```bash
+cp .env.example .env
+```
+
+Then, edit the new `.env` file and provide the required values:
+
+```
+# https://www.convex.dev/
+NEXT_PUBLIC_CONVEX_URL=https://<YOUR_CONVEX_PROJECT>
+
+# https://clerk.com/
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<YOUR_CLERK_PUBLISHABLE_KEY>
+CLERK_SECRET_KEY=<YOUR_CLERK_SECRET_KEY>
+```
+
+**Descriptions:**
+
+- `NEXT_PUBLIC_CONVEX_URL`: Your [Convex](https://www.convex.dev/) project URL for backend data and API.
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Your [Clerk](https://clerk.com/) publishable key for authentication.
+- `CLERK_SECRET_KEY`: Your Clerk secret key for authentication.
+
+You can find these values in your Convex and Clerk dashboards. All keys are required for the app to function properly.
+
 ## Tech Stack
 
 - Next.js 16 (App Router)
