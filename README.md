@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/statickit_gh_logo.png" width="400" alt="StaticKit" />
+  <img src="public/statickit_gh_logo.jpg" width="400" alt="StaticKit" />
 </p>
 
 <p align="center">
@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  <img src="public/statickit_repo.jpg" width="700" alt="StaticKit Editor" />
+  <img src="public/statickit_repo.jpg" width="900" alt="StaticKit Editor" />
 </p>
 
 <p align="center">
