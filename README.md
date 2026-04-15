@@ -7,29 +7,22 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/CoreyRab/statickit/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
+  <a href="https://statickit.ai">
+    <img src="https://img.shields.io/badge/Try_it_live-statickit.ai-blue" alt="Live Demo" />
   </a>
-  <img src="https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white" alt="Next.js" />
-  <a href="https://github.com/CoreyRab/statickit/pulls">
+  <a href="https://github.com/coreyrab/statickit/stargazers">
+    <img src="https://img.shields.io/github/stars/coreyrab/statickit" alt="Stars" />
+  </a>
+  <a href="https://github.com/coreyrab/statickit/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/coreyrab/statickit" alt="License" />
+  </a>
+  <a href="https://github.com/coreyrab/statickit/pulls">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome" />
   </a>
-  <a href="https://github.com/CoreyRab/statickit/stargazers">
-    <img src="https://img.shields.io/github/stars/CoreyRab/statickit?style=social" alt="Stars" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://statickit.ai">Website</a> · <a href="https://github.com/CoreyRab/statickit">GitHub</a> · <a href="https://x.com/coreyrab">Twitter</a>
 </p>
 
 <p align="center">
   <img src="public/statickit_repo.jpg" width="900" alt="StaticKit Editor" />
-</p>
-
-<p align="center">
-  <i>If this helps you, please star ⭐</i>
 </p>
 
 ---
