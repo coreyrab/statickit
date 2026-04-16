@@ -241,6 +241,8 @@ function HomeContent() {
   const intlPathname = useIntlPathname();
   const { theme, setTheme } = useTheme();
   const locale = useLocale() as Locale;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   // Translations
   const t = useTranslations();
@@ -4076,6 +4078,20 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
 
           {/* Right: Star + Hamburger Menu */}
           <div className="flex items-center gap-2">
+            {/* Theme toggle */}
+            {mounted && (
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="p-2 rounded-lg text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50 transition-colors"
+                aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="w-4 h-4" />
+                ) : (
+                  <Moon className="w-4 h-4" />
+                )}
+              </button>
+            )}
             {/* GitHub Star button */}
             <a
               href="https://github.com/coreyrab/statickit"
