@@ -4,19 +4,17 @@ import { useState } from "react";
 import Link from "next/link";
 import { TermsModal } from "./TermsModal";
 import { PrivacyModal } from "./PrivacyModal";
-import { MadeByHumanModal } from "./MadeByHumanModal";
 import { WelcomeModal } from "@/components/onboarding";
 
 export function Footer() {
   const [termsOpen, setTermsOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
-  const [madeByHumanOpen, setMadeByHumanOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
 
   return (
     <>
       <footer className="border-t border-border/50 py-4 md:py-6 px-3 md:px-6">
-        <div className="flex flex-nowrap items-center justify-center md:justify-start gap-x-1 text-xs text-muted-foreground">
+        <div className="flex items-center justify-center gap-x-2 text-xs text-muted-foreground whitespace-nowrap">
             <button
               onClick={() => setAboutOpen(true)}
               className="hover:text-foreground transition-colors cursor-pointer"
@@ -45,28 +43,13 @@ export function Footer() {
               Blog
             </Link>
             <span className="text-muted-foreground/40">·</span>
-            <Link
-              href="/use-cases"
-              className="hover:text-foreground transition-colors cursor-pointer"
-            >
-              Use Cases
-            </Link>
-            <span className="text-muted-foreground/40">·</span>
-            <button
-              onClick={() => setMadeByHumanOpen(true)}
-              className="hover:text-foreground transition-colors cursor-pointer"
-            >
-              By a human
-            </button>
-            <span className="text-muted-foreground/40">·</span>
-            <span>&copy; 2025 StaticKit</span>
+            <span>&copy; 2026 StaticKit</span>
         </div>
       </footer>
 
       <WelcomeModal open={aboutOpen} onOpenChange={setAboutOpen} />
       <TermsModal open={termsOpen} onOpenChange={setTermsOpen} />
       <PrivacyModal open={privacyOpen} onOpenChange={setPrivacyOpen} />
-      <MadeByHumanModal open={madeByHumanOpen} onOpenChange={setMadeByHumanOpen} />
     </>
   );
 }
