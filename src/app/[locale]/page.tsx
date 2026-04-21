@@ -5740,7 +5740,7 @@ Output: A single combined 3×3 grid image in 3:4 aspect ratio.`;
             fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[360px] transform transition-transform duration-300 ease-in-out
             md:relative md:inset-auto md:z-auto md:w-[360px] md:transform-none
             ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-            flex-shrink-0 border-r md:border border-border md:rounded-r-2xl bg-background md:bg-muted/30 flex flex-col overflow-y-auto overscroll-contain pr-2 md:pr-0 md:overflow-hidden md:order-first animate-in fade-in slide-in-from-left-2 duration-200
+            flex-shrink-0 border-r md:border border-border md:rounded-r-2xl bg-background md:bg-muted/30 flex flex-col overflow-y-auto overscroll-contain pr-2 md:pr-0 md:overflow-y-auto md:order-first animate-in fade-in slide-in-from-left-2 duration-200
           `}>
 
             {/* Mobile Sidebar Header */}
